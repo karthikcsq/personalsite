@@ -20,13 +20,23 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
 
-.quicksand {
-  font-family: "Quicksand", sans-serif;
+html, body {
+  height: 100%; /* Ensure the full height of the viewport is used */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Quicksand", Arial, Helvetica, sans-serif;
+}
+
+.quicksand {
+  font-family: "Quicksand", sans-serif;
 }

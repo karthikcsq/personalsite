@@ -28,9 +28,20 @@ export default function HomePage() {
             style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
             <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Welcome</h2>
             <p className="font-quicksand text-lg sm:text-xl">
-              Welcome! My name is Karthik. I'm a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. <br></br> I love photography, music, and traveling. Feel free to explore my site and reach out to me.
+              Welcome! My name is Karthik. I&apos;m a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. <br></br> I love photography, music, and traveling. Feel free to explore my site and reach out to me.
             </p>
           </div>
+        </div>
+
+        {/* Quote */}
+        <div className="relative rounded-xl flex flex-col items-start justify-center p-4 m-8 mt-16 mb-64"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
+          <p className="font-quicksand text-xl italic text-white">
+            &quot;He who has a why to live for can bear almost any how.&quot;
+          </p>
+          <p className="font-quicksand text-lg text-white self-end mt-2">
+            - Friedrich Nietzsche
+          </p>
         </div>
 
         {/* Currently Exploring */}
@@ -49,17 +60,6 @@ export default function HomePage() {
           <h3 className="font-quicksand text-2xl text-white font-semibold mb-4">Purdue University</h3>
           <p className="font-quicksand text-lg text-white rounded-md">
             B.S. in Computer Science & Artificial Intelligence
-          </p>
-        </div>
-
-        {/* Quote */}
-        <div className="relative rounded-xl flex flex-col items-start justify-center p-4 m-8 mt-16 mb-32"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
-          <p className="font-quicksand text-xl italic text-white">
-            "He who has a why to live for can bear almost any how."
-          </p>
-          <p className="font-quicksand text-lg text-white self-end mt-2">
-            - Friedrich Nietzsche
           </p>
         </div>
 
