@@ -1,4 +1,10 @@
-export default function HomePage() {
+'use client';
+import React, { useEffect } from 'react';
+import Link from "next/link";
+import Image from "next/image";
+import { scrollToCenter } from "@/utils/scrollUtils";
+
+export default function HomePage() {  
   const buttonClass =
   "w-40 h-12 text-lg font-semibold rounded-full font-quicksand bg-white text-black flex items-center justify-center hover:scale-120 transition-transform duration-300";
   return (
@@ -28,14 +34,31 @@ export default function HomePage() {
             style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
             <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Welcome</h2>
             <p className="font-quicksand text-lg sm:text-xl">
-              Welcome! My name is Karthik. I&apos;m a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. <br></br> I love photography, music, and traveling. Feel free to explore my site and reach out to me.
+              Welcome! My name is Karthik. I&apos;m a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. 
+            </p>
+            <p className="font-quicksand text-lg sm:text-xl">
+            I love photography, music, and traveling. Feel free to explore my site and reach out to me.
             </p>
           </div>
+          {/* Arrow Button */}
+          <Link
+            href="#quote" 
+            onClick={(event) => scrollToCenter(event, "#quote")}
+            className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
+          >
+            <Image
+            src="/downarrow.svg"
+            alt="Down Arrow"
+            width={48}
+            height={48}
+            />
+          </Link>
         </div>
 
         {/* Quote */}
-        <div className="relative rounded-xl flex flex-col items-start justify-center p-4 m-8 mt-16 mb-64"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
+        <div className="relative rounded-xl flex flex-col items-center justify-center p-4 m-8 mt-16 mb-64"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+          id="quote">
           <p className="font-quicksand text-xl italic text-white">
             &quot;He who has a why to live for can bear almost any how.&quot;
           </p>

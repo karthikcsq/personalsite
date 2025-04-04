@@ -28,7 +28,8 @@ html, body {
   height: 100%; /* Ensure the full height of the viewport is used */
   margin: 0; /* Remove default margin */
   padding: 0; /* Remove default padding */
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-x: visible; /* Prevent horizontal overflow */
+  scroll-behavior: smooth; /* Smooth scrolling */
 }
 
 body {
@@ -39,4 +40,24 @@ body {
 
 .quicksand {
   font-family: "Quicksand", sans-serif;
+}
+
+.embla__viewport {
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+}
+
+.embla__slide {
+  flex: 0 0 auto;
+  min-width: 300px;
+  max-width: 300px;
+  height: 300px;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-right: 50px;
 }
