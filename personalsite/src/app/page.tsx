@@ -31,7 +31,9 @@ export default function HomePage() {
         {/* Summary */}
         <div className="relative flex flex-col items-start min-h-screen justify-center">
           <div className="relative flex flex-col border border-white rounded-md items-start justify-center p-8"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)",
+            boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)",
+             }}>
             <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Welcome</h2>
             <p className="font-quicksand text-lg sm:text-xl">
               Welcome! My name is Karthik. I&apos;m a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. 
@@ -56,8 +58,10 @@ export default function HomePage() {
         </div>
 
         {/* Quote */}
-        <div className="relative rounded-xl flex flex-col items-center justify-center p-4 m-8 mt-16 mb-64"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        <div className="relative rounded-xl flex flex-col items-start justify-center p-4 m-8 mt-16 mb-64"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)",
+            boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)"
+           }}
           id="quote">
           <p className="font-quicksand text-xl italic text-white">
             &quot;He who has a why to live for can bear almost any how.&quot;

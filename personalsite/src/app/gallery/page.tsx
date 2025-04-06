@@ -22,17 +22,17 @@ export default function GalleryPage() {
         <h1 className="text-4xl font-bold text-center">Gallery</h1>
       {/* Arrow Button */}
       <Link
-            href="#images" 
-            onClick={(event) => scrollToCenter(event, "#images")}
-            className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
-          >
-            <Image
-            src="/downarrow.svg"
-            alt="Down Arrow"
-            width={48}
-            height={48}
-            />
-        </Link>
+          href="#images" 
+          onClick={(event) => scrollToCenter(event, "#images")}
+          className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
+        >
+          <Image
+          src="/downarrow.svg"
+          alt="Down Arrow"
+          width={48}
+          height={48}
+          />
+      </Link>
       </div>
       <div className="flex flex-col items-center justify-center my-12 space-y-12">
         {Object.entries(galleryData).map(([folder, images]) => (

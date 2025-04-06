@@ -11,12 +11,15 @@
   "dependencies": {
     "embla-carousel": "^8.5.2",
     "embla-carousel-react": "^8.5.2",
+    "firebase": "^11.6.0",
+    "framer-motion": "^12.6.3",
     "fs": "^0.0.1-security",
     "jquery": "^3.7.1",
     "next": "15.2.4",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-vertical-timeline-component": "^3.5.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
