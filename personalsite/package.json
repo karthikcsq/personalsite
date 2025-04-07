@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "embla-carousel": "^8.5.2",
     "embla-carousel-react": "^8.5.2",
     "firebase": "^11.6.0",
