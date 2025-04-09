@@ -108,7 +108,7 @@ export default function ProjectsPage() {
             >
             <h2 className="text-3xl font-bold mb-4" id="projects">FORMulator</h2>
             <p className="text-lg mb-6">
-              FORMulator allows users to perfect any type of body movement on their own, by leveraging computer vision technology to provide instant feedback. The app uses a combination of pose estimation and machine learning to analyze the user's movements and provide real-time feedback on their form, helping them to improve their performance.
+              FORMulator allows users to perfect any type of body movement on their own, by leveraging computer vision technology to provide instant feedback. The app uses a combination of pose estimation and machine learning to analyze the user&apos;s movements and provide real-time feedback on their form, helping them to improve their performance.
             </p>
             <div className="mb-6">
               <iframe
