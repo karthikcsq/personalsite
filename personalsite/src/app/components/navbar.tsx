@@ -9,7 +9,7 @@ export default function Navbar() {
           <Link href="/projects" className="px-4 py-2 rounded-full hover:bg-gray-700">Projects</Link>
           <Link href="/work" className="px-4 py-2 rounded-full hover:bg-gray-700">Work</Link>
           <Link href="/gallery" className="px-4 py-2 rounded-full hover:bg-gray-700">Gallery</Link>
-          <Link href="/blog" className="px-4 py-2 rounded-full hover:bg-gray-700">Blog</Link>
+          {/* <Link href="/blog" className="px-4 py-2 rounded-full hover:bg-gray-700">Blog</Link> */}
         </div>
       </div>
     </nav>
