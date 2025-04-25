@@ -1,6 +1,4 @@
 'use client';
-import Link from "next/link";
-import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 
@@ -91,36 +89,36 @@ export default function HomePage() {
                     {message.role === "user" ? (
                       message.content
                     ) : (
-                        <ReactMarkdown 
-                        // Remove the className from here
-                        components={{
-                          a: ({node, ...props}) => (
-                            <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
-                          ),
-                          code: ({node, className, inline, ...props}: any) => {
-                            return inline ? 
-                              <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> : 
-                              <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
-                          },
-                          ul: ({node, ...props}) => (
-                            <ul {...props} className="list-disc pl-6 mt-2" />
-                          ),
-                          ol: ({node, ...props}) => (
-                            <ol {...props} className="list-decimal pl-6 mt-2" />
-                          ),
-                          h1: ({node, ...props}) => (
-                            <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
-                          ),
-                          h2: ({node, ...props}) => (
-                            <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
-                          ),
-                          p: ({node, ...props}) => (
-                            <p {...props} className="my-2 prose prose-invert max-w-none" />
-                          ),
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                      <ReactMarkdown 
+                      components={{
+                        a: ({...props}) => (
+                          <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
+                        ),
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        code: ({inline, ...props}: any) => { // Removed 'node' and 'className'
+                          return inline ? 
+                            <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> : 
+                            <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
+                        },
+                        ul: ({...props}) => (
+                          <ul {...props} className="list-disc pl-6 mt-2" />
+                        ),
+                        ol: ({...props}) => (
+                          <ol {...props} className="list-decimal pl-6 mt-2" />
+                        ),
+                        h1: ({...props}) => (
+                          <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
+                        ),
+                        h2: ({...props}) => (
+                          <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
+                        ),
+                        p: ({...props}) => (
+                          <p {...props} className="my-2 prose prose-invert max-w-none" />
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
                     )}
                   </div>
                 </div>
