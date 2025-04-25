@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@pinecone-database/pinecone": "^5.1.2",
+    "@tailwindcss/typography": "^0.5.16",
     "aws-sdk": "^2.1692.0",
     "embla-carousel": "^8.5.2",
     "embla-carousel-react": "^8.5.2",
@@ -17,10 +19,13 @@
     "fs": "^0.0.1-security",
     "jquery": "^3.7.1",
     "next": "15.2.4",
+    "openai": "^4.96.0",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-vertical-timeline-component": "^3.5.3"
+    "react-markdown": "^10.1.0",
+    "react-vertical-timeline-component": "^3.5.3",
+    "rehype-highlight": "^7.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

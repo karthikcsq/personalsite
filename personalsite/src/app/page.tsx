@@ -1,155 +1,165 @@
 'use client';
 import Link from "next/link";
 import Image from "next/image";
-import { scrollToCenter } from "@/utils/scrollUtils";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
 
 export default function HomePage() {  
-  const buttonClass =
-  "w-40 h-12 text-lg font-semibold rounded-full font-quicksand bg-white text-black flex items-center justify-center hover:scale-120 transition-transform duration-300";
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to the bottom when new messages appear
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (input.trim() === "") return;
+
+    // Add user message to chat
+    const userMessage = { role: "user", content: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      // Call our API endpoint
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      // Add AI response to chat
+      const aiMessage = { role: "assistant", content: data.answer };
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage = { 
+        role: "assistant", 
+        content: "Sorry, I encountered an error. Please try again." 
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <section className="relative flex flex-col min-h-screen text-white text-left overflow-hidden">
-      {/* Background Image */}
-      <div
-        className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
-        style={{ 
-          backgroundImage: "url('/spacebg.jpg')",
-          backgroundAttachment: "fixed", 
-        }}
-      ></div>
-
-      {/* Main Content (Fixed on the Left) */}
-      <div
-        className="fixed top-0 left-0 h-full w-1/3 flex flex-col justify-center space-y-4 px-6 sm:px-8 py-8 z-20 backdrop-blur-xs"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
-      >
-        <h1 className="font-quicksand font-sans text-4xl sm:text-5xl font-bold mb-4">Karthik Thyagarajan</h1>
-      </div>
-
-      {/* Right Content (Scrollable Section) */}
-      <div className="ml-[33.33%] w-[66.67%] flex flex-col min-h-screen justify-center space-y-16 p-8">
-        {/* Summary */}
-        <div className="relative flex flex-col items-start min-h-screen justify-center">
-          <div className="relative flex flex-col border border-white rounded-md items-start justify-center p-8"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)",
-            boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)",
-             }}>
-            <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Welcome</h2>
-            <p className="font-quicksand text-lg sm:text-xl">
-              Welcome! My name is Karthik. I&apos;m a student, machine learning engineer, quantum computing enthusiast, and budding entrepreneur. 
-            </p>
-            <p className="font-quicksand text-lg sm:text-xl">
-            I love photography, music, and traveling. Feel free to explore my site and reach out to me.
-            </p>
+    <div className="flex flex-col min-h-screen">
+        {/* Background Image */}
+        <div
+          className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
+          style={{ 
+            backgroundImage: "url('/sunrise.jpg')",
+            backgroundAttachment: "fixed", 
+          }}
+        ></div>
+      <main className="flex-grow p-4 max-w-3xl mx-auto w-full mt-30 items-center justify-center">
+        <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)", boxShadow: "0 0 10px rgba(100, 100, 100, 0.6), 0 0 20px rgba(100, 100, 100, 0.4)" }}
+        >
+          <div className="flex-grow overflow-y-auto mb-4">
+            {messages.length === 0 ? (
+              <div className="text-white text-center mt-20">
+                <p>Hi! My name is Karthik. Feel free to explore my site, or ask me anything about my projects and knowledge base!</p>
+              </div>
+            ) : (
+              messages.map((message, index) => (
+                <div 
+                  key={index} 
+                  className={`mb-4 ${
+                    message.role === "user" ? "text-right" : "text-left"
+                  }`}
+                >
+                  <div
+                    className={`inline-block p-3 mr-3 rounded-lg max-w-[80%] text-white`}
+                    style = {{
+                      backgroundColor: message.role === "user" ? "rgba(211, 31, 8, 0.6)" : "rgba(8, 8, 8, 0.6)"}}
+                  >
+                    {message.role === "user" ? (
+                      message.content
+                    ) : (
+                        <ReactMarkdown 
+                        // Remove the className from here
+                        components={{
+                          a: ({node, ...props}) => (
+                            <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
+                          ),
+                          code: ({node, className, inline, ...props}: any) => {
+                            return inline ? 
+                              <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> : 
+                              <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
+                          },
+                          ul: ({node, ...props}) => (
+                            <ul {...props} className="list-disc pl-6 mt-2" />
+                          ),
+                          ol: ({node, ...props}) => (
+                            <ol {...props} className="list-decimal pl-6 mt-2" />
+                          ),
+                          h1: ({node, ...props}) => (
+                            <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
+                          ),
+                          h2: ({node, ...props}) => (
+                            <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
+                          ),
+                          p: ({node, ...props}) => (
+                            <p {...props} className="my-2 prose prose-invert max-w-none" />
+                          ),
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+            {isLoading && (
+              <div className="text-left mb-4">
+                <div className="inline-block p-3 rounded-lg max-w-[80%] text-white"
+                  style={{ backgroundColor: "rgba(8, 8, 8, 0.6)" }}>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
-          {/* Arrow Button */}
-          <Link
-            href="#quote" 
-            onClick={(event) => scrollToCenter(event, "#quote")}
-            className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
-          >
-            <Image
-            src="/downarrow.svg"
-            alt="Down Arrow"
-            width={48}
-            height={48}
+
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask something..."
+              className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+              disabled={isLoading}
             />
-          </Link>
-        </div>
-
-        {/* Quote */}
-        <div className="relative rounded-xl flex flex-col items-start justify-center p-4 m-8 mt-16 mb-64"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)",
-            boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)"
-           }}
-          id="quote">
-          <p className="font-quicksand text-xl italic text-white">
-            &quot;He who has a why to live for can bear almost any how.&quot;
-          </p>
-          <p className="font-quicksand text-lg text-white self-end mt-2">
-            - Friedrich Nietzsche
-          </p>
-        </div>
-
-        {/* Currently Exploring */}
-        <div className="relative flex flex-col items-start justify-center mb-12">
-          <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Currently Exploring</h2>
-          <ul className="font-quicksand text-lg text-white list-disc pl-6 space-y-2">
-            <li>Robotics foundation models</li>
-            <li>AR/XR long-form video analysis</li>
-            <li>3D Simultaneous Localization and Mapping (SLAM)</li>
-          </ul>
-        </div>
-
-        {/* Section 2 */}
-        <div className="relative flex flex-col items-start justify-center">
-          <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Education</h2>
-          <h3 className="font-quicksand text-2xl text-white font-semibold mb-4">Purdue University</h3>
-          <p className="font-quicksand text-lg text-white rounded-md">
-            B.S. in Computer Science & Artificial Intelligence
-          </p>
-        </div>
-
-        {/* Section 3 */}
-        <div className="relative flex flex-col items-start space-y-6 justify-center">
-          <h2 className="font-quicksand text-4xl text-white font-bold mb-6">Resources</h2>
-          <div className="flex items-center space-x-8">
-            {/* LinkedIn */}
-            <a
-              href="https://www.linkedin.com/in/karthikthyagarajan06"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonClass} hover:bg-blue-400`}
+            <button
+              type="submit"
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50"
+              disabled={isLoading || !input.trim()}
             >
-              LinkedIn
-            </a>
-            <h2 className="font-quicksand text-2xl text-white">
-              Connect with me
-            </h2>
-          </div>
-          <div className="flex items-center space-x-8">
-            {/* GitHub */}
-            <a
-              href="https://github.com/karthikcsq"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonClass} hover:bg-gray-600`}
-            >
-              GitHub
-            </a>
-            <h2 className="font-quicksand text-2xl text-white">
-              Take a look at my projects
-            </h2>
-          </div>
-          <div className="flex items-center space-x-8">
-            {/* Resume */}
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonClass} hover:bg-purple-300`}
-            >
-              Resume
-            </a>
-            <h2 className="font-quicksand text-2xl text-white">
-              Download my resume
-            </h2>
-          </div>
-          <div className="flex items-center space-x-8">
-            {/* Email */}
-            <a
-              href="mailto:karthik6002@gmail.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonClass} hover:bg-red-400`}
-            >
-              Email
-            </a>
-            <h2 className="font-quicksand text-2xl text-white">
-              Want to collaborate? Email me
-            </h2>
-          </div>
+              Send
+            </button>
+          </form>
         </div>
-      </div>
-    </section>
+      </main>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ export default function Navbar() {
       <div className="bg-transparent border border-gray-700 font-quicksand rounded-full px-8 py-3 flex items-center space-x-6 backdrop-blur-lg">
         <div className="flex space-x-4">
           <Link href="/" className="px-4 py-2 rounded-full hover:bg-gray-700">Home</Link>
+          <Link href="/about" className="px-4 py-2 rounded-full hover:bg-gray-700">About</Link>
           <Link href="/projects" className="px-4 py-2 rounded-full hover:bg-gray-700">Projects</Link>
           <Link href="/work" className="px-4 py-2 rounded-full hover:bg-gray-700">Work</Link>
           <Link href="/gallery" className="px-4 py-2 rounded-full hover:bg-gray-700">Gallery</Link>

@@ -1,0 +1,54 @@
+Job 1: Computer Vision Researcher
+----------------------------------
+Organization: OpenInterX  
+Timeframe: February 2025 – Present  
+Location: (Not explicitly stated, likely remote or startup-based)  
+Description:
+- Engineering a scalable video memory and understanding framework to enhance AR applications.
+- Designing and optimizing a Python SDK for the Mavi platform.
+
+Job 2: Undergraduate Researcher
+--------------------------------
+Organization: IDEAS Lab – Purdue University  
+Timeframe: March 2025 – Present  
+Location: Purdue University, Indiana  
+Description:
+- Researching advanced 3D mapping techniques to enhance robotic perception and novel view synthesis.
+- Implementing real-time SLAM algorithms for autonomous navigation.
+
+Job 3: Undergraduate Data Science Researcher
+---------------------------------------------
+Organization: The Data Mine – Corporate Partners (with AgRPA)  
+Timeframe: August 2024 – December 2024  
+Location: Purdue University, Indiana  
+Description:
+- Collaborated with AgRPA on a weed detection system using UAVs.
+- Developed semantic segmentation and localization models to speed up ground-vehicle-based methods.
+
+Job 4: Science and Engineering Apprenticeship (SEAP) Intern
+------------------------------------------------------------
+Organization: Naval Research Laboratory  
+Timeframe: June 2023 – August 2023  
+Location: Washington, D.C.  
+Description:
+- Led a team of four interns on the PALIS project, applying ML to underwater acoustics.
+- Developed UNets, Transformers, and GANs for image-to-image translation.
+- Implemented a secure Retrieval-Augmented Generation model using confidential data.
+
+Job 5: Integrated Photonics Design Engineer
+--------------------------------------------
+Organization: Instachip (Formerly Procyon Photonics)  
+Timeframe: November 2022 – June 2024  
+Location: (Not explicitly stated, assumed remote/startup setting)  
+Description:
+- Designed optical computing chips for neural network backpropagation and telecom.
+- Built optical circuits combining digital and analog systems.
+
+Job 6: Information Technology Assistant
+----------------------------------------
+Organization: Fairfax County Public Schools  
+Timeframe: June 2022 – August 2022  
+Location: Fairfax County, Virginia  
+Description:
+- Maintained school tech equipment over summer.
+- Reimaged 2,000 student laptops, installed server software, maintained hardware.

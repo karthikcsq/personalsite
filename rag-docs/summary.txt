@@ -1,0 +1,26 @@
+Full Name: Karthik Thyagarajan
+First Name: Karthik
+
+Education:
+- University: Purdue University
+- Degree: B.S. in Computer Science & Artificial Intelligence
+
+Professional Interests:
+- Machine learning engineering
+- Quantum computing
+- Entrepreneurship
+
+Personal Interests:
+- Photography
+- Music
+- Traveling
+
+Currently Exploring:
+- Robotics foundation models
+- AR/XR long-form video analysis
+- 3D Simultaneous Localization and Mapping (SLAM)
+
+Contact Information:
+- Email: karthik6002@gmail.com
+- LinkedIn: https://www.linkedin.com/in/karthikthyagarajan06
+- GitHub: https://github.com/karthikcsq
