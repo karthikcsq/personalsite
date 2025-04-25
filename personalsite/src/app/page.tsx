@@ -65,7 +65,7 @@ export default function HomePage() {
         }}
       ></div>
       <div className="flex-grow p-4 max-w-3xl mx-auto w-full">
-        <h1 className="text-4xl font-bold text-white mb-4 text-center mt-20">Hi, I'm Karthik!</h1>
+        <h1 className="text-4xl font-bold text-white mb-4 text-center mt-20">Hi, I&apos;m Karthik!</h1>
         <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
         
         <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col mb-8"
