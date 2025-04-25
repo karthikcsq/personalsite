@@ -55,23 +55,26 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-        {/* Background Image */}
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
-          style={{ 
-            backgroundImage: "url('/sunrise.jpg')",
-            backgroundAttachment: "fixed", 
-          }}
-        ></div>
-      <main className="flex-grow p-4 max-w-3xl mx-auto w-full mt-30 items-center justify-center">
-        <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)", boxShadow: "0 0 10px rgba(100, 100, 100, 0.6), 0 0 20px rgba(100, 100, 100, 0.4)" }}
+    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
+      {/* Background Image */}
+      <div
+        className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
+        style={{ 
+          backgroundImage: "url('/sunrise.jpg')",
+          backgroundAttachment: "fixed", 
+        }}
+      ></div>
+      <div className="flex-grow p-4 max-w-3xl mx-auto w-full">
+        <h1 className="text-4xl font-bold text-white mb-4 text-center mt-20">Hi, I'm Karthik!</h1>
+        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
+        
+        <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col mb-8"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(2px)", boxShadow: "0 0 10px rgba(100, 100, 100, 0.6), 0 0 20px rgba(100, 100, 100, 0.4)" }}
         >
           <div className="flex-grow overflow-y-auto mb-4">
             {messages.length === 0 ? (
               <div className="text-white text-center mt-20">
-                <p>Hi! My name is Karthik. Feel free to explore my site, or ask me anything about my projects and knowledge base!</p>
+                <p>Ask me anything!</p>
               </div>
             ) : (
               messages.map((message, index) => (
@@ -95,7 +98,7 @@ export default function HomePage() {
                           <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
                         ),
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        code: ({inline, ...props}: any) => { // Removed 'node' and 'className'
+                        code: ({inline, ...props}: any) => {
                           return inline ? 
                             <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> : 
                             <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
@@ -145,19 +148,19 @@ export default function HomePage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask something..."
-              className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+              className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black/20 text-white"
               disabled={isLoading}
             />
             <button
               type="submit"
-              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50"
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50 transition-colors"
               disabled={isLoading || !input.trim()}
             >
               Send
             </button>
           </form>
         </div>
-      </main>
-    </div>
+      </div>
+    </section>
   );
 }
