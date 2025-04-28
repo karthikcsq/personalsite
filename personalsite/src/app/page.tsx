@@ -6,7 +6,24 @@ export default function HomePage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showMenuGuide, setShowMenuGuide] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check if it's the first visit and show menu guide
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('hasSeenMenuGuide');
+    
+    if (!hasSeenGuide) {
+      setShowMenuGuide(true);
+      // Hide popup after 30 seconds
+      const timer = setTimeout(() => {
+        setShowMenuGuide(false);
+        localStorage.setItem('hasSeenMenuGuide', 'true');
+      }, 30000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Auto-scroll to the bottom when new messages appear
   useEffect(() => {
@@ -54,6 +71,12 @@ export default function HomePage() {
     }
   };
 
+  // Handler to dismiss popup
+  const dismissGuide = () => {
+    setShowMenuGuide(false);
+    localStorage.setItem('hasSeenMenuGuide', 'true');
+  };
+
   return (
     <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
       {/* Background Image */}
@@ -64,6 +87,38 @@ export default function HomePage() {
           backgroundAttachment: "fixed", 
         }}
       ></div>
+
+      {/* Menu Guide Popup */}
+      {showMenuGuide && (
+        <div 
+          className="fixed top-16 right-4 z-50 bg-gray-900/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-700 max-w-xs"
+          style={{ 
+            animation: 'fadeInDown 0.5s ease-out',
+            boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' 
+          }}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-lg font-semibold pr-8">Welcome!</h3>
+            <button 
+              onClick={dismissGuide}
+              className="text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-gray-300">
+            Click the menu button in the top-right corner to navigate the site.
+          </p>
+          <div className="mt-3 flex justify-end">
+            <div className="w-8 h-8 rounded-full border-2 border-white animate-pulse flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-grow p-4 max-w-3xl mx-auto w-full">
         <h1 className="text-4xl font-bold text-white mb-4 text-center mt-20">Hi, I&apos;m Karthik!</h1>
         <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
@@ -71,6 +126,7 @@ export default function HomePage() {
         <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col mb-8"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(2px)", boxShadow: "0 0 10px rgba(100, 100, 100, 0.6), 0 0 20px rgba(100, 100, 100, 0.4)" }}
         >
+          {/* Chat content remains the same... */}
           <div className="flex-grow overflow-y-auto mb-4">
             {messages.length === 0 ? (
               <div className="text-white text-center mt-20">
@@ -161,6 +217,14 @@ export default function HomePage() {
           </form>
         </div>
       </div>
+
+      {/* Add animation for popup */}
+      <style jsx>{`
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 }
