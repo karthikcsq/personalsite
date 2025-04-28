@@ -1,15 +1,15 @@
 import { getPostBySlug, getSortedPosts } from '@/utils/blogUtils';
 import { Metadata } from 'next';
 
-interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
+// Fix: Make both params and searchParams Promise types
+type Props = {
+  params: Promise<{ slug: string }>,
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-// Optional: Add dynamic metadata if you want SEO-friendly titles
+// Generate metadata for SEO
 export async function generateMetadata(
-  { params }: BlogPostPageProps
+  { params }: Props
 ): Promise<Metadata> {
   const resolvedParams = await params;
   const post = await getPostBySlug(resolvedParams.slug);
@@ -27,13 +27,14 @@ export async function generateStaticParams(): Promise<
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  // Await params before accessing its properties
+// Remove searchParams from the parameters since you're not using it
+export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
+  
   const post = await getPostBySlug(resolvedParams.slug);
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">      
+    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">     
       <div className="max-w-4xl mx-auto w-full p-4 pt-28 pb-16">
         {/* Blog Post Container */}
         <div 
@@ -45,7 +46,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         >
           <h1 className="font-quicksand text-4xl font-bold mb-2 text-white">{post.title}</h1>
           <div className="text-sm text-gray-300 mb-6 font-quicksand">{post.date}</div>
-          
           
           <article
             className="prose prose-invert"
