@@ -44,6 +44,7 @@ export default function Navbar() {
               <Link href="/projects" className="px-4 py-2 rounded-full hover:bg-gray-700 transition-colors">Projects</Link>
               <Link href="/work" className="px-4 py-2 rounded-full hover:bg-gray-700 transition-colors">Work</Link>
               <Link href="/gallery" className="px-4 py-2 rounded-full hover:bg-gray-700 transition-colors">Gallery</Link>
+              <Link href="/blog" className="px-4 py-2 rounded-full hover:bg-gray-700 transition-colors">Blog</Link>
             </div>
           )}
           
@@ -99,6 +100,13 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             Gallery
+          </Link>
+          <Link 
+            href="/blog" 
+            className="block px-4 py-3 text-white hover:bg-gray-800 transition-colors"
+            onClick={closeMenu}
+          >
+            Blog
           </Link>
         </div>
       )}

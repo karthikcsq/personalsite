@@ -17,6 +17,7 @@
     "firebase": "^11.6.0",
     "framer-motion": "^12.6.3",
     "fs": "^0.0.1-security",
+    "gray-matter": "^4.0.3",
     "jquery": "^3.7.1",
     "next": "15.2.4",
     "openai": "^4.96.0",
@@ -25,7 +26,9 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-vertical-timeline-component": "^3.5.3",
-    "rehype-highlight": "^7.0.2"
+    "rehype-highlight": "^7.0.2",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
