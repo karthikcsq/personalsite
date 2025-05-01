@@ -12,7 +12,7 @@ This week in Silicon Valley, I had the chance to see some of the most influentia
 
 The Tesla factory in Fremont was a huge reminder of the fact that assembly and manufacturing technology is always changing and increasing in precision. One thing that especially stood out to me about the Tesla factory was the usage of space. On one hand, there were extremely constricted, fully automated pipelines for Model 3 assembly, where robots were on the ground and hanging upside down in a mere 6 foot tall box manufacturing the car frame end to end. On the other hand, there were machines that lifted car chassis up 6 feet, just to move it across horizontally, before lowering it down 6 feet again, to save floor space in between. Now, I'm not going to presume to know more about robotics and manufacturing than the experts working at Tesla, but I will say this. The ground footprint and the space we take up is so extremely valuable. I would go so far as to say we might even see vertical assembly lines one day, to save on square footage.
 
-<img src="/blog/silicon-valley-trip/tesla_group.jpg" alt="Tesla Factory" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/tesla_group.jpg" alt="Tesla Factory" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 The other thing that struck me was how different the assembly lines were from model to model. It was very different from what I noticed in Bloom Energy (see below), in the sense that there didn't seem to be a uniform integration or methodology in using the very best procedure available to the plant. Perhaps the restructuring would be too costly, but that is also a very well known fact about Tesla's company culture, in that they make changes quickly and constantly.
 
@@ -24,7 +24,7 @@ Now, Bloom Energy was another company we visited, and the key message that was e
 2. After being tested for robustness / effectiveness for mass production, it would move into **Stage C**, where it would slowly be integrated into the main product line. 
 3. Finally, after some practical usage, it would be moved to **Stage D**, where the entire old product line would be replaced by the new (and presumably better) technology.
 
-<img src="/blog/silicon-valley-trip/bloom_group.jpg" alt="Bloom Energy Factory" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/bloom_group.jpg" alt="Bloom Energy Factory" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 #### The future of automation
 
@@ -42,23 +42,23 @@ One of ASML's biggest drivers of revenue is repairing defects in their lithograp
 
 It's not like we haven't seen this before; I mean, medical AI is *huge*. AI tech promising to identify defects in the human body, or at least assisting doctors in doing so, is a task that many medical tech startups have set their eyes on. Yet, the human body is so complex and so diverse. Imagine, instead, that you look for defects in a regularly produced, data-driven, precise microchip. Of *course* this is a far more promising application of defect detection! I just feel as though it's not talked about enough. With advances in defect detection, companies like ASML have a golden opportunity to intensely speed up their iteration process on fixing lithography outputs and boosting revenue.
 
-<img src="/blog/silicon-valley-trip/asml_group.jpg" alt="ASML" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/asml_group.jpg" alt="ASML" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 ## AR/XR
 
 This is probably the first blog post I put up, but if you keep reading, hopefully I talk about my belief that Augmented Reality (AR) and Extended Reality (XR) are going to be a *huge* player in the everyday tech space. I think that they will be synonymous with the smart phones we have today, even going so far as to replace many of their use cases. But honestly, most of the AR/XR hype seems... far off to say the least. At least, that's the impression you can get by reading tech news. Let's be honest, the most comprehensive AR product on the market is probably the Apple Vision Pro, simply because of its features. But it's bulky and slow.
 
-<img src="/blog/silicon-valley-trip/google_group.jpg" alt="Google Campus" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/google_group.jpg" alt="Google Campus" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 In any case, the technology of easy to use, everyday wear, AR glasses seems closer and closer by the day. It's not so much the actual hardware that was interesting to me, it was the development platforms and operating systems. I know it's easy to write off the various OSs as a foregone conclusion (Apple will continue iOS, Android OS from Google, etc.), but it would be so amazing if there was a new operating system from a third party that integrated with AR better than the existing duopoly.
 
-<img src="/blog/silicon-valley-trip/microsoft_group.jpg" alt="Microsoft Campus" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/microsoft_group.jpg" alt="Microsoft Campus" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 ## The Future of Robotics
 
 The progress in robotics was another highlight, especially in terms of simulation and decision-making. At NVIDIA GTC, I saw how companies are training robots in virtual environments before deploying them in the real world. This allows for fast, large-scale testing without the costs and risks of real-world failures. Training in a simulated environment means robots can go through millions of trial-and-error cycles in hours rather than weeks, refining their behavior before they ever interact with physical objects. 
 
-<img src="/blog/silicon-valley-trip/nvidia_group.jpg" alt="NVIDIA GTC" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
+<img src="https://kt-personalsite.s3.us-east-2.amazonaws.com/blog/silicon-valley-trip/nvidia_group.jpg" alt="NVIDIA GTC" width="600" className="mx-auto my-6 rounded-lg shadow-lg" />
 
 Now, I talked about this before, but simulation is going to be the forefront of AI in the coming 5 years. I was blown away by a specific platform in particular: NVIDIA COSMOS. COSMOS is NVIDIA's simulation engine, using machine learning models that *understand* physics in the process. It's a truly innovative system, and I think as research iterates on simulation platforms like this, we will see leaps and bounds of autonomous reasoning being used in the real world.
 
