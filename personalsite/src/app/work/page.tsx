@@ -8,8 +8,19 @@ import { scrollToCenter } from "@/utils/scrollUtils";
 export default function WorkPage() {
   const jobs = [
     {
+      title: "Machine Learning Research Intern",
+      company: "Peraton Labs",
+      description: [
+        "Developing an autoregressive reinforcement learning agent to autonomously navigate IoT device environments and systematically probe for anomalous behavior, with the goal of uncovering hidden malware threats",
+        "Implementing a graph policy neural network to model inter-device relationships and inform the RL agent’s policy, aiming to enhance policy convergence and improve malware detection accuracy"
+      ],
+      year: "June 2025 - Present",
+      color: "rgb(65, 190, 184)",
+      icon: "/companies/peratonlabs.png", 
+    },
+    {
       title: "Computer Vision Researcher",
-      company: "OpenInterX",
+      company: "Memories.ai",
       description: [
         "Engineering a scalable video memory and understanding framework to enhance AR applications by enabling long-term spatial and contextual awareness.",
         "Designing and optimizing a Python SDK for the Mavi platform, streamlining video analysis workflows for developers."
@@ -37,7 +48,7 @@ export default function WorkPage() {
         "Developed semantic segmentation and localization models to accurately locate weeds during real-time drone flight, speeding up ground-vehicle-based methods by 50%."
       ],
       year: "August 2024 - December 2024",
-      color: "rgb(109, 255, 218)", // Unique color for each card
+      color: "rgb(1, 70, 15)", // Unique color for each card
       icon: "/companies/agrpa.png", // Path to the icon
     },
     {
@@ -49,7 +60,7 @@ export default function WorkPage() {
         "Implemented a secure Retrieval-Augmented Generation model that utilized confidential documents and information to respond to prompts."
       ],
       year: "June 2023 - August 2023",
-      color: "rgb(0, 2, 110)", // Unique color for each card
+      color: "rgb(4, 6, 136)", // Unique color for each card
       icon: "/companies/nrl.png", // Path to the icon
     },
     {
