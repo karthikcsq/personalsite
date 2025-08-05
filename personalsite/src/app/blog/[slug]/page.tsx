@@ -15,7 +15,21 @@ export async function generateMetadata(
   const post = await getPostBySlug(resolvedParams.slug);
   return {
     title: post.title,
-    description: post.summary,
+    description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+    keywords: ['blog', 'Karthik Thyagarajan', 'technology', 'research', post.title],
+    authors: [{ name: 'Karthik Thyagarajan' }],
+    openGraph: {
+      title: post.title,
+      description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+      type: 'article',
+      publishedTime: post.date,
+      authors: ['Karthik Thyagarajan'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+    },
   };
 }
 

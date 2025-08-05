@@ -1,5 +1,12 @@
 import Link from 'next/link';
 import { getSortedPosts } from '@/utils/blogUtils';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description: 'Read about Karthik Thyagarajan\'s thoughts on technology, research, and personal experiences. Insights from a software engineer and researcher.',
+  keywords: ['blog', 'technology', 'research', 'software engineering', 'Karthik Thyagarajan'],
+};
 
 export default async function BlogIndex() {
   const posts = getSortedPosts();

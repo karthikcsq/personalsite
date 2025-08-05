@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
+import HomePageHead from '@/app/components/HomePageHead';
 
 export default function HomePage() {  
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -78,7 +79,9 @@ export default function HomePage() {
   };
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
+    <>
+      <HomePageHead />
+      <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
       {/* Background Image */}
       <div
         className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
@@ -226,5 +229,6 @@ export default function HomePage() {
         }
       `}</style>
     </section>
+    </>
   );
 }
