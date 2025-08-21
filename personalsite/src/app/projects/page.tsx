@@ -41,6 +41,84 @@ export default function ProjectsPage() {
 
         {/* Projects Content */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
+          {/* Storytime */}
+          <motion.div 
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(80, 80, 80, 0.9)",
+              boxShadow: "0 0 10px rgba(80, 80, 80, 0.8), 0 0 20px rgba(80, 80, 80, 0.6)", // Glowing effect
+             }}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" id="projects">In The Loop (WIP)</h2>
+            <p className="text-lg mb-6">
+              In The Loop is a platform that ends the pain of AI assumption and token wastage. It provides a seamless experience for users to add clarity to their AI interactions, ensuring that the AI understands their needs without unnecessary back-and-forth.
+            </p>
+            <div className="flex flex-col items-center justify-center my-8 space-y-12">
+              <Image
+                src="/intheloop.png"
+                alt="In The Loop"
+                width={350}
+                height={300}
+                className="rounded-lg shadow-md border-3 border-gray-700"
+              />
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://github.com/karthikcsq/in-the-loop-frontend"
+                className="inline-block hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/githublogo.png"
+                  alt="GitHub Logo"
+                  width={1125}
+                  height={417}
+                  className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
+                />
+              </a>
+            </div>
+          </motion.div>
+          {/* Storytime */}
+          <motion.div 
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(3, 126, 214, 0.9)",
+              boxShadow: "0 0 10px rgba(3, 126, 214, 0.8), 0 0 20px rgba(3, 126, 214, 0.6)", // Glowing effect
+             }}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" id="projects">Storytime.ai (WIP)</h2>
+            <p className="text-lg mb-6">
+              Storytime is an innovative platform that transforms the way we consume and interact with news. Using AI, Storytime intelligently groups individual stories and story updates so that you can see what you care about, without the noise.
+            </p>
+            <div className="flex flex-col items-center justify-center my-8 space-y-12">
+              <Image
+                src="/storytimetimeline1.png"
+                alt="Storytime Timeline"
+                width={350}
+                height={300}
+                className="rounded-lg shadow-md border-3 border-gray-700"
+              />
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://storytime-sepia.vercel.app/"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-orange-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Website
+              </a>
+            </div>
+          </motion.div>
           {/* Verbatim */}
           <motion.div 
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
