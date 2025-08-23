@@ -41,7 +41,7 @@ export default function ProjectsPage() {
 
         {/* Projects Content */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
-          {/* Storytime */}
+          {/* InTheLoop */}
           <motion.div 
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
