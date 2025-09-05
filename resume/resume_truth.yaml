@@ -8,16 +8,17 @@ education:
 skills:
   - category: "AI/ML"
     bullets:
-      - Deep Learning
-      - LLM (LangChain, RAG Implementation, CoT/Reasoning Models, RLHF, Decision-Making)
+      - LLM (LangChain, RAG, CoT/Reasoning, RLHF)
       - Agents
       - MCP
       - PyTorch
       - Tensorflow
-      - Adversarial Learning (GANs)
+      - GAN
       - RL
       - Diffusion
       - Graph Neural Networks
+    show_on: ["cv", "resume"]
+
 
   - category: "Data Science"
     bullets:
@@ -25,6 +26,8 @@ skills:
       - Pandas
       - PostgreSQL
       - NoSQL
+    show_on: ["cv", "resume"]
+
 
   - category: "Languages & Frameworks"
     bullets:
@@ -32,11 +35,13 @@ skills:
       - Java
       - C++
       - C
-      - JavaScript/TypeScript
+      - JS/TS
       - HTML/CSS
       - React
       - Flask
       - Gradle
+    show_on: ["cv", "resume"]
+
 
   - category: "Quantum Computing"
     bullets:
@@ -44,20 +49,22 @@ skills:
       - VQE
       - QAOA
       - Quantum ML
+    show_on: ["cv"]
 
   - category: "Other"
     bullets:
-      - REST APIs
-      - SDK Development
-      - AWS
-      - Google Cloud
+      - REST API
+      - AWS System Design
+      - GCP
       - OAuth
       - Git
       - Docker
       - Linux
+    show_on: ["cv", "resume"]
 
 experience:
   - role: Machine Learning Researcher
+    show_on: ["cv", "resume"]
     company: Peraton Labs
     location: Silver Spring, MD
     work_type: Internship & Part-Time Co-op
@@ -68,6 +75,7 @@ experience:
       - Built a heterogeneous graph neural network with autoencoders to model inter-device relationships and accelerate RL policy convergence, improving anomaly detection accuracy.
 
   - role: Computer Vision Researcher
+    show_on: ["cv", "resume"]
     company: Memories.ai
     location: Remote
     work_type: Part-Time
@@ -78,6 +86,7 @@ experience:
       - Designed and published a Python SDK for the Mavi platform (PyPI: https://pypi.org/project/pymavi/), streamlining developer workflows for video analysis.
 
   - role: Undergraduate Robotics Researcher
+    show_on: ["cv", "resume"]
     company: IDEAS Lab, Purdue University
     location: West Lafayette, IN
     work_type: Part-Time
@@ -88,6 +97,7 @@ experience:
       - Optimized autonomous navigation algorithms, reducing mapping latency through performance tuning.
 
   - role: Undergraduate Data Science Researcher
+    show_on: ["cv"]
     company: The Data Mine Corporate Partners, Purdue University
     location: West Lafayette, IN
     work_type: Part-Time
@@ -97,7 +107,8 @@ experience:
       - Designed an end-to-end weed detection pipeline with Python, TensorFlow, and PostgreSQL; optimized queries for 40% faster data retrieval.
       - Built semantic segmentation and localization models for drone-based weed detection, reducing herbicide usage by 60% and improving efficiency 50% over ground-vehicle methods.
 
-  - role: ML Science & Engineering Apprentice
+  - role: ML Science & Engineering Apprenticeship
+    show_on: ["cv", "resume"]
     company: Naval Research Laboratory
     location: Washington, D.C.
     work_type: Full-Time
@@ -109,6 +120,7 @@ experience:
 
 projects:
   - title: "In The Loop"
+    show_on: ["cv", "resume"]
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
     date: "Ongoing"
     link: "https://in-the-loop-ai.vercel.app/"
@@ -117,13 +129,16 @@ projects:
       - Implemented streaming with a deployed LangGraph agent backend to handle within-thread communications and user interrupts.
 
   - title: "Storytime.ai"
+    show_on: ["cv"]
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
     date: "Ongoing"
     link: "https://storytime-sepia.vercel.app/"
     bullets:
       - Built an AI-driven news aggregation platform that clusters stories and updates, reducing information overload and improving content personalization.
       - Integrated GPT-4o for dynamic summarization, making use of vector databases for efficient similarity search.
+
   - title: "Personal Website"
+    show_on: ["cv"]
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel, Pinecone, AWS S3, Python"
     date: "Ongoing"
     link: "https://github.com/karthikcsq/personalsite"
@@ -132,14 +147,16 @@ projects:
       - Integrated a Pinecone-powered RAG pipeline to enable semantic search across Markdown-based project documentation.
 
   - title: "Verbatim"
+    show_on: ["cv", "resume"]
     tools: "OpenAI APIs, Google Cloud APIs, Next.js, Vercel"
     date: "Feb 2025"
-    link: "https://github.com/TheXDShrimp/verbatim"
+    link: "https://github.com/karthikcsq/verbatim"
     bullets:
       - Created a multi-function video platform for summarization, translation, voice cloning, and lip-sync, deployed at https://www.getverbatim.tech.
       - Automated workflows with Whisper (ASR), GPT-4o (summarization), Google Translate (translation), Eleven Labs (voice cloning), and Twelve Labs (video Q&A).
 
   - title: "Photonic Implementation of Quantum Key Distribution"
+    show_on: ["cv"]
     tools: "Oscilloscope, Python, NumPy"
     date: "Oct 2023 – May 2024"
     link: "https://arxiv.org/abs/2509.04389"
@@ -148,6 +165,7 @@ projects:
       - Automated data parsing and thresholding (0.004 mW cutoff) for bit-sequence extraction, basis sifting, and noise analysis with Python.
 
   - title: "Quantum Racer (Educational Android Game)"
+    show_on: ["cv"]
     tools: "Java, Android SDK, Gradle, XML Layouts"
     date: "Aug 2022 – Dec 2022"
     link: "https://github.com/karthikcsq/QuantumCarGame_Self"

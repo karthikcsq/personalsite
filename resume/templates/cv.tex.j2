@@ -153,7 +153,7 @@
     {\Huge\textbf{KARTHIK THYAGARAJAN}}
 \end{center}
 
-\vspace{-5mm}
+\vspace{-7mm}
 
 \begin{center}
     \small{
@@ -167,18 +167,16 @@
     }
 \end{center}
 
-\vspace{-6mm}
-
 \section{\textbf{Education}}
 \resumeSubHeadingListStart
 
-
+<% for edu in education %>
   \resumeSubheading
-  { Purdue University }
-  { West Lafayette, Indiana }
-  { B.S. of Computer Science \& Artificial Intelligence - 4.0 GPA }
-  { August 2024 - May 2027 (Expected) }
-
+  { <<< edu.institution >>> }
+  { <<< edu.location >>> }
+  { <<< edu.degree >>> - <<< edu.gpa >>> GPA }
+  { <<< edu.status >>> }
+<% endfor %>
 
 \resumeSubHeadingListEnd
 
@@ -186,106 +184,40 @@
 
 \section{\textbf{Skills}}
 \resumeHeadingSkillStart
-
-  \resumeSubItem{AI/ML: }{LLM (LangChain, RAG, CoT/Reasoning, RLHF), Agents, MCP, PyTorch, Tensorflow, GAN, RL, Diffusion, Graph Neural Networks}
-
-  \resumeSubItem{Data Science: }{Numpy, Pandas, PostgreSQL, NoSQL}
-
-  \resumeSubItem{Languages \& Frameworks: }{Python, Java, C++, C, JS/TS, HTML/CSS, React, Flask, Gradle}
-
-  \resumeSubItem{Other: }{REST API, AWS System Design, GCP, OAuth, Git, Docker, Linux}
-
+<% for skill in skills %>
+  \resumeSubItem{<<< skill.category >>>: }{<<< skill.bullets | join(", ") >>>}
+<% endfor %>
 \resumeHeadingSkillEnd
-
-\vspace{-2mm}
 
 \section{\textbf{Experience}}
 \resumeSubHeadingListStart
-
+<% for job in experience %>
   \resumeSubheading
-  {Machine Learning Researcher}
-  {Silver Spring, MD}
-  {Peraton Labs (Internship \& Part-Time Co-op)}
-  {Jun 2025 - Present }
+  {<<< job.role >>>}
+  {<<< job.location >>>}
+  {<<< job.company >>> (<<< job.work_type >>>)}
+  {<<< job.start_date >>> - <<< job.end_date >>> }
   \resumeItemListStart
-  
-    \item Developed a novel reinforcement learning (RL) agent for IoT malware detection, reducing exploration latency by 35\% and increasing detection coverage by 25\% compared to brute-force baselines.
-  
-    \item Built a heterogeneous graph neural network with autoencoders to model inter-device relationships and accelerate RL policy convergence, improving anomaly detection accuracy.
-  
+  <% for bullet in job.bullets %>
+    \item <<< bullet >>>
+  <% endfor %>
   \resumeItemListEnd
-
-  \resumeSubheading
-  {Computer Vision Researcher}
-  {Remote}
-  {Memories.ai (Part-Time)}
-  {Feb 2025 - Aug 2025 }
-  \resumeItemListStart
-  
-    \item Engineered and deployed a scalable video memory framework for AR applications, enabling persistent spatial and contextual awareness while optimizing throughput for speed and scalability.
-  
-    \item {'Designed and published a Python SDK for the Mavi platform (PyPI': 'https://pypi.org/project/pymavi/), streamlining developer workflows for video analysis.'}
-  
-  \resumeItemListEnd
-
-  \resumeSubheading
-  {Undergraduate Robotics Researcher}
-  {West Lafayette, IN}
-  {IDEAS Lab, Purdue University (Part-Time)}
-  {Mar 2025 - Jun 2025 }
-  \resumeItemListStart
-  
-    \item Built real-time SLAM and novel view-synthesis pipelines in Python and C++, improving 3D scene reconstruction accuracy by 25\% while ensuring deployment safety and reliability.
-  
-    \item Optimized autonomous navigation algorithms, reducing mapping latency through performance tuning.
-  
-  \resumeItemListEnd
-
-  \resumeSubheading
-  {ML Science \& Engineering Apprenticeship}
-  {Washington, D.C.}
-  {Naval Research Laboratory (Full-Time)}
-  {Jun 2023 - Aug 2023 }
-  \resumeItemListStart
-  
-    \item Led a 4-member team applying UNets, Transformers, and GANs to underwater acoustics, improving transmission loss prediction accuracy by 20\% compared to physics-based models.
-  
-    \item Prototyped and deployed a secure Retrieval-Augmented Generation (RAG) system, ensuring data confidentiality and operational reliability.
-  
-  \resumeItemListEnd
-
+<% endfor %>
 \resumeSubHeadingListEnd
-
-\vspace{-6mm}
 
 \section{\textbf{Projects}}
 \resumeSubHeadingListStart
-
+<% for project in projects %>
 \resumeProject
-  {In The Loop}
-  {Tools: Next.js, React, TypeScript, Tailwind CSS, Vercel}
-  {Ongoing}
-  {\href{https://in-the-loop-ai.vercel.app/}{https://in-the-loop-ai.vercel.app/} }
+  {<<< project.title >>>}
+  {Tools: <<< project.tools >>>}
+  {<<< project.date >>>}
+  {\href{<<< project.link >>>}{<<< project.link >>>} }
 \resumeItemListStart
-  
-  \item Developed a platform to streamline AI interactions by reducing token wastage and clarifying user intent, improving efficiency of LLM-driven workflows.
-  
-  \item Implemented streaming with a deployed LangGraph agent backend to handle within-thread communications and user interrupts.
-  
+  <% for item in project.bullets %>
+  \item <<< item >>>
+  <% endfor %>
 \resumeItemListEnd
-
-\resumeProject
-  {Verbatim}
-  {Tools: OpenAI APIs, Google Cloud APIs, Next.js, Vercel}
-  {Feb 2025}
-  {\href{https://github.com/karthikcsq/verbatim}{https://github.com/karthikcsq/verbatim} }
-\resumeItemListStart
-  
-  \item Created a multi-function video platform for summarization, translation, voice cloning, and lip-sync, deployed at https://www.getverbatim.tech.
-  
-  \item Automated workflows with Whisper (ASR), GPT-4o (summarization), Google Translate (translation), Eleven Labs (voice cloning), and Twelve Labs (video Q\&A).
-  
-\resumeItemListEnd
-
+<% endfor %>
 \resumeSubHeadingListEnd
 \end{document}
