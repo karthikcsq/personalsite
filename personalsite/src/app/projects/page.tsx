@@ -245,6 +245,20 @@ export default function ProjectsPage() {
             
             <div className="flex items-center justify-center space-x-4">
               <a
+                href="https://arxiv.org/abs/2509.04389"
+                className="inline-block hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/arxivlogo.jpg"
+                  alt="arXiv Logo"
+                  width={1125}
+                  height={417}
+                  className="h-13 w-auto bg-white p-2 rounded-lg shadow-md"
+                />
+              </a>
+              <a
                 href="/QKDResearchPoster.pdf"
                 className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-indigo-900 hover:text-white hover:scale-110 hover:transition duration-300"
                 target="_blank"
@@ -252,6 +266,8 @@ export default function ProjectsPage() {
               >
                 Research Poster
               </a>
+              
+
             </div>
           </motion.div>
 
