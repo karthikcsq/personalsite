@@ -81,6 +81,14 @@ export default function ProjectsPage() {
                   className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
                 />
               </a>
+              <a
+                href="https://in-the-loop-ai.vercel.app/"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-orange-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Website
+              </a>
             </div>
           </motion.div>
           {/* Storytime */}
