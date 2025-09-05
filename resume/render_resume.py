@@ -45,12 +45,13 @@ with open("resume_truth.yaml", "r") as f:
 # Jinja2 environment (looks for templates in ./templates)
 env = Environment(
     loader=FileSystemLoader("templates"),
-    block_start_string = '((*',
-    block_end_string = '*))',
-    variable_start_string = '(((',
-    variable_end_string = ')))',
-    comment_start_string = '((#',
-    comment_end_string = '#))',
+    # Use low-conflict delimiters to avoid clashes with LaTeX content
+    block_start_string = '<%',
+    block_end_string = '%>',
+    variable_start_string = '<<<',
+    variable_end_string = '>>>',
+    comment_start_string = '<#',
+    comment_end_string = '#>',
 )
 template = env.get_template("resume.tex.j2")
 
@@ -74,7 +75,7 @@ else:
 dest_dir = Path("../personalsite/public")
 dest_dir.mkdir(parents=True, exist_ok=True)
 src_pdf = Path("resume_output.pdf")
-dest_pdf = dest_dir / "resume.pdf"
+dest_pdf = dest_dir / "cv.pdf"
 try:
     shutil.copyfile(src_pdf, dest_pdf)
     print(f"Copied {src_pdf} -> {dest_pdf}")

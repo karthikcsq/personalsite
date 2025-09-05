@@ -3,7 +3,7 @@ education:
     location: "West Lafayette, Indiana"
     degree: "B.S. of Computer Science & Artificial Intelligence"
     gpa: "4.0"
-    status: "Currently Pursuing"
+    status: "August 2024 - May 2027 (Expected)"
 
 skills:
   - category: "AI/ML"
@@ -32,9 +32,8 @@ skills:
       - Java
       - C++
       - C
-      - JavaScript
-      - TypeScript
-      - Next.js
+      - JavaScript/TypeScript
+      - HTML/CSS
       - React
       - Flask
       - Gradle
@@ -59,82 +58,99 @@ skills:
 
 experience:
   - role: Machine Learning Researcher
-    location: Silver Spring, MD
     company: Peraton Labs
+    location: Silver Spring, MD
     work_type: Internship & Part-Time Co-op
-    start_date: "June 2025"
+    start_date: "Jun 2025"
     end_date: "Present"
     bullets:
-      - Designed and implemented the first-of-its-kind reinforcement-learning agent to intelligently navigate complex IoT device environments—reducing exploration latency by 35% and boosting malware detection coverage by 25% over a brute-force search baseline.
-      - Implemented a heterogeneous graph neural network combined with autoencoders to model inter-device relationships and inform RL agent policy, aiming to enhance policy convergence and improve malware detection accuracy.
+      - Developed a novel reinforcement learning (RL) agent for IoT malware detection, reducing exploration latency by 35% and increasing detection coverage by 25% compared to brute-force baselines.
+      - Built a heterogeneous graph neural network with autoencoders to model inter-device relationships and accelerate RL policy convergence, improving anomaly detection accuracy.
 
   - role: Computer Vision Researcher
-    location: Remote
     company: Memories.ai
+    location: Remote
     work_type: Part-Time
-    start_date: "February 2025"
-    end_date: "August 2025"
+    start_date: "Feb 2025"
+    end_date: "Aug 2025"
     bullets:
-      - Engineered and deployed a customer-facing, scalable video memory framework for AR apps, enabling long-term spatial and contextual awareness and optimizing throughput for speed and scale.
-      - Designed and launched a Python SDK for the Mavi platform, driving end-to-end developer workflows around video analysis; published to PyPI at https://pypi.org/project/pymavi/.
+      - Engineered and deployed a scalable video memory framework for AR applications, enabling persistent spatial and contextual awareness while optimizing throughput for speed and scalability.
+      - Designed and published a Python SDK for the Mavi platform (PyPI: https://pypi.org/project/pymavi/), streamlining developer workflows for video analysis.
+
   - role: Undergraduate Robotics Researcher
-    location: "West Lafayette, IN"
-    company: "IDEAS Lab at Purdue University"
-    work_type: "Part Time"
-    start_date: "March 2025"
-    end_date: "June 2025"
+    company: IDEAS Lab, Purdue University
+    location: West Lafayette, IN
+    work_type: Part-Time
+    start_date: "Mar 2025"
+    end_date: "Jun 2025"
     bullets:
-      - Collaborated in a cross-functional, iterative team of engineers and researchers to build end-to-end real-time SLAM and novel view-synthesis pipelines, improving scene reconstruction accuracy by 25% while ensuring safety and reliability in deployment.
-      - Implemented performance optimizations in C++ and Python to scale mapping algorithms for autonomous navigation, reducing processing latency.
+      - Built real-time SLAM and novel view-synthesis pipelines in Python and C++, improving 3D scene reconstruction accuracy by 25% while ensuring deployment safety and reliability.
+      - Optimized autonomous navigation algorithms, reducing mapping latency through performance tuning.
 
   - role: Undergraduate Data Science Researcher
-    location: "West Lafayette, IN"
-    company: "The Data Mine Corporate Partners"
-    work_type: "Part Time"
-    start_date: "August 2024"
-    end_date: "December 2024"
+    company: The Data Mine Corporate Partners, Purdue University
+    location: West Lafayette, IN
+    work_type: Part-Time
+    start_date: "Aug 2024"
+    end_date: "Dec 2024"
     bullets:
-      - Partnered with AgRPA in an iterative, cross-disciplinary team to build an end-to-end weed-detection pipeline using Python, TensorFlow, and Postgres, optimizing database queries for 40% faster retrieval.
-      - Developed semantic segmentation and localization models to accurately locate weeds during real-time drone flight, speeding up ground-vehicle-based methods by 50% and cutting herbicide costs by 60%.
+      - Designed an end-to-end weed detection pipeline with Python, TensorFlow, and PostgreSQL; optimized queries for 40% faster data retrieval.
+      - Built semantic segmentation and localization models for drone-based weed detection, reducing herbicide usage by 60% and improving efficiency 50% over ground-vehicle methods.
 
-  - role: ML Science and Engineering Apprenticeship (SEAP) Intern
-    location: "Washington, D.C."
-    company: "Naval Research Laboratory"
-    work_type: "Full Time"
-    start_date: "June 2023"
-    end_date: "August 2023"
+  - role: ML Science & Engineering Apprentice
+    company: Naval Research Laboratory
+    location: Washington, D.C.
+    work_type: Full-Time
+    start_date: "Jun 2023"
+    end_date: "Aug 2023"
     bullets:
-      - Led a team of four in applying machine-learning models (UNets, Transformers, GANs) to underwater acoustics, improving transmission loss prediction accuracy by 20% compared to physics modeling.
-      - Developed and deployed an internal, secure Retrieval-Augmented Generation prototype, maintaining data confidentiality and meeting reliability SLAs.
+      - Led a 4-member team applying UNets, Transformers, and GANs to underwater acoustics, improving transmission loss prediction accuracy by 20% compared to physics-based models.
+      - Prototyped and deployed a secure Retrieval-Augmented Generation (RAG) system, ensuring data confidentiality and operational reliability.
 
 projects:
+  - title: "In The Loop"
+    tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
+    date: "Ongoing"
+    link: "https://in-the-loop-ai.vercel.app/"
+    bullets:
+      - Developed a platform to streamline AI interactions by reducing token wastage and clarifying user intent, improving efficiency of LLM-driven workflows.
+      - Implemented streaming with a deployed LangGraph agent backend to handle within-thread communications and user interrupts.
+
+  - title: "Storytime.ai"
+    tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
+    date: "Ongoing"
+    link: "https://storytime-sepia.vercel.app/"
+    bullets:
+      - Built an AI-driven news aggregation platform that clusters stories and updates, reducing information overload and improving content personalization.
+      - Integrated GPT-4o for dynamic summarization, making use of vector databases for efficient similarity search.
   - title: "Personal Website"
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel, Pinecone, AWS S3, Python"
     date: "Ongoing"
     link: "https://github.com/karthikcsq/personalsite"
     bullets:
-      - "Architected and maintained https://www.karthikthyagarajan.com with Next.js, React, TypeScript & Tailwind CSS; deployed via Vercel and AWS S3 (secure buckets + pre-signed URLs) to host portfolio, blog & image gallery, leveraging Vercel’s CDN for performant global delivery."
-      - "Built a Pinecone-backed RAG pipeline with Python scripts to power searchable Markdown docs of my projects and work history."
+      - Developed and deployed a personal portfolio site with Vercel and AWS S3, showcasing projects, blogs, and image galleries; optimized for CDN-based global delivery.
+      - Integrated a Pinecone-powered RAG pipeline to enable semantic search across Markdown-based project documentation.
+
   - title: "Verbatim"
-    tools: "OpenAI/Google Cloud APIs, Miscellaneous APIs, Next.js, Vercel"
-    date: "February 2025"
+    tools: "OpenAI APIs, Google Cloud APIs, Next.js, Vercel"
+    date: "Feb 2025"
     link: "https://github.com/TheXDShrimp/verbatim"
     bullets:
-      - "Developed a platform to summarize, translate, voice clone, and lip sync any video, deployed using Vercel at https://www.getverbatim.tech."
-      - "Created an automated pipeline with audio transcription (Whisper), translation (Google Cloud), summarization (GPT-4o), automatic voice cloning (Eleven Labs), lip sync (Sync.so) and video Q&A (Twelve Labs) for enhanced interactivity."
+      - Created a multi-function video platform for summarization, translation, voice cloning, and lip-sync, deployed at https://www.getverbatim.tech.
+      - Automated workflows with Whisper (ASR), GPT-4o (summarization), Google Translate (translation), Eleven Labs (voice cloning), and Twelve Labs (video Q&A).
 
   - title: "Photonic Implementation of Quantum Key Distribution"
-    tools: "Oscilloscope, Scientific Computing, Python Data Parsing, Numpy"
-    date: "October 2023 - May 2024"
-    link: "https://www.karthikthyagarajan.com/QKDResearchPoster.pdf"
+    tools: "Oscilloscope, Python, NumPy"
+    date: "Oct 2023 – May 2024"
+    link: "https://arxiv.org/abs/2509.04389"
     bullets:
-      - "Engineered and assembled a lab-scale photonic QKD prototype, leveraging a 650 nm laser, inline polarizers, servo-controlled phase modulators, single-mode fibers, and polarizing beamsplitters, to implement H/V and D/AD polarization encoding; optimized optical alignment and polarization fidelity to generate a sifted key that matched theoretical predictions."
-      - "Developed Python pipelines for oscilloscope waveform thresholding (0.004 mW cutoff), bit-sequence extraction, and basis sifting; conducted noise and signal-loss analysis."
+      - Built and aligned a photonic QKD prototype using lasers, polarizers, phase modulators, and beamsplitters to implement polarization-based key exchange.
+      - Automated data parsing and thresholding (0.004 mW cutoff) for bit-sequence extraction, basis sifting, and noise analysis with Python.
 
-  - title: "Quantum Racer (Android Educational Game)"
-    tools: "Java, Android SDK, Gradle, XML Layouts, Game Physics"
-    date: "August 2022 - December 2022"
+  - title: "Quantum Racer (Educational Android Game)"
+    tools: "Java, Android SDK, Gradle, XML Layouts"
+    date: "Aug 2022 – Dec 2022"
     link: "https://github.com/karthikcsq/QuantumCarGame_Self"
     bullets:
-      - "Architected and implemented a 100% Java-based Android game using Android SDK, Gradle and Git, translating core quantum mechanics concepts—superposition, measurement, probability distributions, noise and decoherence—into interactive racing mechanics; built and packaged the APK for side-loading and future Play Store release."
-      - "Owned end-to-end development: game physics and state management, touch-input and UI flow via XML layouts, asset pipeline (PNG sprites), performance tuning on mobile devices, and comprehensive user documentation to guide educational outreach."
+      - Designed and implemented an educational Android game translating quantum mechanics concepts (superposition, measurement, decoherence) into racing gameplay.
+      - Delivered complete game physics, touch-input UI, and asset pipeline, packaging the final APK for distribution and educational outreach.

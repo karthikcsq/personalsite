@@ -153,11 +153,15 @@
     {\Huge\textbf{KARTHIK THYAGARAJAN}}
 \end{center}
 
+\vspace{-7mm}
+
 \begin{center}
     \small{
+    \href{karthik6002@gmail.com}{karthik6002@gmail.com} | 
+    \href{kthyagar@purdue.edu}{kthyagar@purdue.edu}
+    
     \href{https://www.karthikthyagarajan.com}
-    {karthikthyagarajan.com} | \href{karthik6002@gmail.com}{karthik6002@gmail.com} | 
-    \href{kthyagar@purdue.edu}{kthyagar@purdue.edu} | 
+    {karthikthyagarajan.com} | 
     \socialicon{\faLinkedin} \href{https://www.linkedin.com/in/karthikthyagarajan06}{linkedin.com/in/karthikthyagarajan06/} | 
     \socialicon{\faGithub} \href{https://github.com/karthikcsq}{github.com/karthikcsq} 
     }
@@ -166,54 +170,54 @@
 \section{\textbf{Education}}
 \resumeSubHeadingListStart
 
-((* for edu in education *))
+<% for edu in education %>
   \resumeSubheading
-    { ((( edu.institution ))) }
-    { ((( edu.location ))) }
-    { ((( edu.degree ))) - ((( edu.gpa ))) GPA }
-    { ((( edu.status ))) }
-((* endfor *))
+  { <<< edu.institution >>> }
+  { <<< edu.location >>> }
+  { <<< edu.degree >>> - <<< edu.gpa >>> GPA }
+  { <<< edu.status >>> }
+<% endfor %>
 
 \resumeSubHeadingListEnd
 
-\vspace{-4mm}
+\vspace{-6mm}
 
 \section{\textbf{Skills}}
 \resumeHeadingSkillStart
-((* for skill in skills *))
-  \resumeSubItem{ ((( skill.category ))) : }{ ((( skill.bullets | join(", ") ))) }
-((* endfor *))
+<% for skill in skills %>
+  \resumeSubItem{<<< skill.category >>>: }{<<< skill.bullets | join(", ") >>>}
+<% endfor %>
 \resumeHeadingSkillEnd
 
 \section{\textbf{Experience}}
 \resumeSubHeadingListStart
-((* for job in experience *))
+<% for job in experience %>
   \resumeSubheading
-  { ((( job.role ))) }
-  { ((( job.location ))) }
-  { ((( job.company ))) \( ((( job.work_type ))) \) }
-  { ((( job.start_date ))) - ((( job.end_date ))) }
+  {<<< job.role >>>}
+  {<<< job.location >>>}
+  {<<< job.company >>> (<<< job.work_type >>>)}
+  {<<< job.start_date >>> - <<< job.end_date >>> }
   \resumeItemListStart
-  ((* for bullet in job.bullets *))
-    \item ((( bullet | replace("%", "\\%") )))
-  ((* endfor *))
+  <% for bullet in job.bullets %>
+    \item <<< bullet >>>
+  <% endfor %>
   \resumeItemListEnd
-((* endfor *))
+<% endfor %>
 \resumeSubHeadingListEnd
 
 \section{\textbf{Projects}}
 \resumeSubHeadingListStart
-((* for project in projects *))
+<% for project in projects %>
 \resumeProject
-  { ((( project.title ))) }
-  {Tools: ((( project.tools ))) }
-  { ((( project.date ))) }
-  { \href{ ((( project.link ))) }{ ((( project.link ))) } }
+  {<<< project.title >>>}
+  {Tools: <<< project.tools >>>}
+  {<<< project.date >>>}
+  {\href{<<< project.link >>>}{<<< project.link >>>} }
 \resumeItemListStart
-  ((* for item in project.bullets *))
-  \item ((( item )))
-  ((* endfor *))
+  <% for item in project.bullets %>
+  \item <<< item >>>
+  <% endfor %>
 \resumeItemListEnd
-((* endfor *))
+<% endfor %>
 \resumeSubHeadingListEnd
 \end{document}

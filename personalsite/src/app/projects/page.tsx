@@ -53,7 +53,7 @@ export default function ProjectsPage() {
             viewport={{ once: false }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-3xl font-bold mb-4" id="projects">In The Loop (WIP)</h2>
+            <h2 className="text-3xl font-bold mb-4" id="projects">In The Loop</h2>
             <p className="text-lg mb-6">
               In The Loop is a platform that ends the pain of AI assumption and token wastage. It provides a seamless experience for users to add clarity to their AI interactions, ensuring that the AI understands their needs without unnecessary back-and-forth.
             </p>
@@ -103,7 +103,7 @@ export default function ProjectsPage() {
             viewport={{ once: false }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-3xl font-bold mb-4" id="projects">Storytime.ai (WIP)</h2>
+            <h2 className="text-3xl font-bold mb-4" id="projects">Storytime.ai</h2>
             <p className="text-lg mb-6">
               Storytime is an innovative platform that transforms the way we consume and interact with news. Using AI, Storytime intelligently groups individual stories and story updates so that you can see what you care about, without the noise.
             </p>
