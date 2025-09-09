@@ -128,7 +128,8 @@ def render_target(template_name: str, out_tex: str, out_pdf_name: str, target: s
 
 def copy_to_public(src_pdf: Path, out_pdf_name: str):
     """Copy generated PDF to the website public folder."""
-    dest_dir = Path("../personalsite/public")
+    # Use home-based pathing so this works per-user (home -> CodingFiles/PersonalWebsite/...)
+    dest_dir = Path.home() / "CodingFiles" / "PersonalWebsite" / "personalsite" / "personalsite" / "public"
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest_pdf = dest_dir / out_pdf_name
     try:
