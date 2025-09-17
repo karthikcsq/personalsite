@@ -5,19 +5,19 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: {
     template: '%s | Karthik Thyagarajan',
-    default: 'Karthik Thyagarajan - Software Engineer & Researcher'
+    default: 'Karthik Thyagarajan'
   },
-  description: 'Personal website of Karthik Thyagarajan - Software Engineer, Researcher, and Technology Enthusiast. Explore my projects, research, and professional journey.',
-  keywords: ['Karthik Thyagarajan', 'Software Engineer', 'Researcher', 'Portfolio', 'Projects', 'Technology'],
+  description: 'Personal website of Karthik Thyagarajan - Machine Learning Engineer, Researcher, and Technology Enthusiast. Explore my projects, research, and professional journey.',
+  keywords: ['Karthik Thyagarajan', 'Machine Learning', 'Artificial Intelligence', 'Software Engineer', 'Researcher', 'Portfolio', 'Projects', 'Technology'],
   authors: [{ name: 'Karthik Thyagarajan' }],
   creator: 'Karthik Thyagarajan',
-  metadataBase: new URL('https://karthikthyagarajan.com'), // Replace with your actual domain
+  metadataBase: new URL('https://karthikthyagarajan.com'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.karthikthyagarajan.com', // Replace with your actual domain
-    title: 'Karthik Thyagarajan - Software Engineer & Researcher',
-    description: 'Personal website of Karthik Thyagarajan - Software Engineer, Researcher, and Technology Enthusiast.',
+    url: 'https://www.karthikthyagarajan.com', 
+    title: 'Karthik Thyagarajan',
+    description: 'Personal website of Karthik Thyagarajan - Machine Learning Engineer, Researcher, and Technology Enthusiast.',
     siteName: 'Karthik Thyagarajan',
   },
   robots: {
