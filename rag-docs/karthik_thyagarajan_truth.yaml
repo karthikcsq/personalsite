@@ -1,9 +1,21 @@
+name: "Karthik Thyagarajan"
+contact:
+  - "karthik6002@gmail.com"
+  - "kthyagar@purdue.edu"
+links:
+  - label: "GitHub"
+    url: "https://github.com/karthikcsq"
+  - label: "LinkedIn"
+    url: "https://linkedin.com/in/karthikthyagarajan06"
+  - label: "Portfolio"
+    url: "https://www.karthikthyagarajan.com"
+
 education:
   - institution: "Purdue University"
     location: "West Lafayette, Indiana"
     degree: "B.S. of Computer Science & Artificial Intelligence"
     gpa: "4.0"
-    status: "August 2024 - May 2027 (Expected)"
+    dates: "August 2024 - May 2027"
 
 skills:
   - category: "AI/ML"
@@ -63,7 +75,7 @@ skills:
     show_on: ["cv", "resume"]
 
 experience:
-  - role: Machine Learning Researcher
+  - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
     company: Peraton Labs
     location: Silver Spring, MD
@@ -74,7 +86,7 @@ experience:
       - Developed a novel reinforcement learning (RL) agent for IoT malware detection, reducing exploration latency by 35% and increasing detection coverage by 25% compared to brute-force baselines.
       - Built a heterogeneous graph neural network with autoencoders to model inter-device relationships and accelerate RL policy convergence, improving anomaly detection accuracy.
 
-  - role: Computer Vision Researcher
+  - role: Computer Vision Software Engineer
     show_on: ["cv", "resume"]
     company: Memories.ai
     location: Remote
@@ -83,7 +95,7 @@ experience:
     end_date: "Aug 2025"
     bullets:
       - Engineered and deployed a scalable video memory framework for AR applications, enabling persistent spatial and contextual awareness while optimizing throughput for speed and scalability.
-      - Designed and published a Python SDK for the Mavi platform (PyPI: https://pypi.org/project/pymavi/), streamlining developer workflows for video analysis.
+      - Designed and published a Python SDK for the Mavi platform (https://pypi.org/project/pymavi/), streamlining developer workflows for video analysis.
 
   - role: Undergraduate Robotics Researcher
     show_on: ["cv", "resume"]
@@ -96,7 +108,7 @@ experience:
       - Built real-time SLAM and novel view-synthesis pipelines in Python and C++, improving 3D scene reconstruction accuracy by 25% while ensuring deployment safety and reliability.
       - Optimized autonomous navigation algorithms, reducing mapping latency through performance tuning.
 
-  - role: Undergraduate Data Science Researcher
+  - role: Undergraduate Data Engineer
     show_on: ["cv"]
     company: The Data Mine Corporate Partners, Purdue University
     location: West Lafayette, IN
