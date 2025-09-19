@@ -19,7 +19,7 @@
     "fs": "^0.0.1-security",
     "gray-matter": "^4.0.3",
     "jquery": "^3.7.1",
-    "next": "15.2.4",
+    "next": "^15.5.3",
     "openai": "^4.96.0",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
