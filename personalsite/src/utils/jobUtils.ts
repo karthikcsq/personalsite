@@ -53,8 +53,12 @@ function getIconForCompany(company: string): string {
 }
 
 export function getJobsFromYaml(): JobEntry[] {
-  // Try local workspace root first, then parent (useful if Next.js app is in a subfolder)
+  // Resolution order:
+  // 1. Colocated file in this utils directory (preferred single source now)
+  // 2. Legacy location under workspace root rag-docs/
+  // 3. Parent rag-docs/ (if app nested)
   const candidates = [
+    path.join(__dirname, 'karthik_thyagarajan_truth.yaml'),
     path.join(process.cwd(), 'rag-docs', 'karthik_thyagarajan_truth.yaml'),
     path.join(process.cwd(), '..', 'rag-docs', 'karthik_thyagarajan_truth.yaml')
   ];
