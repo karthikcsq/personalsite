@@ -63,15 +63,13 @@ export function getJobsFromYaml(): JobEntry[] {
     path.join(process.cwd(), '..', 'rag-docs', 'karthik_thyagarajan_truth.yaml')
   ];
   let raw: string | undefined;
-  let usedPath = '';
   for (const p of candidates) {
     if (fs.existsSync(p)) {
       try {
         raw = fs.readFileSync(p, 'utf8');
-        usedPath = p;
         break;
-      } catch (e) {
-        // continue trying next
+      } catch {
+        
       }
     }
   }
@@ -79,8 +77,6 @@ export function getJobsFromYaml(): JobEntry[] {
     console.error('Could not locate YAML experience file in candidates:', candidates);
     return [];
   }
-  // eslint-disable-next-line no-console
-  console.log('[jobUtils] Loaded experience YAML from', usedPath);
   let data: RootYaml;
   try {
     data = yaml.load(raw) as RootYaml;
