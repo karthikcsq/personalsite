@@ -28,7 +28,8 @@
     "react-vertical-timeline-component": "^3.5.3",
     "rehype-highlight": "^7.0.2",
     "remark": "^15.0.1",
-    "remark-html": "^16.0.1"
+    "remark-html": "^16.0.1",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
