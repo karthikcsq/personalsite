@@ -56,7 +56,7 @@ export default function ProjectsPage() {
             <h2 className="text-3xl font-bold mb-4" id="projects">Caladrius</h2>
             <p className="text-lg mb-6">
               Caladrius is a privacy-first AI triage assistant. It aims to cut through the inefficiencies of triage intake and inequities in prioritization, while maintaining a privacy-first HIPAA-compliant ethos.
-              Awarded 2nd place in HackGT 12's track for social impact.
+              Awarded 2nd place in HackGT 12&apos;s track for social impact.
             </p>
             <div className="mb-6">
               <iframe
