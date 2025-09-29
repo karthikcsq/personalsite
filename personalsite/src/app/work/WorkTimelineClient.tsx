@@ -9,7 +9,7 @@ interface Props { jobs: JobEntry[] }
 
 export function WorkTimelineClient({ jobs }: Props) {
   return (
-    <section className="min-h-screen text-white py-12 px-6">
+    <section className="min-h-screen text-white py-12 px-4 sm:px-6 overflow-x-hidden">
       <div className="fixed inset-0 -z-10 animate-gradient"></div>
       <style jsx>{`
         @keyframes gradient { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;}}
@@ -25,8 +25,8 @@ export function WorkTimelineClient({ jobs }: Props) {
           <Image src="/downarrow.svg" alt="Down Arrow" width={48} height={48} />
         </Link>
       </div>
-      <div className="relative gap-8 max-w-4xl mx-auto">
-        <div className="absolute left-[50px] top-0 h-full w-1" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)`}}></div>
+      <div className="relative gap-8 max-w-4xl mx-auto px-4 sm:px-0">
+        <div className="absolute left-[39px] sm:left-[50px] top-0 h-full w-1" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)`}}></div>
         {jobs.map((job, index) => {
           const rgbValues = job.color.match(/\d+/g);
           if (!rgbValues) return null;
@@ -35,19 +35,19 @@ export function WorkTimelineClient({ jobs }: Props) {
           const rgbaShadow1 = `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, 0.8)`;
           const rgbaShadow2 = `rgba(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]}, 0.6)`;
           return (
-            <motion.div key={index} className="grid grid-cols-[100px_1fr] mb-8 gap-8" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }} viewport={{ once: false }} transition={{ duration: 0.5, delay: 0.1 }}>
+            <motion.div key={index} className="grid grid-cols-[50px_1fr] sm:grid-cols-[100px_1fr] mb-8 gap-4 sm:gap-8" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }} viewport={{ once: false }} transition={{ duration: 0.5, delay: 0.1 }}>
               <div className="relative flex items-center justify-center" id="work">
-                <div className="w-25 h-25 rounded-full flex items-center justify-center shadow-md" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)` }}>
-                  <Image src={job.icon} alt={`${job.title} Icon`} width={80} height={80} className="object-contain" />
+                <div className="w-12 h-12 sm:w-25 sm:h-25 rounded-full flex items-center justify-center shadow-md" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)` }}>
+                  <Image src={job.icon} alt={`${job.title} Icon`} width={48} height={48} className="w-8 h-8 sm:w-20 sm:h-20 object-contain" />
                 </div>
               </div>
-              <div className="relative flex flex-col items-start p-6 rounded-lg shadow-lg text-white" style={{ backgroundColor: rgbaBackground, border: `2px solid ${rgbaBorder}`, boxShadow: `0 0 10px ${rgbaShadow1}, 0 0 20px ${rgbaShadow2}` }}>
+              <div className="relative flex flex-col items-start p-4 sm:p-6 rounded-lg shadow-lg text-white" style={{ backgroundColor: rgbaBackground, border: `2px solid ${rgbaBorder}`, boxShadow: `0 0 10px ${rgbaShadow1}, 0 0 20px ${rgbaShadow2}` }}>
                 <div className="mb-2">
-                  <h2 className="text-xl font-semibold">{job.title}</h2>
-                  <p className="text-sm text-gray-200">{job.company}</p>
-                  <p className="text-sm text-gray-200">{job.year}</p>
+                  <h2 className="text-lg sm:text-xl font-semibold">{job.title}</h2>
+                  <p className="text-xs sm:text-sm text-gray-200">{job.company}</p>
+                  <p className="text-xs sm:text-sm text-gray-200">{job.year}</p>
                 </div>
-                <ul className="list-disc list-inside text-gray-300">
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
                   {job.description.map((point, i) => <li key={i}>{point}</li>)}
                 </ul>
               </div>
