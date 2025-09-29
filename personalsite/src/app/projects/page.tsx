@@ -41,6 +41,59 @@ export default function ProjectsPage() {
 
         {/* Projects Content */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
+          {/* Caladrius */}
+          <motion.div 
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(103, 190, 217, 0.9)",
+              boxShadow: "0 0 10px rgba(103, 190, 217, 0.8), 0 0 20px rgba(103, 190, 217, 0.6)", // Glowing effect
+             }}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" id="projects">Caladrius</h2>
+            <p className="text-lg mb-6">
+              Caladrius is a privacy-first AI triage assistant. It aims to cut through the inefficiencies of triage intake and inequities in prioritization, while maintaining a privacy-first HIPAA-compliant ethos.
+              Awarded 2nd place in HackGT 12's track for social impact.
+            </p>
+            <div className="mb-6">
+              <iframe
+                className="w-full rounded-lg shadow-lg"
+                width="500"
+                height="375"
+                src="https://www.youtube.com/embed/1fI_w06EoZQ"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://github.com/karthikcsq/Caladrius"
+                className="inline-block hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/githublogo.png"
+                  alt="GitHub Logo"
+                  width={1125}
+                  height={417}
+                  className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
+                />
+              </a>
+              <a
+                href="https://devpost.com/software/caladrius"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-blue-300 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Devpost
+              </a>
+            </div>
+          </motion.div>
           {/* InTheLoop */}
           <motion.div 
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
@@ -83,7 +136,7 @@ export default function ProjectsPage() {
               </a>
               <a
                 href="https://in-the-loop-ai.vercel.app/"
-                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-orange-400 hover:scale-110 hover:transition duration-300"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-gray-400 hover:scale-110 hover:transition duration-300"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -119,7 +172,7 @@ export default function ProjectsPage() {
             <div className="flex items-center justify-center space-x-4">
               <a
                 href="https://storytime-sepia.vercel.app/"
-                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-orange-400 hover:scale-110 hover:transition duration-300"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-blue-800 hover:scale-110 hover:transition duration-300"
                 target="_blank"
                 rel="noopener noreferrer"
               >

@@ -131,8 +131,16 @@ experience:
       - Prototyped and deployed a secure Retrieval-Augmented Generation (RAG) system, ensuring data confidentiality and operational reliability.
 
 projects:
-  - title: "In The Loop"
+  - title: "Caladrius"
     show_on: ["cv", "resume"]
+    tools: "React Native, Python, LangGraph, GPT-5, AWS S3, QR-based encryption"
+    date: "Sep 2025"
+    link: "https://github.com/karthikcsq/Caladrius"
+    bullets:
+      - Designed and implemented a cross-platform AI triage assistant that integrates patient medical history via encrypted QR-based data transfer, reducing data exposure through a principle-of-least-exposure framework.
+      - Built a multi-agent LLM pipeline to dynamically generate diagnostic questions and produce differential diagnoses with confidence scores, improving triage accuracy and prioritization in emergency settings; awarded 2nd Place in HackGT 12’s Curators’ Cause track for social impact.
+  - title: "In The Loop"
+    show_on: ["cv"]
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
     date: "Ongoing"
     link: "https://in-the-loop-ai.vercel.app/"
