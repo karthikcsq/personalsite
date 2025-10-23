@@ -42,9 +42,6 @@ skills:
       - Flask
       - FastAPI
       - Node.js
-      - LangChain
-      - PyTorch
-      - TensorFlow
       - NumPy
       - Pandas
     show_on: ["cv", "resume"]
@@ -58,7 +55,6 @@ skills:
       - Pinecone
       - ETL Pipelines
       - Data Modeling
-      - Query Optimization
     show_on: ["cv", "resume"]
 
   - category: "Cloud & DevOps"
@@ -78,17 +74,14 @@ skills:
 
   - category: "AI/ML"
     bullets:
-      - Machine Learning
-      - Deep Learning
-      - Computer Vision
-      - Natural Language Processing
-      - Large Language Models
-      - LLM
-      - RAG
-      - Reinforcement Learning
-      - Neural Networks
-      - Graph Neural Networks
+      - LLM (LangChain, RAG, CoT/Reasoning, RLHF)
+      - Agents
+      - MCP
+      - PyTorch
       - GAN
+      - RL
+      - Diffusion
+      - Graph Neural Networks
     show_on: ["cv", "resume"]
 
   - category: "Quantum Computing"
