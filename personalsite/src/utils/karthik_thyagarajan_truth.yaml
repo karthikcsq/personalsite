@@ -157,7 +157,7 @@ projects:
 
   - title: "Caladrius"
     show_on: ["cv", "resume"]
-    tools: "React Native, Python, LangGraph, GPT-4, AWS S3, REST API, Cryptography"
+    tools: "React Native, Python, LangGraph, GPT-5, AWS S3, REST API, Next.js"
     date: "Sep 2025"
     link: "https://github.com/karthikcsq/Caladrius"
     bullets:
