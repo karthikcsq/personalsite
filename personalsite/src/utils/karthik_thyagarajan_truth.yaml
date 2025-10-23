@@ -101,8 +101,8 @@ experience:
     start_date: "Jun 2025"
     end_date: "Present"
     bullets:
-      - Developed reinforcement learning agent for IoT malware detection using PyTorch and graph neural networks, reducing exploration latency by 35% and increasing detection coverage by 25% while processing 500K+ device events daily on distributed AWS EC2 infrastructure.
-      - Designed heterogeneous graph neural network architecture with autoencoders to model device communication patterns, accelerating policy convergence by 40% and improving anomaly detection accuracy by 18%.
+      - Developed reinforcement learning agent for IoT malware detection using PyTorch and graph neural networks, reducing exploration latency by 35% and increasing detection coverage by 25% while processing 500K+ device events daily.
+      - Built ETL pipelines for heterogeneous graph neural network architecture, extracting and sampling data from SQL databases, performing real-time tensor and matrix calculations, and implementing autoencoders to model device communication patterns, accelerating policy convergence by 40%.
 
   - role: Computer Vision Software Engineer
     show_on: ["cv", "resume"]
@@ -135,7 +135,7 @@ experience:
     end_date: "Dec 2024"
     bullets:
       - Built end-to-end weed detection data pipeline processing 200GB+ drone imagery using Python, TensorFlow, and PostgreSQL, optimizing ETL workflows and indexed queries for 40% faster data retrieval.
-      - Engineered semantic segmentation models achieving 92% accuracy on 50K+ labeled images, reducing herbicide usage by 60% and operational costs by $150K annually through U-Net and DeepLabv3 architectures.
+      - Engineered semantic segmentation models achieving 92% accuracy on 50K+ labeled images, reducing herbicide usage by 60% and operational costs by $150K annually through U-Net and YOLOv11 architectures.
 
   - role: ML Science & Engineering Apprenticeship
     show_on: ["cv", "resume"]
@@ -151,12 +151,12 @@ experience:
 projects:
   - title: "Frontera"
     show_on: ["cv", "resume"]
-    tools: "Next.js, TypeScript, FastAPI, Python, LangChain, Firebase, NoSQL, REST API"
+    tools: "Next.js, TypeScript, FastAPI, Python, LangChain, Firebase, NoSQL, REST API, Algorithms"
     date: "Ongoing"
     link: "https://frontera.app"
     bullets:
-      - Founding engineer building full-stack AI-powered project management platform serving 500+ users, architecting microservices backend with FastAPI, Firebase Authentication, NoSQL database, and WebSocket connections for real-time collaboration.
-      - Engineered multi-agent LLM system using LangChain for automated roadmap generation, task decomposition, and intelligent issue resolution, reducing project planning time by 70%.
+      - Founding engineer building full-stack platform serving 500+ users with cofounder matching algorithms, project discovery search engine, community features, and event scheduling; architected microservices backend with FastAPI, Firebase Authentication, NoSQL schema design for social graphs, and WebSocket connections for real-time collaboration.
+      - Engineered multi-agent LLM system using LangChain for automated roadmap generation, task decomposition, and intelligent issue resolution; implemented recommendation engine for user matching and content filtering with collaborative filtering algorithms.
 
   - title: "Caladrius"
     show_on: ["cv", "resume"]
@@ -164,7 +164,7 @@ projects:
     date: "Sep 2025"
     link: "https://github.com/karthikcsq/Caladrius"
     bullets:
-      - Architected cross-platform AI medical triage application with React Native implementing AES-256 encrypted QR-based data transfer and zero-knowledge architecture for HIPAA-compliant medical data handling; awarded 2nd Place at HackGT 12.
+      - Architected cross-platform AI medical triage application with React Native implementing encrypted QR-based data transfer and zero-knowledge architecture for HIPAA-compliant medical data handling; awarded 2nd Place at HackGT 12.
       - Built multi-agent diagnostic system with LangGraph processing patient symptoms through specialized agents, achieving 85% triage accuracy and integrating REST API backend with AWS S3 for secure medical record storage.
 
   - title: "Personal Portfolio & Blog Platform"
