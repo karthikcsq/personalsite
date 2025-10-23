@@ -168,7 +168,7 @@ projects:
       - Built multi-agent diagnostic system with LangGraph processing patient symptoms through specialized agents, achieving 85% triage accuracy and integrating REST API backend with AWS S3 for secure medical record storage.
 
   - title: "Personal Portfolio & Blog Platform"
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     tools: "Next.js, TypeScript, React, Tailwind CSS, Pinecone, AWS S3, Python, Vercel"
     date: "Ongoing"
     link: "https://github.com/karthikcsq/personalsite"
