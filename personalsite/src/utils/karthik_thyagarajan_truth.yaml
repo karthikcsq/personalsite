@@ -16,6 +16,11 @@ education:
     degree: "B.S. of Computer Science & Artificial Intelligence"
     gpa: "4.0"
     dates: "August 2024 - May 2027"
+    coursework:
+      - "Data Structures and Algorithms"
+      - "Computer Architecture"
+      - "Programming in C"
+      - "Linear Algebra"
 
 skills:
   - category: "AI/ML"
@@ -137,8 +142,17 @@ projects:
     date: "Sep 2025"
     link: "https://github.com/karthikcsq/Caladrius"
     bullets:
-      - Designed and implemented a cross-platform AI triage assistant that integrates patient medical history via encrypted QR-based data transfer, reducing data exposure through a principle-of-least-exposure framework.
+      - Designed and implemented a cross-platform AI triage assistant that integrates medical history via encrypted QR-based data transfer, reducing data exposure through a least-exposure framework.
       - Built a multi-agent LLM pipeline to dynamically generate diagnostic questions and produce differential diagnoses with confidence scores, improving triage accuracy and prioritization in emergency settings; awarded 2nd Place in HackGT 12’s track for social impact.
+  - title: "Frontera"
+    show_on: ["cv", "resume"]
+    tools: "Next.js, TypeScript, FastAPI, LangChain, Firebase, React, NoSQL"
+    date: "Ongoing"
+    link: "https://frontera.app"
+    bullets:
+      - Founding engineer for Frontera, a “Cursor for projects” integrating an AI assistant for roadmap updates, intelligent planning, and issue-solving, alongside cofounder/talent matching, project discovery, and community features.
+      - Built an AI agent ecosystem using LangChain and FastAPI integrated with Firebase authentication, REST APIs, and a React-based workspace interface to enable real-time roadmap updates and intelligent task resolution.
+
   - title: "In The Loop"
     show_on: ["cv"]
     tools: "Next.js, React, TypeScript, Tailwind CSS, Vercel"
@@ -167,7 +181,7 @@ projects:
       - Integrated a Pinecone-powered RAG pipeline to enable semantic search across Markdown-based project documentation.
 
   - title: "Verbatim"
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     tools: "OpenAI APIs, Google Cloud APIs, Next.js, Vercel"
     date: "Feb 2025"
     link: "https://github.com/karthikcsq/verbatim"
