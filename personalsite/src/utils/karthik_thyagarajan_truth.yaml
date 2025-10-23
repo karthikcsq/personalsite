@@ -152,8 +152,8 @@ projects:
     date: "Ongoing"
     link: "https://frontera.app"
     bullets:
-      - Founding engineer building full-stack platform serving 100 users with cofounder matching, project discovery, and community features; architected microservices backend with FastAPI, Firebase, NoSQL social graphs, and WebSocket real-time collaboration.
-      - Engineered multi-agent LLM system with LangChain for automated roadmap generation and task decomposition; implemented recommendation engine with collaborative filtering for user matching.
+      - Founding engineer for full-stack platform for 100 users (cofounder matching, project discovery, community); architected microservices backend (FastAPI, Firebase, NoSQL) with WebSocket collaboration.
+      - Developed multi-agent LangChain LLM pipeline for automated roadmap generation and task decomposition; added collaborative-filtering recommender for user matching.
 
   - title: "Caladrius"
     show_on: ["cv", "resume"]
