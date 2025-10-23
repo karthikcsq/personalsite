@@ -148,7 +148,7 @@ experience:
 projects:
   - title: "Frontera"
     show_on: ["cv", "resume"]
-    tools: "Next.js, TypeScript, FastAPI, Python, LangChain, Firebase, NoSQL, REST API, Algorithms"
+    tools: "Next.js, TypeScript, FastAPI, Python, LangChain, Firebase, NoSQL, REST API, WebSocket"
     date: "Ongoing"
     link: "https://frontera.app"
     bullets:
