@@ -53,7 +53,7 @@ skills:
       - Firebase
       - Vector Databases
       - ETL Pipelines
-      - Data Modeling
+      - MongoDB
     show_on: ["cv", "resume"]
 
   - category: "Cloud & DevOps"
@@ -79,7 +79,6 @@ skills:
       - GAN
       - RL
       - Diffusion
-      - Graph Neural Networks
     show_on: ["cv", "resume"]
 
   - category: "Quantum Computing"
@@ -153,7 +152,7 @@ projects:
     date: "Ongoing"
     link: "https://frontera.app"
     bullets:
-      - Founding engineer building full-stack platform serving 500+ users with cofounder matching, project discovery, and community features; architected microservices backend with FastAPI, Firebase, NoSQL social graphs, and WebSocket real-time collaboration.
+      - Founding engineer building full-stack platform serving 100 users with cofounder matching, project discovery, and community features; architected microservices backend with FastAPI, Firebase, NoSQL social graphs, and WebSocket real-time collaboration.
       - Engineered multi-agent LLM system with LangChain for automated roadmap generation and task decomposition; implemented recommendation engine with collaborative filtering for user matching.
 
   - title: "Caladrius"
