@@ -118,43 +118,50 @@ export async function POST(req: NextRequest) {
     // Determine if we have good context or need to use fallback
     const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
 
-    // Check if results include blog posts for citation
-    const hasBlogContext = queryResponse.matches.some(
-      match => match.metadata?.content_type === 'blog_post'
-    );
+    // Check if results include blog posts for citation and extract slugs
+    const blogPosts = queryResponse.matches
+      .filter(match => match.metadata?.content_type === 'blog_post')
+      .map(match => ({
+        title: match.metadata?.title as string,
+        slug: match.metadata?.slug as string
+      }))
+      .filter(post => post.title && post.slug);
+
+    const hasBlogContext = blogPosts.length > 0;
 
     let systemPrompt: string;
     if (hasRelevantContext) {
-      systemPrompt = `You are Karthik's personal AI assistant helping visitors learn about him. You have access to information about Karthik's background, experience, projects, and blog posts.
+      systemPrompt = `You are an AI assistant helping visitors learn about Karthik Thyagarajan. You have access to information about Karthik's background, experience, projects, and blog posts.
 
 Key guidelines:
-- Respond in a natural, conversational tone as if you're Karthik speaking about himself
+- ALWAYS respond in third person (e.g., "Karthik has worked on...", "He graduated from...", "His experience includes...")
+- NEVER use first person pronouns (I, me, my) when referring to Karthik
 - Use the provided context to give accurate, helpful information
-- Don't just repeat the context - synthesize it into natural responses
-- If the context includes blog posts, mention them naturally and provide links at the end
-- If asked about something not in the context, politely redirect to what you do know about Karthik
+- Don't just repeat the context - synthesize it into natural, conversational responses
 - Be friendly and engaging, as this represents Karthik's personal website
-- You may speak informally as well
-${hasBlogContext ? `\n- When referencing blog content, add citations at the end like:\n  "Read more: [Blog Title](URL)"` : ''}
+- If asked about something not in the context, politely redirect to what you do know about Karthik
+${hasBlogContext ? `\n- When referencing blog content, cite it naturally with links in this format:\n  [Blog Title](https://www.karthikthyagarajan.com/blog/[slug])\n  Available blog posts: ${blogPosts.map(p => `"${p.title}" (slug: ${p.slug})`).join(', ')}` : ''}
 
 Context about Karthik:
 ${contexts}`;
     } else {
-      systemPrompt = `You are Karthik's personal AI assistant on his website. While I don't have specific information to answer that exact question, I can help you learn about Karthik Thyagarajan.
+      systemPrompt = `You are an AI assistant on Karthik Thyagarajan's website. While there isn't specific information to answer that exact question, you can help visitors learn about Karthik.
 
-I can tell you about:
-- His background in computer science and AI/ML
+IMPORTANT: Always respond in third person (e.g., "Karthik has experience in...", "He studied...", "His work focuses on...").
+
+You can provide information about:
+- Karthik's background in computer science and AI/ML
 - His work experience and projects
 - His education and research interests
 - His skills and expertise areas
 - His blog posts and writings
 
-Feel free to ask me about any of these topics, or try rephrasing your question. What would you like to know about Karthik?`;
+Feel free to ask about any of these topics, or try rephrasing your question.`;
     }
 
     // Use OpenAI to generate a response
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       messages: [
         {
