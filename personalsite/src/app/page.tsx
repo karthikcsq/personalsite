@@ -41,32 +41,81 @@ export default function HomePage() {
     setInput("");
     setIsLoading(true);
 
+    // Add a placeholder for the streaming response
+    const assistantMessageIndex = messages.length + 1;
+    setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: "" }]);
+
     try {
-      // Call our API endpoint
+      // Build conversation history including the new user message
+      const updatedMessages = [...messages, userMessage];
+
+      // Call our API endpoint with full conversation history
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({
+          message: input, // Keep for backward compatibility
+          messages: updatedMessages // Send full conversation history
+        }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        throw new Error("Something went wrong");
       }
 
-      // Add AI response to chat
-      const aiMessage = { role: "assistant", content: data.answer };
-      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                break;
+              }
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.content) {
+                  accumulatedContent += parsed.content;
+                  // Update the assistant message with accumulated content
+                  setMessages((prevMessages) => {
+                    const newMessages = [...prevMessages];
+                    newMessages[assistantMessageIndex] = {
+                      role: "assistant",
+                      content: accumulatedContent
+                    };
+                    return newMessages;
+                  });
+                }
+              } catch (e) {
+                // Skip malformed JSON
+                console.error("Error parsing chunk:", e);
+              }
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
-      const errorMessage = { 
-        role: "assistant", 
-        content: "Sorry, I encountered an error. Please try again." 
-      };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      setMessages((prevMessages) => {
+        const newMessages = [...prevMessages];
+        newMessages[assistantMessageIndex] = {
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again."
+        };
+        return newMessages;
+      });
     } finally {
       setIsLoading(false);
     }
