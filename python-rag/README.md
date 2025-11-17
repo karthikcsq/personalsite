@@ -4,12 +4,37 @@ This directory contains Python scripts for managing the RAG (Retrieval-Augmented
 
 ## Setup
 
-### 1. Install Dependencies
+This project uses **[uv](https://docs.astral.sh/uv/)** for fast, reliable Python dependency management.
+
+### 1. Install uv (if not already installed)
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip
+pip install uv
+```
+
+### 2. Install Dependencies
 
 ```bash
 cd python-rag
-pip install -r requirements.txt
+
+# Install all dependencies (creates .venv and uv.lock)
+uv sync
+
+# That's it! uv handles everything automatically.
 ```
+
+**What `uv sync` does:**
+- Creates a virtual environment in `.venv/`
+- Installs all dependencies from `pyproject.toml`
+- Creates/updates `uv.lock` for reproducible builds
+- Much faster than pip (10-100x faster!)
 
 ### 2. Environment Variables
 
@@ -34,10 +59,16 @@ Main script to load documents and upload to Pinecone vector database.
 **Usage:**
 
 ```bash
-# Update mode (incremental) - keeps existing vectors
-python create-pinecone.py
+# Run with uv (automatically uses .venv)
+uv run python create-pinecone.py           # Update mode
+uv run python create-pinecone.py --reset   # Reset mode
 
-# Reset mode - deletes all vectors and re-uploads
+# Or activate the virtual environment first
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+
+# Then run normally
+python create-pinecone.py
 python create-pinecone.py --reset
 ```
 
@@ -142,7 +173,8 @@ python-rag/                            # You are here
 - Check that `python-rag/rag-docs/` exists
 
 **"ModuleNotFoundError"**
-- Install dependencies: `pip install -r requirements.txt`
+- Install dependencies: `uv sync`
+- Or use `uv run python ...` which auto-installs
 
 **Pinecone connection errors**
 - Verify `.env` file in root directory

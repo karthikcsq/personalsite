@@ -35,7 +35,9 @@ personalsite/
     ├── rag-docs/               # RAG data sources (YAML, TXT)
     ├── create-pinecone.py      # Script to populate Pinecone vector DB
     ├── testing.py              # Pinecone connection testing
-    ├── requirements.txt        # Python dependencies
+    ├── pyproject.toml          # Python dependencies (uv/pip)
+    ├── uv.lock                 # Locked dependency versions
+    ├── .venv/                  # Virtual environment (gitignored)
     └── README.md               # Python RAG documentation
 ```
 
@@ -49,13 +51,13 @@ personalsite/
 
 ### Python Scripts (RAG Setup)
 
-**Setup**:
+**Setup** (uses [uv](https://docs.astral.sh/uv/) for fast dependency management):
 ```bash
 cd python-rag
-pip install -r requirements.txt
+uv sync  # Installs all dependencies into .venv/
 ```
 
-**Populate Pinecone**: `python create-pinecone.py [--reset]`
+**Populate Pinecone**: `uv run python create-pinecone.py [--reset]`
   - Run from `python-rag/` directory
   - Requires `.env` in **root directory** with: `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `OPENAI_API_KEY`
   - **Modes**:
@@ -149,4 +151,3 @@ Required in `.env.local` (not tracked in git):
   3. Generation: GPT-3.5-turbo with dynamic system prompts
 - **Blog Markdown**: Processed server-side with `sanitize: false`, allowing raw HTML in posts
 - **Work Experience**: Data duplicated between `rag-docs/` (for RAG embeddings) and read directly by `jobUtils.ts` (for timeline display)
-- When working through a task, use TASKS.md to track the progress and next steps on it

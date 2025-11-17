@@ -12,14 +12,13 @@ import yaml
 import sys
 import argparse
 
-from pinecone import Pinecone
-from pinecone import ServerlessSpec
+from pinecone import Pinecone, ServerlessSpec
 from git import Repo
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone as PineconeStore
-from langchain.schema import Document
+from langchain_core.documents import Document
 from dotenv import load_dotenv
 
 load_dotenv()

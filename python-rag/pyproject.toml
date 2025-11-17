@@ -1,0 +1,26 @@
+[project]
+name = "rag-system"
+version = "0.1.0"
+description = "RAG (Retrieval-Augmented Generation) system for personal portfolio chatbot"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Karthik Thyagarajan" }
+]
+
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "pinecone>=5.0.0",
+    "openai>=1.0.0",
+    "langchain>=0.1.0",
+    "langchain-community>=0.0.20",
+    "pyyaml>=6.0",
+    "gitpython>=3.1.0",
+    "requests>=2.31.0",
+    "tiktoken>=0.12.0",
+]
+
+[tool.uv]
+package = false  # This is a script project, not a package
+
+[tool.uv.sources]
