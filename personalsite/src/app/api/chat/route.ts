@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     const queryIntent = detectQueryIntent(message);
 
     // Build query parameters with optional metadata filter
-    let queryParams: {
+    const queryParams: {
       vector: number[];
       topK: number;
       includeMetadata: boolean;
@@ -88,14 +88,12 @@ export async function POST(req: NextRequest) {
       vector: queryEmbedding,
       topK: 5,
       includeMetadata: true,
+      ...(queryIntent?.contentType && {
+        filter: {
+          content_type: { $eq: queryIntent.contentType }
+        }
+      })
     };
-
-    // Add metadata filter if intent is detected
-    if (queryIntent && queryIntent.contentType) {
-      queryParams.filter = {
-        content_type: { $eq: queryIntent.contentType }
-      };
-    }
 
     // Query Pinecone for similar documents
     let queryResponse = await index.query(queryParams);
@@ -124,14 +122,6 @@ export async function POST(req: NextRequest) {
     const hasBlogContext = queryResponse.matches.some(
       match => match.metadata?.content_type === 'blog_post'
     );
-    const blogSources = queryResponse.matches
-      .filter(match => match.metadata?.content_type === 'blog_post')
-      .map(match => ({
-        title: match.metadata?.title,
-        url: match.metadata?.url,
-        date: match.metadata?.date
-      }))
-      .filter((v, i, a) => a.findIndex(t => t.url === v.url) === i); // Deduplicate by URL
 
     let systemPrompt: string;
     if (hasRelevantContext) {
