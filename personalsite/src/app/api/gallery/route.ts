@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk';
+import { NextResponse } from 'next/server';
 
 const albumBucket = 'kt-personalsite';
 AWS.config.region = 'us-east-2'; // Region
@@ -10,7 +11,7 @@ const s3 = new AWS.S3({
   apiVersion: '2006-03-01',
 });
 
-export default async function handler(req, res) {
+export async function GET() {
   const galleryPrefix = 'galleryimgs/'; // Folder prefix in the S3 bucket
 
   try {
@@ -23,12 +24,12 @@ export default async function handler(req, res) {
       })
       .promise();
 
-    const galleryData = {};
+    const galleryData: Record<string, string[]> = {};
 
     // Iterate over the folders (albums)
     const albums = albumData.CommonPrefixes || [];
     for (const album of albums) {
-      const albumName = album.Prefix.replace(galleryPrefix, '').replace('/', '');
+      const albumName = album.Prefix!.replace(galleryPrefix, '').replace('/', '');
 
       // List photos in the current album
       const photoData = await s3
@@ -38,17 +39,20 @@ export default async function handler(req, res) {
         })
         .promise();
 
-      const photos = photoData.Contents.map((photo) => {
+      const photos = photoData.Contents?.map((photo) => {
         const photoUrl = `https://${albumBucket}.s3.${AWS.config.region}.amazonaws.com/${photo.Key}`;
         return photoUrl;
-      });
+      }) || [];
 
       galleryData[albumName] = photos;
     }
 
-    res.status(200).json(galleryData);
+    return NextResponse.json(galleryData, { status: 200 });
   } catch (error) {
     console.error('Error fetching gallery data from S3:', error);
-    res.status(500).json({ error: 'Failed to fetch gallery data' });
+    return NextResponse.json(
+      { error: 'Failed to fetch gallery data' },
+      { status: 500 }
+    );
   }
 }

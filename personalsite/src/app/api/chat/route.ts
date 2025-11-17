@@ -1,94 +1,97 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
+import { NextRequest, NextResponse } from "next/server";
 
-// Export a default function for Pages Router API routes
-export default async function handler(req, res) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const { message } = req.body;
-    
+    const { message } = await req.json();
+
     if (!message) {
-      return res.status(400).json({ error: "Message is required" });
+      return NextResponse.json(
+        { error: "Message is required" },
+        { status: 400 }
+      );
     }
-    
+
     // Initialize Pinecone and OpenAI clients
     const pinecone = new Pinecone({
-      apiKey: process.env.PINECONE_API_KEY,
+      apiKey: process.env.PINECONE_API_KEY!,
     });
-    
+
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY!,
     });
-    
+
     // Get the index
-    const index = pinecone.Index(process.env.PINECONE_INDEX_NAME);
-    
+    const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
+
     // Create embeddings for the user query
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-ada-002",
       input: message,
     });
-    
+
     const queryEmbedding = embeddingResponse.data[0].embedding;
-    
+
     // Detect query intent for metadata filtering
-    function detectQueryIntent(query) {
+    function detectQueryIntent(query: string) {
       const lowerQuery = query.toLowerCase();
-      
+
       // Project-related keywords
-      if (lowerQuery.includes('project') || lowerQuery.includes('projects') || 
-          lowerQuery.includes('built') || lowerQuery.includes('developed') || 
+      if (lowerQuery.includes('project') || lowerQuery.includes('projects') ||
+          lowerQuery.includes('built') || lowerQuery.includes('developed') ||
           lowerQuery.includes('created') || lowerQuery.includes('work on')) {
         return { contentType: 'project' };
       }
-      
+
       // Experience/work-related keywords
-      if (lowerQuery.includes('experience') || lowerQuery.includes('job') || 
-          lowerQuery.includes('work') || lowerQuery.includes('company') || 
+      if (lowerQuery.includes('experience') || lowerQuery.includes('job') ||
+          lowerQuery.includes('work') || lowerQuery.includes('company') ||
           lowerQuery.includes('employer')) {
         return { contentType: 'experience' };
       }
-      
+
       // Education-related keywords
-      if (lowerQuery.includes('education') || lowerQuery.includes('school') || 
-          lowerQuery.includes('university') || lowerQuery.includes('degree') || 
+      if (lowerQuery.includes('education') || lowerQuery.includes('school') ||
+          lowerQuery.includes('university') || lowerQuery.includes('degree') ||
           lowerQuery.includes('study') || lowerQuery.includes('studied')) {
         return { contentType: 'education' };
       }
-      
+
       // Skills-related keywords
-      if (lowerQuery.includes('skill') || lowerQuery.includes('skills') || 
-          lowerQuery.includes('technology') || lowerQuery.includes('technologies') || 
+      if (lowerQuery.includes('skill') || lowerQuery.includes('skills') ||
+          lowerQuery.includes('technology') || lowerQuery.includes('technologies') ||
           lowerQuery.includes('programming') || lowerQuery.includes('language')) {
         return { contentType: 'skills' };
       }
-      
+
       return null; // No specific filter
     }
-    
+
     const queryIntent = detectQueryIntent(message);
-    
+
     // Build query parameters with optional metadata filter
-    let queryParams = {
+    let queryParams: {
+      vector: number[];
+      topK: number;
+      includeMetadata: boolean;
+      filter?: { content_type: { $eq: string } };
+    } = {
       vector: queryEmbedding,
       topK: 5,
       includeMetadata: true,
     };
-    
+
     // Add metadata filter if intent is detected
     if (queryIntent && queryIntent.contentType) {
       queryParams.filter = {
         content_type: { $eq: queryIntent.contentType }
       };
     }
-    
+
     // Query Pinecone for similar documents
     let queryResponse = await index.query(queryParams);
-    
+
     // If filtered search returns poor results, try without filter
     if (queryIntent && queryResponse.matches.length === 0) {
       console.log(`No results found for content_type: ${queryIntent.contentType}, retrying without filter`);
@@ -98,15 +101,18 @@ export default async function handler(req, res) {
         includeMetadata: true,
       });
     }
-    
+
     // Extract contexts from search results with relevance scoring
-    const relevantMatches = queryResponse.matches.filter(match => match.score > 0.75);
-    const contexts = queryResponse.matches.map(match => match.metadata.text).join("\n\n");
-    
+    const relevantMatches = queryResponse.matches.filter(match => match.score && match.score > 0.75);
+    const contexts = queryResponse.matches
+      .map(match => match.metadata?.text as string)
+      .filter(Boolean)
+      .join("\n\n");
+
     // Determine if we have good context or need to use fallback
     const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
-    
-    let systemPrompt;
+
+    let systemPrompt: string;
     if (hasRelevantContext) {
       systemPrompt = `You are Karthik's personal AI assistant helping visitors learn about him. You have access to information about Karthik's background, experience, and projects.
 
@@ -131,7 +137,7 @@ I can tell you about:
 
 Feel free to ask me about any of these topics, or try rephrasing your question. What would you like to know about Karthik?`;
     }
-    
+
     // Use OpenAI to generate a response
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -147,13 +153,16 @@ Feel free to ask me about any of these topics, or try rephrasing your question. 
         }
       ],
     });
-    
+
     const answer = completion.choices[0].message.content;
-    
-    return res.status(200).json({ answer });
-  
+
+    return NextResponse.json({ answer }, { status: 200 });
+
   } catch (error) {
     console.error("Error in chat API:", error);
-    return res.status(500).json({ error: "Something went wrong" });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
