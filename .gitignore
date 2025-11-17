@@ -42,6 +42,19 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+python-rag/venv/
+python-rag/__pycache__/
+python-rag/tracking.json
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 

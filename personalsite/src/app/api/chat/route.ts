@@ -37,6 +37,14 @@ export async function POST(req: NextRequest) {
     function detectQueryIntent(query: string) {
       const lowerQuery = query.toLowerCase();
 
+      // Blog-related keywords (check first for higher priority)
+      if (lowerQuery.includes('blog') || lowerQuery.includes('wrote about') ||
+          lowerQuery.includes('article') || lowerQuery.includes('post') ||
+          lowerQuery.includes('written') || lowerQuery.includes('opinion on') ||
+          lowerQuery.includes('thoughts on') || lowerQuery.includes('essay')) {
+        return { contentType: 'blog_post' };
+      }
+
       // Project-related keywords
       if (lowerQuery.includes('project') || lowerQuery.includes('projects') ||
           lowerQuery.includes('built') || lowerQuery.includes('developed') ||
@@ -48,21 +56,21 @@ export async function POST(req: NextRequest) {
       if (lowerQuery.includes('experience') || lowerQuery.includes('job') ||
           lowerQuery.includes('work') || lowerQuery.includes('company') ||
           lowerQuery.includes('employer')) {
-        return { contentType: 'experience' };
+        return { contentType: 'professional' };
       }
 
       // Education-related keywords
       if (lowerQuery.includes('education') || lowerQuery.includes('school') ||
           lowerQuery.includes('university') || lowerQuery.includes('degree') ||
           lowerQuery.includes('study') || lowerQuery.includes('studied')) {
-        return { contentType: 'education' };
+        return { contentType: 'academic' };
       }
 
       // Skills-related keywords
       if (lowerQuery.includes('skill') || lowerQuery.includes('skills') ||
           lowerQuery.includes('technology') || lowerQuery.includes('technologies') ||
           lowerQuery.includes('programming') || lowerQuery.includes('language')) {
-        return { contentType: 'skills' };
+        return { contentType: 'technical' };
       }
 
       return null; // No specific filter
@@ -112,17 +120,32 @@ export async function POST(req: NextRequest) {
     // Determine if we have good context or need to use fallback
     const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
 
+    // Check if results include blog posts for citation
+    const hasBlogContext = queryResponse.matches.some(
+      match => match.metadata?.content_type === 'blog_post'
+    );
+    const blogSources = queryResponse.matches
+      .filter(match => match.metadata?.content_type === 'blog_post')
+      .map(match => ({
+        title: match.metadata?.title,
+        url: match.metadata?.url,
+        date: match.metadata?.date
+      }))
+      .filter((v, i, a) => a.findIndex(t => t.url === v.url) === i); // Deduplicate by URL
+
     let systemPrompt: string;
     if (hasRelevantContext) {
-      systemPrompt = `You are Karthik's personal AI assistant helping visitors learn about him. You have access to information about Karthik's background, experience, and projects.
+      systemPrompt = `You are Karthik's personal AI assistant helping visitors learn about him. You have access to information about Karthik's background, experience, projects, and blog posts.
 
 Key guidelines:
 - Respond in a natural, conversational tone as if you're Karthik speaking about himself
 - Use the provided context to give accurate, helpful information
 - Don't just repeat the context - synthesize it into natural responses
+- If the context includes blog posts, mention them naturally and provide links at the end
 - If asked about something not in the context, politely redirect to what you do know about Karthik
 - Be friendly and engaging, as this represents Karthik's personal website
 - You may speak informally as well
+${hasBlogContext ? `\n- When referencing blog content, add citations at the end like:\n  "Read more: [Blog Title](URL)"` : ''}
 
 Context about Karthik:
 ${contexts}`;
@@ -134,6 +157,7 @@ I can tell you about:
 - His work experience and projects
 - His education and research interests
 - His skills and expertise areas
+- His blog posts and writings
 
 Feel free to ask me about any of these topics, or try rephrasing your question. What would you like to know about Karthik?`;
     }

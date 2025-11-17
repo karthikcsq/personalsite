@@ -9,6 +9,8 @@ import shutil
 import requests
 import stat
 import yaml
+import sys
+import argparse
 
 from pinecone import Pinecone
 from pinecone import ServerlessSpec
@@ -23,6 +25,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # === CONFIGURATION ===
+# Paths are relative to python-rag/ directory
 TEXT_DIRECTORY = "rag-docs"
 TRACKING_FILE = "tracking.json"
 GITHUB_USERNAME = os.environ.get("GITHUB_USERNAME")
@@ -68,11 +71,14 @@ def load_text_files():
     text_docs = loader.load()
     for doc in text_docs:
         doc.metadata.update({"source_type": "text", "file_path": doc.metadata["source"]})
-    
+
     # Load YAML files
     yaml_docs = load_yaml_files()
-    
-    return text_docs + yaml_docs
+
+    # Load blog posts
+    blog_docs = load_blog_posts()
+
+    return text_docs + yaml_docs + blog_docs
 
 def load_yaml_files():
     """Load and process YAML files from the rag-docs directory"""
@@ -195,6 +201,109 @@ def yaml_to_documents(yaml_data, file_path):
     
     return documents
 
+# === BLOG POST LOADING ===
+def load_blog_posts():
+    """Load and process blog posts from personalsite/blog/posts directory"""
+    blog_docs = []
+
+    # Try multiple potential paths for the blog posts (from python-rag/ directory)
+    potential_paths = [
+        "../personalsite/blog/posts",  # From python-rag/ to personalsite/blog/posts
+        "personalsite/blog/posts",      # If running from root
+        "../blog/posts",                # Alternative path
+        "blog/posts"                    # If blog is in current dir
+    ]
+
+    blog_dir = None
+    for path in potential_paths:
+        if os.path.exists(path):
+            blog_dir = path
+            break
+
+    if not blog_dir:
+        print("⚠️  Blog posts directory not found. Skipping blog loading.")
+        return []
+
+    # Find all markdown files in blog directory
+    blog_files = []
+    for root, dirs, files in os.walk(blog_dir):
+        for file in files:
+            if file.endswith('.md'):
+                blog_files.append(os.path.join(root, file))
+
+    print(f"📝 Found {len(blog_files)} blog post(s)")
+
+    for blog_file in blog_files:
+        try:
+            with open(blog_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Parse frontmatter and content
+            doc = parse_blog_markdown(content, blog_file)
+            if doc:
+                blog_docs.append(doc)
+                print(f"  ✓ Loaded: {doc.metadata.get('title', 'Untitled')}")
+
+        except Exception as e:
+            print(f"❌ Error processing blog file {blog_file}: {e}")
+
+    return blog_docs
+
+def parse_blog_markdown(content, file_path):
+    """Parse markdown blog post with frontmatter"""
+    # Split frontmatter and content
+    if not content.startswith('---'):
+        print(f"⚠️  No frontmatter found in {file_path}")
+        return None
+
+    parts = content.split('---', 2)
+    if len(parts) < 3:
+        print(f"⚠️  Invalid frontmatter format in {file_path}")
+        return None
+
+    frontmatter_text = parts[1].strip()
+    markdown_content = parts[2].strip()
+
+    # Parse frontmatter YAML
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text)
+    except Exception as e:
+        print(f"❌ Failed to parse frontmatter in {file_path}: {e}")
+        return None
+
+    # Extract slug from filename
+    slug = os.path.basename(file_path).replace('.md', '')
+
+    # Create searchable text combining title, summary, and content
+    title = frontmatter.get('title', 'Untitled')
+    date = frontmatter.get('date', 'Unknown date')
+    summary = frontmatter.get('summary', '')
+
+    # Clean markdown content (remove image tags and HTML for better embedding)
+    import re
+    clean_content = re.sub(r'<img[^>]+>', '', markdown_content)
+    clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
+
+    searchable_text = f"""Blog Post: {title}
+Date: {date}
+Summary: {summary}
+
+{clean_content}"""
+
+    return Document(
+        page_content=searchable_text,
+        metadata={
+            "source_type": "blog",
+            "content_type": "blog_post",
+            "file_path": file_path,
+            "slug": slug,
+            "title": title,
+            "date": date,
+            "summary": summary,
+            "url": f"/blog/{slug}"
+        }
+    )
+
 # === HANDLE REMOVE PERMISSIONS ===
 def handle_remove_readonly(func, path, exc_info):
     os.chmod(path, stat.S_IWRITE)
@@ -243,10 +352,75 @@ def load_github_repos(repo_urls, tracking_data):
 
 # === CHUNKING ===
 def chunk_documents(documents):
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    return splitter.split_documents(documents)
+    """Smart chunking based on document type"""
+    chunks = []
 
-# === VECTORSTORE UPLOAD ===
+    for doc in documents:
+        source_type = doc.metadata.get('source_type', 'unknown')
+
+        if source_type == 'blog':
+            # Larger chunks for blog posts to maintain narrative flow
+            # Use section breaks and paragraphs as boundaries
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1200,
+                chunk_overlap=200,
+                separators=["\n## ", "\n### ", "\n\n", "\n", ". ", " ", ""]
+            )
+        elif source_type == 'yaml':
+            # Keep structured data intact (experience, projects, etc.)
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=600,
+                chunk_overlap=50,
+                separators=["\n\n", "\n", " ", ""]
+            )
+        elif source_type == 'github':
+            # Code-aware chunking
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=800,
+                chunk_overlap=100,
+                separators=["\n\nclass ", "\n\ndef ", "\n\n", "\n", " ", ""]
+            )
+        else:
+            # Default chunking for text files
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=500,
+                chunk_overlap=50
+            )
+
+        doc_chunks = splitter.split_documents([doc])
+        chunks.extend(doc_chunks)
+
+    return chunks
+
+# === PINECONE MANAGEMENT ===
+def delete_all_vectors():
+    """Delete all vectors from the Pinecone index"""
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    index = pc.Index(INDEX_NAME)
+
+    print("🗑️  Deleting all existing vectors from Pinecone index...")
+
+    try:
+        # Get index stats to see what we're deleting
+        stats = index.describe_index_stats()
+        total_vectors = stats.total_vector_count
+
+        if total_vectors == 0:
+            print("  ℹ️  Index is already empty")
+            return
+
+        print(f"  📊 Found {total_vectors} vectors to delete")
+
+        # Delete all vectors by deleting from all namespaces
+        # For default namespace (empty string), use delete_all
+        index.delete(delete_all=True)
+
+        print(f"  ✅ Successfully deleted all vectors from index '{INDEX_NAME}'")
+
+    except Exception as e:
+        print(f"  ❌ Error deleting vectors: {e}")
+        raise
+
 # === VECTORSTORE UPLOAD ===
 def upload_to_pinecone(chunks):
     pc = Pinecone(api_key=PINECONE_API_KEY)
@@ -291,7 +465,56 @@ def upload_to_pinecone(chunks):
     print(f"✅ Successfully uploaded {len(chunks)} chunks to Pinecone.")
 
 # === MAIN ===
-def main():
+def main(reset=False):
+    """
+    Main function to load documents and upload to Pinecone
+
+    Args:
+        reset (bool): If True, delete all existing vectors before uploading
+    """
+    # Parse command-line arguments if called from command line
+    parser = argparse.ArgumentParser(
+        description='Upload documents to Pinecone for RAG system',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python create-pinecone.py              # Normal update mode (incremental)
+  python create-pinecone.py --reset      # Delete all vectors and re-upload everything
+  python create-pinecone.py -r           # Same as --reset (shorthand)
+        """
+    )
+    parser.add_argument(
+        '--reset', '-r',
+        action='store_true',
+        help='Delete all existing vectors before uploading (fresh start)'
+    )
+
+    # Only parse args if running as main script
+    if __name__ == "__main__":
+        args = parser.parse_args()
+        reset = args.reset
+
+    print("=" * 60)
+    print("🚀 Pinecone RAG Document Upload")
+    print("=" * 60)
+
+    if reset:
+        print("\n⚠️  RESET MODE: All existing vectors will be deleted!")
+        print("   This will clear your entire Pinecone index.")
+
+        # Ask for confirmation
+        response = input("\n   Are you sure you want to continue? (yes/no): ").strip().lower()
+        if response not in ['yes', 'y']:
+            print("\n❌ Operation cancelled by user.")
+            return
+
+        print()
+        delete_all_vectors()
+        print()
+    else:
+        print("\n📝 Running in UPDATE mode (incremental)")
+        print("   Use --reset flag to delete all vectors first\n")
+
     print("📦 Loading tracking data...")
     tracking_data = load_tracking()
 
@@ -316,6 +539,10 @@ def main():
         # print("💾 Updating tracking file...")
         # tracking_data.update(new_tracking)
         # save_tracking(tracking_data)
+
+        print("\n" + "=" * 60)
+        print("✅ Upload complete!")
+        print("=" * 60)
     else:
         print("✅ No new content to upload.")
 

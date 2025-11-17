@@ -31,9 +31,12 @@ personalsite/
 │       ├── jobUtils.ts         # YAML work experience parser
 │       └── scrollUtils.ts      # Smooth scroll helpers
 ├── blog/posts/                 # Markdown blog posts with frontmatter
-├── rag-docs/                   # Documents for RAG system (YAML, TXT)
-├── create-pinecone.py          # Script to populate Pinecone vector DB
-└── testing.py                  # Pinecone connection testing
+└── python-rag/                 # Python RAG management (all-in-one)
+    ├── rag-docs/               # RAG data sources (YAML, TXT)
+    ├── create-pinecone.py      # Script to populate Pinecone vector DB
+    ├── testing.py              # Pinecone connection testing
+    ├── requirements.txt        # Python dependencies
+    └── README.md               # Python RAG documentation
 ```
 
 ## Development Commands
@@ -45,21 +48,44 @@ personalsite/
 - **Lint**: `npm run lint`
 
 ### Python Scripts (RAG Setup)
-- **Populate Pinecone**: `python create-pinecone.py`
-  - Requires `.env` with: `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `OPENAI_API_KEY`, `GITHUB_TOKEN` (optional), `GITHUB_USERNAME` (optional)
-  - Loads documents from `rag-docs/` directory
-  - Chunks text (500 chars, 50 overlap) and uploads embeddings to Pinecone
-  - GitHub repo integration is currently commented out (lines 301-303)
+
+**Setup**:
+```bash
+cd python-rag
+pip install -r requirements.txt
+```
+
+**Populate Pinecone**: `python create-pinecone.py [--reset]`
+  - Run from `python-rag/` directory
+  - Requires `.env` in **root directory** with: `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `OPENAI_API_KEY`
+  - **Modes**:
+    - `python create-pinecone.py` - UPDATE mode (incremental, keeps existing vectors)
+    - `python create-pinecone.py --reset` - RESET mode (deletes all vectors, fresh upload)
+      - Asks for confirmation before deletion
+      - Use when content has been updated/removed
+  - Loads documents from multiple sources:
+    - YAML files from `rag-docs/` (resume data - same directory)
+    - Text files from `rag-docs/` (general content - same directory)
+    - Blog posts from `../personalsite/blog/posts/` (Markdown with frontmatter)
+  - Smart chunking strategy based on content type:
+    - Blog posts: 1200 chars, 200 overlap (preserves narrative)
+    - YAML data: 600 chars, 50 overlap (keeps structured data intact)
+    - Text files: 500 chars, 50 overlap (default)
+  - GitHub repo integration is currently commented out
+  - See `python-rag/README.md` for detailed documentation
 
 ## Architecture & Key Patterns
 
 ### Data Flow for RAG Chatbot
 1. **User Input** → Home page (`src/app/page.tsx`) sends POST to `/api/chat`
 2. **API Route** (`src/app/api/chat/route.ts`) embeds query using OpenAI text-embedding-ada-002
-3. **Intent Detection** → Analyzes query for content type (project/experience/education/skills) to apply metadata filters
+3. **Intent Detection** → Analyzes query for content type (blog_post/project/professional/academic/technical) to apply metadata filters
 4. **Vector Search** → Queries Pinecone for top-5 relevant document chunks (score > 0.75 threshold)
-5. **LLM Response** → GPT-3.5-turbo generates conversational answer with retrieved context
-6. **Client Render** → ReactMarkdown displays formatted response with custom styling
+   - If filtered search returns no results, retries without filter
+5. **Citation Extraction** → Identifies blog post sources for citation links
+6. **LLM Response** → GPT-3.5-turbo generates conversational answer with retrieved context
+   - System prompt includes instruction to cite blog posts with markdown links
+7. **Client Render** → ReactMarkdown displays formatted response with clickable blog citations
 
 ### Blog System
 - Static generation at build time via `getSortedPosts()` in `blogUtils.ts`
@@ -123,3 +149,4 @@ Required in `.env.local` (not tracked in git):
   3. Generation: GPT-3.5-turbo with dynamic system prompts
 - **Blog Markdown**: Processed server-side with `sanitize: false`, allowing raw HTML in posts
 - **Work Experience**: Data duplicated between `rag-docs/` (for RAG embeddings) and read directly by `jobUtils.ts` (for timeline display)
+- When working through a task, use TASKS.md to track the progress and next steps on it
