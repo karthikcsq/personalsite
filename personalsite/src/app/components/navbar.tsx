@@ -1,138 +1,72 @@
 'use client';
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
 
-  // Check if we're on a mobile device
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Set initial value
-    checkIsMobile();
-    
-    // Add event listener for window resize
-    window.addEventListener('resize', checkIsMobile);
-    
-    // Clean up
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
+  const navItems = [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/projects", label: "Projects" },
+    { href: "/work", label: "Work" },
+    { href: "/gallery", label: "Gallery" },
+    { href: "/blog", label: "Blog" },
+  ];
 
-  // Handle click outside to close menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current && 
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current && 
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
-  const handleMouseEnter = () => {
-    if (!isMobile) {
-      setIsMenuOpen(true);
-    }
-  };
+  // Find current page index for distance calculation
+  const currentIndex = navItems.findIndex(item =>
+    pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
+  );
 
   return (
-    <nav className="text-white fixed top-4 right-4 z-50">
-      {/* Hamburger Button */}
-      <button 
-        ref={buttonRef}
-        onMouseEnter={handleMouseEnter}
-        onClick={toggleMenu}
-        className="relative w-12 h-12 flex flex-col justify-center items-center bg-gray-900/80 backdrop-blur-lg rounded-full border border-gray-700 focus:outline-none shadow-lg hover:bg-gray-800/80 transition-colors"
-        aria-label="Toggle navigation menu"
-      >
-        <span className={`block w-6 h-0.5 bg-white mb-1.5 transition-transform duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-        <span className={`block w-6 h-0.5 bg-white mb-1.5 transition-opacity duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-        <span className={`block w-6 h-0.5 bg-white transition-transform duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-      </button>
+    <nav className="fixed right-0 top-0 h-screen flex items-center z-50">
+      <div className="flex flex-col justify-center h-full py-12 px-8">
+        {navItems.map((item, index) => {
+          const isActive = pathname === item.href ||
+                          (item.href !== "/" && pathname?.startsWith(item.href));
 
-      {/* Menu Dropdown */}
-      {isMenuOpen && (
-        <div 
-          ref={menuRef}
-          onMouseLeave={() => !isMobile && setIsMenuOpen(false)}
-          className="absolute right-0 top-14 mt-2 w-56 bg-gray-900/90 backdrop-blur-lg rounded-lg border border-gray-700 shadow-lg py-2 transition-all"
-          style={{ 
-            animation: 'fadeIn 0.2s ease-out',
-            boxShadow: '0 0 10px rgba(255, 255, 255, 0.2), 0 0 15px rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <Link 
-            href="/" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            Home
-          </Link>
-          <Link 
-            href="/about" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            About
-          </Link>
-          <Link 
-            href="/projects" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            Projects
-          </Link>
-          <Link 
-            href="/work" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            Work
-          </Link>
-          <Link 
-            href="/gallery" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            Gallery
-          </Link>
-          <Link 
-            href="/blog" 
-            className="block px-5 py-3 text-white hover:bg-gray-800 transition-colors"
-            onClick={closeMenu}
-          >
-            Blog
-          </Link>
-        </div>
-      )}
+          // Calculate distance from current page (0 = current, 1 = adjacent, etc.)
+          const distance = currentIndex >= 0 ? Math.abs(index - currentIndex) : 0;
 
-      {/* Add this to your globals.css for the animation */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+          // Fade based on distance: current = 1, adjacent = 0.7, far = 0.4
+          const opacity = distance === 0 ? 1 : distance === 1 ? 0.7 : 0.4;
+
+          return (
+            <div key={item.href} className="relative">
+              {/* Top line - slides in from left */}
+              <div
+                className="absolute top-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
+                style={{
+                  transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
+                  opacity: isActive ? 1 : 0
+                }}
+              ></div>
+
+              {/* Bottom line - slides in from left */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
+                style={{
+                  transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
+                  opacity: isActive ? 1 : 0
+                }}
+              ></div>
+
+              <Link
+                href={item.href}
+                className={`
+                  block text-white font-medium px-4 py-3 rounded-lg text-center
+                  transition-all duration-300 ease-in-out
+                  hover:bg-white/10 hover:opacity-100
+                `}
+                style={{ opacity }}
+              >
+                {item.label}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
     </nav>
   );
 }

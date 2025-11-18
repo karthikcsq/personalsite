@@ -54,10 +54,12 @@ function getIconForCompany(company: string): string {
 
 export function getJobsFromYaml(): JobEntry[] {
   // Resolution order:
-  // 1. Colocated file in this utils directory (preferred single source now)
-  // 2. Legacy location under workspace root rag-docs/
-  // 3. Parent rag-docs/ (if app nested)
+  // 1. python-rag/rag-docs/ (correct location)
+  // 2. Colocated file in this utils directory
+  // 3. Legacy location under workspace root rag-docs/
+  // 4. Parent rag-docs/ (if app nested)
   const candidates = [
+    path.join(process.cwd(), '..', 'python-rag', 'rag-docs', 'karthik_thyagarajan_truth.yaml'),
     path.join(__dirname, 'karthik_thyagarajan_truth.yaml'),
     path.join(process.cwd(), 'rag-docs', 'karthik_thyagarajan_truth.yaml'),
     path.join(process.cwd(), '..', 'rag-docs', 'karthik_thyagarajan_truth.yaml')

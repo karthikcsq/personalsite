@@ -3,28 +3,11 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import HomePageHead from '@/app/components/HomePageHead';
 
-export default function HomePage() {  
+export default function HomePage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showMenuGuide, setShowMenuGuide] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Check if it's the first visit and show menu guide
-  useEffect(() => {
-    const hasSeenGuide = localStorage.getItem('hasSeenMenuGuide');
-    
-    if (!hasSeenGuide) {
-      setShowMenuGuide(true);
-      // Hide popup after 30 seconds
-      const timer = setTimeout(() => {
-        setShowMenuGuide(false);
-        localStorage.setItem('hasSeenMenuGuide', 'true');
-      }, 30000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   // Auto-scroll to the bottom when new messages appear
   useEffect(() => {
@@ -121,12 +104,6 @@ export default function HomePage() {
     }
   };
 
-  // Handler to dismiss popup
-  const dismissGuide = () => {
-    setShowMenuGuide(false);
-    localStorage.setItem('hasSeenMenuGuide', 'true');
-  };
-
   return (
     <>
       <HomePageHead />
@@ -134,58 +111,29 @@ export default function HomePage() {
       {/* Background Image */}
       <div
         className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
-        style={{ 
+        style={{
           backgroundImage: "url('/sunrise.jpg')",
-          backgroundAttachment: "fixed", 
+          backgroundAttachment: "fixed",
         }}
       ></div>
 
-      {/* Menu Guide Popup */}
-      {showMenuGuide && (
-        <div 
-          className="fixed top-16 right-4 z-50 bg-gray-900/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-700 max-w-xs"
-          style={{ 
-            animation: 'fadeInDown 0.5s ease-out',
-            boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' 
-          }}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-semibold pr-8">Welcome!</h3>
-            <button 
-              onClick={dismissGuide}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
-          <p className="text-gray-300">
-            Click the menu button in the top-right corner to navigate the site.
-          </p>
-          <div className="mt-3 flex justify-end">
-            <div className="w-8 h-8 rounded-full border-2 border-white animate-pulse flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col h-screen w-full max-w-3xl mx-auto px-4">
+      <div className={`flex flex-col h-screen w-full max-w-3xl mx-auto px-4 transition-all duration-1000 ease-out ${
+        messages.length === 0 ? 'justify-center' : 'justify-start'
+      }`}>
         {/* Header - fades out when chat starts */}
         <div
-          className={`flex flex-col items-center justify-center transition-all duration-700 ease-in-out ${
-            messages.length === 0 ? 'flex-grow' : 'flex-shrink-0 h-0 opacity-0 overflow-hidden'
+          className={`flex flex-col items-center transition-all duration-1000 ease-out ${
+            messages.length === 0 ? 'mb-8 opacity-100 scale-100' : 'h-0 mb-0 opacity-0 scale-95 overflow-hidden'
           }`}
         >
-          <h1 className="text-4xl font-bold text-white mb-4 text-center">Hi, I&apos;m Karthik!</h1>
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
+          <h1 className="text-4xl font-bold text-white mb-4 text-center transition-all duration-1000 ease-out">Hi, I&apos;m Karthik!</h1>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center transition-all duration-1000 ease-out">Welcome to my digital archive.</h2>
         </div>
 
         {/* Messages container - grows to full height when chat starts */}
         <div
-          className={`flex-grow overflow-y-auto mb-4 transition-all duration-700 ease-in-out custom-scrollbar ${
-            messages.length === 0 ? 'opacity-0 h-0' : 'opacity-100'
+          className={`flex-grow overflow-y-auto mb-4 transition-all duration-1000 ease-out custom-scrollbar ${
+            messages.length === 0 ? 'hidden' : 'opacity-100'
           }`}
           style={{
             paddingTop: messages.length > 0 ? '2rem' : '0',
@@ -208,6 +156,13 @@ export default function HomePage() {
               >
                 {message.role === "user" ? (
                   message.content
+                ) : message.content === "" ? (
+                  // Show loading indicator for empty assistant messages
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                  </div>
                 ) : (
                   <ReactMarkdown
                     components={{
@@ -243,25 +198,13 @@ export default function HomePage() {
               </div>
             </div>
           ))}
-          {isLoading && (
-            <div className="text-left mb-4 animate-fadeIn">
-              <div className="inline-block p-3 rounded-lg max-w-[80%] text-white"
-                style={{ backgroundColor: "rgba(8, 8, 8, 0.6)", backdropFilter: "blur(4px)" }}>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
-                </div>
-              </div>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input bar - always at bottom */}
         <form
           onSubmit={handleSubmit}
-          className={`flex gap-2 pb-6 transition-all duration-700 ease-in-out ${
+          className={`flex gap-2 pb-6 transition-all duration-1000 ease-out ${
             messages.length === 0 ? '' : 'sticky bottom-0'
           }`}
         >
