@@ -94,31 +94,36 @@ export async function POST(req: NextRequest) {
         return { contentType: 'blog_post' };
       }
 
-      // Project-related keywords
+      // Project-related keywords (expanded for better detection)
       if (lowerQuery.includes('project') || lowerQuery.includes('projects') ||
           lowerQuery.includes('built') || lowerQuery.includes('developed') ||
-          lowerQuery.includes('created') || lowerQuery.includes('work on')) {
+          lowerQuery.includes('created') || lowerQuery.includes('made') ||
+          lowerQuery.includes('hackathon') || lowerQuery.includes('personal project') ||
+          lowerQuery.includes('portfolio project') || lowerQuery.includes('side project')) {
         return { contentType: 'project' };
       }
 
       // Experience/work-related keywords
       if (lowerQuery.includes('experience') || lowerQuery.includes('job') ||
           lowerQuery.includes('work') || lowerQuery.includes('company') ||
-          lowerQuery.includes('employer')) {
+          lowerQuery.includes('employer') || lowerQuery.includes('intern') ||
+          lowerQuery.includes('role')) {
         return { contentType: 'professional' };
       }
 
       // Education-related keywords
       if (lowerQuery.includes('education') || lowerQuery.includes('school') ||
           lowerQuery.includes('university') || lowerQuery.includes('degree') ||
-          lowerQuery.includes('study') || lowerQuery.includes('studied')) {
+          lowerQuery.includes('study') || lowerQuery.includes('studied') ||
+          lowerQuery.includes('purdue') || lowerQuery.includes('college')) {
         return { contentType: 'academic' };
       }
 
       // Skills-related keywords
       if (lowerQuery.includes('skill') || lowerQuery.includes('skills') ||
           lowerQuery.includes('technology') || lowerQuery.includes('technologies') ||
-          lowerQuery.includes('programming') || lowerQuery.includes('language')) {
+          lowerQuery.includes('programming') || lowerQuery.includes('language') ||
+          lowerQuery.includes('framework') || lowerQuery.includes('tool')) {
         return { contentType: 'technical' };
       }
 
@@ -135,7 +140,7 @@ export async function POST(req: NextRequest) {
       filter?: { content_type: { $eq: string } };
     } = {
       vector: queryEmbedding,
-      topK: 5,
+      topK: 10, // Increased from 5 to get more candidates
       includeMetadata: true,
       ...(queryIntent?.contentType && {
         filter: {
@@ -144,25 +149,61 @@ export async function POST(req: NextRequest) {
       })
     };
 
+    console.log(`🔍 Query: "${currentQuery}"`);
+    console.log(`🎯 Detected intent: ${queryIntent?.contentType || 'none'}`);
+
     // Query Pinecone for similar documents
     let queryResponse = await index.query(queryParams);
 
+    console.log(`📊 Found ${queryResponse.matches.length} matches (before filtering)`);
+    if (queryResponse.matches.length > 0) {
+      console.log(`   Top score: ${queryResponse.matches[0].score?.toFixed(3)}`);
+      console.log(`   Content types: ${[...new Set(queryResponse.matches.map(m => m.metadata?.content_type))].join(', ')}`);
+    }
+
     // If filtered search returns poor results, try without filter
     if (queryIntent && queryResponse.matches.length === 0) {
-      console.log(`No results found for content_type: ${queryIntent.contentType}, retrying without filter`);
+      console.log(`⚠️  No results found for content_type: ${queryIntent.contentType}, retrying without filter`);
       queryResponse = await index.query({
         vector: queryEmbedding,
-        topK: 5,
+        topK: 10,
         includeMetadata: true,
       });
+      console.log(`📊 Unfiltered search found ${queryResponse.matches.length} matches`);
     }
 
     // Extract contexts from search results with relevance scoring
-    const relevantMatches = queryResponse.matches.filter(match => match.score && match.score > 0.75);
-    const contexts = queryResponse.matches
-      .map(match => match.metadata?.text as string)
-      .filter(Boolean)
-      .join("\n\n");
+    // Use lower threshold for overview/general queries since they might not have high semantic similarity
+    const isOverviewQuery = queryIntent?.contentType === 'blog_post' ||
+                           queryIntent?.contentType === 'project' ||
+                           currentQuery.toLowerCase().includes('about');
+    const relevanceThreshold = isOverviewQuery ? 0.65 : 0.75;
+    const relevantMatches = queryResponse.matches.filter(match => match.score && match.score > relevanceThreshold);
+
+    console.log(`✅ ${relevantMatches.length} matches passed relevance threshold (${relevanceThreshold})`);
+
+    // Build structured context with source attribution
+    const contextParts = relevantMatches
+      .map((match, idx) => {
+        const text = match.metadata?.text as string;
+        const sourceType = match.metadata?.content_type || match.metadata?.source_type || 'unknown';
+        const score = match.score?.toFixed(3) || 'N/A';
+
+        // Add source labels to help model understand provenance
+        let sourceLabel = `Source ${idx + 1} [${sourceType}, relevance: ${score}]`;
+        if (match.metadata?.title) {
+          sourceLabel += ` - "${match.metadata.title}"`;
+        } else if (match.metadata?.company) {
+          sourceLabel += ` - ${match.metadata.company}`;
+        } else if (match.metadata?.project_title) {
+          sourceLabel += ` - ${match.metadata.project_title}`;
+        }
+
+        return `${sourceLabel}:\n${text}`;
+      })
+      .filter(Boolean);
+
+    const contexts = contextParts.join("\n\n---\n\n");
 
     // Determine if we have good context or need to use fallback
     const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
@@ -180,32 +221,38 @@ export async function POST(req: NextRequest) {
 
     let systemPrompt: string;
     if (hasRelevantContext) {
-      systemPrompt = `You are an AI assistant helping visitors learn about Karthik Thyagarajan. You have access to information about Karthik's background, experience, projects, and blog posts.
+      systemPrompt = `You are an AI assistant helping visitors learn about Karthik Thyagarajan. You have been provided with specific information retrieved from his portfolio.
 
-Key guidelines:
-- ALWAYS respond in third person (e.g., "Karthik has worked on...", "He graduated from...", "His experience includes...")
-- NEVER use first person pronouns (I, me, my) when referring to Karthik
-- Use the provided context to give accurate, helpful information
-- Don't just repeat the context - synthesize it into natural, conversational responses
-- Be friendly and engaging, as this represents Karthik's personal website
-- If asked about something not in the context, politely redirect to what you do know about Karthik
-${hasBlogContext ? `\n- When referencing blog content, cite it naturally with links in this format:\n  [Blog Title](https://www.karthikthyagarajan.com/blog/[slug])\n  Available blog posts: ${blogPosts.map(p => `"${p.title}" (slug: ${p.slug})`).join(', ')}` : ''}
+CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
+1. ONLY use information explicitly stated in the Context section below
+2. NEVER make up, infer, or fabricate any details not present in the Context
+3. If the Context doesn't contain specific information requested, say: "I don't have specific information about that in the available data. You could ask about [suggest related topics from context]."
+4. ALWAYS respond in third person (e.g., "Karthik has worked on...", "He graduated from...", "His experience includes...")
+5. NEVER use first person pronouns (I, me, my) when referring to Karthik
+6. When providing information, be specific and cite details from the context (e.g., project names, company names, technologies)
+7. If you're unsure whether information is in the context, err on the side of caution and don't include it
+${hasBlogContext ? `\n8. When referencing blog content, cite it with links: [Blog Title](https://www.karthikthyagarajan.com/blog/[slug])\n   Available blog posts: ${blogPosts.map(p => `"${p.title}" (slug: ${p.slug})`).join(', ')}` : ''}
 
-Context about Karthik:
-${contexts}`;
+Context about Karthik (with source attribution):
+${contexts}
+
+Remember: Accuracy is more important than completeness. Only state facts that are explicitly in the Context above.`;
     } else {
-      systemPrompt = `You are an AI assistant on Karthik Thyagarajan's website. While there isn't specific information to answer that exact question, you can help visitors learn about Karthik.
+      systemPrompt = `You are an AI assistant on Karthik Thyagarajan's website. The current query didn't return specific information from the knowledge base.
 
-IMPORTANT: Always respond in third person (e.g., "Karthik has experience in...", "He studied...", "His work focuses on...").
+IMPORTANT INSTRUCTIONS:
+- Always respond in third person (e.g., "Karthik has experience in...", "He studied...", "His work focuses on...")
+- Be honest that you don't have specific information to answer the exact question asked
+- Suggest rephrasing or asking about these general topics:
+  * His education and academic background
+  * His work experience and internships
+  * His technical projects
+  * His skills in AI/ML, full-stack development, or quantum computing
+  * His blog posts and writings
 
-You can provide information about:
-- Karthik's background in computer science and AI/ML
-- His work experience and projects
-- His education and research interests
-- His skills and expertise areas
-- His blog posts and writings
+DO NOT make up or infer any specific details. Only acknowledge what general topics are available in the knowledge base.
 
-Feel free to ask about any of these topics, or try rephrasing your question.`;
+Example response: "I don't have specific information about that in the available context. However, I can help answer questions about Karthik's education, work experience, projects, or technical skills. What would you like to know about?"`;
     }
 
     // Build messages array with conversation history

@@ -171,110 +171,157 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="flex-grow p-4 max-w-3xl mx-auto w-full">
-        <h1 className="text-4xl font-bold text-white mb-4 text-center mt-20">Hi, I&apos;m Karthik!</h1>
-        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
-        
-        <div className="rounded-lg shadow p-4 h-[70vh] flex flex-col mb-8"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(2px)", boxShadow: "0 0 10px rgba(100, 100, 100, 0.6), 0 0 20px rgba(100, 100, 100, 0.4)" }}
+      <div className="flex flex-col h-screen w-full max-w-3xl mx-auto px-4">
+        {/* Header - fades out when chat starts */}
+        <div
+          className={`flex flex-col items-center justify-center transition-all duration-700 ease-in-out ${
+            messages.length === 0 ? 'flex-grow' : 'flex-shrink-0 h-0 opacity-0 overflow-hidden'
+          }`}
         >
-          {/* Chat content remains the same... */}
-          <div className="flex-grow overflow-y-auto mb-4">
-            {messages.length === 0 ? (
-              <div className="text-white text-center mt-20">
-                <p>Ask me anything!</p>
-              </div>
-            ) : (
-              messages.map((message, index) => (
-                <div 
-                  key={index} 
-                  className={`mb-4 ${
-                    message.role === "user" ? "text-right" : "text-left"
-                  }`}
-                >
-                  <div
-                    className={`inline-block p-3 mr-3 rounded-lg max-w-[80%] text-white`}
-                    style = {{
-                      backgroundColor: message.role === "user" ? "rgba(211, 31, 8, 0.6)" : "rgba(8, 8, 8, 0.6)"}}
-                  >
-                    {message.role === "user" ? (
-                      message.content
-                    ) : (
-                      <ReactMarkdown 
-                      components={{
-                        a: ({...props}) => (
-                          <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
-                        ),
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        code: ({inline, ...props}: any) => {
-                          return inline ? 
-                            <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> : 
-                            <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
-                        },
-                        ul: ({...props}) => (
-                          <ul {...props} className="list-disc pl-6 mt-2" />
-                        ),
-                        ol: ({...props}) => (
-                          <ol {...props} className="list-decimal pl-6 mt-2" />
-                        ),
-                        h1: ({...props}) => (
-                          <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
-                        ),
-                        h2: ({...props}) => (
-                          <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
-                        ),
-                        p: ({...props}) => (
-                          <p {...props} className="my-2 prose prose-invert max-w-none" />
-                        ),
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-            {isLoading && (
-              <div className="text-left mb-4">
-                <div className="inline-block p-3 rounded-lg max-w-[80%] text-white"
-                  style={{ backgroundColor: "rgba(8, 8, 8, 0.6)" }}>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask something..."
-              className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black/20 text-white"
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50 transition-colors"
-              disabled={isLoading || !input.trim()}
-            >
-              Send
-            </button>
-          </form>
+          <h1 className="text-4xl font-bold text-white mb-4 text-center">Hi, I&apos;m Karthik!</h1>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Welcome to my digital archive.</h2>
         </div>
+
+        {/* Messages container - grows to full height when chat starts */}
+        <div
+          className={`flex-grow overflow-y-auto mb-4 transition-all duration-700 ease-in-out custom-scrollbar ${
+            messages.length === 0 ? 'opacity-0 h-0' : 'opacity-100'
+          }`}
+          style={{
+            paddingTop: messages.length > 0 ? '2rem' : '0',
+            paddingBottom: '1rem'
+          }}
+        >
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`mb-4 animate-fadeIn ${
+                message.role === "user" ? "text-right" : "text-left"
+              }`}
+            >
+              <div
+                className={`inline-block p-3 rounded-lg max-w-[80%] text-white shadow-lg`}
+                style={{
+                  backgroundColor: message.role === "user" ? "rgba(211, 31, 8, 0.6)" : "rgba(8, 8, 8, 0.6)",
+                  backdropFilter: "blur(4px)"
+                }}
+              >
+                {message.role === "user" ? (
+                  message.content
+                ) : (
+                  <ReactMarkdown
+                    components={{
+                      a: ({...props}) => (
+                        <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
+                      ),
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      code: ({inline, ...props}: any) => {
+                        return inline ?
+                          <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> :
+                          <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
+                      },
+                      ul: ({...props}) => (
+                        <ul {...props} className="list-disc pl-6 mt-2" />
+                      ),
+                      ol: ({...props}) => (
+                        <ol {...props} className="list-decimal pl-6 mt-2" />
+                      ),
+                      h1: ({...props}) => (
+                        <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
+                      ),
+                      h2: ({...props}) => (
+                        <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
+                      ),
+                      p: ({...props}) => (
+                        <p {...props} className="my-2 prose prose-invert max-w-none" />
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                )}
+              </div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="text-left mb-4 animate-fadeIn">
+              <div className="inline-block p-3 rounded-lg max-w-[80%] text-white"
+                style={{ backgroundColor: "rgba(8, 8, 8, 0.6)", backdropFilter: "blur(4px)" }}>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input bar - always at bottom */}
+        <form
+          onSubmit={handleSubmit}
+          className={`flex gap-2 pb-6 transition-all duration-700 ease-in-out ${
+            messages.length === 0 ? '' : 'sticky bottom-0'
+          }`}
+        >
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask me anything..."
+            className="flex-grow p-3 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 bg-black/30 text-white placeholder-gray-400 backdrop-blur-sm transition-all"
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            className="bg-red-900/80 text-white px-6 py-3 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50 transition-all backdrop-blur-sm"
+            disabled={isLoading || !input.trim()}
+          >
+            Send
+          </button>
+        </form>
       </div>
 
-      {/* Add animation for popup */}
-      <style jsx>{`
+      {/* Add animations and custom scrollbar */}
+      <style jsx global>{`
         @keyframes fadeInDown {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out;
+        }
+
+        /* Custom scrollbar styles */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+          transition: background 0.2s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Firefox scrollbar */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
         }
       `}</style>
     </section>
