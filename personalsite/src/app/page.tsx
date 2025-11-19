@@ -50,15 +50,15 @@ export default function HomePage() {
     };
     window.addEventListener('resize', handleResize);
 
-    // Reduced particle count for better performance
-    const particleCount = Math.min(50, Math.floor(window.innerWidth / 30));
+    // Increased particle count for futuristic effect
+    const particleCount = Math.min(100, Math.floor(window.innerWidth / 15));
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
+        vx: (Math.random() - 0.5) * 0.6, // Moderate speed
+        vy: (Math.random() - 0.5) * 0.6, // Moderate speed
         size: Math.random() * 2 + 1
       });
     }
@@ -78,8 +78,8 @@ export default function HomePage() {
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      // Batch drawing operations
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+      // Batch drawing operations with dark blue color
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.7)'; // Blue-500 with opacity
       particles.forEach((particle) => {
         // Update position
         particle.x += particle.vx;
@@ -108,7 +108,7 @@ export default function HomePage() {
           const distSq = dx * dx + dy * dy;
           if (distSq < connectionDistance * connectionDistance) {
             const distance = Math.sqrt(distSq);
-            ctx.strokeStyle = `rgba(239, 68, 68, ${0.4 * (1 - distance / connectionDistance)})`;
+            ctx.strokeStyle = `rgba(59, 130, 246, ${0.5 * (1 - distance / connectionDistance)})`; // Blue connections
             ctx.lineWidth = 1.0;
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
@@ -220,7 +220,7 @@ export default function HomePage() {
   return (
     <>
       <HomePageHead />
-      <section className="relative flex flex-col min-h-screen text-premium-100 overflow-hidden bg-gradient-to-br from-premium-950 via-premium-900 to-premium-950">
+      <section className="relative flex flex-col min-h-screen text-premium-100 overflow-hidden bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950">
       {/* Particle Canvas */}
       <canvas
         ref={canvasRef}
@@ -266,14 +266,16 @@ export default function HomePage() {
           </a>
         </div>
 
-        {/* Messages container */}
+        {/* Messages container with fade mask */}
         <div
-          className={`flex-grow overflow-y-auto mb-6 transition-all duration-700 ease-out premium-scrollbar ${
+          className={`relative flex-grow overflow-y-auto mb-6 transition-all duration-700 ease-out premium-scrollbar ${
             messages.length === 0 ? 'hidden' : 'opacity-100'
           }`}
           style={{
             paddingTop: messages.length > 0 ? '3rem' : '0',
-            paddingBottom: '1rem'
+            paddingBottom: '1rem',
+            WebkitMaskImage: messages.length > 0 ? 'linear-gradient(to bottom, transparent 0%, black 40px)' : 'none',
+            maskImage: messages.length > 0 ? 'linear-gradient(to bottom, transparent 0%, black 40px)' : 'none'
           }}
         >
           {messages.map((message, index) => (
@@ -293,11 +295,11 @@ export default function HomePage() {
                 {message.role === "user" ? (
                   <span className="font-quicksand font-normal">{message.content}</span>
                 ) : message.content === "" ? (
-                  // Premium loading indicator
+                  // Loading indicator with blue theme
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
                   </div>
                 ) : (
                   <ReactMarkdown
@@ -363,30 +365,15 @@ export default function HomePage() {
         </form>
       </div>
 
-      {/* Premium scrollbar styles */}
+      {/* Hide scrollbar */}
       <style jsx global>{`
         .premium-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .premium-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .premium-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(234, 179, 8, 0.3);
-          border-radius: 3px;
-          transition: background 0.2s ease;
-        }
-
-        .premium-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(234, 179, 8, 0.5);
+          display: none;
         }
 
         /* Firefox scrollbar */
         .premium-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(234, 179, 8, 0.3) transparent;
+          scrollbar-width: none;
         }
       `}</style>
     </section>
