@@ -3,16 +3,103 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import HomePageHead from '@/app/components/HomePageHead';
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+}
+
 export default function HomePage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Auto-scroll to the bottom when new messages appear
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Particle system
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Initialize particles
+    const particleCount = 80;
+    const particles: Particle[] = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2.5 + 1.5
+      });
+    }
+
+    // Animation loop
+    let animationId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle, i) => {
+        // Update position
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        // Bounce off edges
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+
+        // Draw particle
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw connections
+        particles.slice(i + 1).forEach(otherParticle => {
+          const dx = particle.x - otherParticle.x;
+          const dy = particle.y - otherParticle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 200) {
+            ctx.strokeStyle = `rgba(239, 68, 68, ${0.4 * (1 - distance / 200)})`;
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(otherParticle.x, otherParticle.y);
+            ctx.stroke();
+          }
+        });
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,19 +194,26 @@ export default function HomePage() {
   return (
     <>
       <HomePageHead />
-      <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
-      {/* Background Image */}
-      <div
-        className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
-        style={{
-          backgroundImage: "url('/sunrise.jpg')",
-          backgroundAttachment: "fixed",
-        }}
-      ></div>
+      <section className="relative flex flex-col min-h-screen text-white overflow-hidden bg-gradient-to-br from-gray-950 via-black to-gray-950">
+      {/* Particle Canvas */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 pointer-events-none"
+        style={{ zIndex: 1 }}
+      />
 
-      <div className={`flex flex-col h-screen w-full max-w-3xl mx-auto px-4 transition-all duration-1000 ease-out ${
+      {/* Subtle grid pattern */}
+      <div className="fixed inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+          backgroundSize: '50px 50px',
+          zIndex: 0
+        }}
+      />
+
+      <div className={`flex flex-col h-screen w-full max-w-3xl mx-auto px-4 transition-all duration-1000 ease-out relative ${
         messages.length === 0 ? 'justify-center' : 'justify-start'
-      }`}>
+      }`} style={{ zIndex: 10 }}>
         {/* Header - fades out when chat starts */}
         <div
           className={`flex flex-col items-center transition-all duration-1000 ease-out ${
@@ -128,6 +222,20 @@ export default function HomePage() {
         >
           <h1 className="text-4xl font-bold text-white mb-4 text-center transition-all duration-1000 ease-out">Hi, I&apos;m Karthik!</h1>
           <h2 className="text-2xl font-semibold text-white mb-6 text-center transition-all duration-1000 ease-out">Welcome to my digital archive.</h2>
+
+          {/* Read About Me Button */}
+          <a
+            href="/about"
+            className="group relative overflow-hidden px-6 py-3 mb-4 bg-white/5 border border-white/20 hover:border-red-500/50 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/10 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative flex items-center gap-2">
+              <span className="font-quicksand text-sm font-light text-white/80 group-hover:text-white transition-colors">Read About Me</span>
+              <svg className="w-4 h-4 text-white/60 group-hover:text-red-400 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
         </div>
 
         {/* Messages container - grows to full height when chat starts */}

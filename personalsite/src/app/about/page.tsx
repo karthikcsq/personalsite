@@ -1,82 +1,44 @@
 'use client';
-import { useState, useEffect, useRef } from "react";
 
 export default function AboutPage() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const skills = [
     "Machine Learning", "PyTorch", "Computer Vision", "Quantum Computing",
-    "Next.js", "TypeScript", "Python", "AWS", "Robotics", "AR/XR"
+    "TypeScript", "C++", "Python", "AWS", "Robotics", "AR/XR"
   ];
 
   const interests = [
-    { label: "Photography", color: "from-purple-500/10 to-pink-500/10" },
-    { label: "Music", color: "from-blue-500/10 to-cyan-500/10" },
-    { label: "Travel", color: "from-orange-500/10 to-red-500/10" },
-    { label: "AI/ML", color: "from-green-500/10 to-emerald-500/10" }
+    { label: "Photography", image: "/interests/photography-interest.jpg" },
+    { label: "Music", image: "/interests/music-interest.jpg" },
+    { label: "Travel", image: "/interests/travel-interest.jpg" },
+    { label: "AI/ML", image: "/interests/ai-interest.jpg" }
   ];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-950 text-white overflow-hidden">
-      {/* Animated background orbs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-96 h-96 bg-red-600/20 rounded-full blur-3xl"
-          style={{
-            top: '10%',
-            left: '15%',
-            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
-            transition: 'transform 0.3s ease-out'
-          }}
-        />
-        <div
-          className="absolute w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"
-          style={{
-            bottom: '10%',
-            right: '10%',
-            transform: `translate(${mousePosition.x * -0.03}px, ${mousePosition.y * -0.03}px)`,
-            transition: 'transform 0.3s ease-out'
-          }}
-        />
-        <div
-          className="absolute w-72 h-72 bg-blue-600/20 rounded-full blur-3xl"
-          style={{
-            top: '50%',
-            left: '50%',
-            transform: `translate(${mousePosition.x * 0.015}px, ${mousePosition.y * 0.015}px)`,
-            transition: 'transform 0.3s ease-out'
-          }}
-        />
-      </div>
-
-      {/* Subtle grid pattern */}
-      <div className="fixed inset-0 -z-10 opacity-[0.03]"
+    <div className="relative min-h-screen text-white overflow-hidden">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-          backgroundSize: '50px 50px'
+          backgroundImage: "url('/sunrise.jpg')",
+          backgroundAttachment: "fixed",
+          zIndex: 0
         }}
       />
+      {/* Dark Overlay */}
+      <div className="fixed inset-0 bg-black/40" style={{ zIndex: 1 }} />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-24 md:pr-32 lg:pr-40">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-24 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
         {/* Hero Section */}
-        <div ref={heroRef} className="mb-8 animate-fadeIn">
+        <div className="mb-8 animate-fadeIn">
           <div className="mb-8">
-            <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-white mb-4">
+            <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-white mb-4" style={{ textShadow: '0 0 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,1)' }}>
               Karthik Thyagarajan
             </h1>
             <div className="h-px w-24 bg-gradient-to-r from-red-500 to-transparent"></div>
           </div>
 
-          <p className="font-quicksand text-xl sm:text-2xl text-white/50 mb-6 font-light animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+          <p className="font-quicksand text-xl sm:text-2xl text-white mb-6 font-light animate-fadeIn" style={{ animationDelay: '0.2s', textShadow: '0 0 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,1)' }}>
             Building intelligent systems at the intersection of ML, robotics, and quantum computing
           </p>
 
@@ -87,8 +49,11 @@ export default function AboutPage() {
           {skills.map((skill, idx) => (
             <span
               key={skill}
-              className="px-3 py-1.5 bg-white/5 border border-white/10 text-xs font-quicksand text-white/70 hover:bg-white/10 hover:border-white/20 hover:text-white/90 transition-all duration-200 cursor-default"
-              style={{ animationDelay: `${0.5 + idx * 0.1}s` }}
+              className="px-3 py-1.5 bg-black/30 backdrop-blur-sm border border-white/20 text-xs font-quicksand text-white hover:bg-black/40 hover:border-white/30 hover:text-white transition-all duration-200 cursor-default"
+              style={{
+                animationDelay: `${0.5 + idx * 0.1}s`,
+                textShadow: '0 0 20px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,1)'
+              }}
             >
               {skill}
             </span>
@@ -96,12 +61,12 @@ export default function AboutPage() {
         </div>
 
         {/* Connect Section */}
-        <div className="mb-20 group relative overflow-hidden bg-white/[0.03] border border-white/10 p-6 backdrop-blur-sm hover:border-white/20 transition-all duration-300 animate-slideUp">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="mb-8 group relative overflow-hidden bg-black/25 border border-emerald-500/20 p-6 backdrop-blur-md hover:border-emerald-500/40 transition-all duration-300 animate-slideUp">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-teal-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="relative z-10">
             <div className="mb-4">
-              <h2 className="font-quicksand text-lg font-light text-white/90 mb-1">Connect</h2>
-              <div className="h-px w-12 bg-gradient-to-r from-red-500/50 to-transparent"></div>
+              <h2 className="font-quicksand text-lg font-light text-white mb-1">Connect</h2>
+              <div className="h-px w-12 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <a
@@ -169,15 +134,15 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* About Card - Spans 2 columns */}
-          <div className="lg:col-span-2 group relative overflow-hidden bg-white/[0.03] border border-white/10 p-8 backdrop-blur-sm hover:border-white/20 transition-all duration-300 animate-slideUp">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="lg:col-span-2 group relative overflow-hidden bg-black/25 border border-red-500/20 p-8 backdrop-blur-md hover:border-red-500/40 transition-all duration-300 animate-slideUp">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/10 to-orange-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
               <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white/90 mb-1">About</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-red-500/50 to-transparent"></div>
+                <h2 className="font-quicksand text-2xl font-light text-white mb-1">About</h2>
+                <div className="h-px w-12 bg-gradient-to-r from-red-500 to-orange-500"></div>
               </div>
               <p className="font-quicksand text-base text-white/60 leading-relaxed mb-4 font-light">
-                CS & AI student at Purdue University. Working on startups, AR/XR video analysis, and 3D SLAM systems.
+                CS & AI student at Purdue University. Working on startups, AR/XR video analysis, and full stack applications.
                 Previously built ML infrastructure at scale and developed quantum algorithms for real-world applications.
               </p>
               <p className="font-quicksand text-base text-white/60 leading-relaxed font-light">
@@ -187,12 +152,12 @@ export default function AboutPage() {
           </div>
 
           {/* Education Card */}
-          <div className="group relative overflow-hidden bg-white/[0.03] border border-white/10 p-8 backdrop-blur-sm hover:border-white/20 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.1s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="group relative overflow-hidden bg-black/25 border border-purple-500/20 p-8 backdrop-blur-md hover:border-purple-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.1s' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
               <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white/90 mb-1">Education</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
+                <h2 className="font-quicksand text-2xl font-light text-white mb-1">Education</h2>
+                <div className="h-px w-12 bg-gradient-to-r from-purple-500 to-pink-500"></div>
               </div>
               <h3 className="font-quicksand text-lg font-normal text-white mb-2">Purdue University</h3>
               <p className="font-quicksand text-sm text-white/50 leading-relaxed font-light">
@@ -202,25 +167,29 @@ export default function AboutPage() {
           </div>
 
           {/* Currently Exploring Card */}
-          <div className="group relative overflow-hidden bg-white/[0.03] border border-white/10 p-8 backdrop-blur-sm hover:border-white/20 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="group relative overflow-hidden bg-black/25 border border-cyan-500/20 p-8 backdrop-blur-md hover:border-cyan-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.2s' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-blue-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
               <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white/90 mb-1">Currently Exploring</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-cyan-500/50 to-transparent"></div>
+                <h2 className="font-quicksand text-2xl font-light text-white mb-1">Currently Exploring</h2>
+                <div className="h-px w-12 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
               </div>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-xs">━</span>
-                  <span className="font-quicksand text-sm text-white/60 group-hover/item:text-white/80 transition-colors font-light">Robotics foundation models</span>
+                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
+                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Reinforcement learning for IoT security</span>
                 </li>
                 <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-xs">━</span>
-                  <span className="font-quicksand text-sm text-white/60 group-hover/item:text-white/80 transition-colors font-light">AR/XR long-form video analysis</span>
+                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
+                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">AR/XR video memory systems</span>
                 </li>
                 <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-xs">━</span>
-                  <span className="font-quicksand text-sm text-white/60 group-hover/item:text-white/80 transition-colors font-light">3D SLAM systems</span>
+                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
+                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Neural radiance fields & 3D SLAM</span>
+                </li>
+                <li className="flex items-start gap-3 group/item">
+                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
+                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Multi-agent systems & RAG pipelines</span>
                 </li>
               </ul>
             </div>
@@ -228,30 +197,38 @@ export default function AboutPage() {
 
           {/* Interests Grid */}
           <div className="lg:col-span-2 grid grid-cols-2 gap-4 animate-slideUp" style={{ animationDelay: '0.3s' }}>
-            {interests.map((interest, idx) => (
+            {interests.map((interest) => (
               <div
                 key={interest.label}
-                className="group relative overflow-hidden bg-white/[0.03] border border-white/10 p-6 backdrop-blur-sm hover:border-white/20 transition-all duration-300"
+                className="group relative overflow-hidden border border-white/10 backdrop-blur-sm hover:border-white/30 transition-all duration-300 aspect-[4/3]"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${interest.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                <div className="relative z-10">
-                  <p className="font-quicksand text-sm font-light text-white/60 group-hover:text-white/80 transition-colors">{interest.label}</p>
+                {/* Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundImage: `url(${interest.image})` }}
+                />
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+                {/* Text */}
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <p className="font-quicksand text-lg font-semibold text-white drop-shadow-lg">{interest.label}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Quote Card */}
-          <div className="lg:col-span-3 group relative overflow-hidden bg-white/[0.03] border border-white/10 p-8 backdrop-blur-sm hover:border-white/20 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.4s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/0 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10 h-full flex flex-col justify-center">
-              <div className="mb-6">
-                <div className="h-px w-8 bg-gradient-to-r from-red-500/50 to-transparent mb-4"></div>
+          <div className="lg:col-span-3 group relative overflow-hidden bg-black/25 border border-orange-500/20 p-6 backdrop-blur-md hover:border-orange-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.4s' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-red-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 flex items-center gap-3">
+              <span className="text-red-500/40 text-5xl font-serif leading-none flex-shrink-0">&ldquo;</span>
+              <div className="flex-1">
+                <p className="font-quicksand text-base text-white/70 leading-relaxed font-light italic mb-2">
+                  He who has a why to live for can bear almost any how.
+                </p>
+                <p className="font-quicksand text-xs text-white/40 font-light">— Friedrich Nietzsche</p>
               </div>
-              <p className="font-quicksand text-base text-white/70 mb-4 leading-relaxed font-light">
-                He who has a why to live for can bear almost any how.
-              </p>
-              <p className="font-quicksand text-xs text-white/40 font-light">— Friedrich Nietzsche</p>
+              <span className="text-red-500/40 text-5xl font-serif leading-none flex-shrink-0 self-start">&rdquo;</span>
             </div>
           </div>
         </div>
@@ -267,6 +244,11 @@ export default function AboutPage() {
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
 
         .animate-fadeIn {
