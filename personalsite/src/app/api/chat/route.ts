@@ -274,7 +274,7 @@ Example response: "I don't have specific information about that in the available
 
     // Use OpenAI to generate a streaming response
     const stream = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5.1",
       temperature: 0.7,
       messages: [
         {
