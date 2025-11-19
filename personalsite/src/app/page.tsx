@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import HomePageHead from '@/app/components/HomePageHead';
+import { Send, ArrowRight } from 'lucide-react';
 
 interface Particle {
   x: number;
@@ -23,80 +24,106 @@ export default function HomePage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Particle system
+  // Optimized particle system with reduced particle count and better performance
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Use device pixel ratio for crisp rendering
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.scale(dpr, dpr);
+    };
+    resize();
 
+    let resizeTimeout: NodeJS.Timeout;
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resize, 100);
     };
     window.addEventListener('resize', handleResize);
 
-    // Initialize particles
-    const particleCount = 80;
+    // Reduced particle count for better performance
+    const particleCount = Math.min(50, Math.floor(window.innerWidth / 30));
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2.5 + 1.5
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 1
       });
     }
 
-    // Animation loop
+    // Optimized animation loop with requestAnimationFrame throttling
     let animationId: number;
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let lastTime = 0;
+    const fps = 60;
+    const interval = 1000 / fps;
 
-      particles.forEach((particle, i) => {
+    const animate = (currentTime: number) => {
+      animationId = requestAnimationFrame(animate);
+
+      const deltaTime = currentTime - lastTime;
+      if (deltaTime < interval) return;
+      lastTime = currentTime - (deltaTime % interval);
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      // Batch drawing operations
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+      particles.forEach((particle) => {
         // Update position
         particle.x += particle.vx;
         particle.y += particle.vy;
 
         // Bounce off edges
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+        if (particle.x < 0 || particle.x > window.innerWidth) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > window.innerHeight) particle.vy *= -1;
 
         // Draw particle
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fill();
+      });
 
-        // Draw connections
-        particles.slice(i + 1).forEach(otherParticle => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+      // Draw connections (optimized to only check nearby particles)
+      const connectionDistance = 200;
+      for (let i = 0; i < particles.length; i++) {
+        const particle = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const other = particles[j];
+          const dx = particle.x - other.x;
+          const dy = particle.y - other.y;
 
-          if (distance < 200) {
-            ctx.strokeStyle = `rgba(239, 68, 68, ${0.4 * (1 - distance / 200)})`;
+          // Quick distance check before sqrt
+          const distSq = dx * dx + dy * dy;
+          if (distSq < connectionDistance * connectionDistance) {
+            const distance = Math.sqrt(distSq);
+            ctx.strokeStyle = `rgba(239, 68, 68, ${0.4 * (1 - distance / connectionDistance)})`;
             ctx.lineWidth = 1.0;
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
+            ctx.lineTo(other.x, other.y);
             ctx.stroke();
           }
-        });
-      });
-
-      animationId = requestAnimationFrame(animate);
+        }
+      }
     };
 
-    animate();
+    animationId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
       cancelAnimationFrame(animationId);
     };
   }, []);
@@ -126,8 +153,8 @@ export default function HomePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: input, // Keep for backward compatibility
-          messages: updatedMessages // Send full conversation history
+          message: input,
+          messages: updatedMessages
         }),
       });
 
@@ -169,7 +196,6 @@ export default function HomePage() {
                   });
                 }
               } catch (e) {
-                // Skip malformed JSON
                 console.error("Error parsing chunk:", e);
               }
             }
@@ -194,7 +220,7 @@ export default function HomePage() {
   return (
     <>
       <HomePageHead />
-      <section className="relative flex flex-col min-h-screen text-white overflow-hidden bg-gradient-to-br from-gray-950 via-black to-gray-950">
+      <section className="relative flex flex-col min-h-screen text-premium-100 overflow-hidden bg-gradient-to-br from-premium-950 via-premium-900 to-premium-950">
       {/* Particle Canvas */}
       <canvas
         ref={canvasRef}
@@ -202,7 +228,7 @@ export default function HomePage() {
         style={{ zIndex: 1 }}
       />
 
-      {/* Subtle grid pattern */}
+      {/* Refined grid pattern */}
       <div className="fixed inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
@@ -211,92 +237,94 @@ export default function HomePage() {
         }}
       />
 
-      <div className={`flex flex-col h-screen w-full max-w-3xl mx-auto px-4 transition-all duration-1000 ease-out relative ${
+      <div className={`flex flex-col h-screen w-full max-w-4xl mx-auto px-6 md:px-8 transition-all duration-700 ease-out relative ${
         messages.length === 0 ? 'justify-center' : 'justify-start'
       }`} style={{ zIndex: 10 }}>
         {/* Header - fades out when chat starts */}
         <div
-          className={`flex flex-col items-center transition-all duration-1000 ease-out ${
-            messages.length === 0 ? 'mb-8 opacity-100 scale-100' : 'h-0 mb-0 opacity-0 scale-95 overflow-hidden'
+          className={`flex flex-col items-center transition-all duration-700 ease-out ${
+            messages.length === 0 ? 'mb-12 opacity-100 scale-100' : 'h-0 mb-0 opacity-0 scale-95 overflow-hidden'
           }`}
         >
-          <h1 className="text-4xl font-bold text-white mb-4 text-center transition-all duration-1000 ease-out">Hi, I&apos;m Karthik!</h1>
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center transition-all duration-1000 ease-out">Welcome to my digital archive.</h2>
+          <h1 className="text-5xl md:text-6xl font-light font-quicksand text-premium-50 mb-4 text-center tracking-tight">
+            Hi, I&apos;m Karthik
+          </h1>
+          <h2 className="text-xl md:text-2xl font-light font-quicksand text-premium-300 mb-10 text-center max-w-2xl">
+            Welcome to my digital archive
+          </h2>
 
-          {/* Read About Me Button */}
+          {/* Premium CTA Button */}
           <a
             href="/about"
-            className="group relative overflow-hidden px-6 py-3 mb-4 bg-white/5 border border-white/20 hover:border-red-500/50 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+            className="group relative overflow-hidden px-8 py-4 bg-premium-800/40 border border-premium-700/40 backdrop-blur-sm rounded-xl transition-all duration-300 hover:bg-premium-800/60 hover:border-accent-600/40 hover:scale-105 shadow-premium-lg"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/10 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative flex items-center gap-2">
-              <span className="font-quicksand text-sm font-light text-white/80 group-hover:text-white transition-colors">Read About Me</span>
-              <svg className="w-4 h-4 text-white/60 group-hover:text-red-400 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+            <div className="absolute inset-0 bg-gradient-to-r from-accent-600/0 via-accent-600/10 to-accent-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative flex items-center gap-3">
+              <span className="font-quicksand text-sm font-medium text-premium-100 tracking-wide">Discover My Story</span>
+              <ArrowRight className="w-4 h-4 text-accent-500 group-hover:translate-x-1 transition-transform duration-300" />
             </div>
           </a>
         </div>
 
-        {/* Messages container - grows to full height when chat starts */}
+        {/* Messages container */}
         <div
-          className={`flex-grow overflow-y-auto mb-4 transition-all duration-1000 ease-out custom-scrollbar ${
+          className={`flex-grow overflow-y-auto mb-6 transition-all duration-700 ease-out premium-scrollbar ${
             messages.length === 0 ? 'hidden' : 'opacity-100'
           }`}
           style={{
-            paddingTop: messages.length > 0 ? '2rem' : '0',
+            paddingTop: messages.length > 0 ? '3rem' : '0',
             paddingBottom: '1rem'
           }}
         >
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`mb-4 animate-fadeIn ${
+              className={`mb-6 animate-fade-in ${
                 message.role === "user" ? "text-right" : "text-left"
               }`}
             >
               <div
-                className={`inline-block p-3 rounded-lg max-w-[80%] text-white shadow-lg`}
-                style={{
-                  backgroundColor: message.role === "user" ? "rgba(211, 31, 8, 0.6)" : "rgba(8, 8, 8, 0.6)",
-                  backdropFilter: "blur(4px)"
-                }}
+                className={`inline-block px-6 py-4 rounded-2xl max-w-[85%] shadow-premium-md backdrop-blur-sm border ${
+                  message.role === "user"
+                    ? "bg-accent-600/20 border-accent-600/30 text-premium-50"
+                    : "bg-premium-800/40 border-premium-700/30 text-premium-100"
+                }`}
               >
                 {message.role === "user" ? (
-                  message.content
+                  <span className="font-quicksand font-normal">{message.content}</span>
                 ) : message.content === "" ? (
-                  // Show loading indicator for empty assistant messages
+                  // Premium loading indicator
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
                   </div>
                 ) : (
                   <ReactMarkdown
                     components={{
                       a: ({...props}) => (
-                        <a {...props} className="text-blue-300 hover:text-blue-200 underline" target="_blank" rel="noopener noreferrer" />
+                        <a {...props} className="text-accent-400 hover:text-accent-300 underline transition-colors" target="_blank" rel="noopener noreferrer" />
                       ),
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       code: ({inline, ...props}: any) => {
                         return inline ?
-                          <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-sm" /> :
-                          <code {...props} className="block bg-gray-800 p-2 rounded-md text-sm overflow-x-auto" />
+                          <code {...props} className="bg-premium-950/60 px-2 py-1 rounded text-sm font-mono text-accent-400" /> :
+                          <code {...props} className="block bg-premium-950/60 p-4 rounded-lg text-sm font-mono overflow-x-auto border border-premium-700/30" />
                       },
                       ul: ({...props}) => (
-                        <ul {...props} className="list-disc pl-6 mt-2" />
+                        <ul {...props} className="list-disc pl-6 mt-3 space-y-1" />
                       ),
                       ol: ({...props}) => (
-                        <ol {...props} className="list-decimal pl-6 mt-2" />
+                        <ol {...props} className="list-decimal pl-6 mt-3 space-y-1" />
                       ),
                       h1: ({...props}) => (
-                        <h1 {...props} className="text-xl font-bold mt-3 mb-2" />
+                        <h1 {...props} className="text-2xl font-semibold mt-4 mb-3 text-premium-50" />
                       ),
                       h2: ({...props}) => (
-                        <h2 {...props} className="text-lg font-bold mt-3 mb-1" />
+                        <h2 {...props} className="text-xl font-semibold mt-4 mb-2 text-premium-50" />
                       ),
                       p: ({...props}) => (
-                        <p {...props} className="my-2 prose prose-invert max-w-none" />
+                        <p {...props} className="my-2 leading-relaxed font-quicksand" />
                       ),
                     }}
                   >
@@ -309,10 +337,10 @@ export default function HomePage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input bar - always at bottom */}
+        {/* Premium Input bar */}
         <form
           onSubmit={handleSubmit}
-          className={`flex gap-2 pb-6 transition-all duration-1000 ease-out ${
+          className={`flex gap-3 pb-8 transition-all duration-700 ease-out ${
             messages.length === 0 ? '' : 'sticky bottom-0'
           }`}
         >
@@ -321,58 +349,44 @@ export default function HomePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me anything..."
-            className="flex-grow p-3 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 bg-black/30 text-white placeholder-gray-400 backdrop-blur-sm transition-all"
+            className="flex-grow px-6 py-4 border border-premium-700/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-quicksand shadow-premium-md"
             disabled={isLoading}
           />
           <button
             type="submit"
-            className="bg-red-900/80 text-white px-6 py-3 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:opacity-50 transition-all backdrop-blur-sm"
+            className="bg-accent-600 text-premium-950 px-6 py-4 rounded-xl hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm font-quicksand font-medium flex items-center gap-2 shadow-premium-md hover:scale-105"
             disabled={isLoading || !input.trim()}
           >
-            Send
+            <span className="hidden sm:inline">Send</span>
+            <Send className="w-5 h-5" />
           </button>
         </form>
       </div>
 
-      {/* Add animations and custom scrollbar */}
+      {/* Premium scrollbar styles */}
       <style jsx global>{`
-        @keyframes fadeInDown {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out;
-        }
-
-        /* Custom scrollbar styles */
-        .custom-scrollbar::-webkit-scrollbar {
+        .premium-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
 
-        .custom-scrollbar::-webkit-scrollbar-track {
+        .premium-scrollbar::-webkit-scrollbar-track {
           background: transparent;
         }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
+        .premium-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(234, 179, 8, 0.3);
           border-radius: 3px;
           transition: background 0.2s ease;
         }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.4);
+        .premium-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(234, 179, 8, 0.5);
         }
 
         /* Firefox scrollbar */
-        .custom-scrollbar {
+        .premium-scrollbar {
           scrollbar-width: thin;
-          scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+          scrollbar-color: rgba(234, 179, 8, 0.3) transparent;
         }
       `}</style>
     </section>

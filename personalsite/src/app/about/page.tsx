@@ -1,5 +1,8 @@
 'use client';
 
+import { Linkedin, Github, Mail, FileText, Code, GraduationCap, Lightbulb, Quote } from 'lucide-react';
+import { useMemo } from 'react';
+
 export default function AboutPage() {
 
   const skills = [
@@ -15,8 +18,8 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="relative min-h-screen text-white overflow-hidden">
-      {/* Background Image */}
+    <div className="relative min-h-screen text-premium-100 overflow-hidden">
+      {/* Background Image with premium overlay */}
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={{
@@ -25,35 +28,31 @@ export default function AboutPage() {
           zIndex: 0
         }}
       />
-      {/* Dark Overlay */}
-      <div className="fixed inset-0 bg-black/40" style={{ zIndex: 1 }} />
+      {/* Premium dark overlay */}
+      <div className="fixed inset-0 bg-premium-950/70 backdrop-blur-sm" style={{ zIndex: 1 }} />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-24 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-28 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
         {/* Hero Section */}
-        <div className="mb-8 animate-fadeIn">
-          <div className="mb-8">
-            <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-white mb-4" style={{ textShadow: '0 0 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,1)' }}>
+        <div className="mb-12 animate-fade-in">
+          <div className="mb-10">
+            <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-6">
               Karthik Thyagarajan
             </h1>
-            <div className="h-px w-24 bg-gradient-to-r from-red-500 to-transparent"></div>
+            <div className="h-0.5 w-20 bg-gradient-to-r from-accent-500 to-transparent"></div>
           </div>
 
-          <p className="font-quicksand text-xl sm:text-2xl text-white mb-6 font-light animate-fadeIn" style={{ animationDelay: '0.2s', textShadow: '0 0 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,1)' }}>
+          <p className="font-quicksand text-xl sm:text-2xl text-premium-200 mb-8 font-light max-w-3xl leading-relaxed">
             Building intelligent systems at the intersection of ML, robotics, and quantum computing
           </p>
 
         </div>
 
         {/* Skills */}
-        <div className="flex flex-wrap gap-2 mb-6 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
-          {skills.map((skill, idx) => (
+        <div className="flex flex-wrap gap-3 mb-10 animate-fade-in">
+          {skills.map((skill) => (
             <span
               key={skill}
-              className="px-3 py-1.5 bg-black/30 backdrop-blur-sm border border-white/20 text-xs font-quicksand text-white hover:bg-black/40 hover:border-white/30 hover:text-white transition-all duration-200 cursor-default"
-              style={{
-                animationDelay: `${0.5 + idx * 0.1}s`,
-                textShadow: '0 0 20px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,1)'
-              }}
+              className="px-4 py-2 bg-premium-800/40 backdrop-blur-md border border-premium-700/40 text-sm font-quicksand text-premium-200 hover:bg-premium-800/60 hover:border-accent-600/40 hover:text-premium-100 transition-all duration-300 cursor-default rounded-lg shadow-premium"
             >
               {skill}
             </span>
@@ -61,26 +60,24 @@ export default function AboutPage() {
         </div>
 
         {/* Connect Section */}
-        <div className="mb-8 group relative overflow-hidden bg-black/25 border border-emerald-500/20 p-6 backdrop-blur-md hover:border-emerald-500/40 transition-all duration-300 animate-slideUp">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-teal-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="mb-12 group relative overflow-hidden bg-premium-900/40 border border-accent-600/30 p-8 backdrop-blur-xl hover:border-accent-600/50 transition-all duration-300 rounded-xl shadow-premium-lg">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-accent-700/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="relative z-10">
-            <div className="mb-4">
-              <h2 className="font-quicksand text-lg font-light text-white mb-1">Connect</h2>
-              <div className="h-px w-12 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+            <div className="mb-6 flex items-center gap-3">
+              <Mail className="w-5 h-5 text-accent-500" />
+              <h2 className="font-quicksand text-2xl font-medium text-premium-50">Connect</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <a
                 href="https://www.linkedin.com/in/karthikthyagarajan06"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-white/[0.02] border border-white/10 p-4 hover:border-blue-400/30 transition-all duration-200"
+                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-blue-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/5 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200" />
-                <div className="relative z-10 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  <p className="font-quicksand font-normal text-white text-xs">LinkedIn</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <Linkedin className="w-5 h-5 text-premium-300 group-hover/link:text-blue-400 transition-colors" />
+                  <p className="font-quicksand font-medium text-premium-100 text-sm">LinkedIn</p>
                 </div>
               </a>
 
@@ -88,14 +85,12 @@ export default function AboutPage() {
                 href="https://github.com/karthikcsq"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-white/[0.02] border border-white/10 p-4 hover:border-gray-400/30 transition-all duration-200"
+                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-gray-400/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-500/0 to-gray-500/5 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200" />
-                <div className="relative z-10 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                  </svg>
-                  <p className="font-quicksand font-normal text-white text-xs">GitHub</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-500/0 to-gray-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <Github className="w-5 h-5 text-premium-300 group-hover/link:text-gray-300 transition-colors" />
+                  <p className="font-quicksand font-medium text-premium-100 text-sm">GitHub</p>
                 </div>
               </a>
 
@@ -103,27 +98,23 @@ export default function AboutPage() {
                 href="/resume.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-white/[0.02] border border-white/10 p-4 hover:border-purple-400/30 transition-all duration-200"
+                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-purple-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/5 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200" />
-                <div className="relative z-10 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <p className="font-quicksand font-normal text-white text-xs">Resume</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-premium-300 group-hover/link:text-purple-400 transition-colors" />
+                  <p className="font-quicksand font-medium text-premium-100 text-sm">Resume</p>
                 </div>
               </a>
 
               <a
                 href="mailto:karthik6002@gmail.com"
-                className="group/link relative overflow-hidden bg-white/[0.02] border border-white/10 p-4 hover:border-red-400/30 transition-all duration-200"
+                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-red-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/5 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200" />
-                <div className="relative z-10 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <p className="font-quicksand font-normal text-white text-xs">Email</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-premium-300 group-hover/link:text-red-400 transition-colors" />
+                  <p className="font-quicksand font-medium text-premium-100 text-sm">Email</p>
                 </div>
               </a>
             </div>
@@ -131,136 +122,113 @@ export default function AboutPage() {
         </div>
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto">
 
-          {/* About Card - Spans 2 columns */}
-          <div className="lg:col-span-2 group relative overflow-hidden bg-black/25 border border-red-500/20 p-8 backdrop-blur-md hover:border-red-500/40 transition-all duration-300 animate-slideUp">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-600/10 to-orange-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* About Card */}
+          <div className="lg:col-span-2 group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
-              <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white mb-1">About</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-red-500 to-orange-500"></div>
+              <div className="mb-8 flex items-center gap-3">
+                <Code className="w-6 h-6 text-accent-500" />
+                <h2 className="font-quicksand text-2xl font-medium text-premium-50">About</h2>
               </div>
-              <p className="font-quicksand text-base text-white/60 leading-relaxed mb-4 font-light">
+              <p className="font-quicksand text-base text-premium-300 leading-relaxed mb-5 font-light">
                 CS & AI student at Purdue University. Working on startups, AR/XR video analysis, and full stack applications.
                 Previously built ML infrastructure at scale and developed quantum algorithms for real-world applications.
               </p>
-              <p className="font-quicksand text-base text-white/60 leading-relaxed font-light">
+              <p className="font-quicksand text-base text-premium-300 leading-relaxed font-light">
                 Passionate about pushing the boundaries of what&apos;s possible with intelligent systems.
               </p>
             </div>
           </div>
 
           {/* Education Card */}
-          <div className="group relative overflow-hidden bg-black/25 border border-purple-500/20 p-8 backdrop-blur-md hover:border-purple-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.1s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
-              <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white mb-1">Education</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+              <div className="mb-8 flex items-center gap-3">
+                <GraduationCap className="w-6 h-6 text-accent-500" />
+                <h2 className="font-quicksand text-2xl font-medium text-premium-50">Education</h2>
               </div>
-              <h3 className="font-quicksand text-lg font-normal text-white mb-2">Purdue University</h3>
-              <p className="font-quicksand text-sm text-white/50 leading-relaxed font-light">
+              <h3 className="font-quicksand text-lg font-medium text-premium-100 mb-3">Purdue University</h3>
+              <p className="font-quicksand text-sm text-premium-400 leading-relaxed font-light">
                 B.S. in Computer Science & Artificial Intelligence
               </p>
             </div>
           </div>
 
           {/* Currently Exploring Card */}
-          <div className="group relative overflow-hidden bg-black/25 border border-cyan-500/20 p-8 backdrop-blur-md hover:border-cyan-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-blue-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative z-10">
-              <div className="mb-6">
-                <h2 className="font-quicksand text-2xl font-light text-white mb-1">Currently Exploring</h2>
-                <div className="h-px w-12 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+              <div className="mb-8 flex items-center gap-3">
+                <Lightbulb className="w-6 h-6 text-accent-500" />
+                <h2 className="font-quicksand text-2xl font-medium text-premium-50">Currently Exploring</h2>
               </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
-                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Reinforcement learning for IoT security</span>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
+                  <span className="font-quicksand text-base text-premium-300 font-light">Reinforcement learning for IoT security</span>
                 </li>
-                <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
-                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">AR/XR video memory systems</span>
+                <li className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
+                  <span className="font-quicksand text-base text-premium-300 font-light">AR/XR video memory systems</span>
                 </li>
-                <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
-                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Neural radiance fields & 3D SLAM</span>
+                <li className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
+                  <span className="font-quicksand text-base text-premium-300 font-light">Neural radiance fields & 3D SLAM</span>
                 </li>
-                <li className="flex items-start gap-3 group/item">
-                  <span className="text-red-500/70 mt-1.5 text-sm">━</span>
-                  <span className="font-quicksand text-base text-white/60 group-hover/item:text-white/80 transition-colors font-light">Multi-agent systems & RAG pipelines</span>
+                <li className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
+                  <span className="font-quicksand text-base text-premium-300 font-light">Multi-agent systems & RAG pipelines</span>
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Interests Grid */}
-          <div className="lg:col-span-2 grid grid-cols-2 gap-4 animate-slideUp" style={{ animationDelay: '0.3s' }}>
-            {interests.map((interest) => (
-              <div
-                key={interest.label}
-                className="group relative overflow-hidden border border-white/10 backdrop-blur-sm hover:border-white/30 transition-all duration-300 aspect-[4/3]"
-              >
-                {/* Background Image */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${interest.image})` }}
-                />
-                {/* Dark Overlay */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
-                {/* Text */}
-                <div className="relative z-10 h-full flex items-center justify-center">
-                  <p className="font-quicksand text-lg font-semibold text-white drop-shadow-lg">{interest.label}</p>
-                </div>
-              </div>
-            ))}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-4">
+            {interests.map((interest) => {
+              const Component = interest.label === "Photography" ? "a" : "div";
+              const linkProps = interest.label === "Photography" ? { href: "/gallery" } : {};
+
+              return (
+                <Component
+                  key={interest.label}
+                  {...linkProps}
+                  className="group relative overflow-hidden border border-premium-700/30 backdrop-blur-sm hover:border-accent-600/40 transition-all duration-300 aspect-[4/3] rounded-xl shadow-premium-md cursor-pointer"
+                >
+                  {/* Background Image */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                    style={{ backgroundImage: `url(${interest.image})` }}
+                  />
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-premium-950/50 group-hover:bg-premium-950/30 transition-colors duration-300" />
+                  {/* Text */}
+                  <div className="relative z-10 h-full flex items-center justify-center">
+                    <p className="font-quicksand text-lg font-medium text-premium-50 drop-shadow-lg">{interest.label}</p>
+                  </div>
+                </Component>
+              );
+            })}
           </div>
 
           {/* Quote Card */}
-          <div className="lg:col-span-3 group relative overflow-hidden bg-black/25 border border-orange-500/20 p-6 backdrop-blur-md hover:border-orange-500/40 transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.4s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-red-600/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10 flex items-center gap-3">
-              <span className="text-red-500/40 text-5xl font-serif leading-none flex-shrink-0">&ldquo;</span>
+          <div className="lg:col-span-3 group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-8 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 flex items-center gap-4">
+              <Quote className="w-10 h-10 text-accent-500/40 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-quicksand text-base text-white/70 leading-relaxed font-light italic mb-2">
+                <p className="font-quicksand text-base text-premium-300 leading-relaxed font-light italic mb-3">
                   He who has a why to live for can bear almost any how.
                 </p>
-                <p className="font-quicksand text-xs text-white/40 font-light">— Friedrich Nietzsche</p>
+                <p className="font-quicksand text-xs text-premium-400 font-light">— Friedrich Nietzsche</p>
               </div>
-              <span className="text-red-500/40 text-5xl font-serif leading-none flex-shrink-0 self-start">&rdquo;</span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Animations */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 1s ease-out forwards;
-          opacity: 0;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.8s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
     </div>
   );
 }
