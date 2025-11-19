@@ -1,5 +1,6 @@
 import "@/app/globals.css"; // Ensures Tailwind styles are applied
 import Navbar from "@/app/components/navbar";
+import PageTransition from "@/app/components/PageTransition";
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -38,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="h-full">
       <body className="h-full text-white m-0 p-0">
         <Navbar />
-        <main>{children}</main>
+        <PageTransition>
+          <main>{children}</main>
+        </PageTransition>
       </body>
     </html>
   );

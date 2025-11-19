@@ -33,6 +33,17 @@ html {
   scroll-behavior: smooth;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 html, body {
   height: 100%; /* Ensure the full height of the viewport is used */
   margin: 0; /* Remove default margin */

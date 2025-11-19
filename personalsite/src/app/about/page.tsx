@@ -1,7 +1,6 @@
 'use client';
 
 import { Linkedin, Github, Mail, FileText, Code, GraduationCap, Lightbulb, Quote } from 'lucide-react';
-import { useMemo } from 'react';
 
 export default function AboutPage() {
 
