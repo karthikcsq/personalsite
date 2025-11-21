@@ -260,7 +260,7 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent-600/0 via-accent-600/10 to-accent-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
-              <span className="font-quicksand text-sm font-medium text-premium-100 tracking-wide">Discover My Story</span>
+              <span className="font-quicksand text-sm font-medium text-premium-100 tracking-wide">Read About Me</span>
               <ArrowRight className="w-4 h-4 text-accent-500 group-hover:translate-x-1 transition-transform duration-300" />
             </div>
           </a>
