@@ -33,17 +33,21 @@ export default function AboutPage() {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-28 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
         {/* Hero Section */}
         <div className="mb-12 animate-fade-in">
-          <div className="mb-10">
-            <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-6">
-              Karthik Thyagarajan
-            </h1>
-            <div className="h-0.5 w-20 bg-gradient-to-r from-accent-500 to-transparent"></div>
+          <div className="relative overflow-hidden rounded-2xl border border-premium-700/40 bg-premium-950/60 backdrop-blur-xl shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-premium-950/80 via-premium-900/50 to-premium-900/20 opacity-90" />
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-premium-950/60 via-transparent to-transparent" />
+            <div className="relative px-8 py-10 sm:px-10 sm:py-12">
+              <div className="mb-8">
+                <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-4">
+                  Karthik Thyagarajan
+                </h1>
+                <div className="h-0.5 w-20 bg-gradient-to-r from-accent-500 to-transparent" />
+              </div>
+              <p className="font-quicksand text-xl sm:text-2xl text-premium-100/90 font-light max-w-3xl leading-relaxed">
+                Building intelligent systems at the intersection of ML, robotics, and quantum computing
+              </p>
+            </div>
           </div>
-
-          <p className="font-quicksand text-xl sm:text-2xl text-premium-200 mb-8 font-light max-w-3xl leading-relaxed">
-            Building intelligent systems at the intersection of ML, robotics, and quantum computing
-          </p>
-
         </div>
 
         {/* Skills */}
