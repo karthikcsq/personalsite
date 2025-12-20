@@ -1,6 +1,7 @@
 import "@/app/globals.css"; // Ensures Tailwind styles are applied
 import Navbar from "@/app/components/navbar";
 import { Metadata } from 'next'
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: {
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full text-white m-0 p-0">
         <Navbar />
         <main>{children}</main>
+        <Analytics />
       </body>
     </html>
   );
