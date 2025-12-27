@@ -29,14 +29,19 @@ function getTextColor(r: number, g: number, b: number): string {
 export function WorkTimelineClient({ jobs }: Props) {
   return (
     <section className="relative min-h-screen text-white py-12 px-4 sm:px-6 overflow-x-hidden">
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-4xl font-bold text-center">Work Experience</h2>
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40 md:pr-32 lg:pr-40">
+        <h1 className="text-5xl md:text-7xl font-light text-center font-quicksand mb-6 tracking-tight">Work Experience</h1>
+        <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
+          My professional journey and experiences
+        </p>
         <Link
           href="#work"
           onClick={(event) => scrollToCenter(event, "#work")}
-          className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
+          className="mt-8 self-center w-10 h-10 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-300 text-gray-400 hover:text-white"
         >
-          <Image src="/downarrow.svg" alt="Down Arrow" width={48} height={48} />
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </Link>
       </div>
       <div className="relative gap-8 max-w-4xl mx-auto px-4 sm:px-0" style={{ zIndex: 10 }}>

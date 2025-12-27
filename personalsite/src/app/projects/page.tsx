@@ -9,19 +9,19 @@ export default function ProjectsPage() {
       <section className="relative flex flex-col font-quicksand text-white text-left overflow-hidden">
 
         {/* Header Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-          <h2 className="text-4xl font-bold text-center">Projects</h2>
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40 md:pr-32 lg:pr-40 pt-24">
+          <h1 className="text-5xl md:text-7xl font-light text-center font-quicksand mb-6 tracking-tight">Projects</h1>
+          <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
+            Building solutions that make a difference
+          </p>
           <Link
-          href="#images" 
-          onClick={(event) => scrollToCenter(event, "#projects")}
-          className="mt-6 self-center w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-white hover:scale-110 transition-transform duration-300"
-            >
-              <Image
-              src="/downarrow.svg"
-              alt="Down Arrow"
-              width={48}
-              height={48}
-              />
+            href="#projects"
+            onClick={(event) => scrollToCenter(event, "#projects")}
+            className="mt-8 self-center w-10 h-10 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-300 text-gray-400 hover:text-white"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </Link>
         </div>
 

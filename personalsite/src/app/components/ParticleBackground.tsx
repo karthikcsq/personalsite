@@ -68,7 +68,7 @@ class SpatialGrid {
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const particlesRef = useRef<Particle[]>([]);
   const spatialGridRef = useRef<SpatialGrid | null>(null);
   const isVisibleRef = useRef(true);

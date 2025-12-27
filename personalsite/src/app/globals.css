@@ -72,14 +72,18 @@ body {
 
 .embla__slide {
   flex: 0 0 auto;
-  min-width: 300px;
-  max-width: 300px;
-  height: 300px;
+  min-width: 0;
   position: relative;
   justify-content: center;
   align-items: center;
   display: flex;
-  margin-right: 50px;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .embla__slide {
+    padding-right: 1.5rem;
+  }
 }
 
 /* Replace this section in your globals.css */
