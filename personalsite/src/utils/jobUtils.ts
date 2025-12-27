@@ -26,9 +26,9 @@ interface RootYaml {
 // Generate deterministic cool color based on index
 function getCoolColor(index: number): string {
   // Use index as seed for deterministic "random" values
-  const hueRange = 120; // 120 degrees of hue range (180-300)
-  const hue = 180 + ((index * 137.508) % hueRange); // Blues, greens, purples (180-300°)
-  const saturation = 45 + (index * 23) % 30; // 45-75% (medium saturation)
+  const hueRange = 50; // 50 degrees of hue range (200-250)
+  const hue = 200 + ((index * 137.508) % hueRange); // Blue-focused range, avoiding purple (200-250°)
+  const saturation = 25 + (index * 23) % 25; // 25-50% (lower saturation, less glowy)
   const lightness = 50 + (index * 17) % 30;  // 50-80% (medium-high lightness)
 
   // Convert HSL to RGB
