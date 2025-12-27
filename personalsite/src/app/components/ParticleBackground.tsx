@@ -8,133 +8,302 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
+  gridX: number;
+  gridY: number;
+}
+
+// Spatial grid for O(n) connection checks instead of O(n²)
+class SpatialGrid {
+  private cellSize: number;
+  private grid: Map<string, Particle[]>;
+  private width: number;
+  private height: number;
+
+  constructor(cellSize: number, width: number, height: number) {
+    this.cellSize = cellSize;
+    this.grid = new Map();
+    this.width = width;
+    this.height = height;
+  }
+
+  clear() {
+    this.grid.clear();
+  }
+
+  getCellKey(x: number, y: number): string {
+    const cellX = Math.floor(x / this.cellSize);
+    const cellY = Math.floor(y / this.cellSize);
+    return `${cellX},${cellY}`;
+  }
+
+  insert(particle: Particle) {
+    const key = this.getCellKey(particle.x, particle.y);
+    particle.gridX = Math.floor(particle.x / this.cellSize);
+    particle.gridY = Math.floor(particle.y / this.cellSize);
+
+    if (!this.grid.has(key)) {
+      this.grid.set(key, []);
+    }
+    this.grid.get(key)!.push(particle);
+  }
+
+  getNearby(particle: Particle): Particle[] {
+    const nearby: Particle[] = [];
+    const cellX = particle.gridX;
+    const cellY = particle.gridY;
+
+    // Check this cell and 8 surrounding cells
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const key = `${cellX + dx},${cellY + dy}`;
+        const particles = this.grid.get(key);
+        if (particles) {
+          nearby.push(...particles);
+        }
+      }
+    }
+    return nearby;
+  }
 }
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
+  const particlesRef = useRef<Particle[]>([]);
+  const spatialGridRef = useRef<SpatialGrid | null>(null);
+  const isVisibleRef = useRef(true);
+  const lastTimeRef = useRef(0);
+  const fpsRef = useRef(60);
 
-  // Optimized particle system with reduced particle count and better performance
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    const ctx = canvas.getContext('2d', {
+      alpha: true,
+      desynchronized: true,
+      willReadFrequently: false
+    });
     if (!ctx) return;
 
-    // Use device pixel ratio for crisp rendering
-    const dpr = window.devicePixelRatio || 1;
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.scale(dpr, dpr);
+    // Performance-aware particle count
+    const getParticleCount = () => {
+      const area = window.innerWidth * window.innerHeight;
+      const isMobile = window.innerWidth < 768;
+      const baseCount = isMobile ? 70 : 100;
+      return Math.min(baseCount, Math.floor(area / 20000));
     };
+
+    // Use device pixel ratio for crisp rendering
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.scale(dpr, dpr);
+
+      // Reinitialize particles on resize
+      initParticles();
+    };
+
+    const initParticles = () => {
+      const particleCount = getParticleCount();
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      particlesRef.current = [];
+      for (let i = 0; i < particleCount; i++) {
+        particlesRef.current.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: Math.random() * 1.5 + 0.8,
+          gridX: 0,
+          gridY: 0
+        });
+      }
+
+      // Initialize spatial grid with cell size = half connection distance
+      // This ensures smooth transitions when particles cross cell boundaries
+      spatialGridRef.current = new SpatialGrid(100, w, h);
+    };
+
     resize();
 
+    // Debounced resize handler
     let resizeTimeout: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resize, 100);
+      resizeTimeout = setTimeout(resize, 150);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
-    // Increased particle count for futuristic effect
-    const particleCount = Math.min(100, Math.floor(window.innerWidth / 15));
-    const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.6, // Moderate speed
-        vy: (Math.random() - 0.5) * 0.6, // Moderate speed
-        size: Math.random() * 2 + 1
-      });
-    }
+    // Visibility API to pause when tab is hidden
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = !document.hidden;
+      if (isVisibleRef.current) {
+        lastTimeRef.current = performance.now();
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Optimized animation loop with requestAnimationFrame throttling
-    let animationId: number;
-    let lastTime = 0;
-    const fps = 60;
-    const interval = 1000 / fps;
+    // Pre-calculate colors to avoid string allocation
+    const particleColor = 'rgba(59, 130, 246, 0.7)';
+    const baseConnectionColor = 'rgba(59, 130, 246, ';
+
+    // Connection distance
+    const connectionDistance = 200;
+    const connectionDistanceSq = connectionDistance * connectionDistance;
 
     const animate = (currentTime: number) => {
-      animationId = requestAnimationFrame(animate);
+      if (!isVisibleRef.current) return;
 
-      const deltaTime = currentTime - lastTime;
+      animationRef.current = requestAnimationFrame(animate);
+
+      // Frame rate limiting
+      const deltaTime = currentTime - lastTimeRef.current;
+      const interval = 1000 / fpsRef.current;
+
       if (deltaTime < interval) return;
-      lastTime = currentTime - (deltaTime % interval);
+      lastTimeRef.current = currentTime - (deltaTime % interval);
 
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-      // Batch drawing operations with dark blue color
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.7)'; // Blue-500 with opacity
-      particles.forEach((particle) => {
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+      // Clear canvas once
+      ctx.clearRect(0, 0, w, h);
 
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > window.innerWidth) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > window.innerHeight) particle.vy *= -1;
+      // Update spatial grid
+      const grid = spatialGridRef.current!;
+      grid.clear();
 
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
+      const particles = particlesRef.current;
 
-      // Draw connections (optimized to only check nearby particles)
-      const connectionDistance = 200;
+      // Update and insert into grid
+      ctx.fillStyle = particleColor;
+      ctx.beginPath();
+
       for (let i = 0; i < particles.length; i++) {
-        const particle = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const other = particles[j];
-          const dx = particle.x - other.x;
-          const dy = particle.y - other.y;
+        const p = particles[i];
 
-          // Quick distance check before sqrt
+        // Update position
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Bounce off edges with proper bounds checking
+        if (p.x <= p.size) {
+          p.x = p.size;
+          p.vx = Math.abs(p.vx);
+        } else if (p.x >= w - p.size) {
+          p.x = w - p.size;
+          p.vx = -Math.abs(p.vx);
+        }
+
+        if (p.y <= p.size) {
+          p.y = p.size;
+          p.vy = Math.abs(p.vy);
+        } else if (p.y >= h - p.size) {
+          p.y = h - p.size;
+          p.vy = -Math.abs(p.vy);
+        }
+
+        // Add to grid
+        grid.insert(p);
+
+        // Batch draw particles
+        ctx.moveTo(p.x + p.size, p.y);
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      }
+
+      ctx.fill();
+
+      // Draw connections using spatial grid (O(n) instead of O(n²))
+      ctx.lineWidth = 1;
+
+      const drawnConnections = new Set<string>();
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const nearby = grid.getNearby(p);
+
+        for (let j = 0; j < nearby.length; j++) {
+          const other = nearby[j];
+          if (p === other) continue;
+
+          // Create unique connection ID to avoid drawing twice
+          const connectionId = p.x < other.x ? `${p.x},${p.y}-${other.x},${other.y}` : `${other.x},${other.y}-${p.x},${p.y}`;
+          if (drawnConnections.has(connectionId)) continue;
+
+          const dx = p.x - other.x;
+          const dy = p.y - other.y;
           const distSq = dx * dx + dy * dy;
-          if (distSq < connectionDistance * connectionDistance) {
+
+          if (distSq < connectionDistanceSq) {
             const distance = Math.sqrt(distSq);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.5 * (1 - distance / connectionDistance)})`; // Blue connections
-            ctx.lineWidth = 1.0;
+            const opacity = 0.5 * (1 - distance / connectionDistance);
+
+            ctx.strokeStyle = baseConnectionColor + opacity + ')';
             ctx.beginPath();
-            ctx.moveTo(particle.x, particle.y);
+            ctx.moveTo(p.x, p.y);
             ctx.lineTo(other.x, other.y);
             ctx.stroke();
+
+            drawnConnections.add(connectionId);
           }
         }
       }
     };
 
-    animationId = requestAnimationFrame(animate);
+    // Start animation
+    lastTimeRef.current = performance.now();
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearTimeout(resizeTimeout);
-      cancelAnimationFrame(animationId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
   }, []);
 
   return (
     <>
       {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950" style={{ zIndex: 0 }} />
+      <div
+        className="fixed inset-0 bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950"
+        style={{ zIndex: 0, willChange: 'auto' }}
+      />
 
       {/* Particle Canvas */}
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none"
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 1, willChange: 'transform' }}
       />
 
-      {/* Refined grid pattern */}
-      <div className="fixed inset-0 opacity-[0.03]"
+      {/* Optimized grid pattern with GPU acceleration */}
+      <div
+        className="fixed inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
           backgroundSize: '50px 50px',
-          zIndex: 2
+          zIndex: 2,
+          willChange: 'auto',
+          transform: 'translateZ(0)', // GPU acceleration
+          backfaceVisibility: 'hidden'
         }}
       />
     </>
