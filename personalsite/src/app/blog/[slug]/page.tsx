@@ -48,8 +48,8 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getPostBySlug(resolvedParams.slug);
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">     
-      <div className="max-w-4xl mx-auto w-full p-4 pt-28 pb-16">
+    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
+      <div className="max-w-4xl mx-auto w-full p-4 pt-28 pb-16 relative" style={{ zIndex: 10 }}>
         {/* Blog Post Container */}
         <div 
           className="rounded-lg backdrop-blur-sm p-8"

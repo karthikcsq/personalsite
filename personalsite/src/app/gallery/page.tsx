@@ -32,8 +32,8 @@ export default function GalleryPage() {
   }, []);
 
   return (
-    <section className="relative bg-black flex flex-col min-h-screen text-white overflow-hidden">
-      <div className="max-w-full mx-auto w-full px-4 pt-24 pb-16">
+    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
+      <div className="max-w-full mx-auto w-full px-4 pt-24 pb-16 relative" style={{ zIndex: 10 }}>
         {/* Title Section */}
         <div className="flex flex-col items-center justify-center min-h-screen">
           <h1 className="text-4xl font-bold text-center font-quicksand mb-4">Gallery</h1>

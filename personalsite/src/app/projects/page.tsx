@@ -2,25 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { scrollToCenter } from '@/utils/scrollUtils';
 
 export default function ProjectsPage() {
   return (
       <section className="relative flex flex-col font-quicksand text-white text-left overflow-hidden">
-        {/* Background Image */}
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-cover bg-center -z-10"
-          style={{
-            backgroundImage: "url('/robothand.png')",
-            backgroundAttachment: "fixed", 
-            // Make dimmer
-            filter: "brightness(0.7)",
-          }}
-        ></div>
-
-        {/* Dark Overlay */}
-        <div className="absolute top-0 left-0 w-full h-full bg-black opacity-50 -z-10"></div>
 
         {/* Header Content */}
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
@@ -42,16 +28,12 @@ export default function ProjectsPage() {
         {/* Projects Content */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
           {/* Caladrius */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(103, 190, 217, 0.9)",
               boxShadow: "0 0 10px rgba(103, 190, 217, 0.8), 0 0 20px rgba(103, 190, 217, 0.6)", // Glowing effect
              }}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <h2 className="text-3xl font-bold mb-4" id="projects">Caladrius</h2>
             <p className="text-lg mb-6">
@@ -93,18 +75,14 @@ export default function ProjectsPage() {
                 Devpost
               </a>
             </div>
-          </motion.div>
+          </div>
           {/* InTheLoop */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(80, 80, 80, 0.9)",
               boxShadow: "0 0 10px rgba(80, 80, 80, 0.8), 0 0 20px rgba(80, 80, 80, 0.6)", // Glowing effect
              }}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <h2 className="text-3xl font-bold mb-4" id="projects">In The Loop</h2>
             <p className="text-lg mb-6">
@@ -143,18 +121,14 @@ export default function ProjectsPage() {
                 Website
               </a>
             </div>
-          </motion.div>
+          </div>
           {/* Storytime */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(3, 126, 214, 0.9)",
               boxShadow: "0 0 10px rgba(3, 126, 214, 0.8), 0 0 20px rgba(3, 126, 214, 0.6)", // Glowing effect
              }}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <h2 className="text-3xl font-bold mb-4" id="projects">Storytime.ai</h2>
             <p className="text-lg mb-6">
@@ -179,18 +153,14 @@ export default function ProjectsPage() {
                 Website
               </a>
             </div>
-          </motion.div>
+          </div>
           {/* Verbatim */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(243, 152, 20, 0.9)",
               boxShadow: "0 0 10px rgba(243, 152, 20, 0.8), 0 0 20px rgba(243, 152, 20, 0.6)", // Glowing effect
              }}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <h2 className="text-3xl font-bold mb-4" id="projects">Verbatim</h2>
             <p className="text-lg mb-6">
@@ -231,19 +201,15 @@ export default function ProjectsPage() {
                 Website
               </a>
             </div>
-          </motion.div>
+          </div>
 
           {/* FORMulator */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(244, 194, 156, 0.9)",
               boxShadow: "0 0 10px rgba(244, 194, 156, 0.8), 0 0 20px rgba(244, 194, 156, 0.6)", // Glowing effect
              }}
-             initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.5 }}
             >
             <h2 className="text-3xl font-bold mb-4" id="projects">FORMulator</h2>
             <p className="text-lg mb-6">
@@ -276,19 +242,15 @@ export default function ProjectsPage() {
                 />
               </a>
             </div>
-          </motion.div>
+          </div>
 
           {/* QKD */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(87, 20, 243, 0.9)",
               boxShadow: "0 0 10px rgba(87, 20, 243, 0.8), 0 0 20px rgba(87, 20, 243, 0.6)", // Glowing effect
              }}
-             initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.5 }}
             >
             <h2 className="text-3xl font-bold mb-4" id="projects">Photonic Implementation of QKD</h2>
             <p className="text-lg mb-6">
@@ -330,19 +292,15 @@ export default function ProjectsPage() {
               
 
             </div>
-          </motion.div>
+          </div>
 
           {/* Kmeans SOM */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(199, 56, 56, 0.9)",
               boxShadow: "0 0 10px rgba(199, 56, 56, 0.8), 0 0 20px rgba(199, 56, 56, 0.6)", // Glowing effect
              }}
-             initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.5 }}
             >
             <h2 className="text-3xl font-bold mb-4" id="projects">Enhancing Cluster Cohesion: Integrating Self-Organizing Maps with K-Means Clustering for Improving Unsupervised Learning Distinctions</h2>
             <p className="text-lg mb-6">
@@ -367,19 +325,15 @@ export default function ProjectsPage() {
                 Research Preprint
               </a>
             </div>
-          </motion.div>
+          </div>
 
           {/* Quantum Racer */}
-          <motion.div 
+          <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
               border: "2px solid rgba(13, 155, 161, 0.9)",
               boxShadow: "0 0 10px rgba(13, 155, 161, 0.8), 0 0 20px rgba(13, 155, 161, 0.6)", // Glowing effect
              }}
-             initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.5 }}
             >
             <h2 className="text-3xl font-bold mb-4" id="projects">Quantum Racer</h2>
             <p className="text-lg mb-6">
@@ -412,7 +366,7 @@ export default function ProjectsPage() {
                 />
               </a>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
   );

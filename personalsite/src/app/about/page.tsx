@@ -18,17 +18,6 @@ export default function AboutPage() {
 
   return (
     <div className="relative min-h-screen text-premium-100 overflow-hidden">
-      {/* Background Image with premium overlay */}
-      <div
-        className="fixed inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/sunrise.jpg')",
-          backgroundAttachment: "fixed",
-          zIndex: 0
-        }}
-      />
-      {/* Premium dark overlay */}
-      <div className="fixed inset-0 bg-premium-950/70 backdrop-blur-sm" style={{ zIndex: 1 }} />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-28 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
         {/* Hero Section */}

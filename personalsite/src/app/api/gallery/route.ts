@@ -39,10 +39,16 @@ export async function GET() {
         })
         .promise();
 
-      const photos = photoData.Contents?.map((photo) => {
-        const photoUrl = `https://${albumBucket}.s3.${AWS.config.region}.amazonaws.com/${photo.Key}`;
-        return photoUrl;
-      }) || [];
+      const photos = photoData.Contents
+        ?.filter((photo) => {
+          // Filter out folders (keys ending with '/') and only include valid image files
+          const key = photo.Key || '';
+          return !key.endsWith('/') && /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(key);
+        })
+        .map((photo) => {
+          const photoUrl = `https://${albumBucket}.s3.${AWS.config.region}.amazonaws.com/${photo.Key}`;
+          return photoUrl;
+        }) || [];
 
       galleryData[albumName] = photos;
     }
