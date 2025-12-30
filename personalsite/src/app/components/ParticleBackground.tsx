@@ -159,8 +159,8 @@ export default function ParticleBackground() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Pre-calculate colors to avoid string allocation
-    const particleColor = 'rgba(59, 130, 246, 0.7)';
-    const baseConnectionColor = 'rgba(59, 130, 246, ';
+    const particleColor = 'rgba(255, 255, 255, 0.8)';
+    const baseConnectionColor = 'rgba(255, 255, 255, ';
 
     // Connection distance
     const connectionDistance = 200;
@@ -251,7 +251,7 @@ export default function ParticleBackground() {
 
           if (distSq < connectionDistanceSq) {
             const distance = Math.sqrt(distSq);
-            const opacity = 0.5 * (1 - distance / connectionDistance);
+            const opacity = 0.6 * (1 - distance / connectionDistance);
 
             ctx.strokeStyle = baseConnectionColor + opacity + ')';
             ctx.beginPath();
@@ -281,9 +281,9 @@ export default function ParticleBackground() {
 
   return (
     <>
-      {/* Background gradient */}
+      {/* Background - pure black */}
       <div
-        className="fixed inset-0 bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950"
+        className="fixed inset-0 bg-black"
         style={{ zIndex: 0, willChange: 'auto' }}
       />
 
@@ -294,9 +294,9 @@ export default function ParticleBackground() {
         style={{ zIndex: 1, willChange: 'transform' }}
       />
 
-      {/* Optimized grid pattern with GPU acceleration */}
+      {/* Optimized grid pattern with GPU acceleration - more visible on black */}
       <div
-        className="fixed inset-0 opacity-[0.03]"
+        className="fixed inset-0 opacity-[0.08]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
           backgroundSize: '50px 50px',
