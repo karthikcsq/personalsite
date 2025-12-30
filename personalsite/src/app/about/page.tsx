@@ -27,12 +27,12 @@ export default function AboutPage() {
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-premium-950/60 via-transparent to-transparent" />
             <div className="relative px-8 py-10 sm:px-10 sm:py-12">
               <div className="mb-8">
-                <h1 className="font-quicksand text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-4">
+                <h1 className="font-host-grotesk text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-4">
                   Karthik Thyagarajan
                 </h1>
                 <div className="h-0.5 w-20 bg-gradient-to-r from-accent-500 to-transparent" />
               </div>
-              <p className="font-quicksand text-xl sm:text-2xl text-premium-100/90 font-light max-w-3xl leading-relaxed">
+              <p className="font-host-grotesk text-xl sm:text-2xl text-premium-100/90 font-light max-w-3xl leading-relaxed">
                 Building intelligent systems at the intersection of ML, robotics, and quantum computing
               </p>
             </div>
@@ -44,7 +44,7 @@ export default function AboutPage() {
           {skills.map((skill) => (
             <span
               key={skill}
-              className="px-4 py-2 bg-premium-800/40 backdrop-blur-md border border-premium-700/40 text-sm font-quicksand text-premium-200 hover:bg-premium-800/60 hover:border-accent-600/40 hover:text-premium-100 transition-all duration-300 cursor-default rounded-lg shadow-premium"
+              className="px-4 py-2 bg-premium-800/40 backdrop-blur-md border border-premium-700/40 text-sm font-host-grotesk text-premium-200 hover:bg-premium-800/60 hover:border-accent-600/40 hover:text-premium-100 transition-all duration-300 cursor-default rounded-lg shadow-premium"
             >
               {skill}
             </span>
@@ -57,7 +57,7 @@ export default function AboutPage() {
           <div className="relative z-10">
             <div className="mb-6 flex items-center gap-3">
               <Mail className="w-5 h-5 text-accent-500" />
-              <h2 className="font-quicksand text-2xl font-medium text-premium-50">Connect</h2>
+              <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Connect</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <a
@@ -69,7 +69,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                 <div className="relative z-10 flex items-center gap-3">
                   <Linkedin className="w-5 h-5 text-premium-300 group-hover/link:text-blue-400 transition-colors" />
-                  <p className="font-quicksand font-medium text-premium-100 text-sm">LinkedIn</p>
+                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">LinkedIn</p>
                 </div>
               </a>
 
@@ -82,7 +82,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-500/0 to-gray-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                 <div className="relative z-10 flex items-center gap-3">
                   <Github className="w-5 h-5 text-premium-300 group-hover/link:text-gray-300 transition-colors" />
-                  <p className="font-quicksand font-medium text-premium-100 text-sm">GitHub</p>
+                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">GitHub</p>
                 </div>
               </a>
 
@@ -95,7 +95,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                 <div className="relative z-10 flex items-center gap-3">
                   <FileText className="w-5 h-5 text-premium-300 group-hover/link:text-purple-400 transition-colors" />
-                  <p className="font-quicksand font-medium text-premium-100 text-sm">Resume</p>
+                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">Resume</p>
                 </div>
               </a>
 
@@ -106,7 +106,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                 <div className="relative z-10 flex items-center gap-3">
                   <Mail className="w-5 h-5 text-premium-300 group-hover/link:text-red-400 transition-colors" />
-                  <p className="font-quicksand font-medium text-premium-100 text-sm">Email</p>
+                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">Email</p>
                 </div>
               </a>
             </div>
@@ -122,13 +122,13 @@ export default function AboutPage() {
             <div className="relative z-10">
               <div className="mb-8 flex items-center gap-3">
                 <Code className="w-6 h-6 text-accent-500" />
-                <h2 className="font-quicksand text-2xl font-medium text-premium-50">About</h2>
+                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">About</h2>
               </div>
-              <p className="font-quicksand text-base text-premium-300 leading-relaxed mb-5 font-light">
+              <p className="font-host-grotesk text-base text-premium-300 leading-relaxed mb-5 font-light">
                 CS & AI student at Purdue University. Working on startups, AR/XR video analysis, and full stack applications.
                 Previously built ML infrastructure at scale and developed quantum algorithms for real-world applications.
               </p>
-              <p className="font-quicksand text-base text-premium-300 leading-relaxed font-light">
+              <p className="font-host-grotesk text-base text-premium-300 leading-relaxed font-light">
                 Passionate about pushing the boundaries of what&apos;s possible with intelligent systems.
               </p>
             </div>
@@ -140,10 +140,10 @@ export default function AboutPage() {
             <div className="relative z-10">
               <div className="mb-8 flex items-center gap-3">
                 <GraduationCap className="w-6 h-6 text-accent-500" />
-                <h2 className="font-quicksand text-2xl font-medium text-premium-50">Education</h2>
+                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Education</h2>
               </div>
-              <h3 className="font-quicksand text-lg font-medium text-premium-100 mb-3">Purdue University</h3>
-              <p className="font-quicksand text-sm text-premium-400 leading-relaxed font-light">
+              <h3 className="font-host-grotesk text-lg font-medium text-premium-100 mb-3">Purdue University</h3>
+              <p className="font-host-grotesk text-sm text-premium-400 leading-relaxed font-light">
                 B.S. in Computer Science & Artificial Intelligence
               </p>
             </div>
@@ -155,24 +155,24 @@ export default function AboutPage() {
             <div className="relative z-10">
               <div className="mb-8 flex items-center gap-3">
                 <Lightbulb className="w-6 h-6 text-accent-500" />
-                <h2 className="font-quicksand text-2xl font-medium text-premium-50">Currently Exploring</h2>
+                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Currently Exploring</h2>
               </div>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-quicksand text-base text-premium-300 font-light">Reinforcement learning for IoT security</span>
+                  <span className="font-host-grotesk text-base text-premium-300 font-light">Reinforcement learning for IoT security</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-quicksand text-base text-premium-300 font-light">AR/XR video memory systems</span>
+                  <span className="font-host-grotesk text-base text-premium-300 font-light">AR/XR video memory systems</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-quicksand text-base text-premium-300 font-light">Neural radiance fields & 3D SLAM</span>
+                  <span className="font-host-grotesk text-base text-premium-300 font-light">Neural radiance fields & 3D SLAM</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-quicksand text-base text-premium-300 font-light">Multi-agent systems & RAG pipelines</span>
+                  <span className="font-host-grotesk text-base text-premium-300 font-light">Multi-agent systems & RAG pipelines</span>
                 </li>
               </ul>
             </div>
@@ -199,7 +199,7 @@ export default function AboutPage() {
                   <div className="absolute inset-0 bg-premium-950/50 group-hover:bg-premium-950/30 transition-colors duration-300" />
                   {/* Text */}
                   <div className="relative z-10 h-full flex items-center justify-center">
-                    <p className="font-quicksand text-lg font-medium text-premium-50 drop-shadow-lg">{interest.label}</p>
+                    <p className="font-host-grotesk text-lg font-medium text-premium-50 drop-shadow-lg">{interest.label}</p>
                   </div>
                 </Component>
               );
@@ -212,10 +212,10 @@ export default function AboutPage() {
             <div className="relative z-10 flex items-center gap-4">
               <Quote className="w-10 h-10 text-accent-500/40 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-quicksand text-base text-premium-300 leading-relaxed font-light italic mb-3">
+                <p className="font-host-grotesk text-base text-premium-300 leading-relaxed font-light italic mb-3">
                   He who has a why to live for can bear almost any how.
                 </p>
-                <p className="font-quicksand text-xs text-premium-400 font-light">— Friedrich Nietzsche</p>
+                <p className="font-host-grotesk text-xs text-premium-400 font-light">— Friedrich Nietzsche</p>
               </div>
             </div>
           </div>

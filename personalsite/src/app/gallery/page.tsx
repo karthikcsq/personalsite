@@ -36,7 +36,7 @@ export default function GalleryPage() {
       <div className="max-w-full mx-auto w-full px-4 pt-16 pb-16 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
         {/* Title Section */}
         <div className="flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40">
-          <h1 className="text-5xl md:text-7xl font-light text-center font-quicksand mb-6 tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-light text-center font-host-grotesk mb-6 tracking-tight">
             Gallery
           </h1>
           <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
@@ -60,7 +60,7 @@ export default function GalleryPage() {
         <div className="flex flex-col items-start py-20 space-y-24">
           {Object.entries(galleryData).map(([folder, images], index) => (
             <div key={folder} className="w-full max-w-[1400px] px-4 md:px-8">
-              <h2 className="text-2xl md:text-3xl font-light uppercase tracking-widest mb-8 font-quicksand">
+              <h2 className="text-2xl md:text-3xl font-light uppercase tracking-widest mb-8 font-host-grotesk">
                 {folder}
               </h2>
               <EmblaCarousel images={images} isMobile={isMobile} />

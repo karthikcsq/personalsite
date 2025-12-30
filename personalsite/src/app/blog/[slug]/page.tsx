@@ -58,8 +58,8 @@ export default async function BlogPostPage({ params }: Props) {
             boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)"
           }}
         >
-          <h1 className="font-quicksand text-4xl font-bold mb-2 text-white">{post.title}</h1>
-          <div className="text-sm text-gray-300 mb-6 font-quicksand">{post.date}</div>
+          <h1 className="font-host-grotesk text-4xl font-bold mb-2 text-white">{post.title}</h1>
+          <div className="text-sm text-gray-300 mb-6 font-host-grotesk">{post.date}</div>
           
           <article
             className="prose prose-invert"

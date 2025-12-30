@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -18,7 +18,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Quicksand", sans-serif;
+  --font-sans: "Host Grotesk", sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -55,11 +55,11 @@ html, body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Quicksand", Arial, Helvetica, sans-serif;
+  font-family: "Host Grotesk", Arial, Helvetica, sans-serif;
 }
 
-.quicksand {
-  font-family: "Quicksand", sans-serif;
+.host-grotesk {
+  font-family: "Host Grotesk", sans-serif;
 }
 
 .embla__viewport {
@@ -89,7 +89,7 @@ body {
 /* Replace this section in your globals.css */
 .prose h1 {
   display: block;
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Host Grotesk', sans-serif;
   font-size: 2rem;
   font-weight: 700;
   margin-top: 1.5em;
@@ -99,7 +99,7 @@ body {
 
 .prose h2 {
   display: block;
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Host Grotesk', sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
   margin-top: 1em;
@@ -109,7 +109,7 @@ body {
 
 .prose h3 {
   display: block;
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Host Grotesk', sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   margin-top: 0.75em;
@@ -119,7 +119,7 @@ body {
 
 .prose h4 {
   display: block;
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Host Grotesk', sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
   margin-top: 0.5em;

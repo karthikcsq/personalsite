@@ -30,7 +30,7 @@ export function WorkTimelineClient({ jobs }: Props) {
   return (
     <section className="relative min-h-screen text-white py-12 px-4 sm:px-6 overflow-x-hidden">
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40 md:pr-32 lg:pr-40">
-        <h1 className="text-5xl md:text-7xl font-light text-center font-quicksand mb-6 tracking-tight">Work Experience</h1>
+        <h1 className="text-5xl md:text-7xl font-light text-center font-host-grotesk mb-6 tracking-tight">Work Experience</h1>
         <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
           My professional journey and experiences
         </p>

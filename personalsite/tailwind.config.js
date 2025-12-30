@@ -5,7 +5,7 @@ module.exports = {
     theme: {
       extend: {
         fontFamily: {
-          quicksand: ['"Quicksand"', 'sans-serif'], // Add Quicksand as a custom font
+          'host-grotesk': ['"Host Grotesk"', 'sans-serif'], // Add Host Grotesk as a custom font
         },
         // Premium Swiss-inspired color palette
         colors: {

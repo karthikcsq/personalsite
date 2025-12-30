@@ -118,10 +118,10 @@ export default function HomePage() {
             messages.length === 0 ? 'mb-12 opacity-100 scale-100' : 'h-0 mb-0 opacity-0 scale-95 overflow-hidden'
           }`}
         >
-          <h1 className="text-5xl md:text-6xl font-light font-quicksand text-premium-50 mb-4 text-center tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-light font-host-grotesk text-premium-50 mb-4 text-center tracking-tight">
             Hi, I&apos;m Karthik
           </h1>
-          <h2 className="text-xl md:text-2xl font-light font-quicksand text-premium-300 mb-10 text-center max-w-2xl">
+          <h2 className="text-xl md:text-2xl font-light font-host-grotesk text-premium-300 mb-10 text-center max-w-2xl">
             Welcome to my digital archive
           </h2>
 
@@ -132,7 +132,7 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent-600/0 via-accent-600/10 to-accent-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
-              <span className="font-quicksand text-sm font-medium text-premium-100 tracking-wide">Read About Me</span>
+              <span className="font-host-grotesk text-sm font-medium text-premium-100 tracking-wide">Read About Me</span>
               <ArrowRight className="w-4 h-4 text-accent-500 group-hover:translate-x-1 transition-transform duration-300" />
             </div>
           </a>
@@ -165,7 +165,7 @@ export default function HomePage() {
                 }`}
               >
                 {message.role === "user" ? (
-                  <span className="font-quicksand font-normal">{message.content}</span>
+                  <span className="font-host-grotesk font-normal">{message.content}</span>
                 ) : message.content === "" ? (
                   // Loading indicator with blue theme
                   <div className="flex items-center space-x-2">
@@ -198,7 +198,7 @@ export default function HomePage() {
                         <h2 {...props} className="text-xl font-semibold mt-4 mb-2 text-premium-50" />
                       ),
                       p: ({...props}) => (
-                        <p {...props} className="my-2 leading-relaxed font-quicksand" />
+                        <p {...props} className="my-2 leading-relaxed font-host-grotesk" />
                       ),
                     }}
                   >
@@ -223,12 +223,12 @@ export default function HomePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me anything..."
-            className="flex-grow px-6 py-4 border border-premium-700/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-quicksand shadow-premium-md"
+            className="flex-grow px-6 py-4 border border-premium-700/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-host-grotesk shadow-premium-md"
             disabled={isLoading}
           />
           <button
             type="submit"
-            className="bg-accent-600 text-premium-950 px-6 py-4 rounded-xl hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm font-quicksand font-medium flex items-center gap-2 shadow-premium-md hover:scale-105"
+            className="bg-accent-600 text-premium-950 px-6 py-4 rounded-xl hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm font-host-grotesk font-medium flex items-center gap-2 shadow-premium-md hover:scale-105"
             disabled={isLoading || !input.trim()}
           >
             <span className="hidden sm:inline">Send</span>

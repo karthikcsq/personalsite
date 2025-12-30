@@ -20,12 +20,12 @@ export default async function BlogIndex() {
         <div className="mb-16 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm">
             <BookOpen className="w-4 h-4 text-white" />
-            <span className="text-xs font-quicksand font-medium text-white tracking-wide uppercase">Writing & Thoughts</span>
+            <span className="text-xs font-host-grotesk font-medium text-white tracking-wide uppercase">Writing & Thoughts</span>
           </div>
 
-          <h1 className="font-quicksand text-5xl sm:text-6xl font-light tracking-tight text-white mb-4">Blog</h1>
+          <h1 className="font-host-grotesk text-5xl sm:text-6xl font-light tracking-tight text-white mb-4">Blog</h1>
           <div className="h-0.5 w-16 bg-gradient-to-r from-blue-500 to-transparent mb-6"></div>
-          <p className="font-quicksand text-lg text-gray-400 max-w-2xl">
+          <p className="font-host-grotesk text-lg text-gray-400 max-w-2xl">
             Exploring ideas at the intersection of technology, AI, and innovation
           </p>
         </div>
@@ -33,7 +33,7 @@ export default async function BlogIndex() {
         {posts.length === 0 ? (
           <div className="text-center py-20">
             <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-            <p className="text-gray-500 font-quicksand text-lg">No posts available yet.</p>
+            <p className="text-gray-500 font-host-grotesk text-lg">No posts available yet.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -56,25 +56,25 @@ export default async function BlogIndex() {
                     {/* Date Badge */}
                     <div className="flex items-center gap-2 mb-4">
                       <Calendar className="w-4 h-4 text-gray-500" />
-                      <time className="text-sm text-gray-500 font-quicksand font-light tracking-wide">
+                      <time className="text-sm text-gray-500 font-host-grotesk font-light tracking-wide">
                         {post.date}
                       </time>
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-2xl sm:text-3xl font-quicksand font-medium text-white mb-4 group-hover:text-blue-400 transition-colors duration-300">
+                    <h2 className="text-2xl sm:text-3xl font-host-grotesk font-medium text-white mb-4 group-hover:text-blue-400 transition-colors duration-300">
                       {post.title}
                     </h2>
 
                     {/* Summary */}
                     {post.summary && (
-                      <p className="text-gray-400 font-quicksand font-light leading-relaxed mb-6 line-clamp-2">
+                      <p className="text-gray-400 font-host-grotesk font-light leading-relaxed mb-6 line-clamp-2">
                         {post.summary}
                       </p>
                     )}
 
                     {/* Read More Link */}
-                    <div className="flex items-center gap-2 text-white font-quicksand font-medium text-sm group-hover:gap-3 transition-all duration-300">
+                    <div className="flex items-center gap-2 text-white font-host-grotesk font-medium text-sm group-hover:gap-3 transition-all duration-300">
                       <span>Read Article</span>
                       <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </div>
