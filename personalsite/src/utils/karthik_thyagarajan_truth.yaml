@@ -146,15 +146,6 @@ experience:
       - Architected secure RAG system with LangChain and vector embeddings for classified document retrieval, reducing query response time by 65%.
 
 projects:
-  - title: "Frontera"
-    show_on: ["cv", "resume"]
-    tools: "Next.js, TypeScript, FastAPI, Python, LangChain, Firebase, NoSQL, REST API, WebSocket"
-    date: "Ongoing"
-    link: "https://frontera.app"
-    bullets:
-      - Founding engineer for full-stack platform for 100+ users, architected a backend to support cofounder matching, project discovery, communities, and events.
-      - Developed multi-agent LangChain LLM pipeline for automated roadmap generation and task decomposition; added collaborative-filtering recommender for user matching.
-
   - title: "Caladrius"
     show_on: ["cv", "resume"]
     tools: "React Native, Python, LangGraph, GPT-5, AWS S3, REST API, Next.js"
@@ -181,24 +172,6 @@ projects:
     bullets:
       - Created video processing platform integrating Whisper, GPT-4o, Eleven Labs, and Twelve Labs APIs for transcription, translation, voice cloning, and lip-sync, processing 500+ videos.
       - Architected serverless async pipeline on Vercel handling 2GB files with job queues and webhook notifications, reducing wait time by 85%.
-
-  - title: "In The Loop"
-    show_on: ["cv"]
-    tools: "Next.js, React, TypeScript, LangGraph, Python, FastAPI, Vercel"
-    date: "Ongoing"
-    link: "https://in-the-loop-ai.vercel.app/"
-    bullets:
-      - Built streaming AI agent platform reducing LLM token usage by 40% through intent clarification using LangGraph with WebSocket-based streaming.
-      - Implemented FastAPI backend with user interrupts and thread-level state management for 100+ concurrent sessions and analytics dashboard.
-
-  - title: "Storytime.ai"
-    show_on: ["cv"]
-    tools: "Next.js, React, TypeScript, GPT-4o, Pinecone, Python, Tailwind CSS"
-    date: "Ongoing"
-    link: "https://storytime-sepia.vercel.app/"
-    bullets:
-      - Developed AI news aggregation platform using GPT-4o for clustering and summarization, processing 1K+ daily articles with Pinecone vector search for duplicate detection.
-      - Implemented personalization engine with collaborative filtering and ETL pipeline scraping multiple sources, increasing engagement by 55%.
 
   - title: "Photonic Implementation of Quantum Key Distribution"
     show_on: ["cv"]
