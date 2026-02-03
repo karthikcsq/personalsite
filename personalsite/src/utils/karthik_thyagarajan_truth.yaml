@@ -152,7 +152,7 @@ projects:
     date: "Ongoing"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Architected scalable cloud-native backend infrastructure using FastAPI and PostgreSQL, facilitating real-time game state synchronization and team management for an iOS application serving 200+ active beta users.
+      - Architected scalable backend using FastAPI and PostgreSQL, enabling real-time game state synchronization for an iOS application with 200+ active users.
       - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
 
   - title: "Caladrius"
