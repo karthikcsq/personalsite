@@ -146,6 +146,15 @@ experience:
       - Architected secure RAG system with LangChain and vector embeddings for classified document retrieval, reducing query response time by 65%.
 
 projects:
+  - title: "Repple"
+    show_on: ["cv", "resume"]
+    tools: "Python (FastAPI), Supabase, PostgreSQL, OpenAI API, Pydantic"
+    date: "Ongoing"
+    link: "https://www.linkedin.com/company/reppleapp"
+    bullets:
+      - Architected scalable cloud-native backend infrastructure using FastAPI and PostgreSQL, facilitating real-time game state synchronization and team management for an iOS application serving 200+ active beta users.
+      - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
+
   - title: "Caladrius"
     show_on: ["cv", "resume"]
     tools: "React Native, Python, LangGraph, GPT-5, AWS S3, REST API, Next.js"
