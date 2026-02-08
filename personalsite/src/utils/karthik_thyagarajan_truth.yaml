@@ -136,6 +136,7 @@ projects:
 
   - title: "buildpurdue"
     show_on: ["cv", "resume"]
+    tools: "Next.js, PostgreSQL, Supabase, UI/UX Design, Leadership, Mentorship"
     date: "Ongoing"
     link: "https://buildpurdue.org"
     bullets:
