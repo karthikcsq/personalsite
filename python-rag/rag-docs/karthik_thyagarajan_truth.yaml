@@ -131,7 +131,7 @@ projects:
     date: "Ongoing"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Built FastAPI and PostgreSQL backend with live state management for iOS app with 200+ active users.
+      - Built FastAPI and PostgreSQL backend with synchronized multiplayer functionality for iOS app with 200+ active users.
       - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
 
   - title: "buildpurdue"
