@@ -111,8 +111,8 @@ experience:
     start_date: "Aug 2024"
     end_date: "Dec 2024"
     bullets:
-      - Built weed detection pipeline processing 200GB+ drone imagery with Python, TensorFlow, and PostgreSQL, optimizing ETL workflows for 40% faster retrieval.
-      - Engineered U-Net and YOLOv11 segmentation models achieving 92% accuracy on 50K+ images through agile sprints, reducing herbicide usage by 60% and costs by $150K annually.
+      - Built weed detection pipeline processing 200GB+ drone imagery, optimizing ETL workflows for 40% faster retrieval.
+      - Engineered segmentation models achieving 92% accuracy on 50K+ images through agile sprints, reducing herbicide usage by 60% and costs by $150K annually.
 
   - role: ML Science & Engineering Apprenticeship
     show_on: ["cv", "resume"]
@@ -121,8 +121,8 @@ experience:
     start_date: "Jun 2023"
     end_date: "Aug 2023"
     bullets:
-      - Led 4-engineer team developing UNet, Transformer, and GAN models for underwater acoustics, improving transmission loss prediction accuracy by 20% over physics-based simulations.
-      - Architected secure RAG system with LangChain and vector embeddings for classified document retrieval, reducing query response time by 65%.
+      - Developed novel ML algorithms for underwater acoustics, improving transmission loss prediction accuracy by 20% over physics-based simulations.
+      - Built LangChain RAG system for classified document retrieval, reducing query time by 65%.
 
 projects:
   - title: "Repple"
