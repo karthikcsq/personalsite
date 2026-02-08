@@ -49,7 +49,7 @@ def save_tracking(data):
 
 # === GITHUB REPO FETCHING ===
 def get_user_repos(username, token):
-    print("🔍 Fetching GitHub repositories...")
+    print("Fetching GitHub repositories...")
     headers = {"Authorization": f"token {token}"}
     repos = []
     page = 1
@@ -100,7 +100,7 @@ def load_yaml_files():
             yaml_docs.extend(docs)
             
         except Exception as e:
-            print(f"❌ Error processing YAML file {yaml_file}: {e}")
+            print(f"Error processing YAML file {yaml_file}: {e}")
     
     return yaml_docs
 
@@ -220,7 +220,7 @@ def load_blog_posts():
             break
 
     if not blog_dir:
-        print("⚠️  Blog posts directory not found. Skipping blog loading.")
+        print("Warning: Blog posts directory not found. Skipping blog loading.")
         return []
 
     # Find all markdown files in blog directory
@@ -230,7 +230,7 @@ def load_blog_posts():
             if file.endswith('.md'):
                 blog_files.append(os.path.join(root, file))
 
-    print(f"📝 Found {len(blog_files)} blog post(s)")
+    print(f"Found {len(blog_files)} blog post(s)")
 
     for blog_file in blog_files:
         try:
@@ -241,10 +241,10 @@ def load_blog_posts():
             doc = parse_blog_markdown(content, blog_file)
             if doc:
                 blog_docs.append(doc)
-                print(f"  ✓ Loaded: {doc.metadata.get('title', 'Untitled')}")
+                print(f"  Loaded: {doc.metadata.get('title', 'Untitled')}")
 
         except Exception as e:
-            print(f"❌ Error processing blog file {blog_file}: {e}")
+            print(f"Error processing blog file {blog_file}: {e}")
 
     return blog_docs
 
@@ -252,12 +252,12 @@ def parse_blog_markdown(content, file_path):
     """Parse markdown blog post with frontmatter"""
     # Split frontmatter and content
     if not content.startswith('---'):
-        print(f"⚠️  No frontmatter found in {file_path}")
+        print(f"Warning: No frontmatter found in {file_path}")
         return None
 
     parts = content.split('---', 2)
     if len(parts) < 3:
-        print(f"⚠️  Invalid frontmatter format in {file_path}")
+        print(f"Warning: Invalid frontmatter format in {file_path}")
         return None
 
     frontmatter_text = parts[1].strip()
@@ -267,7 +267,7 @@ def parse_blog_markdown(content, file_path):
     try:
         frontmatter = yaml.safe_load(frontmatter_text)
     except Exception as e:
-        print(f"❌ Failed to parse frontmatter in {file_path}: {e}")
+        print(f"Failed to parse frontmatter in {file_path}: {e}")
         return None
 
     # Extract slug from filename
@@ -320,7 +320,7 @@ def load_github_repos(repo_urls, tracking_data):
         try:
             Repo.clone_from(repo_url, repo_path)
         except Exception as e:
-            print(f"❌ Failed to clone {repo_url}: {e}")
+            print(f"Failed to clone {repo_url}: {e}")
             continue
 
         loader = DirectoryLoader(
@@ -397,7 +397,7 @@ def delete_all_vectors():
     pc = Pinecone(api_key=PINECONE_API_KEY)
     index = pc.Index(INDEX_NAME)
 
-    print("🗑️  Deleting all existing vectors from Pinecone index...")
+    print("Deleting all existing vectors from Pinecone index...")
 
     try:
         # Get index stats to see what we're deleting
@@ -405,19 +405,19 @@ def delete_all_vectors():
         total_vectors = stats.total_vector_count
 
         if total_vectors == 0:
-            print("  ℹ️  Index is already empty")
+            print("  Index is already empty")
             return
 
-        print(f"  📊 Found {total_vectors} vectors to delete")
+        print(f"  Found {total_vectors} vectors to delete")
 
         # Delete all vectors by deleting from all namespaces
         # For default namespace (empty string), use delete_all
         index.delete(delete_all=True)
 
-        print(f"  ✅ Successfully deleted all vectors from index '{INDEX_NAME}'")
+        print(f"  Successfully deleted all vectors from index '{INDEX_NAME}'")
 
     except Exception as e:
-        print(f"  ❌ Error deleting vectors: {e}")
+        print(f"  Error deleting vectors: {e}")
         raise
 
 # === VECTORSTORE UPLOAD ===
@@ -459,9 +459,9 @@ def upload_to_pinecone(chunks):
         # Upsert to Pinecone
         index.upsert(vectors=vectors_to_upsert)
         
-        print(f"✓ Uploaded batch {i // batch_size + 1}/{(len(chunks) - 1) // batch_size + 1}")
+        print(f"Uploaded batch {i // batch_size + 1}/{(len(chunks) - 1) // batch_size + 1}")
     
-    print(f"✅ Successfully uploaded {len(chunks)} chunks to Pinecone.")
+    print(f"Successfully uploaded {len(chunks)} chunks to Pinecone.")
 
 # === MAIN ===
 def main(reset=False):
@@ -494,56 +494,56 @@ Examples:
         reset = args.reset
 
     print("=" * 60)
-    print("🚀 Pinecone RAG Document Upload")
+    print("Pinecone RAG Document Upload")
     print("=" * 60)
 
     if reset:
-        print("\n⚠️  RESET MODE: All existing vectors will be deleted!")
+        print("\nWARNING: RESET MODE - All existing vectors will be deleted!")
         print("   This will clear your entire Pinecone index.")
 
         # Ask for confirmation
         response = input("\n   Are you sure you want to continue? (yes/no): ").strip().lower()
         if response not in ['yes', 'y']:
-            print("\n❌ Operation cancelled by user.")
+            print("\nOperation cancelled by user.")
             return
 
         print()
         delete_all_vectors()
         print()
     else:
-        print("\n📝 Running in UPDATE mode (incremental)")
+        print("\nRunning in UPDATE mode (incremental)")
         print("   Use --reset flag to delete all vectors first\n")
 
-    print("📦 Loading tracking data...")
+    print("Loading tracking data...")
     tracking_data = load_tracking()
 
-    print("📄 Loading local text files...")
+    print("Loading local text files...")
     text_docs = load_text_files()
 
-    # print("🐙 Fetching and loading GitHub repositories...")
+    # print("Fetching and loading GitHub repositories...")
     # repo_urls = get_user_repos(GITHUB_USERNAME, GITHUB_TOKEN)
     # github_docs, new_tracking = load_github_repos(repo_urls, tracking_data)
 
     # all_docs = text_docs + github_docs
     all_docs = text_docs
-    print(f"📚 Total new/updated documents: {len(all_docs)}")
+    print(f"Total new/updated documents: {len(all_docs)}")
 
-    print("✂️ Splitting documents into chunks...")
+    print("Splitting documents into chunks...")
     chunks = chunk_documents(all_docs)
 
     if chunks:
-        print("📤 Uploading to Pinecone...")
+        print("Uploading to Pinecone...")
         upload_to_pinecone(chunks)
 
-        # print("💾 Updating tracking file...")
+        # print("Updating tracking file...")
         # tracking_data.update(new_tracking)
         # save_tracking(tracking_data)
 
         print("\n" + "=" * 60)
-        print("✅ Upload complete!")
+        print("Upload complete!")
         print("=" * 60)
     else:
-        print("✅ No new content to upload.")
+        print("No new content to upload.")
 
 if __name__ == "__main__":
     main()

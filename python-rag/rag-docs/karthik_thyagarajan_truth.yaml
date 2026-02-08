@@ -13,14 +13,15 @@ links:
 education:
   - institution: "Purdue University"
     location: "West Lafayette, Indiana"
-    degree: "B.S. of Computer Science & Artificial Intelligence"
+    degree: "B.S. of Computer Science & Artificial Intelligence (Double Major)"
     gpa: "3.93"
     dates: "May 2027"
     coursework:
-      - "Data Structures and Algorithms"
+      - "Data Structures & Algorithms"
       - "Computer Architecture"
       - "Programming in C"
       - "Linear Algebra"
+      - "Competitive Programming"
 
 skills:
   - category: "Languages"
@@ -94,7 +95,6 @@ experience:
     show_on: ["cv", "resume"]
     company: Peraton Labs
     location: Silver Spring, MD
-    work_type: Internship & Part-Time Co-op
     start_date: "Jun 2025"
     end_date: "Present"
     bullets:
@@ -105,7 +105,6 @@ experience:
     show_on: ["cv", "resume"]
     company: Memories.ai
     location: Remote
-    work_type: Part-Time
     start_date: "Feb 2025"
     end_date: "Aug 2025"
     bullets:
@@ -116,7 +115,6 @@ experience:
     show_on: ["cv"]
     company: IDEAS Lab, Purdue University
     location: West Lafayette, IN
-    work_type: Part-Time
     start_date: "Mar 2025"
     end_date: "Jun 2025"
     bullets:
@@ -125,9 +123,8 @@ experience:
 
   - role: Undergraduate Data Engineer
     show_on: ["cv", "resume"]
-    company: The Data Mine Corporate Partners, Purdue University
+    company: AgRPA
     location: West Lafayette, IN
-    work_type: Part-Time
     start_date: "Aug 2024"
     end_date: "Dec 2024"
     bullets:
@@ -138,7 +135,6 @@ experience:
     show_on: ["cv", "resume"]
     company: Naval Research Laboratory
     location: Washington, D.C.
-    work_type: Full-Time
     start_date: "Jun 2023"
     end_date: "Aug 2023"
     bullets:
