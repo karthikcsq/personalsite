@@ -91,7 +91,7 @@ experience:
       - Published Python SDK on PyPI with 2K+ downloads, implementing async processing and REST API integration for video analysis workflows.
 
   - role: Undergraduate Robotics Researcher
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     company: IDEAS Lab
     location: West Lafayette, IN
     start_date: "Mar 2025"
