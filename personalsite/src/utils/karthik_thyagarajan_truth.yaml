@@ -104,14 +104,14 @@ experience:
       - Built real-time SLAM pipeline in C++ and Python with sensor fusion and Kalman filtering, improving 3D reconstruction accuracy by 25% and reducing latency by 30%.
       - Implemented neural radiance fields for novel view synthesis, generating photorealistic scene reconstructions for autonomous navigation.
 
-  - role: Undergraduate Data Engineer
+  - role: Data Engineering Intern
     show_on: ["cv", "resume"]
     company: AgRPA
     location: West Lafayette, IN
     start_date: "Aug 2024"
     end_date: "Dec 2024"
     bullets:
-      - Built weed detection pipeline processing 200GB+ drone imagery, optimizing ETL workflows for 40% faster retrieval.
+      - Built end-to-end weed detection pipeline processing 200GB+ drone imagery with Python and cloud storage, implementing parallel ETL workflows and optimized data partitioning for 40% faster retrieval and analysis.
       - Engineered segmentation models achieving 92% accuracy on 50K+ images through agile sprints, reducing herbicide usage by 60% and costs by $150K annually.
 
   - role: ML Science & Engineering Apprenticeship
