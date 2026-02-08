@@ -130,6 +130,15 @@ projects:
       - Built FastAPI and PostgreSQL backend with real-time game state synchronization for iOS app with 200+ active users.
       - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
 
+  - title: "buildpurdue"
+    show_on: ["cv", "resume"]
+    tools: "Next.js, Vercel, Supabase, PostgreSQL"
+    date: "Ongoing"
+    link: "https://buildpurdue.org"
+    bullets:
+      - Co-founded a campus accelerator supporting 15 student startups, providing resources that enabled teams to validate core problems and refine go-to-market strategies.
+      - Forged partnerships with 4 VC firms and industry mentors, creating a direct pipeline for student founders to secure feedback and potential pre-seed funding.
+
   - title: "Caladrius (HackGT - 2nd Place)"
     show_on: ["cv", "resume"]
     tools: "React Native, Python, LangGraph, GPT-5, AWS S3, REST API, Next.js"
