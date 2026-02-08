@@ -111,7 +111,7 @@ experience:
     start_date: "Aug 2024"
     end_date: "Dec 2024"
     bullets:
-      - Built end-to-end weed detection pipeline processing 200GB+ drone imagery with Python and cloud storage, implementing parallel ETL workflows and optimized data partitioning for 40% faster retrieval and analysis.
+      - Built end-to-end weed detection pipeline processing 200GB+ drone imagery with Python and cloud storage, implementing parallel ETL workflows and optimized data partitioning for 40% faster analysis.
       - Engineered segmentation models achieving 92% accuracy on 50K+ images through agile sprints, reducing herbicide usage by 60% and costs by $150K annually.
 
   - role: ML Science & Engineering Apprenticeship
