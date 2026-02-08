@@ -14,8 +14,8 @@ education:
   - institution: "Purdue University"
     location: "West Lafayette, Indiana"
     degree: "B.S. of Computer Science & Artificial Intelligence"
-    gpa: "4.0"
-    dates: "August 2024 - May 2027"
+    gpa: "3.93"
+    dates: "May 2027"
     coursework:
       - "Data Structures and Algorithms"
       - "Computer Architecture"
@@ -101,7 +101,7 @@ experience:
       - Developed RL agent for IoT malware detection using PyTorch and graph neural networks, reducing exploration latency by 35% and increasing detection coverage by 25% across 500K+ daily device events.
       - Built ETL pipelines and heterogeneous graph architecture with autoencoders to model device communication patterns, accelerating policy convergence by 40%.
 
-  - role: Computer Vision Software Engineer
+  - role: Computer Vision Researcher
     show_on: ["cv", "resume"]
     company: Memories.ai
     location: Remote
