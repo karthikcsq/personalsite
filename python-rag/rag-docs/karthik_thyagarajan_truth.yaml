@@ -149,7 +149,7 @@ projects:
     link: "https://github.com/karthikcsq/Caladrius"
     bullets:
       - Architected cross-platform AI triage app with encrypted QR-based data transfer and zero-knowledge architecture for HIPAA compliance.
-      - Built multi-agent diagnostic system with LangGraph achieving 85% triage accuracy, integrating REST API backend with AWS S3 for secure storage.
+      - Built multi-agent diagnostic system with LangGraph achieving 85% triage accuracy when compared to symptom analysis data.
 
   - title: "Personal Portfolio & Blog Platform"
     show_on: ["cv"]
