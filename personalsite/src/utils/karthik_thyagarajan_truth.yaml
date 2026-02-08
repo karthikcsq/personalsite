@@ -127,16 +127,16 @@ projects:
     date: "Ongoing"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Architected scalable backend using FastAPI and PostgreSQL, enabling real-time game state synchronization for an iOS application with 200+ active users.
+      - Built FastAPI and PostgreSQL backend with real-time game state synchronization for iOS app with 200+ active users.
       - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
 
-  - title: "Caladrius"
+  - title: "Caladrius (HackGT - 2nd Place)"
     show_on: ["cv", "resume"]
     tools: "React Native, Python, LangGraph, GPT-5, AWS S3, REST API, Next.js"
     date: "Sep 2025"
     link: "https://github.com/karthikcsq/Caladrius"
     bullets:
-      - Architected cross-platform AI triage app with encrypted QR-based data transfer and zero-knowledge architecture for HIPAA compliance; awarded 2nd Place at HackGT 12.
+      - Architected cross-platform AI triage app with encrypted QR-based data transfer and zero-knowledge architecture for HIPAA compliance.
       - Built multi-agent diagnostic system with LangGraph achieving 85% triage accuracy, integrating REST API backend with AWS S3 for secure storage.
 
   - title: "Personal Portfolio & Blog Platform"
