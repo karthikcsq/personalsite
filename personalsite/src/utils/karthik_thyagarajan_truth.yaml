@@ -1,4 +1,8 @@
 name: "Karthik Thyagarajan"
+
+section_aliases:
+  projects: "Projects & Clubs"
+
 contact:
   - "karthik6002@gmail.com"
   - +1-703-951-7237
@@ -132,7 +136,6 @@ projects:
 
   - title: "buildpurdue"
     show_on: ["cv", "resume"]
-    tools: "Next.js, Vercel, Supabase, PostgreSQL"
     date: "Ongoing"
     link: "https://buildpurdue.org"
     bullets:
