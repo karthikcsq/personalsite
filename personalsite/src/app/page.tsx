@@ -122,7 +122,7 @@ export default function HomePage() {
             Hi, I&apos;m Karthik
           </h1>
           <h2 className="text-xl md:text-2xl font-light font-host-grotesk text-premium-300 mb-10 text-center max-w-2xl">
-            Welcome to my digital archive
+            Engineer, researcher, builder.
           </h2>
 
           {/* Premium CTA Button */}
