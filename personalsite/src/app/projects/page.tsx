@@ -27,6 +27,151 @@ export default function ProjectsPage() {
 
         {/* Projects Content */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
+          {/* Repple */}
+          <div
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(168, 85, 247, 0.9)",
+              boxShadow: "0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.6)",
+             }}
+          >
+            <h2 className="text-3xl font-bold mb-4" id="projects">Repple</h2>
+            <p className="text-lg mb-6">
+              Repple is a competitive fitness app for iOS that makes working out fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards. Features include ELO matchmaking, automated point aggregation, and AI-generated workout plans that adapt to user performance.
+            </p>
+            <div className="mb-6">
+              <iframe
+                className="w-full rounded-lg shadow-lg"
+                width="500"
+                height="600"
+                src="https://www.instagram.com/p/DWW1V1JkfFO/embed"
+                title="Repple Instagram"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://apps.apple.com/us/app/repple-app/id6756220797"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-purple-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Download for iOS
+              </a>
+              <a
+                href="https://www.linkedin.com/company/reppleapp"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-purple-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
+            </div>
+          </div>
+
+          {/* google-tools-mcp */}
+          <div
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(66, 133, 244, 0.9)",
+              boxShadow: "0 0 10px rgba(66, 133, 244, 0.8), 0 0 20px rgba(66, 133, 244, 0.6)",
+             }}
+          >
+            <h2 className="text-3xl font-bold mb-4">google-tools-mcp</h2>
+            <p className="text-lg mb-6">
+              An open-source MCP server that unifies all of Google Workspace behind a single server and OAuth flow. 169 tools covering Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms. Features auto re-auth, PDF/Word reading from Drive, and read-before-edit guards. MIT licensed, no telemetry.
+            </p>
+            <div className="flex flex-col items-center justify-center my-8 space-y-6">
+              <Image
+                src="/GoogleToolsMCP1.png"
+                alt="google-tools-mcp overview"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-md border-3 border-gray-700"
+              />
+              <Image
+                src="/GoogleToolsMCP2.png"
+                alt="google-tools-mcp demo"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-md border-3 border-gray-700"
+              />
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://github.com/karthikcsq/google-tools-mcp"
+                className="inline-block hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/githublogo.png"
+                  alt="GitHub Logo"
+                  width={1125}
+                  height={417}
+                  className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
+                />
+              </a>
+              <a
+                href="https://www.npmjs.com/package/google-tools-mcp"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-blue-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                npm
+              </a>
+            </div>
+          </div>
+
+          {/* Veritas */}
+          <div
+            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
+              border: "2px solid rgba(20, 184, 166, 0.9)",
+              boxShadow: "0 0 10px rgba(20, 184, 166, 0.8), 0 0 20px rgba(20, 184, 166, 0.6)",
+             }}
+          >
+            <h2 className="text-3xl font-bold mb-4">Veritas</h2>
+            <p className="text-lg mb-6">
+              Veritas is a clinical research platform that combines cryptographic proof-of-personhood (World ID) with ML-powered response quality scoring to give researchers clean, trustworthy data. Won Best Proof-of-Human Application at Catapult 2026.
+            </p>
+            <div className="mb-6">
+              <iframe
+                className="w-full rounded-lg shadow-lg"
+                width="500"
+                height="375"
+                src="https://www.youtube.com/embed/aXmBme6b2-E"
+                title="Veritas demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="flex items-center justify-center space-x-4">
+              <a
+                href="https://github.com/karthikcsq/veritas"
+                className="inline-block hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/githublogo.png"
+                  alt="GitHub Logo"
+                  width={1125}
+                  height={417}
+                  className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
+                />
+              </a>
+              <a
+                href="https://devpost.com/software/veritas-81fzu6"
+                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-purple-400 hover:scale-110 hover:transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Devpost
+              </a>
+            </div>
+          </div>
+
           {/* Caladrius */}
           <div
             className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
@@ -73,84 +218,6 @@ export default function ProjectsPage() {
                 rel="noopener noreferrer"
               >
                 Devpost
-              </a>
-            </div>
-          </div>
-          {/* InTheLoop */}
-          <div
-            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
-              border: "2px solid rgba(80, 80, 80, 0.9)",
-              boxShadow: "0 0 10px rgba(80, 80, 80, 0.8), 0 0 20px rgba(80, 80, 80, 0.6)", // Glowing effect
-             }}
-          >
-            <h2 className="text-3xl font-bold mb-4" id="projects">In The Loop</h2>
-            <p className="text-lg mb-6">
-              In The Loop is a platform that ends the pain of AI assumption and token wastage. It provides a seamless experience for users to add clarity to their AI interactions, ensuring that the AI understands their needs without unnecessary back-and-forth.
-            </p>
-            <div className="flex flex-col items-center justify-center my-8 space-y-12">
-              <Image
-                src="/intheloop.png"
-                alt="In The Loop"
-                width={350}
-                height={300}
-                className="rounded-lg shadow-md border-3 border-gray-700"
-              />
-            </div>
-            <div className="flex items-center justify-center space-x-4">
-              <a
-                href="https://github.com/karthikcsq/in-the-loop-frontend"
-                className="inline-block hover:scale-110 hover:transition duration-300"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Image
-                  src="/githublogo.png"
-                  alt="GitHub Logo"
-                  width={1125}
-                  height={417}
-                  className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
-                />
-              </a>
-              <a
-                href="https://in-the-loop-ai.vercel.app/"
-                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-gray-400 hover:scale-110 hover:transition duration-300"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Website
-              </a>
-            </div>
-          </div>
-          {/* Storytime */}
-          <div
-            className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)",
-              border: "2px solid rgba(3, 126, 214, 0.9)",
-              boxShadow: "0 0 10px rgba(3, 126, 214, 0.8), 0 0 20px rgba(3, 126, 214, 0.6)", // Glowing effect
-             }}
-          >
-            <h2 className="text-3xl font-bold mb-4" id="projects">Storytime.ai</h2>
-            <p className="text-lg mb-6">
-              Storytime is an innovative platform that transforms the way we consume and interact with news. Using AI, Storytime intelligently groups individual stories and story updates so that you can see what you care about, without the noise.
-            </p>
-            <div className="flex flex-col items-center justify-center my-8 space-y-12">
-              <Image
-                src="/storytimetimeline1.png"
-                alt="Storytime Timeline"
-                width={350}
-                height={300}
-                className="rounded-lg shadow-md border-3 border-gray-700"
-              />
-            </div>
-            <div className="flex items-center justify-center space-x-4">
-              <a
-                href="https://storytime-sepia.vercel.app/"
-                className="inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg hover:bg-blue-800 hover:scale-110 hover:transition duration-300"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Website
               </a>
             </div>
           </div>
