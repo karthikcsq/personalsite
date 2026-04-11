@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     // Create embeddings for the user query
     const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-ada-002",
+      model: "text-embedding-3-small",
       input: currentQuery,
     });
 
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       filter?: { content_type: { $eq: string } };
     } = {
       vector: queryEmbedding,
-      topK: 10, // Increased from 5 to get more candidates
+      topK: 15,
       includeMetadata: true,
       ...(queryIntent?.contentType && {
         filter: {
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
       console.log(`⚠️  No results found for content_type: ${queryIntent.contentType}, retrying without filter`);
       queryResponse = await index.query({
         vector: queryEmbedding,
-        topK: 10,
+        topK: 15,
         includeMetadata: true,
       });
       console.log(`📊 Unfiltered search found ${queryResponse.matches.length} matches`);
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
     const isOverviewQuery = queryIntent?.contentType === 'blog_post' ||
                            queryIntent?.contentType === 'project' ||
                            currentQuery.toLowerCase().includes('about');
-    const relevanceThreshold = isOverviewQuery ? 0.65 : 0.75;
+    const relevanceThreshold = isOverviewQuery ? 0.50 : 0.60;
     const relevantMatches = queryResponse.matches.filter(match => match.score && match.score > relevanceThreshold);
 
     console.log(`✅ ${relevantMatches.length} matches passed relevance threshold (${relevanceThreshold})`);
@@ -275,7 +275,7 @@ Example response: "I don't have specific information about that in the available
     // Use OpenAI to generate a streaming response
     const stream = await openai.chat.completions.create({
       model: "gpt-5.1",
-      temperature: 0.7,
+      temperature: 0.3,
       messages: [
         {
           role: "system",

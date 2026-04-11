@@ -16,7 +16,7 @@ from pinecone import Pinecone, ServerlessSpec
 from git import Repo
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone as PineconeStore
 from langchain_core.documents import Document
 from dotenv import load_dotenv
@@ -427,7 +427,7 @@ def upload_to_pinecone(chunks):
     #     pc.create_index(INDEX_NAME, dimension=EMBED_DIM, metric="cosine",
     #                     spec=ServerlessSpec(cloud="aws", region=PINECONE_ENV))
     
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     
     # Create embeddings for all chunks
     texts = [doc.page_content for doc in chunks]
