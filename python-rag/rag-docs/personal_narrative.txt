@@ -1,0 +1,43 @@
+Karthik Thyagarajan - Personal Narrative & Background
+
+## Who is Karthik?
+
+Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (class of 2027) from Northern Virginia. He describes himself as "an ideator, a builder, and a dreamer." He is passionate about building systems that blend perception and reasoning, and enjoys tackling complex problems at the intersection of intelligence and interactivity.
+
+Karthik attended Thomas Jefferson High School for Science and Technology (TJHSST) in Alexandria, Virginia from 2020 to 2024, one of the top-ranked STEM high schools in the United States. He scored 5s on both AP Physics C: Electricity and Magnetism and AP Physics C: Mechanics. He also achieved Royal Conservatory of Music Piano Examination Level 8, showing his musical side.
+
+At Purdue, he is double majoring in Computer Science and Artificial Intelligence with a 3.93 GPA. He has led ML projects in both academic and applied settings and is always looking for opportunities to build, learn, and collaborate on impactful tech.
+
+He is currently based in the San Francisco Bay Area and is open to Artificial Intelligence Intern, Machine Learning Intern, and Software Engineer roles.
+
+## Why AI & Machine Learning?
+
+Karthik's interest in AI/ML started early. He won the Best AI/ML Hack award at HackTJ 10.0 in March 2023 while still in high school. From there, he went on to work at the Naval Research Laboratory that same summer, developing ML algorithms for underwater acoustics and building a LangChain RAG system for classified document retrieval.
+
+His AI/ML work has since spanned reinforcement learning (Peraton Labs), computer vision (Memories.ai), robotics and SLAM (IDEAS Lab), agricultural ML (AgRPA), and multi-agent AI systems (Caladrius). He holds certifications in MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
+
+AI/ML excites Karthik because it enables modeling of thinking and intelligence. If taken to the limit, it will change the way we understand the universe, enabling progress and discovery at a scale never thought of before.
+
+## Why Entrepreneurship?
+
+Karthik co-founded buildpurdue, where he serves as Co-President and Technical Lead. He designed the operational framework for this founder hub, bridging the gap between customer discovery and technical building. He solely developed the organization's operating platform using Next.js and TypeScript, implementing secure RBAC pipelines to automate student and alumni management. buildpurdue supports 15 student startups and has partnerships with 4 VC firms.
+
+He is also a Founding Engineer at Repple, a gamified fitness app for iOS with 200+ active users.
+
+Karthik believes deeply in the startup ecosystem. Through buildpurdue, he has organized events bringing VCs and industry mentors (like John Decker, Chris Blackburn, Veronica Fernandez, and Tyler Mantel) directly to campus to give student founders real operator feedback instead of just academic advice. He attended the Collegiate Entrepreneurs Summit at 16 Tech Innovation District and actively follows the Purdue Alumni Entrepreneurship Network (PAEN).
+
+Startups draw Karthik in because all innovation comes from founders, whether that's founders within a larger company or operating on their own. These are people who see real needs and go solve them. A startup is simply the best way for him to operate on where he sees gaps without having to join a slower-moving company to achieve the same effect. That's why all his internships have been in spaces where he is on the cutting edge of research and innovation.
+
+## What Makes Karthik Stand Out?
+
+- Breadth: ML + full-stack + quantum computing + entrepreneurship + open source is an extremely rare combination for an undergraduate
+- He attended TJHSST, one of the top STEM high schools in the country
+- Published on arXiv as an undergrad (quantum key distribution research)
+- Won Best AI/ML Hack at HackTJ and 2nd place at HackGT
+- Co-President of buildpurdue, Founding Engineer at Repple
+- Built google-tools-mcp, an open source MCP server for Google Workspace with 169 tools
+- Active thought leader on LinkedIn with 1,358+ followers, writing about MCP, AI agents, and the future of agent-tool interaction
+- Certified in MCP Fundamentals and AI Agents Fundamentals (Hugging Face)
+- Classically trained pianist (Royal Conservatory Level 8)
+- Follows thought leaders like Andrew Ng and Jim Fan
+- Top skills: Python, Machine Learning, Software Development, Computer Vision, Quantum Computing

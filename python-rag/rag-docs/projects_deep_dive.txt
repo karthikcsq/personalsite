@@ -1,0 +1,101 @@
+Karthik Thyagarajan - Projects Deep Dive
+
+## Veritas (Catapult 2026 - Winner: Best Proof-of-Human Application)
+Veritas is a clinical research platform that combines cryptographic proof-of-personhood with ML-powered response quality scoring to give researchers clean, trustworthy data. The global clinical trials market is worth over $80 billion, and an estimated 4% of trial volunteers are "professional patients" who fabricate or exaggerate symptoms for compensation.
+
+How it works in three layers:
+- Identity: Participants verify through World ID (iris biometrics) to cryptographically prove they are a unique human. You cannot enroll twice.
+- Intelligence: Every response is scored across multiple quality dimensions by an ML pipeline. Researchers see per-participant integrity scores, flagged contradictions, timing anomalies, and cross-response similarity analysis from a six-tab analytics dashboard.
+- Experience: AI analyzes researcher questions before the study launches, suggesting improvements. During the survey, participants get real-time nudges if responses are vague or off-topic.
+
+The scoring pipeline combines LLM scoring (GPT-4o-mini evaluating coherence, effort, consistency, specificity) with structured scoring (response time analysis, reverse consistency checks). A RAG pipeline using Pinecone detects copied responses across participants.
+
+Built with: Next.js 14, React 19, Tailwind CSS, shadcn/ui, PostgreSQL via Supabase, NextAuth.js, World ID, OpenAI GPT-4o, Pinecone, Vercel
+Team: Karthik Thyagarajan, Sonny Chen, Melody Yang, Alex Li
+GitHub: https://github.com/karthikcsq/veritas
+Live: https://veritas-kasm.vercel.app
+
+## google-tools-mcp (Apr 2025)
+An open-source MCP server that unifies all of Google Workspace behind a single server and OAuth flow. Karthik built this because he was frustrated with the fragmented state of Google integrations for AI agents. Most existing solutions required 4-5 separate MCP servers, each with their own auth flow, config, and quirks.
+
+Key features:
+- 169 tools covering Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms
+- Single OAuth flow. One setup command: npx google-tools-mcp setup
+- Auto re-auth: handles token expiration and scope changes seamlessly
+- Reads PDFs and Word docs directly from Drive without conversion
+- Read-before-edit guards: prevents blind overwrites, lists all matches when editing ambiguous content
+- Can orchestrate across the entire workspace: read a PDF from Drive, summarize it into a Doc, pull data from a Sheet into a Slides deck, and email it to a team
+- No telemetry, multi-account profiles, service account support for team automation
+- MIT licensed, published on npm
+- GitHub: https://github.com/karthikcsq/google-tools-mcp
+
+## Repple (Ongoing)
+Repple is a competitive fitness app for iOS with 200+ active users. Karthik is a Founding Engineer (title on LinkedIn as of Nov 2025). The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards.
+
+Key technical details:
+- Built the entire backend using FastAPI and PostgreSQL with Supabase
+- Synchronized multiplayer functionality so users can compete in real-time
+- Custom ELO matchmaking algorithm that pairs users of similar fitness levels
+- Automated cron-based point aggregation system
+- Generative AI workout plans that adapt based on user performance metrics
+- Built with Python (FastAPI), Supabase, PostgreSQL, OpenAI API, Pydantic, TypeScript, and Anthropic Claude
+- Co-founded with Rishab Chakravarty, Arjun Chadha, and Ayush Guhan
+
+Repple was born from a real motivation gap in exercise logging. The team saw that the best way to motivate consistency was by solving another problem simultaneously: a need for community and competition at the gym. Arjun Chadha reached out to Karthik out of the blue, and Karthik immediately agreed to begin working on it. Rishab Chakravarty, Arjun Chadha, and Ayush Guhan are Karthik's three cofounders.
+
+## buildpurdue (Ongoing)
+buildpurdue is a campus accelerator Karthik co-founded at Purdue University. He serves as Co-President and Technical Lead.
+
+Key details:
+- Supports 15 student startups with resources to validate problems and refine go-to-market strategies
+- Forged partnerships with 4 VC firms and industry mentors
+- Karthik designed the operational framework, bridging customer discovery and technical building
+- Solely developed the organization's operating platform (Next.js/TypeScript) with secure RBAC pipelines to automate student and alumni management
+- Organizes events like VC panels (John Decker, Chris Blackburn, Veronica Fernandez, Tyler Mantel) and community events
+- Hosts workshops: Finding Your First Paying Customer, Co-Founder Selection, MVP building
+- Part of the broader Purdue entrepreneurship ecosystem including PAEN and Purdue@SV
+
+buildpurdue has had a moderate amount of success so far. One of their flagship startups, Evential, has launched and is currently speaking with investors. Another startup, Parallax, has had a paid pilot.
+
+## Caladrius (HackGT - 2nd Place, Sep 2025)
+An AI triage system built at HackGT that won 2nd place. Built with React Native, Python, LangGraph, AWS S3, REST API, and Next.js.
+
+Key technical details:
+- Encrypted, zero-knowledge data transfer for HIPAA compliance
+- Multi-agent diagnostic system using LangGraph
+- Achieved 85% triage accuracy on symptom analysis
+
+Karthik found his team for Caladrius through an Instagram story. It was the craziest rush. They spoke with real doctors and medical filing professionals in the industry to design the best product they could. They worked through the night to get it to work. The team was half asleep during their final pitch, but managed to deliver something strong and powerful.
+
+## Verbatim (Feb 2025)
+A video processing platform that integrates multiple AI APIs for transcription, translation, voice cloning, and lip-sync.
+
+Key technical details:
+- Integrates Whisper, GPT-4o, Eleven Labs, and Twelve Labs APIs
+- Serverless async pipeline on Vercel handling 2GB files
+- Job queues and webhook notifications reduced wait time by 85%
+- Processed 500+ videos
+
+## Photonic Implementation of Quantum Key Distribution (Oct 2023 - May 2024)
+A research project implementing quantum key distribution using photonic hardware. Published on arXiv.
+
+Key technical details:
+- Polarization-based QKD prototype with 95% photon detection rate
+- Secure key exchange demonstrated over 5m fiber optic channel
+- Automated signal processing pipeline with Python and NumPy
+- Processed 10K+ samples for bit extraction and QBER analysis
+- Published: https://arxiv.org/abs/2509.04389
+
+## Personal Portfolio & Blog Platform (Ongoing)
+This very website! Built with Next.js, TypeScript, React, Tailwind CSS, Pinecone, AWS S3, Python, and Vercel.
+
+Key technical details:
+- RAG-powered semantic search using Pinecone and OpenAI embeddings
+- 95+ Lighthouse score with sub-1-second load times
+- Automated CI/CD on Vercel
+- AWS S3 CDN for gallery images
+
+## Quantum Racer (Aug - Dec 2022)
+An educational Android game simulating quantum mechanics concepts.
+- Custom physics engine with MVC architecture in Java
+- Distributed APK reached 100+ students in quantum computing workshops

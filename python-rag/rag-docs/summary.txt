@@ -1,0 +1,13 @@
+Karthik Thyagarajan - Overview Summary
+
+Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (3.93 GPA, graduating May 2027) who combines deep technical skill in AI/ML with a passion for building real products, leading entrepreneurial ventures, and contributing to open source. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the United States.
+
+On the technical side, Karthik has worked on machine learning at Peraton Labs (RL for IoT security), computer vision at Memories.ai (video processing for AR), robotics research at IDEAS Lab (SLAM and neural radiance fields), agricultural data engineering at AgRPA (drone-based weed detection), and ML for underwater acoustics at the Naval Research Laboratory. He is proficient in Python, Java, C/C++, JavaScript/TypeScript, and has hands-on experience with PyTorch, reinforcement learning, GANs, diffusion models, LangChain, RAG systems, MCP, and multi-agent AI architectures. His top skills are Python, Machine Learning, Software Development, Computer Vision, and Quantum Computing.
+
+On the product and leadership side, Karthik serves as Co-President and Technical Lead of buildpurdue, a campus startup accelerator supporting 15 student startups with VC partnerships. He is a Founding Engineer at Repple, a competitive fitness iOS app with 200+ active users featuring AI-generated workout plans and ELO matchmaking. He won 2nd place at HackGT with Caladrius, an AI triage system with HIPAA-compliant data handling, and won Best AI/ML Hack at HackTJ 10.0.
+
+In open source, Karthik built google-tools-mcp, an MCP server that unifies all of Google Workspace (169 tools) behind a single OAuth flow. He is an active thought leader on LinkedIn (1,358+ followers), writing about MCP, AI agents, and the future of agent-tool interaction. He holds certifications in MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
+
+Karthik has published quantum computing research on arXiv and has experience with Qiskit, VQE, and physical QKD hardware. He is also a classically trained pianist (Royal Conservatory Level 8) and enjoys traveling. His portfolio gallery features photos from Costa Rica, Hawaii, Kilimanjaro, Amsterdam, and more.
+
+He is currently based in the San Francisco Bay Area, originally from Northern Virginia, and can be reached at karthik6002@gmail.com.

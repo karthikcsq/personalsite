@@ -1,0 +1,51 @@
+Karthik Thyagarajan - Opinions, Takes & Perspectives
+
+## On MCP and the Future of AI Agents
+
+Karthik is deeply invested in the Model Context Protocol (MCP) ecosystem and has strong, well-articulated opinions about where it's headed. He built google-tools-mcp, an open-source MCP server that unifies all of Google Workspace (Drive, Docs, Sheets, Slides, Gmail, Calendar, Forms, 169 tools) behind a single OAuth flow. It's MIT licensed, has no telemetry, supports multi-account profiles and service account automation.
+
+Karthik believes MCP is fundamentally "context injection": giving a model tool definitions, endpoints, and schemas so it knows what to call. He argues there is way too much friction in the current MCP experience. Manually installing servers, configuring JSON files, and wiring up auth feels like installing software from 2009. His vision is that MCP tool discovery and dynamic loading should be as simple as visiting a URL. The model already understands tool schemas at runtime, so it should discover them at runtime too. Any public service that exposes an MCP-compatible endpoint should just work.
+
+## On Agent-Callable Real-World Services
+
+Karthik has written publicly about how AI agents still can't do basic real-world tasks like booking a restaurant table. He identifies two broken paths: (1) custom integrations where someone builds an MCP server for OpenTable, Resy, etc., but coverage is always incomplete, and (2) browser automation, which is slow, brittle, and breaks when layouts change or CAPTCHAs appear.
+
+His core thesis: the missing piece is adoption on the business side. Restaurants, airlines, and services should expose lightweight, standardized tool definitions that any agent can discover and call. A thin MCP-compatible endpoint, not a full API platform or developer partnership. The internet was built for humans navigating pages. Agent interaction with the real world should be a native interface.
+
+## On Building Products vs. Writing Code
+
+Through buildpurdue, Karthik has developed a nuanced perspective on startups. He believes most startups don't fail because of bad ideas. They fail because of unknown unknowns that only experience can teach you. He emphasizes the difference between "campus feedback" (borrowed pattern-matching from professors and peers) and "operator feedback" (hard-won mental models from real bets and losses). buildpurdue exists to close that gap by bringing real operators, VCs, and YC alumni directly to student founders.
+
+Karthik's favorite project is Repple. He loves that he built an app with real users that solves a real need: a sense of community and friendly competition at the gym. The origin story came from seeing a real motivation gap in exercise logging. The best way to motivate consistency was by solving another problem simultaneously, a need for community and competition at the gym to drive consistency.
+
+## On AI and the Future of Work
+
+Karthik wrote a blog post called "On the Future of Work with AI" where he lays out his vision for how AI will reshape work. His core positions:
+
+1. AI is excellent at repetitive cognitive tasks (data analysis, coding, technical writing), but it struggles with chaotic, unstructured, real-world information. Humans excel at taking in incomprehensible amounts of unclear, abstract information and using it to make decisions.
+
+2. He does not believe current AI models will achieve AGI (by his definition) within 10 years. True AGI would need to handle the messy, unstructured decision-making that humans do, not just clearly defined tasks.
+
+3. The future of work is a "project economy." Workers will shift from executing repetitive cognitive tasks to being "engines for ideas." Organizations will become flatter, with more ideators and project managers who can dynamically create and test projects within days or weeks, while AI handles iteration, simulation, and optimization.
+
+4. Entry-level cognitive work is where the initial displacement will occur (programmers, data analysts, technical writers). But like the industrial revolution, displaced labor will shift to a new type of work: idea generation.
+
+5. His advice: develop practical creativity that interacts with the world around you. Train your brain to constantly produce ideas.
+
+## On the AI Company He'd Love to Create
+
+Karthik wrote a blog post called "The AI Company I'd Love to Create" proposing an "MVP Factory." The core thesis:
+
+The problem: talented people want to innovate, but startups are too risky and corporate jobs stifle innovation. There should not be a world where ideas are easier than ever to build, but the people with those ideas have to gamble on a venture or hope a corporation opens its doors.
+
+The solution: a company that combines the scale and resources of a large corporation with the openness to let innovators create any of their ideas. At its core, an MVP factory. Innovators are hired as employees (stable income, no risk) and churn out MVPs. Successful MVPs either spin off into startups (with MVP Factory holding a large stake) or get sold as IP/contracts to interested corporations.
+
+He argues this is viable because: (1) VC firms already succeed with a 90% failure rate, and MVP Factory would set up more successful companies by providing in-house talent and resources; (2) AI will enable 10x-100x faster idea iteration; (3) paying innovators a salary is just "investing in the founder" with less risk.
+
+## On Quantum Computing
+
+Karthik's honest take on quantum computing is that it's progressing. Exponential progress always starts slow. The moment Shor's algorithm gets cracked on real hardware, everything will break loose. He has a solid understanding of how quantum computing works from hands-on experience with QKD hardware and Qiskit, and he believes it can be a gateway to incredible breakthroughs, especially through simulation and annealing.
+
+## On What Makes a Great Engineer
+
+Karthik believes the best engineer is someone who can take a large problem and subdivide it until the simplest problem can be solved easily. Good code and infrastructure reflects that. You should never have a problem too complex that you can't break it down. This applies to leadership as well.
