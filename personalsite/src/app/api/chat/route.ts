@@ -125,6 +125,8 @@ function encodeSparseQuery(text: string): { indices: number[]; values: number[] 
   return { indices, values };
 }
 
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -160,7 +162,6 @@ export async function POST(req: NextRequest) {
       model: "text-embedding-3-small",
       input: searchQuery,
     });
-
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
     // Step 3: Hybrid query - dense (semantic) + sparse (keyword/BM25)
