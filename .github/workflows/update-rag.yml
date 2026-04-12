@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'personalsite/src/data/projects.json'
-      - 'python-rag/rag-docs/**'
+      - 'python-rag/**'
       - 'personalsite/blog/posts/**'
 
   workflow_dispatch: # allows manual trigger from GitHub UI
@@ -13,9 +13,6 @@ on:
 jobs:
   update-pinecone:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: python-rag
 
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +25,11 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
+        working-directory: python-rag
         run: uv sync
 
       - name: Upload to Pinecone (hybrid: dense + sparse)
+        working-directory: python-rag
         env:
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
@@ -39,7 +38,6 @@ jobs:
 
       - name: Commit updated BM25 model
         run: |
-          cd ..
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add personalsite/src/data/bm25-model.json
