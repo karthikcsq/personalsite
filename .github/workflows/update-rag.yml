@@ -2,41 +2,38 @@ name: Update RAG Embeddings
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - 'personalsite/src/data/projects.json'
-      - 'python-rag/**'
-      - 'personalsite/blog/posts/**'
-
-  workflow_dispatch: # allows manual trigger from GitHub UI
+      - "personalsite/src/data/projects.json"
+      - "python-rag/**"
+      - "personalsite/blog/posts/**"
+  workflow_dispatch:
 
 jobs:
   update-pinecone:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install uv
         run: pip install uv
 
       - name: Install dependencies
-        working-directory: python-rag
-        run: uv sync
+        run: cd python-rag && uv sync
 
-      - name: Upload to Pinecone (hybrid: dense + sparse)
-        working-directory: python-rag
+      - name: Upload to Pinecone
         env:
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: uv run python create-pinecone.py --reset --yes
+        run: cd python-rag && uv run python create-pinecone.py --reset --yes
 
-      - name: Commit updated BM25 model
+      - name: Commit BM25 model
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
