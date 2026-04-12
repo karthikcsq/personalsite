@@ -1,5 +1,5 @@
 """
-Simple BM25 encoder for hybrid search.
+Simple BM25 encoder for hybrid search with Pinecone.
 Designed to produce sparse vectors compatible with Pinecone,
 with a model export format that can be loaded in TypeScript.
 """
