@@ -20,6 +20,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone as PineconeStore
 from langchain_core.documents import Document
 from dotenv import load_dotenv
+from bm25 import SimpleBM25
 
 load_dotenv()
 
@@ -32,6 +33,7 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME")
 EMBED_DIM = 1536  # For OpenAI embeddings
+BM25_MODEL_PATH = os.path.join("..", "personalsite", "src", "data", "bm25-model.json")
 
 # === HELPERS ===
 def compute_hash(content):
@@ -471,15 +473,61 @@ def chunk_documents(documents):
     return chunks
 
 # === PINECONE MANAGEMENT ===
+def ensure_hybrid_index():
+    """Ensure the Pinecone index uses dotproduct metric for hybrid search.
+    Recreates the index if it exists with a different metric."""
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+
+    # Check if index exists and its metric
+    existing_indexes = pc.list_indexes()
+    index_exists = False
+    needs_recreate = False
+
+    for idx_info in existing_indexes:
+        if idx_info.name == INDEX_NAME:
+            index_exists = True
+            if idx_info.metric != "dotproduct":
+                print(f"  Index '{INDEX_NAME}' uses '{idx_info.metric}' metric, need 'dotproduct' for hybrid search")
+                needs_recreate = True
+            break
+
+    if needs_recreate:
+        print(f"  Deleting index '{INDEX_NAME}' to recreate with dotproduct metric...")
+        pc.delete_index(INDEX_NAME)
+        index_exists = False
+        # Wait for deletion
+        import time
+        time.sleep(5)
+
+    if not index_exists:
+        print(f"  Creating index '{INDEX_NAME}' with dotproduct metric for hybrid search...")
+        pc.create_index(
+            name=INDEX_NAME,
+            dimension=EMBED_DIM,
+            metric="dotproduct",
+            spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+        )
+        # Wait for index to be ready
+        import time
+        while not pc.describe_index(INDEX_NAME).status.get("ready", False):
+            print("  Waiting for index to be ready...")
+            time.sleep(2)
+        print(f"  Index '{INDEX_NAME}' created and ready")
+    else:
+        print(f"  Index '{INDEX_NAME}' already uses dotproduct metric")
+
 def delete_all_vectors():
     """Delete all vectors from the Pinecone index"""
     pc = Pinecone(api_key=PINECONE_API_KEY)
+
+    # First ensure the index uses the right metric for hybrid search
+    ensure_hybrid_index()
+
     index = pc.Index(INDEX_NAME)
 
     print("Deleting all existing vectors from Pinecone index...")
 
     try:
-        # Get index stats to see what we're deleting
         stats = index.describe_index_stats()
         total_vectors = stats.total_vector_count
 
@@ -488,11 +536,7 @@ def delete_all_vectors():
             return
 
         print(f"  Found {total_vectors} vectors to delete")
-
-        # Delete all vectors by deleting from all namespaces
-        # For default namespace (empty string), use delete_all
         index.delete(delete_all=True)
-
         print(f"  Successfully deleted all vectors from index '{INDEX_NAME}'")
 
     except Exception as e:
@@ -502,45 +546,57 @@ def delete_all_vectors():
 # === VECTORSTORE UPLOAD ===
 def upload_to_pinecone(chunks):
     pc = Pinecone(api_key=PINECONE_API_KEY)
-    # if INDEX_NAME not in pc.list_indexes():
-    #     pc.create_index(INDEX_NAME, dimension=EMBED_DIM, metric="cosine",
-    #                     spec=ServerlessSpec(cloud="aws", region=PINECONE_ENV))
-    
+
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    
+
     # Create embeddings for all chunks
     texts = [doc.page_content for doc in chunks]
     metadatas = [doc.metadata for doc in chunks]
-    
-    # Get embeddings
+
+    # Get dense embeddings
+    print("Generating dense embeddings...")
     embeds = embeddings.embed_documents(texts)
-    
+
+    # Fit BM25 and generate sparse vectors
+    print("Fitting BM25 model...")
+    bm25 = SimpleBM25(k1=1.2, b=0.75)
+    bm25.fit(texts)
+    bm25.save(BM25_MODEL_PATH)
+
+    print("Generating sparse vectors...")
+    sparse_vectors = [bm25.encode_document(text) for text in texts]
+
     # Prepare data for Pinecone
     index = pc.Index(INDEX_NAME)
-    batch_size = 100  # Adjust based on your needs
-    
-    print(f"Uploading {len(chunks)} chunks to Pinecone in batches of {batch_size}...")
-    
+    batch_size = 100
+
+    print(f"Uploading {len(chunks)} chunks to Pinecone (hybrid: dense + sparse) in batches of {batch_size}...")
+
     for i in range(0, len(chunks), batch_size):
         batch_texts = texts[i:i + batch_size]
         batch_embeds = embeds[i:i + batch_size]
         batch_metadatas = metadatas[i:i + batch_size]
-        
-        # Create vector records
+        batch_sparse = sparse_vectors[i:i + batch_size]
+
+        # Create vector records with both dense and sparse values
         vectors_to_upsert = []
-        for j, (text, vector, metadata) in enumerate(zip(batch_texts, batch_embeds, batch_metadatas)):
+        for j, (text, vector, metadata, sparse) in enumerate(zip(batch_texts, batch_embeds, batch_metadatas, batch_sparse)):
             vector_id = f"vec_{i + j}"
-            # Include the text in metadata for retrieval
             metadata_with_text = metadata.copy()
             metadata_with_text["text"] = text
-            vectors_to_upsert.append((vector_id, vector, metadata_with_text))
-        
+            vectors_to_upsert.append({
+                "id": vector_id,
+                "values": vector,
+                "sparse_values": sparse,
+                "metadata": metadata_with_text,
+            })
+
         # Upsert to Pinecone
         index.upsert(vectors=vectors_to_upsert)
-        
+
         print(f"Uploaded batch {i // batch_size + 1}/{(len(chunks) - 1) // batch_size + 1}")
-    
-    print(f"Successfully uploaded {len(chunks)} chunks to Pinecone.")
+
+    print(f"Successfully uploaded {len(chunks)} hybrid chunks to Pinecone.")
 
 # === MAIN ===
 def main(reset=False, skip_confirm=False):

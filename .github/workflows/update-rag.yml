@@ -30,9 +30,18 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Upload to Pinecone
+      - name: Upload to Pinecone (hybrid: dense + sparse)
         env:
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: uv run python create-pinecone.py --reset --yes
+
+      - name: Commit updated BM25 model
+        run: |
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add personalsite/src/data/bm25-model.json
+          git diff --staged --quiet || git commit -m "Update BM25 model from RAG pipeline"
+          git push

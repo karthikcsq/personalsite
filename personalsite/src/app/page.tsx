@@ -4,6 +4,14 @@ import ReactMarkdown from 'react-markdown';
 import HomePageHead from '@/app/components/HomePageHead';
 import { Send, ArrowRight } from 'lucide-react';
 
+// Convert bare URLs to markdown links so ReactMarkdown renders them as clickable
+function linkifyUrls(text: string): string {
+  return text.replace(
+    /(?<!\]\()(?<!\()(https?:\/\/[^\s)<>]+)/g,
+    (url) => `[${url}](${url})`
+  );
+}
+
 export default function HomePage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
@@ -310,7 +318,7 @@ export default function HomePage() {
                       ),
                     }}
                   >
-                    {message.content}
+                    {linkifyUrls(message.content)}
                   </ReactMarkdown>
                 )}
               </div>

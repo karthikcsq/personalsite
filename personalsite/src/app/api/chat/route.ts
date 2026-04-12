@@ -1,6 +1,7 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
+import bm25Model from "@/data/bm25-model.json";
 
 // Type for chat messages
 interface ChatMessage {
@@ -77,6 +78,53 @@ Rules:
   return rewriteResponse.choices[0]?.message?.content?.trim() || currentQuery;
 }
 
+// === BM25 SPARSE ENCODER (mirrors python-rag/bm25.py tokenization) ===
+const STOPWORDS = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in",
+  "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the",
+  "their", "then", "there", "these", "they", "this", "to", "was", "will", "with",
+  "i", "me", "my", "we", "our", "you", "your", "he", "him", "his", "she", "her",
+  "its", "them", "what", "which", "who", "whom", "how", "when", "where", "why",
+  "do", "does", "did", "has", "have", "had", "am", "been", "being", "would",
+  "could", "should", "can", "may", "might", "shall", "about", "from", "up",
+  "out", "so", "than", "too", "very", "just", "also", "more", "some", "any",
+  "all", "each", "every", "both", "few", "own", "other", "over", "under",
+]);
+
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(t => t.length > 1 && !STOPWORDS.has(t));
+}
+
+interface BM25Model {
+  vocab: Record<string, number>;
+  idf: Record<string, number>;
+}
+
+function encodeSparseQuery(text: string): { indices: number[]; values: number[] } {
+  const model = bm25Model as BM25Model;
+  const tokens = tokenize(text);
+  const seen = new Set<string>();
+  const indices: number[] = [];
+  const values: number[] = [];
+
+  for (const token of tokens) {
+    if (seen.has(token) || !(token in model.vocab)) continue;
+    seen.add(token);
+    const idx = model.vocab[token];
+    const idf = model.idf[String(idx)];
+    if (idf && idf > 0) {
+      indices.push(idx);
+      values.push(idf);
+    }
+  }
+
+  return { indices, values };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -115,10 +163,14 @@ export async function POST(req: NextRequest) {
 
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // Step 3: Query Pinecone (no manual intent filtering, let semantic search do the work)
+    // Step 3: Hybrid query - dense (semantic) + sparse (keyword/BM25)
+    const sparseQuery = encodeSparseQuery(searchQuery);
+    console.log(`🔑 Sparse query: ${sparseQuery.indices.length} terms`);
+
     const queryResponse = await index.query({
       vector: queryEmbedding,
-      topK: 15,
+      sparseVector: sparseQuery.indices.length > 0 ? sparseQuery : undefined,
+      topK: 30,
       includeMetadata: true,
     });
 
