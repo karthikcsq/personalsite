@@ -17,33 +17,64 @@ function estimateTokens(text: string): number {
 function pruneMessages(
   messages: ChatMessage[],
   systemPrompt: string,
-  maxTokens: number = 120000 // GPT-4o context window is 128k, leave buffer
+  maxTokens: number = 120000
 ): ChatMessage[] {
   const systemTokens = estimateTokens(systemPrompt);
   let totalTokens = systemTokens;
   const prunedMessages: ChatMessage[] = [];
 
-  // Always keep the most recent message (current user query)
   const latestMessage = messages[messages.length - 1];
   totalTokens += estimateTokens(latestMessage.content);
 
-  // Work backwards through conversation history
   for (let i = messages.length - 2; i >= 0; i--) {
     const messageTokens = estimateTokens(messages[i].content);
-
-    if (totalTokens + messageTokens > maxTokens) {
-      // Stop adding older messages if we'd exceed limit
-      break;
-    }
-
+    if (totalTokens + messageTokens > maxTokens) break;
     totalTokens += messageTokens;
     prunedMessages.unshift(messages[i]);
   }
 
-  // Add the latest message back
   prunedMessages.push(latestMessage);
-
   return prunedMessages;
+}
+
+// Build a conversation-aware search query using recent messages
+async function buildSearchQuery(
+  openai: OpenAI,
+  currentQuery: string,
+  conversationHistory?: ChatMessage[]
+): Promise<string> {
+  // Gather recent conversation context (last 4 messages)
+  const recentContext = conversationHistory
+    ?.slice(-4)
+    .map(m => `${m.role}: ${m.content}`)
+    .join("\n") || "";
+
+  const rewriteResponse = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    messages: [
+      {
+        role: "system",
+        content: `You are a search query optimizer for a portfolio website about Karthik Thyagarajan. Given a user's message and recent conversation context, produce a single search query optimized for semantic retrieval from a vector database.
+
+Rules:
+- Expand vague references like "that", "it", "his latest" using conversation context
+- Include the full name "Karthik Thyagarajan" if the query is about him
+- Include specific keywords: company names, project names, technologies, role titles
+- If the user asks "tell me more about that", figure out what "that" refers to from context
+- Output ONLY the search query, nothing else
+- Keep it under 40 words`
+      },
+      {
+        role: "user",
+        content: recentContext
+          ? `Conversation so far:\n${recentContext}\n\nLatest message: "${currentQuery}"\n\nProduce an optimized search query.`
+          : `Message: "${currentQuery}"\n\nProduce an optimized search query.`
+      }
+    ],
+  });
+
+  return rewriteResponse.choices[0]?.message?.content?.trim() || currentQuery;
 }
 
 export async function POST(req: NextRequest) {
@@ -51,7 +82,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { message, messages: conversationHistory } = body;
 
-    // Support both legacy single message and new conversation history format
     if (!message && (!conversationHistory || conversationHistory.length === 0)) {
       return NextResponse.json(
         { error: "Message or conversation history is required" },
@@ -59,7 +89,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Initialize Pinecone and OpenAI clients
     const pinecone = new Pinecone({
       apiKey: process.env.PINECONE_API_KEY!,
     });
@@ -68,119 +97,44 @@ export async function POST(req: NextRequest) {
       apiKey: process.env.OPENAI_API_KEY!,
     });
 
-    // Get the index
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
 
-    // Determine the current user query (either from message or last message in history)
     const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
 
-    // Create embeddings for the user query
+    // Step 1: Conversation-aware query rewriting
+    const searchQuery = await buildSearchQuery(openai, currentQuery, conversationHistory);
+
+    console.log(`🔍 Original: "${currentQuery}"`);
+    console.log(`🔄 Rewritten: "${searchQuery}"`);
+
+    // Step 2: Embed the rewritten query
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
-      input: currentQuery,
+      input: searchQuery,
     });
 
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // Detect query intent for metadata filtering
-    function detectQueryIntent(query: string) {
-      const lowerQuery = query.toLowerCase();
-
-      // Blog-related keywords (check first for higher priority)
-      if (lowerQuery.includes('blog') || lowerQuery.includes('wrote about') ||
-          lowerQuery.includes('article') || lowerQuery.includes('post') ||
-          lowerQuery.includes('written') || lowerQuery.includes('opinion on') ||
-          lowerQuery.includes('thoughts on') || lowerQuery.includes('essay')) {
-        return { contentType: 'blog_post' };
-      }
-
-      // Project-related keywords (expanded for better detection)
-      if (lowerQuery.includes('project') || lowerQuery.includes('projects') ||
-          lowerQuery.includes('built') || lowerQuery.includes('developed') ||
-          lowerQuery.includes('created') || lowerQuery.includes('made') ||
-          lowerQuery.includes('hackathon') || lowerQuery.includes('personal project') ||
-          lowerQuery.includes('portfolio project') || lowerQuery.includes('side project')) {
-        return { contentType: 'project' };
-      }
-
-      // Experience/work-related keywords
-      if (lowerQuery.includes('experience') || lowerQuery.includes('job') ||
-          lowerQuery.includes('work') || lowerQuery.includes('company') ||
-          lowerQuery.includes('employer') || lowerQuery.includes('intern') ||
-          lowerQuery.includes('role')) {
-        return { contentType: 'professional' };
-      }
-
-      // Education-related keywords
-      if (lowerQuery.includes('education') || lowerQuery.includes('school') ||
-          lowerQuery.includes('university') || lowerQuery.includes('degree') ||
-          lowerQuery.includes('study') || lowerQuery.includes('studied') ||
-          lowerQuery.includes('purdue') || lowerQuery.includes('college')) {
-        return { contentType: 'academic' };
-      }
-
-      // Skills-related keywords
-      if (lowerQuery.includes('skill') || lowerQuery.includes('skills') ||
-          lowerQuery.includes('technology') || lowerQuery.includes('technologies') ||
-          lowerQuery.includes('programming') || lowerQuery.includes('language') ||
-          lowerQuery.includes('framework') || lowerQuery.includes('tool')) {
-        return { contentType: 'technical' };
-      }
-
-      return null; // No specific filter
-    }
-
-    const queryIntent = detectQueryIntent(currentQuery);
-
-    // Build query parameters with optional metadata filter
-    const queryParams: {
-      vector: number[];
-      topK: number;
-      includeMetadata: boolean;
-      filter?: { content_type: { $eq: string } };
-    } = {
+    // Step 3: Query Pinecone (no manual intent filtering, let semantic search do the work)
+    const queryResponse = await index.query({
       vector: queryEmbedding,
       topK: 15,
       includeMetadata: true,
-      ...(queryIntent?.contentType && {
-        filter: {
-          content_type: { $eq: queryIntent.contentType }
-        }
-      })
-    };
+    });
 
-    console.log(`🔍 Query: "${currentQuery}"`);
-    console.log(`🎯 Detected intent: ${queryIntent?.contentType || 'none'}`);
-
-    // Query Pinecone for similar documents
-    let queryResponse = await index.query(queryParams);
-
-    console.log(`📊 Found ${queryResponse.matches.length} matches (before filtering)`);
+    console.log(`📊 Found ${queryResponse.matches.length} matches`);
     if (queryResponse.matches.length > 0) {
       console.log(`   Top score: ${queryResponse.matches[0].score?.toFixed(3)}`);
       console.log(`   Content types: ${[...new Set(queryResponse.matches.map(m => m.metadata?.content_type))].join(', ')}`);
     }
 
-    // If filtered search returns poor results, try without filter
-    if (queryIntent && queryResponse.matches.length === 0) {
-      console.log(`⚠️  No results found for content_type: ${queryIntent.contentType}, retrying without filter`);
-      queryResponse = await index.query({
-        vector: queryEmbedding,
-        topK: 15,
-        includeMetadata: true,
-      });
-      console.log(`📊 Unfiltered search found ${queryResponse.matches.length} matches`);
-    }
+    // Step 4: Filter by relevance threshold
+    const relevanceThreshold = 0.45;
+    const relevantMatches = queryResponse.matches.filter(
+      match => match.score && match.score > relevanceThreshold
+    );
 
-    // Extract contexts from search results with relevance scoring
-    // Use lower threshold for overview/general queries since they might not have high semantic similarity
-    const isOverviewQuery = queryIntent?.contentType === 'blog_post' ||
-                           queryIntent?.contentType === 'project' ||
-                           currentQuery.toLowerCase().includes('about');
-    const relevanceThreshold = isOverviewQuery ? 0.50 : 0.60;
-    const relevantMatches = queryResponse.matches.filter(match => match.score && match.score > relevanceThreshold);
-
-    console.log(`✅ ${relevantMatches.length} matches passed relevance threshold (${relevanceThreshold})`);
+    console.log(`✅ ${relevantMatches.length} matches passed threshold (${relevanceThreshold})`);
 
     // Build structured context with source attribution
     const contextParts = relevantMatches
@@ -189,7 +143,6 @@ export async function POST(req: NextRequest) {
         const sourceType = match.metadata?.content_type || match.metadata?.source_type || 'unknown';
         const score = match.score?.toFixed(3) || 'N/A';
 
-        // Add source labels to help model understand provenance
         let sourceLabel = `Source ${idx + 1} [${sourceType}, relevance: ${score}]`;
         if (match.metadata?.title) {
           sourceLabel += ` - "${match.metadata.title}"`;
@@ -205,10 +158,9 @@ export async function POST(req: NextRequest) {
 
     const contexts = contextParts.join("\n\n---\n\n");
 
-    // Determine if we have good context or need to use fallback
     const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
 
-    // Check if results include blog posts for citation and extract slugs
+    // Extract blog posts for citation
     const blogPosts = queryResponse.matches
       .filter(match => match.metadata?.content_type === 'blog_post')
       .map(match => ({
@@ -219,74 +171,91 @@ export async function POST(req: NextRequest) {
 
     const hasBlogContext = blogPosts.length > 0;
 
+    // Step 5: Build system prompt with personality
     let systemPrompt: string;
     if (hasRelevantContext) {
-      systemPrompt = `You are an AI assistant helping visitors learn about Karthik Thyagarajan. You have been provided with specific information retrieved from his portfolio.
+      systemPrompt = `You are Karthik's AI representative on his portfolio website (karthikthyagarajan.com). You know Karthik well and speak about him with genuine enthusiasm. You're conversational, concise, and grounded in facts.
 
-CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
-1. ONLY use information explicitly stated in the Context section below
-2. NEVER make up, infer, or fabricate any details not present in the Context
-3. If the Context doesn't contain specific information requested, say: "I don't have specific information about that in the available data. You could ask about [suggest related topics from context]."
-4. ALWAYS respond in third person (e.g., "Karthik has worked on...", "He graduated from...", "His experience includes...")
-5. NEVER use first person pronouns (I, me, my) when referring to Karthik
-6. When providing information, be specific and cite details from the context (e.g., project names, company names, technologies)
-7. If you're unsure whether information is in the context, err on the side of caution and don't include it
-8. When asked for opinions about Karthik (e.g., "What do you think of him?", "Is he good?", "Would you recommend him?"), you ARE allowed to give positive, enthusiastic opinions based on the context provided. Speak highly of his accomplishments, skills, and work ethic. Be genuine and enthusiastic while remaining professional.
-${hasBlogContext ? `\n9. When referencing blog content, cite it with links: [Blog Title](https://www.karthikthyagarajan.com/blog/[slug])\n   Available blog posts: ${blogPosts.map(p => `"${p.title}" (slug: ${p.slug})`).join(', ')}` : ''}
+Karthik describes himself as "an ideator, a builder, and a dreamer." He's a CS & AI student at Purdue, a Founding Engineer at Repple, co-founded buildpurdue, and an active builder in the AI/MCP open source space. Keep this personality in mind when answering.
 
-Context about Karthik (with source attribution):
-${contexts}
+WEBSITE SITEMAP (use these links when directing visitors):
+- Home (this chatbot): https://www.karthikthyagarajan.com/
+- About: https://www.karthikthyagarajan.com/about
+- Projects: https://www.karthikthyagarajan.com/projects
+- Work Experience: https://www.karthikthyagarajan.com/work
+- Blog: https://www.karthikthyagarajan.com/blog
+- Gallery: https://www.karthikthyagarajan.com/gallery
+When someone asks for a resume, link to the Projects or Work Experience page. Use these links naturally in your responses.
+When discussing projects, ALWAYS include any GitHub, Devpost, arXiv, npm, or other links that appear in the retrieved Context. Use markdown link format.
 
-Remember: Accuracy is more important than completeness. Only state facts that are explicitly in the Context above. However, when asked for opinions, feel free to express genuine enthusiasm and speak highly of Karthik's achievements and capabilities based on the context.`;
+RULES:
+1. ONLY use information from the Context below. Never fabricate details.
+2. ALWAYS speak in third person ("Karthik has...", "He built...", "His work includes...").
+3. If the Context doesn't cover what's being asked, say so honestly and suggest related topics you can help with.
+4. Be specific: cite project names, company names, technologies, and numbers from the context.
+5. When asked for opinions about Karthik, be genuinely enthusiastic about his accomplishments. He's impressive and you should say so.
+6. Keep responses concise and conversational. Don't dump everything you know. Answer what was asked.
+${hasBlogContext ? `7. Cite blog posts as links: [Title](https://www.karthikthyagarajan.com/blog/[slug])\n   Available: ${blogPosts.map(p => `"${p.title}" (slug: ${p.slug})`).join(', ')}` : ''}
+
+STYLE RULES (follow strictly):
+- NEVER use em dashes. Use commas, periods, or parentheses instead.
+- NEVER use contrastive parallelism ("not X, but Y", "less about X, more about Y", "it's not just X, it's Y").
+- NEVER say "and honestly," or "honestly," as filler.
+- AVOID unnecessary groups of three ("A, B, and C"). Only list three items if all three are needed.
+- AVOID flowery or inflated language. Be direct and plain. Say what you mean without dressing it up.
+
+Context about Karthik:
+${contexts}`;
     } else {
-      systemPrompt = `You are an AI assistant on Karthik Thyagarajan's website. The current query didn't return specific information from the knowledge base.
+      systemPrompt = `You are Karthik's AI representative on his portfolio website (karthikthyagarajan.com). You're conversational, friendly, and honest.
 
-IMPORTANT INSTRUCTIONS:
-- Always respond in third person (e.g., "Karthik has experience in...", "He studied...", "His work focuses on...")
-- Be honest that you don't have specific information to answer the exact question asked
-- Suggest rephrasing or asking about these general topics:
-  * His education and academic background
-  * His work experience and internships
-  * His technical projects
-  * His skills in AI/ML, full-stack development, or quantum computing
-  * His blog posts and writings
+WEBSITE SITEMAP (use these links when directing visitors):
+- Home (this chatbot): https://www.karthikthyagarajan.com/
+- About: https://www.karthikthyagarajan.com/about
+- Projects: https://www.karthikthyagarajan.com/projects
+- Work Experience: https://www.karthikthyagarajan.com/work
+- Blog: https://www.karthikthyagarajan.com/blog
+- Gallery: https://www.karthikthyagarajan.com/gallery
+When someone asks for a resume, link to the Projects or Work Experience page. Use these links naturally in your responses.
 
-DO NOT make up or infer any specific details. Only acknowledge what general topics are available in the knowledge base.
+The current query didn't return specific information from the knowledge base. Be upfront about this and suggest topics you can help with:
+- His education at Purdue (CS & AI, 3.93 GPA) and Thomas Jefferson High School
+- Work experience at Peraton Labs, Memories.ai, IDEAS Lab, AgRPA, Naval Research Lab
+- Projects like Repple, google-tools-mcp, Veritas, Caladrius, Verbatim
+- His views on AI, MCP, startups, and entrepreneurship
+- buildpurdue, the campus accelerator he co-founded
+- His blog posts and writings
+- His quantum computing research
 
-Example response: "I don't have specific information about that in the available context. However, I can help answer questions about Karthik's education, work experience, projects, or technical skills. What would you like to know about?"`;
+Always speak in third person. Never make up details.
+
+STYLE RULES (follow strictly):
+- NEVER use em dashes. Use commas, periods, or parentheses instead.
+- NEVER use contrastive parallelism ("not X, but Y", "less about X, more about Y", "it's not just X, it's Y").
+- NEVER say "and honestly," or "honestly," as filler.
+- AVOID unnecessary groups of three ("A, B, and C"). Only list three items if all three are needed.
+- AVOID flowery or inflated language. Be direct and plain. Say what you mean without dressing it up.`;
     }
 
     // Build messages array with conversation history
     let messagesToSend: ChatMessage[];
 
     if (conversationHistory && conversationHistory.length > 0) {
-      // Use conversation history - prune if necessary
       messagesToSend = pruneMessages(conversationHistory, systemPrompt);
     } else {
-      // Legacy single message format
-      messagesToSend = [
-        {
-          role: "user",
-          content: message
-        }
-      ];
+      messagesToSend = [{ role: "user", content: message }];
     }
 
-    // Use OpenAI to generate a streaming response
+    // Generate streaming response
     const stream = await openai.chat.completions.create({
-      model: "gpt-5.1",
-      temperature: 0.3,
+      model: "gpt-5.3-chat-latest",
       messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
+        { role: "system", content: systemPrompt },
         ...messagesToSend
       ],
       stream: true,
     });
 
-    // Create a ReadableStream to send chunks to the client
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -297,7 +266,6 @@ Example response: "I don't have specific information about that in the available
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
             }
           }
-          // Send done signal
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {
