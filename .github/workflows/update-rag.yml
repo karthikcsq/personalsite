@@ -10,6 +10,9 @@ on:
       - "personalsite/blog/posts/**"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-pinecone:
     runs-on: ubuntu-latest
