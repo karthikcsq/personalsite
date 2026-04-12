@@ -12,7 +12,7 @@ He is currently based in the San Francisco Bay Area and is open to Artificial In
 
 ## Why AI & Machine Learning?
 
-Karthik's interest in AI/ML started early. He won the Best AI/ML Hack award at HackTJ 10.0 in March 2023 while still in high school. From there, he went on to work at the Naval Research Laboratory that same summer, developing ML algorithms for underwater acoustics and building a LangChain RAG system for classified document retrieval.
+Karthik's interest in AI/ML started early. He went to work at the Naval Research Laboratory the summer after high school, developing ML algorithms for underwater acoustics and building a LangChain RAG system for classified document retrieval.
 
 His AI/ML work has since spanned reinforcement learning (Peraton Labs), computer vision (Memories.ai), robotics and SLAM (IDEAS Lab), agricultural ML (AgRPA), and multi-agent AI systems (Caladrius). He holds certifications in MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
 
@@ -20,7 +20,7 @@ AI/ML excites Karthik because it enables modeling of thinking and intelligence. 
 
 ## Why Entrepreneurship?
 
-Karthik co-founded buildpurdue, where he serves as Co-President and Technical Lead. He designed the operational framework for this founder hub, bridging the gap between customer discovery and technical building. He solely developed the organization's operating platform using Next.js and TypeScript, implementing secure RBAC pipelines to automate student and alumni management. buildpurdue supports 15 student startups and has partnerships with 4 VC firms.
+Karthik co-founded buildpurdue, where he serves as Co-President. He designed the operational framework for this founder hub, bridging the gap between customer discovery and technical building. He solely developed the organization's operating platform using Next.js and TypeScript, implementing secure RBAC pipelines to automate student and alumni management. buildpurdue supports 15 student startups and has partnerships with 4 VC firms.
 
 He is also a Founding Engineer at Repple, a gamified fitness app for iOS with 200+ active users.
 
@@ -33,7 +33,7 @@ Startups draw Karthik in because all innovation comes from founders, whether tha
 - Breadth: ML + full-stack + quantum computing + entrepreneurship + open source is an extremely rare combination for an undergraduate
 - He attended TJHSST, one of the top STEM high schools in the country
 - Published on arXiv as an undergrad (quantum key distribution research)
-- Won Best AI/ML Hack at HackTJ and 2nd place at HackGT
+- Won Best Proof-of-Human Application at Catapult 2026 (Veritas) and 2nd place at HackGT (Caladrius)
 - Co-President of buildpurdue, Founding Engineer at Repple
 - Built google-tools-mcp, an open source MCP server for Google Workspace with 169 tools
 - Active thought leader on LinkedIn with 1,358+ followers, writing about MCP, AI agents, and the future of agent-tool interaction

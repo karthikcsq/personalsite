@@ -1,7 +1,7 @@
 Karthik Thyagarajan - Projects Deep Dive
 
 ## Veritas (Catapult 2026 - Winner: Best Proof-of-Human Application)
-Veritas is a clinical research platform that combines cryptographic proof-of-personhood with ML-powered response quality scoring to give researchers clean, trustworthy data. The global clinical trials market is worth over $80 billion, and an estimated 4% of trial volunteers are "professional patients" who fabricate or exaggerate symptoms for compensation.
+Veritas is a clinical research platform that combines cryptographic proof-of-personhood with ML-powered response quality scoring to give researchers clean, trustworthy data. The team worked with and spoke to real clinical researchers who have problems with data quality, solving a fraud problem that affects 4% of a $35 billion market. An estimated 4% of trial volunteers are "professional patients" who fabricate or exaggerate symptoms for compensation.
 
 How it works in three layers:
 - Identity: Participants verify through World ID (iris biometrics) to cryptographically prove they are a unique human. You cannot enroll twice.
@@ -13,6 +13,8 @@ The scoring pipeline combines LLM scoring (GPT-4o-mini evaluating coherence, eff
 Built with: Next.js 14, React 19, Tailwind CSS, shadcn/ui, PostgreSQL via Supabase, NextAuth.js, World ID, OpenAI GPT-4o, Pinecone, Vercel
 Team: Karthik Thyagarajan, Sonny Chen, Melody Yang, Alex Li
 GitHub: https://github.com/karthikcsq/veritas
+Devpost: https://devpost.com/software/veritas-81fzu6
+Demo video: https://youtu.be/aXmBme6b2-E
 Live: https://veritas-kasm.vercel.app
 
 ## google-tools-mcp (Apr 2025)
@@ -28,6 +30,7 @@ Key features:
 - No telemetry, multi-account profiles, service account support for team automation
 - MIT licensed, published on npm
 - GitHub: https://github.com/karthikcsq/google-tools-mcp
+- npm: https://www.npmjs.com/package/google-tools-mcp
 
 ## Repple (Ongoing)
 Repple is a competitive fitness app for iOS with 200+ active users. Karthik is a Founding Engineer (title on LinkedIn as of Nov 2025). The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards.
@@ -42,9 +45,11 @@ Key technical details:
 - Co-founded with Rishab Chakravarty, Arjun Chadha, and Ayush Guhan
 
 Repple was born from a real motivation gap in exercise logging. The team saw that the best way to motivate consistency was by solving another problem simultaneously: a need for community and competition at the gym. Arjun Chadha reached out to Karthik out of the blue, and Karthik immediately agreed to begin working on it. Rishab Chakravarty, Arjun Chadha, and Ayush Guhan are Karthik's three cofounders.
+- iOS App Store: https://apps.apple.com/us/app/repple-app/id6756220797
+- LinkedIn: https://www.linkedin.com/company/reppleapp
 
 ## buildpurdue (Ongoing)
-buildpurdue is a campus accelerator Karthik co-founded at Purdue University. He serves as Co-President and Technical Lead.
+buildpurdue is a campus accelerator Karthik co-founded at Purdue University. He serves as Co-President.
 
 Key details:
 - Supports 15 student startups with resources to validate problems and refine go-to-market strategies
@@ -55,6 +60,8 @@ Key details:
 - Hosts workshops: Finding Your First Paying Customer, Co-Founder Selection, MVP building
 - Part of the broader Purdue entrepreneurship ecosystem including PAEN and Purdue@SV
 
+- Website: https://buildpurdue.org
+
 buildpurdue has had a moderate amount of success so far. One of their flagship startups, Evential, has launched and is currently speaking with investors. Another startup, Parallax, has had a paid pilot.
 
 ## Caladrius (HackGT - 2nd Place, Sep 2025)
@@ -64,6 +71,9 @@ Key technical details:
 - Encrypted, zero-knowledge data transfer for HIPAA compliance
 - Multi-agent diagnostic system using LangGraph
 - Achieved 85% triage accuracy on symptom analysis
+
+- GitHub: https://github.com/karthikcsq/Caladrius
+- Devpost: https://devpost.com/software/caladrius
 
 Karthik found his team for Caladrius through an Instagram story. It was the craziest rush. They spoke with real doctors and medical filing professionals in the industry to design the best product they could. They worked through the night to get it to work. The team was half asleep during their final pitch, but managed to deliver something strong and powerful.
 

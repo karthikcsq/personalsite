@@ -1,7 +1,7 @@
 Karthik Thyagarajan - Frequently Asked Questions
 
 Q: Who is Karthik Thyagarajan?
-A: Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (graduating May 2027) with a 3.93 GPA. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US. He has worked at companies like Peraton Labs, Memories.ai, IDEAS Lab, AgRPA, and the Naval Research Laboratory. He co-founded buildpurdue (a campus startup accelerator where he serves as Co-President and Technical Lead) and is a Founding Engineer at Repple (a competitive fitness app). He also built google-tools-mcp, an open-source MCP server for Google Workspace.
+A: Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (graduating May 2027) with a 3.93 GPA. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US. He has worked at companies like Peraton Labs, Memories.ai, IDEAS Lab, AgRPA, and the Naval Research Laboratory. He co-founded buildpurdue (a campus startup accelerator where he serves as Co-President) and is a Founding Engineer at Repple (a competitive fitness app). He also built google-tools-mcp, an open-source MCP server for Google Workspace.
 
 Q: What is Karthik currently working on?
 A: Karthik is currently a Machine Learning Engineering Intern at Peraton Labs (since Jun 2025), building RL agents for IoT malware detection. He is also a Founding Engineer at Repple and Co-President of buildpurdue. He recently built and launched google-tools-mcp, an open-source MCP server for Google Workspace with 169 tools. He actively writes about MCP, AI agents, and the future of agent-tool interaction on LinkedIn, where he has 1,358+ followers.
@@ -19,7 +19,7 @@ Q: Has Karthik published any research?
 A: Yes. Karthik published research on arXiv about a photonic implementation of quantum key distribution (https://arxiv.org/abs/2509.04389). He also conducted ML research at the Naval Research Laboratory on underwater acoustics and at IDEAS Lab on robotics/SLAM.
 
 Q: What is buildpurdue?
-A: buildpurdue is a campus accelerator at Purdue University where Karthik serves as Co-President and Technical Lead. It supports 15 student startups by providing resources to validate core problems and refine go-to-market strategies. The organization has partnerships with 4 VC firms and industry mentors. Karthik designed the operational framework and solely developed the organization's operating platform (Next.js/TypeScript) with secure RBAC pipelines. buildpurdue brings real operators and VCs to campus for direct feedback sessions with student founders, hosts workshops on topics like finding your first paying customer and co-founder selection, and is part of the broader Purdue entrepreneurship ecosystem.
+A: buildpurdue is a campus accelerator at Purdue University where Karthik serves as Co-President. It supports 15 student startups by providing resources to validate core problems and refine go-to-market strategies. The organization has partnerships with 4 VC firms and industry mentors. Karthik designed the operational framework and solely developed the organization's operating platform (Next.js/TypeScript) with secure RBAC pipelines. buildpurdue brings real operators and VCs to campus for direct feedback sessions with student founders, hosts workshops on topics like finding your first paying customer and co-founder selection, and is part of the broader Purdue entrepreneurship ecosystem.
 
 Q: What is Repple?
 A: Repple is a competitive fitness app for iOS with 200+ active users. Karthik is a Founding Engineer. The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards. It features synchronized multiplayer, ELO matchmaking, automated point aggregation, and AI-generated workout plans. Co-founded with Rishab Chakravarty, Arjun Chadha, and Ayush Guhan.
@@ -33,7 +33,7 @@ A: Karthik is proficient in Python, Java, C/C++, JavaScript, SQL, and TypeScript
 Q: Where has Karthik worked?
 A: Karthik's work experience includes:
 - Founding Engineer at Repple (Nov 2025 - Present) - Competitive fitness app
-- Co-President and Technical Lead at buildpurdue (Sep 2025 - Present) - Campus startup accelerator
+- Co-President at buildpurdue (Sep 2025 - Present) - Campus startup accelerator
 - Machine Learning Engineering Intern at Peraton Labs (Jun 2025 - Present) - RL agents for IoT malware detection
 - Computer Vision Researcher at Memories.ai (Feb 2025 - Aug 2025) - Video memory framework for AR
 - Undergraduate Robotics Researcher at IDEAS Lab (Mar 2025 - Jun 2025) - SLAM pipelines and neural radiance fields
@@ -44,7 +44,7 @@ Q: What are Karthik's interests outside of tech?
 A: Karthik is a classically trained pianist who achieved Royal Conservatory of Music Piano Examination Level 8. He also enjoys travel. His portfolio gallery showcases photos from Costa Rica, Hawaii, Kilimanjaro, Amsterdam, and more.
 
 Q: Where did Karthik go to high school?
-A: Karthik attended Thomas Jefferson High School for Science and Technology (TJHSST) in Alexandria, Virginia from 2020 to 2024. TJHSST is consistently ranked as one of the top STEM high schools in the United States. He scored 5s on AP Physics C: E&M and AP Physics C: Mechanics, and won the Best AI/ML Hack award at HackTJ 10.0 in March 2023.
+A: Karthik attended Thomas Jefferson High School for Science and Technology (TJHSST) in Alexandria, Virginia from 2020 to 2024. TJHSST is consistently ranked as one of the top STEM high schools in the United States. He scored 5s on AP Physics C: E&M and AP Physics C: Mechanics.
 
 Q: What is Karthik's GPA?
 A: Karthik has a 3.93 GPA at Purdue University where he is double majoring in Computer Science and Artificial Intelligence.
@@ -54,8 +54,8 @@ A: Karthik holds certifications in MCP Fundamentals (Hugging Face, May 2025) and
 
 Q: What awards has Karthik won?
 A: Karthik has won:
+- Best Proof-of-Human Application at Catapult 2026 with Veritas (clinical research fraud detection platform)
 - 2nd Place at HackGT with Caladrius (AI triage system, Sep 2025)
-- Best AI/ML Hack at HackTJ 10.0 (Mar 2023)
 - Royal Conservatory of Music Piano Examination Level 8 (Mar 2022)
 
 Q: How can I contact Karthik?
@@ -63,6 +63,18 @@ A: Karthik can be reached at karthik6002@gmail.com. His profiles are available a
 - GitHub: https://github.com/karthikcsq
 - LinkedIn: https://linkedin.com/in/karthikthyagarajan06
 - Portfolio: https://www.karthikthyagarajan.com
+
+Q: Where can I find Karthik's resume or CV?
+A: Karthik's resume and CV are available as downloadable PDFs on his website:
+- Resume: https://www.karthikthyagarajan.com/resume.pdf
+- Full CV: https://www.karthikthyagarajan.com/cv.pdf
+His work experience timeline is also at https://www.karthikthyagarajan.com/work and his projects are at https://www.karthikthyagarajan.com/projects.
+
+Q: Where can I find Karthik's research papers?
+A: Karthik's published research is available online:
+- QKD Research Paper (arXiv): https://arxiv.org/abs/2509.04389
+- QKD Research Poster: https://www.karthikthyagarajan.com/QKDResearchPoster.pdf
+- K-Means SOM Paper: https://www.karthikthyagarajan.com/K_Means_SOM.pdf
 
 Q: What is Karthik's experience with AI and machine learning?
 A: Karthik has deep experience in AI/ML spanning multiple domains:
