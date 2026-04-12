@@ -1,0 +1,38 @@
+name: Update RAG Embeddings
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'personalsite/src/data/projects.json'
+      - 'python-rag/rag-docs/**'
+      - 'personalsite/blog/posts/**'
+
+  workflow_dispatch: # allows manual trigger from GitHub UI
+
+jobs:
+  update-pinecone:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-rag
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Upload to Pinecone
+        env:
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: uv run python create-pinecone.py --reset --yes

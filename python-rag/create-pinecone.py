@@ -63,9 +63,78 @@ def get_user_repos(username, token):
         page += 1
     return repos
 
+# === PROJECTS JSON LOADING ===
+PROJECTS_JSON_CANDIDATES = [
+    os.path.join("..", "personalsite", "src", "data", "projects.json"),  # From python-rag/
+    os.path.join("personalsite", "src", "data", "projects.json"),       # From root
+]
+
+def load_projects_json():
+    """Load project data from the shared projects.json in the website repo"""
+    json_path = None
+    for candidate in PROJECTS_JSON_CANDIDATES:
+        if os.path.exists(candidate):
+            json_path = candidate
+            break
+
+    if not json_path:
+        print("Warning: projects.json not found. Skipping project loading from JSON.")
+        return []
+
+    with open(json_path, 'r', encoding='utf-8') as f:
+        projects = json.load(f)
+
+    print(f"Found {len(projects)} projects in projects.json")
+
+    docs = []
+    for project in projects:
+        title = project.get("title", "")
+        date = project.get("date", "")
+        tools = project.get("tools", "")
+        narrative = project.get("ragNarrative", project.get("description", ""))
+        awards = project.get("awards", "")
+        links = project.get("links", [])
+        display = project.get("display", {})
+        embed_url = display.get("embedUrl", "")
+
+        # Build searchable text (same format as the old projects_deep_dive.txt)
+        header = title
+        if awards and date:
+            header += f" ({date} - {awards})"
+        elif awards:
+            header += f" ({awards})"
+        elif date:
+            header += f" ({date})"
+
+        parts = [f"Project: {header}", narrative]
+        if tools:
+            parts.append(f"Built with: {tools}")
+        for link in links:
+            if link["url"].startswith("http"):
+                parts.append(f"{link['label']}: {link['url']}")
+        if embed_url:
+            parts.append(f"Demo video: {embed_url}")
+
+        text = "\n".join(parts)
+
+        docs.append(Document(
+            page_content=text,
+            metadata={
+                "source_type": "json",
+                "file_path": json_path,
+                "section": "projects",
+                "content_type": "project",
+                "project_title": title,
+                "technologies": tools
+            }
+        ))
+        print(f"  Loaded project: {title}")
+
+    return docs
+
 # === TEXT FILE LOADING ===
 def load_text_files():
-    # Load regular text files
+    # Load regular text files (excluding projects_deep_dive.txt which is now sourced from projects.json)
     loader = DirectoryLoader(TEXT_DIRECTORY, glob="**/*.txt", loader_cls=TextLoader)
     text_docs = loader.load()
     for doc in text_docs:
@@ -77,7 +146,10 @@ def load_text_files():
     # Load blog posts
     blog_docs = load_blog_posts()
 
-    return text_docs + yaml_docs + blog_docs
+    # Load projects from shared JSON
+    project_docs = load_projects_json()
+
+    return text_docs + yaml_docs + blog_docs + project_docs
 
 def load_yaml_files():
     """Load and process YAML files from the rag-docs directory"""
@@ -372,6 +444,13 @@ def chunk_documents(documents):
                 chunk_overlap=50,
                 separators=["\n\n", "\n", " ", ""]
             )
+        elif source_type == 'json':
+            # Keep each project as a single chunk when possible
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1200,
+                chunk_overlap=100,
+                separators=["\n\n", "\n", ". ", " ", ""]
+            )
         elif source_type == 'github':
             # Code-aware chunking
             splitter = RecursiveCharacterTextSplitter(
@@ -464,7 +543,7 @@ def upload_to_pinecone(chunks):
     print(f"Successfully uploaded {len(chunks)} chunks to Pinecone.")
 
 # === MAIN ===
-def main(reset=False):
+def main(reset=False, skip_confirm=False):
     """
     Main function to load documents and upload to Pinecone
 
@@ -487,11 +566,17 @@ Examples:
         action='store_true',
         help='Delete all existing vectors before uploading (fresh start)'
     )
+    parser.add_argument(
+        '--yes', '-y',
+        action='store_true',
+        help='Skip confirmation prompts (for CI/CD usage)'
+    )
 
     # Only parse args if running as main script
     if __name__ == "__main__":
         args = parser.parse_args()
-        reset = args.reset
+        reset = args.reset or reset
+        skip_confirm = args.yes or skip_confirm
 
     print("=" * 60)
     print("Pinecone RAG Document Upload")
@@ -501,11 +586,12 @@ Examples:
         print("\nWARNING: RESET MODE - All existing vectors will be deleted!")
         print("   This will clear your entire Pinecone index.")
 
-        # Ask for confirmation
-        response = input("\n   Are you sure you want to continue? (yes/no): ").strip().lower()
-        if response not in ['yes', 'y']:
-            print("\nOperation cancelled by user.")
-            return
+        # Ask for confirmation (skip in CI with --yes)
+        if not skip_confirm:
+            response = input("\n   Are you sure you want to continue? (yes/no): ").strip().lower()
+            if response not in ['yes', 'y']:
+                print("\nOperation cancelled by user.")
+                return
 
         print()
         delete_all_vectors()

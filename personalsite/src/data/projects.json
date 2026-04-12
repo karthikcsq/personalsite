@@ -1,0 +1,175 @@
+[
+  {
+    "id": "repple",
+    "title": "Repple",
+    "date": "Ongoing",
+    "description": "Repple is a competitive fitness app for iOS that makes working out fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards. Features include ELO matchmaking, automated point aggregation, and AI-generated workout plans that adapt to user performance.",
+    "ragNarrative": "Repple is a competitive fitness app for iOS with 200+ active users. Karthik is a Founding Engineer (title on LinkedIn as of Nov 2025). The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards.\n\nKey technical details:\n- Built the entire backend using FastAPI and PostgreSQL with Supabase\n- Synchronized multiplayer functionality so users can compete in real-time\n- Custom ELO matchmaking algorithm that pairs users of similar fitness levels\n- Automated cron-based point aggregation system\n- Generative AI workout plans that adapt based on user performance metrics\n- Co-founded with Rishab Chakravarty, Arjun Chadha, and Ayush Guhan\n\nRepple was born from a real motivation gap in exercise logging. The team saw that the best way to motivate consistency was by solving another problem simultaneously: a need for community and competition at the gym. Arjun Chadha reached out to Karthik out of the blue, and Karthik immediately agreed to begin working on it. Rishab Chakravarty, Arjun Chadha, and Ayush Guhan are Karthik's three cofounders.",
+    "tools": "Python (FastAPI), Supabase, PostgreSQL, OpenAI API, Pydantic, TypeScript, Anthropic Claude",
+    "links": [
+      { "label": "Download for iOS", "url": "https://apps.apple.com/us/app/repple-app/id6756220797", "type": "appstore" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/company/reppleapp", "type": "linkedin" }
+    ],
+    "display": {
+      "borderColor": "rgba(168, 85, 247, 0.9)",
+      "glowColor": "rgba(168, 85, 247, 0.8)",
+      "hoverColor": "hover:bg-purple-400",
+      "embedUrl": "https://www.instagram.com/p/DWW1V1JkfFO/embed",
+      "embedHeight": 600
+    }
+  },
+  {
+    "id": "google-tools-mcp",
+    "title": "google-tools-mcp",
+    "date": "Apr 2025",
+    "description": "An open-source MCP server that unifies all of Google Workspace behind a single server and OAuth flow. 169 tools covering Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms. Features auto re-auth, PDF/Word reading from Drive, and read-before-edit guards. MIT licensed, no telemetry.",
+    "ragNarrative": "An open-source MCP server that unifies all of Google Workspace behind a single server and OAuth flow. Karthik built this because he was frustrated with the fragmented state of Google integrations for AI agents. Most existing solutions required 4-5 separate MCP servers, each with their own auth flow, config, and quirks.\n\nKey features:\n- 169 tools covering Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms\n- Single OAuth flow. One setup command: npx google-tools-mcp setup\n- Auto re-auth: handles token expiration and scope changes seamlessly\n- Reads PDFs and Word docs directly from Drive without conversion\n- Read-before-edit guards: prevents blind overwrites, lists all matches when editing ambiguous content\n- Can orchestrate across the entire workspace: read a PDF from Drive, summarize it into a Doc, pull data from a Sheet into a Slides deck, and email it to a team\n- No telemetry, multi-account profiles, service account support for team automation\n- MIT licensed, published on npm",
+    "tools": "TypeScript, Node.js, Google APIs, OAuth 2.0, MCP SDK",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/karthikcsq/google-tools-mcp", "type": "github" },
+      { "label": "npm", "url": "https://www.npmjs.com/package/google-tools-mcp", "type": "npm" }
+    ],
+    "display": {
+      "borderColor": "rgba(66, 133, 244, 0.9)",
+      "glowColor": "rgba(66, 133, 244, 0.8)",
+      "hoverColor": "hover:bg-blue-400",
+      "images": [
+        { "src": "/GoogleToolsMCP1.png", "alt": "google-tools-mcp overview", "width": 500, "height": 300 },
+        { "src": "/GoogleToolsMCP2.png", "alt": "google-tools-mcp demo", "width": 500, "height": 300 }
+      ]
+    }
+  },
+  {
+    "id": "veritas",
+    "title": "Veritas",
+    "date": "Catapult 2026",
+    "description": "Veritas is a clinical research platform that combines cryptographic proof-of-personhood (World ID) with ML-powered response quality scoring to give researchers clean, trustworthy data. Won Best Proof-of-Human Application at Catapult 2026.",
+    "ragNarrative": "Veritas is a clinical research platform that combines cryptographic proof-of-personhood with ML-powered response quality scoring to give researchers clean, trustworthy data. The team worked with and spoke to real clinical researchers who have problems with data quality, solving a fraud problem that affects 4% of a $35 billion market. An estimated 4% of trial volunteers are \"professional patients\" who fabricate or exaggerate symptoms for compensation.\n\nHow it works in three layers:\n- Identity: Participants verify through World ID (iris biometrics) to cryptographically prove they are a unique human. You cannot enroll twice.\n- Intelligence: Every response is scored across multiple quality dimensions by an ML pipeline. Researchers see per-participant integrity scores, flagged contradictions, timing anomalies, and cross-response similarity analysis from a six-tab analytics dashboard.\n- Experience: AI analyzes researcher questions before the study launches, suggesting improvements. During the survey, participants get real-time nudges if responses are vague or off-topic.\n\nThe scoring pipeline combines LLM scoring (GPT-4o-mini evaluating coherence, effort, consistency, specificity) with structured scoring (response time analysis, reverse consistency checks). A RAG pipeline using Pinecone detects copied responses across participants.",
+    "tools": "Next.js 14, React 19, Tailwind CSS, shadcn/ui, PostgreSQL via Supabase, NextAuth.js, World ID, OpenAI GPT-4o, Pinecone, Vercel",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/karthikcsq/veritas", "type": "github" },
+      { "label": "Devpost", "url": "https://devpost.com/software/veritas-81fzu6", "type": "devpost" },
+      { "label": "Live", "url": "https://veritas-kasm.vercel.app", "type": "website" }
+    ],
+    "display": {
+      "borderColor": "rgba(20, 184, 166, 0.9)",
+      "glowColor": "rgba(20, 184, 166, 0.8)",
+      "hoverColor": "hover:bg-purple-400",
+      "embedUrl": "https://www.youtube.com/embed/aXmBme6b2-E",
+      "embedHeight": 375
+    },
+    "awards": "Winner: Best Proof-of-Human Application"
+  },
+  {
+    "id": "caladrius",
+    "title": "Caladrius",
+    "date": "Sep 2025",
+    "description": "Caladrius is a privacy-first AI triage assistant. It aims to cut through the inefficiencies of triage intake and inequities in prioritization, while maintaining a privacy-first HIPAA-compliant ethos. Awarded 2nd place in HackGT 12's track for social impact.",
+    "ragNarrative": "An AI triage system built at HackGT that won 2nd place.\n\nKey technical details:\n- Encrypted, zero-knowledge data transfer for HIPAA compliance\n- Multi-agent diagnostic system using LangGraph\n- Achieved 85% triage accuracy on symptom analysis\n\nKarthik found his team for Caladrius through an Instagram story. It was the craziest rush. They spoke with real doctors and medical filing professionals in the industry to design the best product they could. They worked through the night to get it to work. The team was half asleep during their final pitch, but managed to deliver something strong and powerful.",
+    "tools": "React Native, Python, LangGraph, AWS S3, REST API, Next.js",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/karthikcsq/Caladrius", "type": "github" },
+      { "label": "Devpost", "url": "https://devpost.com/software/caladrius", "type": "devpost" }
+    ],
+    "display": {
+      "borderColor": "rgba(103, 190, 217, 0.9)",
+      "glowColor": "rgba(103, 190, 217, 0.8)",
+      "hoverColor": "hover:bg-blue-300",
+      "embedUrl": "https://www.youtube.com/embed/1fI_w06EoZQ",
+      "embedHeight": 375
+    },
+    "awards": "HackGT - 2nd Place"
+  },
+  {
+    "id": "verbatim",
+    "title": "Verbatim",
+    "date": "Feb 2025",
+    "description": "Verbatim is an intelligent platform that takes any video, summarizes it for quicker consumption, translates it into multiple languages, and then recreates the speaker\u2019s lip movements to match the new audio\u2014delivering a seamless, localized experience.",
+    "ragNarrative": "A video processing platform that integrates multiple AI APIs for transcription, translation, voice cloning, and lip-sync.\n\nKey technical details:\n- Integrates Whisper, GPT-4o, Eleven Labs, and Twelve Labs APIs\n- Serverless async pipeline on Vercel handling 2GB files\n- Job queues and webhook notifications reduced wait time by 85%\n- Processed 500+ videos",
+    "tools": "Next.js, Python, OpenAI API, Google Cloud, Vercel, REST API",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/TheXDShrimp/verbatim", "type": "github" },
+      { "label": "Website", "url": "https://www.getverbatim.tech", "type": "website" }
+    ],
+    "display": {
+      "borderColor": "rgba(243, 152, 20, 0.9)",
+      "glowColor": "rgba(243, 152, 20, 0.8)",
+      "hoverColor": "hover:bg-orange-400",
+      "embedUrl": "https://www.youtube.com/embed/LGS8Pe7L3Gw",
+      "embedHeight": 375
+    }
+  },
+  {
+    "id": "formulator",
+    "title": "FORMulator",
+    "date": "2024",
+    "description": "FORMulator allows users to perfect any type of body movement on their own, by leveraging computer vision technology to provide instant feedback. The app uses a combination of pose estimation and machine learning to analyze the user\u2019s movements and provide real-time feedback on their form, helping them to improve their performance.",
+    "ragNarrative": "FORMulator allows users to perfect any type of body movement on their own, by leveraging computer vision technology to provide instant feedback. The app uses a combination of pose estimation and machine learning to analyze the user's movements and provide real-time feedback on their form, helping them to improve their performance.",
+    "tools": "Computer Vision, Machine Learning, Pose Estimation",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/karthikcsq/FORMulator", "type": "github" }
+    ],
+    "display": {
+      "borderColor": "rgba(244, 194, 156, 0.9)",
+      "glowColor": "rgba(244, 194, 156, 0.8)",
+      "embedUrl": "https://youtube.com/embed/4HB9wkMFed8",
+      "embedHeight": 375
+    }
+  },
+  {
+    "id": "qkd",
+    "title": "Photonic Implementation of QKD",
+    "date": "Oct 2023 - May 2024",
+    "description": "Quantum Key Distribution (QKD) is a method of secure communication that uses quantum mechanics to exchange cryptographic keys. This project focuses on the photonic implementation of QKD with near-infrared lasers, utilizing the principles of quantum mechanics to ensure secure communication between two parties.",
+    "ragNarrative": "A research project implementing quantum key distribution using photonic hardware. Published on arXiv.\n\nKey technical details:\n- Polarization-based QKD prototype with 95% photon detection rate\n- Secure key exchange demonstrated over 5m fiber optic channel\n- Automated signal processing pipeline with Python and NumPy\n- Processed 10K+ samples for bit extraction and QBER analysis",
+    "tools": "Python, NumPy, Oscilloscope, Optics Hardware",
+    "links": [
+      { "label": "arXiv", "url": "https://arxiv.org/abs/2509.04389", "type": "arxiv" },
+      { "label": "Research Poster", "url": "/QKDResearchPoster.pdf", "type": "pdf" }
+    ],
+    "display": {
+      "borderColor": "rgba(87, 20, 243, 0.9)",
+      "glowColor": "rgba(87, 20, 243, 0.8)",
+      "hoverColor": "hover:bg-indigo-900",
+      "images": [
+        { "src": "/qkd_setup.png", "alt": "QKD experimental setup", "width": 350, "height": 300 }
+      ]
+    }
+  },
+  {
+    "id": "kmeans-som",
+    "title": "Enhancing Cluster Cohesion: Integrating Self-Organizing Maps with K-Means Clustering for Improving Unsupervised Learning Distinctions",
+    "date": "2023",
+    "description": "This project explores how SOM, known for its capability to uncover topological structures, fared against traditional centroid-based approaches in capturing intricate data relationships.",
+    "ragNarrative": "A research project exploring how Self-Organizing Maps (SOM), known for their capability to uncover topological structures, fared against traditional centroid-based approaches like K-Means in capturing intricate data relationships. The study integrates SOM with K-Means clustering to improve unsupervised learning distinctions and cluster cohesion.",
+    "tools": "Python, Machine Learning, SOM, K-Means",
+    "links": [
+      { "label": "Research Preprint", "url": "/K_Means_SOM.pdf", "type": "pdf" }
+    ],
+    "display": {
+      "borderColor": "rgba(199, 56, 56, 0.9)",
+      "glowColor": "rgba(199, 56, 56, 0.8)",
+      "hoverColor": "hover:bg-red-800",
+      "images": [
+        { "src": "/SOM.png", "alt": "SOM visualization", "width": 300, "height": 300 }
+      ]
+    }
+  },
+  {
+    "id": "quantum-racer",
+    "title": "Quantum Racer",
+    "date": "Aug - Dec 2022",
+    "description": "Quantum Racer is a simple car racing game that teaches players about quantum decoherence and noise by challenging them to navigate a quantum car through a track while avoiding obstacles. The game is designed to be fun and educational, making it suitable for players of all ages.",
+    "ragNarrative": "An educational Android game simulating quantum mechanics concepts.\n- Custom physics engine with MVC architecture in Java\n- Distributed APK reached 100+ students in quantum computing workshops",
+    "tools": "Java, Android SDK, Gradle, XML",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/karthikcsq/QuantumCarGame_Self", "type": "github" }
+    ],
+    "display": {
+      "borderColor": "rgba(13, 155, 161, 0.9)",
+      "glowColor": "rgba(13, 155, 161, 0.8)",
+      "embedUrl": "https://youtube.com/embed/3OGC_il_6Hc",
+      "embedHeight": 375
+    }
+  }
+]
