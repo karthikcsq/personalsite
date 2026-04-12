@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from 'react-markdown';
 import HomePageHead from '@/app/components/HomePageHead';
 import { Send, ArrowRight } from 'lucide-react';
@@ -7,49 +7,49 @@ import { Send, ArrowRight } from 'lucide-react';
 export default function HomePage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [queue, setQueue] = useState<string[]>([]);
+  const [queueNavIndex, setQueueNavIndex] = useState(-1); // -1 = not browsing
+  const [savedInput, setSavedInput] = useState(""); // preserved input while browsing queue
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isProcessingRef = useRef(false);
+  const messagesRef = useRef(messages);
+
+  // Keep refs in sync
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { isProcessingRef.current = isProcessing; }, [isProcessing]);
 
   // Auto-scroll to the bottom when new messages appear
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (input.trim() === "") return;
+  // Process a single message through the API
+  const processMessage = useCallback(async (messageText: string) => {
+    setIsProcessing(true);
 
-    // Add user message to chat
-    const userMessage = { role: "user", content: input };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setInput("");
-    setIsLoading(true);
+    const userMessage = { role: "user", content: messageText };
+    setMessages(prev => [...prev, userMessage]);
 
-    // Add a placeholder for the streaming response
-    const assistantMessageIndex = messages.length + 1;
-    setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: "" }]);
+    // Capture the index for the assistant placeholder
+    const assistantIndex = messagesRef.current.length + 1;
+    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      // Build conversation history including the new user message
-      const updatedMessages = [...messages, userMessage];
+      const updatedMessages = [...messagesRef.current, userMessage];
 
-      // Call our API endpoint with full conversation history
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: input,
+          message: messageText,
           messages: updatedMessages
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Something went wrong");
-      }
+      if (!response.ok) throw new Error("Something went wrong");
 
-      // Handle streaming response
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedContent = "";
@@ -65,17 +65,14 @@ export default function HomePage() {
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const data = line.slice(6);
-              if (data === '[DONE]') {
-                break;
-              }
+              if (data === '[DONE]') break;
               try {
                 const parsed = JSON.parse(data);
                 if (parsed.content) {
                   accumulatedContent += parsed.content;
-                  // Update the assistant message with accumulated content
-                  setMessages((prevMessages) => {
-                    const newMessages = [...prevMessages];
-                    newMessages[assistantMessageIndex] = {
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[assistantIndex] = {
                       role: "assistant",
                       content: accumulatedContent
                     };
@@ -91,16 +88,127 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessages((prevMessages) => {
-        const newMessages = [...prevMessages];
-        newMessages[assistantMessageIndex] = {
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[assistantIndex] = {
           role: "assistant",
           content: "Sorry, I encountered an error. Please try again."
         };
         return newMessages;
       });
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
+    }
+  }, []);
+
+  // Process next queued message when processing finishes
+  useEffect(() => {
+    if (!isProcessing && queue.length > 0 && queueNavIndex === -1) {
+      const next = queue[0];
+      setQueue(prev => prev.slice(1));
+      processMessage(next);
+    }
+  }, [isProcessing, queue, queueNavIndex, processMessage]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (input.trim() === "") return;
+
+    if (queueNavIndex >= 0) {
+      // Editing a queued message: update the queue entry and exit nav mode
+      setQueue(prev => {
+        const updated = [...prev];
+        updated[queueNavIndex] = input;
+        return updated;
+      });
+      setQueueNavIndex(-1);
+      setSavedInput("");
+      setInput("");
+      inputRef.current?.focus();
+      return;
+    }
+
+    if (isProcessingRef.current) {
+      // Currently processing: add to queue
+      setQueue(prev => [...prev, input]);
+      setInput("");
+      inputRef.current?.focus();
+      return;
+    }
+
+    // Not processing: send immediately
+    processMessage(input);
+    setInput("");
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (queue.length === 0) return;
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (queueNavIndex === -1) {
+        // Entering queue navigation: save current input
+        setSavedInput(input);
+        const newIndex = queue.length - 1;
+        setQueueNavIndex(newIndex);
+        setInput(queue[newIndex]);
+      } else if (queueNavIndex > 0) {
+        const newIndex = queueNavIndex - 1;
+        // Save edits to current queue item before moving
+        setQueue(prev => {
+          const updated = [...prev];
+          updated[queueNavIndex] = input;
+          return updated;
+        });
+        setQueueNavIndex(newIndex);
+        setInput(queue[newIndex]);
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (queueNavIndex === -1) return;
+
+      // Save edits to current queue item
+      setQueue(prev => {
+        const updated = [...prev];
+        updated[queueNavIndex] = input;
+        return updated;
+      });
+
+      if (queueNavIndex < queue.length - 1) {
+        const newIndex = queueNavIndex + 1;
+        setQueueNavIndex(newIndex);
+        setInput(queue[newIndex]);
+      } else {
+        // Past the end: restore saved input
+        setQueueNavIndex(-1);
+        setInput(savedInput);
+        setSavedInput("");
+      }
+    } else if (e.key === "Escape" && queueNavIndex >= 0) {
+      e.preventDefault();
+      // Save edits and exit nav mode
+      setQueue(prev => {
+        const updated = [...prev];
+        updated[queueNavIndex] = input;
+        return updated;
+      });
+      setQueueNavIndex(-1);
+      setInput(savedInput);
+      setSavedInput("");
+    }
+  };
+
+  const removeFromQueue = (index: number) => {
+    setQueue(prev => prev.filter((_, i) => i !== index));
+    if (queueNavIndex >= 0) {
+      if (index === queueNavIndex) {
+        setQueueNavIndex(-1);
+        setInput(savedInput);
+        setSavedInput("");
+      } else if (index < queueNavIndex) {
+        setQueueNavIndex(prev => prev - 1);
+      }
     }
   };
 
@@ -122,7 +230,7 @@ export default function HomePage() {
             Hi, I&apos;m Karthik
           </h1>
           <h2 className="text-xl md:text-2xl font-light font-host-grotesk text-premium-300 mb-10 text-center max-w-2xl">
-            Engineer, researcher, builder.
+            Ideator, builder, dreamer.
           </h2>
 
           {/* Premium CTA Button */}
@@ -211,7 +319,36 @@ export default function HomePage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Premium Input bar */}
+        {/* Queue display */}
+        {queue.length > 0 && (
+          <div className="flex flex-wrap gap-2 pb-3 px-1">
+            <span className="text-xs text-premium-500 font-host-grotesk self-center mr-1">Queued:</span>
+            {queue.map((item, index) => (
+              <div
+                key={index}
+                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-host-grotesk border transition-all cursor-default ${
+                  queueNavIndex === index
+                    ? "bg-accent-600/20 border-accent-600/40 text-accent-300"
+                    : "bg-premium-800/30 border-premium-700/30 text-premium-400"
+                }`}
+              >
+                <span className="truncate max-w-[200px]">{item}</span>
+                <button
+                  onClick={() => removeFromQueue(index)}
+                  className="opacity-0 group-hover:opacity-100 text-premium-500 hover:text-premium-200 transition-opacity ml-0.5"
+                  type="button"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+            <span className="text-xs text-premium-600 font-host-grotesk self-center ml-1">
+              (&#8593;&#8595; to edit)
+            </span>
+          </div>
+        )}
+
+        {/* Input bar */}
         <form
           onSubmit={handleSubmit}
           className={`flex gap-3 pb-8 transition-all duration-700 ease-out ${
@@ -222,16 +359,21 @@ export default function HomePage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
-            className="flex-grow px-6 py-4 border border-premium-700/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-host-grotesk shadow-premium-md"
-            disabled={isLoading}
+            onKeyDown={handleKeyDown}
+            ref={inputRef}
+            placeholder={queueNavIndex >= 0 ? "Editing queued message..." : "Ask me anything..."}
+            className={`flex-grow px-6 py-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-host-grotesk shadow-premium-md ${
+              queueNavIndex >= 0
+                ? "border-accent-600/40"
+                : "border-premium-700/40"
+            }`}
           />
           <button
             type="submit"
             className="bg-accent-600 text-premium-950 px-6 py-4 rounded-xl hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm font-host-grotesk font-medium flex items-center gap-2 shadow-premium-md hover:scale-105"
-            disabled={isLoading || !input.trim()}
+            disabled={!input.trim()}
           >
-            <span className="hidden sm:inline">Send</span>
+            <span className="hidden sm:inline">{queueNavIndex >= 0 ? "Save" : "Send"}</span>
             <Send className="w-5 h-5" />
           </button>
         </form>
