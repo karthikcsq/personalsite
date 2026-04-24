@@ -1,191 +1,117 @@
-'use client';
+"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+
+const NAV_ITEMS = [
+  { href: "/work", label: "Work" },
+  { href: "/projects", label: "Projects" },
+  { href: "/blog", label: "Writing" },
+  { href: "/gallery", label: "Photography" },
+  { href: "/about", label: "About" },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  // Close menu when route changes
-  useEffect(() => {
-    setIsOpen(false);
+    setOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
-    if (isOpen && isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "";
     };
-  }, [isOpen, isMobile]);
+  }, [open]);
 
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/about", label: "About" },
-    { href: "/projects", label: "Projects" },
-    { href: "/work", label: "Work" },
-    { href: "/gallery", label: "Gallery" },
-    { href: "/blog", label: "Blog" },
-  ];
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname?.startsWith(href));
 
-  // Find current page index for distance calculation
-  const currentIndex = navItems.findIndex(item =>
-    pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
-  );
+  return (
+    <>
+      <header className="sticky top-0 z-40 border-b border-[var(--color-hairline)] bg-[var(--color-surface)]/85 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 md:px-8">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="font-serif text-[20px] italic leading-none text-[var(--color-ink)]">
+              karthik
+            </span>
+            <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-accent)]" />
+          </Link>
 
-  if (isMobile) {
-    return (
-      <>
-        {/* Hamburger Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-6 right-6 z-[60] w-12 h-12 flex flex-col items-center justify-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/20 rounded-lg transition-all duration-300 hover:bg-black/60"
-          aria-label="Toggle menu"
-        >
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              isOpen ? 'rotate-45 translate-y-2' : ''
-            }`}
-          />
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              isOpen ? 'opacity-0' : ''
-            }`}
-          />
-          <span
-            className={`w-6 h-0.5 bg-white transition-all duration-300 ${
-              isOpen ? '-rotate-45 -translate-y-2' : ''
-            }`}
-          />
-        </button>
-
-        {/* Backdrop */}
-        <div
-          className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
-            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          onClick={() => setIsOpen(false)}
-        />
-
-        {/* Mobile Menu */}
-        <nav
-          className={`fixed top-0 right-0 h-screen w-64 bg-black/90 backdrop-blur-xl border-l border-white/10 z-50 transition-transform duration-300 ease-in-out ${
-            isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <div className="flex flex-col justify-center h-full px-6 py-20">
-            {navItems.map((item, index) => {
-              const isActive = pathname === item.href ||
-                              (item.href !== "/" && pathname?.startsWith(item.href));
-
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-7 md:flex">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
               return (
-                <div key={item.href} className="relative">
-                  {/* Top line - slides in from left */}
-                  <div
-                    className="absolute top-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
-                    style={{
-                      transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                      opacity: isActive ? 1 : 0
-                    }}
-                  ></div>
-
-                  {/* Bottom line - slides in from left */}
-                  <div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
-                    style={{
-                      transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                      opacity: isActive ? 1 : 0
-                    }}
-                  ></div>
-
-                  <Link
-                    href={item.href}
-                    className={`
-                      block text-white font-medium px-6 py-4 rounded-lg text-left
-                      transition-all duration-300 ease-in-out
-                      hover:bg-white/10 hover:translate-x-2
-                    `}
-                    style={{
-                      transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                </div>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative text-sm transition-colors ${
+                    active
+                      ? "text-[var(--color-ink)]"
+                      : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  {item.label}
+                  {active && (
+                    <span className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[var(--color-accent)]" />
+                  )}
+                </Link>
               );
             })}
-          </div>
-        </nav>
-      </>
-    );
-  }
+            <Link
+              href="/"
+              className="text-sm text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-accent)]"
+            >
+              ← Ask the chat
+            </Link>
+          </nav>
 
-  // Desktop navigation (original)
-  return (
-    <nav className="fixed right-0 top-0 h-screen flex items-center z-50">
-      <div className="flex flex-col justify-center h-full py-12 px-8">
-        {navItems.map((item, index) => {
-          const isActive = pathname === item.href ||
-                          (item.href !== "/" && pathname?.startsWith(item.href));
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-muted)] md:hidden"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
 
-          // Calculate distance from current page (0 = current, 1 = adjacent, etc.)
-          const distance = currentIndex >= 0 ? Math.abs(index - currentIndex) : 0;
-
-          // Fade based on distance: current = 1, adjacent = 0.7, far = 0.4
-          const opacity = distance === 0 ? 1 : distance === 1 ? 0.7 : 0.4;
-
-          return (
-            <div key={item.href} className="relative">
-              {/* Top line - slides in from left */}
-              <div
-                className="absolute top-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
-                style={{
-                  transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                  opacity: isActive ? 1 : 0
-                }}
-              ></div>
-
-              {/* Bottom line - slides in from left */}
-              <div
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white transition-all duration-500 ease-in-out origin-left"
-                style={{
-                  transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                  opacity: isActive ? 1 : 0
-                }}
-              ></div>
-
+      {/* Mobile sheet */}
+      <div
+        className={`fixed inset-0 z-30 bg-[var(--color-surface)] transition-opacity duration-300 md:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div className="flex h-full flex-col items-start gap-6 px-6 pt-24">
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item.href);
+            return (
               <Link
+                key={item.href}
                 href={item.href}
-                className={`
-                  block text-white font-medium px-4 py-3 rounded-lg text-center
-                  transition-all duration-300 ease-in-out
-                  hover:bg-white/10 hover:opacity-100
-                `}
-                style={{ opacity }}
+                className={`font-serif text-[32px] italic transition-colors ${
+                  active
+                    ? "text-[var(--color-accent)]"
+                    : "text-[var(--color-ink)] hover:text-[var(--color-accent)]"
+                }`}
               >
                 {item.label}
               </Link>
-            </div>
-          );
-        })}
+            );
+          })}
+          <Link
+            href="/"
+            className="mt-6 text-sm text-[var(--color-ink-muted)]"
+          >
+            ← Ask the chat
+          </Link>
+        </div>
       </div>
-    </nav>
+    </>
   );
 }

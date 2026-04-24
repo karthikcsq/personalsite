@@ -1,169 +1,153 @@
-@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  /* Surfaces (warmer cream ⇢ subtle variations) */
+  --color-surface: oklch(95% 0.022 82);
+  --color-surface-raised: oklch(97% 0.016 82);
+  --color-surface-muted: oklch(92% 0.028 82);
+  --color-surface-sunken: oklch(90% 0.032 82);
+
+  /* Ink (warm near-black ⇢ tertiary) */
+  --color-ink: oklch(20% 0.018 55);
+  --color-ink-muted: oklch(42% 0.018 60);
+  --color-ink-subtle: oklch(58% 0.014 65);
+  --color-ink-faint: oklch(72% 0.012 70);
+
+  /* Hairlines (warm cream-tinted) */
+  --color-hairline: oklch(84% 0.024 78);
+  --color-hairline-strong: oklch(74% 0.028 78);
+
+  /* Accent: deep scarlet (single committed color) */
+  --color-accent: oklch(53% 0.225 26);
+  --color-accent-hover: oklch(47% 0.22 25);
+  --color-accent-soft: oklch(92% 0.05 25);
+  --color-accent-tint: oklch(95% 0.024 23);
+
+  /* Semantic */
+  --color-focus: var(--color-accent);
+
+  /* Typography */
+  --font-sans: var(--font-host-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* Shadows (low-commitment, light surface appropriate) */
+  --shadow-soft: 0 1px 2px oklch(20% 0.015 60 / 0.04), 0 2px 6px oklch(20% 0.015 60 / 0.04);
+  --shadow-lift: 0 4px 12px oklch(20% 0.015 60 / 0.06), 0 1px 3px oklch(20% 0.015 60 / 0.04);
+}
 
 :root {
-  /* Premium color palette - slate and gold */
-  --premium-bg: #0f172a;
-  --premium-surface: #1e293b;
-  --premium-border: #334155;
-  --premium-text: #f8fafc;
-  --premium-text-secondary: #cbd5e1;
-  --premium-accent: #eab308;
-  --premium-accent-hover: #ca8a04;
-
-  --background: var(--premium-bg);
-  --foreground: var(--premium-text);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: "Host Grotesk", sans-serif;
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-  }
+  color-scheme: light;
+  --background: var(--color-surface);
+  --foreground: var(--color-ink);
 }
 
 html {
   scroll-behavior: smooth;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body {
-  height: 100%; /* Ensure the full height of the viewport is used */
-  margin: 0; /* Remove default margin */
-  padding: 0; /* Remove default padding */
-  overflow-x: visible; /* Prevent horizontal overflow */
-  scroll-behavior: smooth; /* Smooth scrolling */
-}
-
-body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: "Host Grotesk", Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.host-grotesk {
-  font-family: "Host Grotesk", sans-serif;
+/* Selection */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-surface);
 }
 
-.embla__viewport {
-  overflow: hidden;
+/* Focus: no global ring. The input wrapper carries its own border-color change
+   on focus-within; other elements rely on hover/active affordances. */
+:focus,
+:focus-visible {
+  outline: none;
 }
 
-.embla__container {
-  display: flex;
+/* Scrollbar: minimal */
+.quiet-scroll::-webkit-scrollbar { width: 0; height: 0; }
+.quiet-scroll { scrollbar-width: none; }
+
+/* Ink fade mask for chat scroll */
+.ink-mask-top {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 48px);
+          mask-image: linear-gradient(to bottom, transparent 0, black 48px);
 }
 
-.embla__slide {
-  flex: 0 0 auto;
-  min-width: 0;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  padding-right: 1rem;
+/* Motion: staggered reveals */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slip {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tick {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-2px); }
 }
 
-@media (min-width: 768px) {
-  .embla__slide {
-    padding-right: 1.5rem;
-  }
+.rise { animation: rise 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.slip { animation: slip 520ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.tick { animation: tick 1.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .slip, .tick { animation: none !important; }
+  html { scroll-behavior: auto; }
 }
 
-/* Replace this section in your globals.css */
-.prose h1 {
-  display: block;
-  font-family: 'Host Grotesk', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  color: white;
+/* Prose overrides (blog) — light-mode edition */
+.prose {
+  color: var(--color-ink);
+  max-width: 68ch;
 }
-
-.prose h2 {
-  display: block;
-  font-family: 'Host Grotesk', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  color: white;
-}
-
-.prose h3 {
-  display: block;
-  font-family: 'Host Grotesk', sans-serif;
-  font-size: 1.5rem;
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
   font-weight: 600;
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
-  color: white;
+  letter-spacing: -0.015em;
 }
-
-.prose h4 {
-  display: block;
-  font-family: 'Host Grotesk', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  color: white;
-}
-
-.prose p {
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-  color: #e5e7eb; /* text-gray-200 equivalent */
-}
-
-.prose ul, .prose ol {
-  display: block;
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-  padding-left: 1.5em;
-}
-
-.prose ul {
-  list-style-type: disc;
-}
-
-.prose ol {
-  list-style-type: decimal;
-}
-
-.prose a {
-  color: #93c5fd; /* text-blue-300 equivalent */
-  text-decoration: underline;
-}
-
-.prose a:hover {
-  color: #60a5fa; /* text-blue-400 equivalent */
-}
-
+.prose h1 { font-size: 2rem;    margin: 1.4em 0 0.5em; }
+.prose h2 { font-size: 1.6rem;  margin: 1.2em 0 0.5em; }
+.prose h3 { font-size: 1.3rem;  margin: 1em 0 0.5em; }
+.prose h4 { font-size: 1.1rem;  margin: 0.9em 0 0.4em; }
+.prose p  { margin: 1.15em 0; color: var(--color-ink); line-height: 1.7; }
+.prose ul, .prose ol { padding-left: 1.4em; margin: 1.1em 0; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose a  { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.prose a:hover { color: var(--color-accent-hover); }
 .prose img {
-  margin-top: 2em;
-  margin-bottom: 2em;
-  margin-left: auto;
-  margin-right: auto;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin: 2em auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
   max-width: 100%;
   height: auto;
 }
+.prose code { font-family: var(--font-mono); font-size: 0.92em; background: var(--color-surface-muted); padding: 0.1em 0.35em; border-radius: var(--radius-xs); }
+.prose blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1em;
+  color: var(--color-ink-muted);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05em;
+}
+
