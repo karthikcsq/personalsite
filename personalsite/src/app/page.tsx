@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowUp, X } from "lucide-react";
@@ -11,12 +11,43 @@ interface Message {
   artifacts?: Artifact[];
 }
 
-const STARTER_CHIPS = [
+// Bank of suggested questions that rotate through the UI. The pre-chat hero
+// shows 4 at a time and the in-chat rail shows 3 — both draw from this bank,
+// so users always see fresh prompts as the conversation progresses. Keep
+// entries short (≤ ~50 chars) and conversational (third person, no em dashes).
+const QUESTION_BANK: readonly string[] = [
   "What is Karthik building right now?",
   "Where has he worked?",
   "Show me his research.",
   "What does he write about?",
+  "Tell me about Repple.",
+  "What is google-tools-mcp?",
+  "What's his take on MCP?",
+  "How did he get into AI?",
+  "Which hackathons has he won?",
+  "Tell me about buildpurdue.",
+  "What does he do at buildpurdue?",
+  "Why did he co-found buildpurdue?",
+  "What did he do at Peraton Labs?",
+  "What's Veritas?",
+  "Show me his favorite project.",
+  "What's he studying at Purdue?",
+  "Has he done quantum computing research?",
+  "What did he build at the Naval Research Lab?",
+  "What's his view on the future of AI work?",
+  "What tools does he use to build?",
+  "Tell me something surprising about him.",
+  "What's Caladrius?",
 ];
+
+function shuffled<T>(arr: readonly T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function linkifyUrls(text: string): string {
   return text.replace(
@@ -32,6 +63,10 @@ export default function HomePage() {
   const [queue, setQueue] = useState<string[]>([]);
   const [queueNavIndex, setQueueNavIndex] = useState(-1);
   const [savedInput, setSavedInput] = useState("");
+  // Shuffled once per session so the first chips a visitor sees are random,
+  // but the rotation order stays stable as they chat.
+  const [rotatedBank] = useState<string[]>(() => shuffled(QUESTION_BANK));
+  const [chipCursor, setChipCursor] = useState(0);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -94,9 +129,15 @@ export default function HomePage() {
             if (parsed.artifacts) {
               setMessages((prev) => {
                 const next = [...prev];
+                const current = next[assistantIndex].artifacts ?? [];
+                const existingIds = new Set(current.map((a) => a.id));
+                const additions = (parsed.artifacts as Artifact[]).filter(
+                  (a) => !existingIds.has(a.id),
+                );
+                if (additions.length === 0) return prev;
                 next[assistantIndex] = {
                   ...next[assistantIndex],
-                  artifacts: parsed.artifacts as Artifact[],
+                  artifacts: [...current, ...additions],
                 };
                 return next;
               });
@@ -157,11 +198,13 @@ export default function HomePage() {
     if (isProcessingRef.current) {
       setQueue((prev) => [...prev, trimmed]);
       setInput("");
+      setChipCursor((prev) => prev + 4);
       inputRef.current?.focus();
       return;
     }
     processMessage(trimmed);
     setInput("");
+    setChipCursor((prev) => prev + 4);
     inputRef.current?.focus();
   };
 
@@ -244,17 +287,52 @@ export default function HomePage() {
     setQueueNavIndex(-1);
     setInput("");
     setSavedInput("");
+    setChipCursor(0);
     inputRef.current?.focus();
   };
 
   const inChat = messages.length > 0;
-  // Group artifacts per assistant turn; reverse turn order (newest turn on top)
-  // but preserve the intent-driven order WITHIN each turn.
-  const artifactTurns = messages
-    .filter((m) => m.role === "assistant" && m.artifacts && m.artifacts.length > 0)
-    .slice()
-    .reverse();
-  const allArtifacts: Artifact[] = artifactTurns.flatMap((m) => m.artifacts ?? []);
+  // Walk assistant turns newest-first and collect artifacts, deduplicating
+  // across turns by artifact.id so the same card never appears twice in the
+  // receipts panel. First (newest) sighting wins its spot.
+  const allArtifacts: Artifact[] = (() => {
+    const seen = new Set<string>();
+    const out: Artifact[] = [];
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role !== "assistant" || !m.artifacts) continue;
+      for (const a of m.artifacts) {
+        if (seen.has(a.id)) continue;
+        seen.add(a.id);
+        out.push(a);
+      }
+    }
+    return out;
+  })();
+
+  // Surface suggested-question chips that rotate per turn, skipping anything
+  // the user already asked (or queued) in this session.
+  const askedSet = useMemo(() => {
+    const s = new Set<string>();
+    for (const m of messages) if (m.role === "user") s.add(m.content.trim());
+    for (const q of queue) s.add(q.trim());
+    return s;
+  }, [messages, queue]);
+
+  const pickChips = (count: number): string[] => {
+    const out: string[] = [];
+    const n = rotatedBank.length;
+    if (n === 0) return out;
+    for (let i = 0; i < n && out.length < count; i++) {
+      const q = rotatedBank[(chipCursor + i) % n];
+      if (askedSet.has(q) || out.includes(q)) continue;
+      out.push(q);
+    }
+    return out;
+  };
+
+  const heroChips = pickChips(4);
+  const inChatChips = pickChips(3);
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
@@ -303,9 +381,6 @@ export default function HomePage() {
             <p className="mt-6 max-w-[560px] font-serif text-[clamp(1.1rem,2vw,1.4rem)] italic leading-snug text-[var(--color-ink-muted)]">
               Founder, engineer, and student, happiest with a hard problem.
             </p>
-            <p className="mt-4 text-[14px] text-[var(--color-ink-subtle)]">
-              Ask the chat anything.
-            </p>
           </div>
 
           <div className="rise mt-3" style={{ animationDelay: "200ms" }}>
@@ -342,17 +417,19 @@ export default function HomePage() {
               </div>
             </form>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              {STARTER_CHIPS.map((chip) => (
-                <button
-                  key={chip}
-                  onClick={() => submit(chip)}
-                  className="group rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
+            {heroChips.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {heroChips.map((chip) => (
+                  <button
+                    key={chip}
+                    onClick={() => submit(chip)}
+                    className="group rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div
@@ -365,6 +442,10 @@ export default function HomePage() {
             <span className="h-3 w-px bg-[var(--color-hairline)]" />
             <Link href="/projects" className="transition-colors hover:text-[var(--color-ink)]">
               Projects
+            </Link>
+            <span className="h-3 w-px bg-[var(--color-hairline)]" />
+            <Link href="/involvement" className="transition-colors hover:text-[var(--color-ink)]">
+              Involvement
             </Link>
             <span className="h-3 w-px bg-[var(--color-hairline)]" />
             <Link href="/blog" className="transition-colors hover:text-[var(--color-ink)]">
@@ -430,6 +511,24 @@ export default function HomePage() {
                 <span className="ml-1 font-mono text-[10px] text-[var(--color-ink-faint)]">
                   ↑↓ to edit
                 </span>
+              </div>
+            )}
+
+            {/* Suggested question chips (rotate per turn) */}
+            {inChatChips.length > 0 && (
+              <div className="mx-auto flex w-full max-w-[620px] flex-wrap items-center gap-1.5 pb-3">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-ink-subtle)]">
+                  Try
+                </span>
+                {inChatChips.map((chip) => (
+                  <button
+                    key={chip}
+                    onClick={() => submit(chip)}
+                    className="rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3 py-1 text-[12px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                  >
+                    {chip}
+                  </button>
+                ))}
               </div>
             )}
 

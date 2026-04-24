@@ -247,6 +247,48 @@ def yaml_to_documents(yaml_data, file_path):
                     }
                 ))
         
+        # Process involvements (buildpurdue, etc.) — richer than a project,
+        # narrower than an employment role. Emits content_type=involvement
+        # so the chat route can route these chunks to involvement artifacts.
+        if 'involvement' in yaml_data:
+            for inv in yaml_data['involvement']:
+                slug = inv.get('slug', '')
+                title = inv.get('title', slug)
+                inv_text = f"Involvement: {inv.get('role', '')} at {title}"
+                if 'date' in inv:
+                    inv_text += f"\nDate: {inv['date']}"
+                if 'tagline' in inv:
+                    inv_text += f"\nTagline: {inv['tagline']}"
+                if 'what_it_is' in inv:
+                    inv_text += f"\nWhat it is:\n{inv['what_it_is']}"
+                if 'my_role' in inv:
+                    inv_text += f"\nMy role:\n{inv['my_role']}"
+                if 'contributions' in inv:
+                    inv_text += "\nContributions:\n" + "\n".join(
+                        [f"• {c.get('area', '')}: {c.get('detail', '')}" for c in inv['contributions']]
+                    )
+                if 'point_of_view' in inv:
+                    inv_text += "\nPoint of view:\n" + "\n".join(
+                        [f"• {p}" for p in inv['point_of_view']]
+                    )
+                if 'bullets' in inv:
+                    inv_text += "\nBullets:\n" + "\n".join(
+                        [f"• {b}" for b in inv['bullets']]
+                    )
+
+                documents.append(Document(
+                    page_content=inv_text,
+                    metadata={
+                        "source_type": "yaml",
+                        "file_path": file_path,
+                        "section": "involvement",
+                        "content_type": "involvement",
+                        "involvement_slug": slug,
+                        "involvement_title": title,
+                        "role": inv.get('role', ''),
+                    }
+                ))
+
         # Process projects
         if 'projects' in yaml_data:
             for project in yaml_data['projects']:
@@ -461,10 +503,19 @@ def chunk_documents(documents):
                 separators=["\n\nclass ", "\n\ndef ", "\n\n", "\n", " ", ""]
             )
         else:
-            # Default chunking for text files
+            # Text files in rag-docs/ are opinion/bio/faq markdown organized
+            # by `##` and `###` section headers. We MUST split on header
+            # boundaries first so a section header stays attached to the
+            # paragraph underneath it (otherwise retrieval can return a 90
+            # char chunk that is just the header, with the actual content
+            # orphaned into a neighbor chunk the query never surfaces).
+            #
+            # Generous chunk_size + overlap keeps short opinions whole and
+            # lets long ones carry enough leading context to be findable.
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=500,
-                chunk_overlap=50
+                chunk_size=1200,
+                chunk_overlap=200,
+                separators=["\n## ", "\n### ", "\n\n", "\n", ". ", " ", ""]
             )
 
         doc_chunks = splitter.split_documents([doc])

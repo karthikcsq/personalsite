@@ -20,11 +20,11 @@ AI/ML excites Karthik because it enables modeling of thinking and intelligence. 
 
 ## Why Entrepreneurship?
 
-Karthik co-founded buildpurdue, where he serves as Co-President. He designed the operational framework for this founder hub, bridging the gap between customer discovery and technical building. He solely developed the organization's operating platform using Next.js and TypeScript, implementing secure RBAC pipelines to automate student and alumni management. buildpurdue supports 15 student startups and has partnerships with 4 VC firms.
+Karthik co-founded buildpurdue, where he serves as Co-President. buildpurdue is a founder-led, peer-to-peer community for student builders at Purdue. Its core identity is density and agency: the most progress happens when active founders are in the same room, building alongside each other. It's not a top-down accelerator with a curriculum, it's a dense group of people already shipping who give each other real feedback. Karthik shapes the operational framework, and led the build of the organization's internal platform in Next.js and TypeScript on Supabase and PostgreSQL, with RBAC pipelines for cohort, alumni, and mentor management, as the primary contributor on a small team.
 
 He is also a Founding Engineer at Repple, a gamified fitness app for iOS with 200+ active users.
 
-Karthik believes deeply in the startup ecosystem. Through buildpurdue, he has organized events bringing VCs and industry mentors (like John Decker, Chris Blackburn, Veronica Fernandez, and Tyler Mantel) directly to campus to give student founders real operator feedback instead of just academic advice. He attended the Collegiate Entrepreneurs Summit at 16 Tech Innovation District and actively follows the Purdue Alumni Entrepreneurship Network (PAEN).
+Karthik believes deeply in the startup ecosystem. Through buildpurdue, he organizes events bringing VCs and industry mentors directly to campus so student founders get real operator feedback, not just academic advice. The deeper bet, though, is on density: a student founder two months ahead of you is often more useful than a curriculum and more honest than a lecture.
 
 Startups draw Karthik in because all innovation comes from founders, whether that's founders within a larger company or operating on their own. These are people who see real needs and go solve them. A startup is simply the best way for him to operate on where he sees gaps without having to join a slower-moving company to achieve the same effect. That's why all his internships have been in spaces where he is on the cutting edge of research and innovation.
 
