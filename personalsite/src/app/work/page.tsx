@@ -1,5 +1,6 @@
 import { getJobsFromYaml } from "@/utils/jobUtils";
 import { WorkTimelineClient } from "./WorkTimelineClient";
+import { HashScroller } from "@/app/components/HashScroller";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 
 export default function WorkPage() {
   const jobs = getJobsFromYaml();
-  return <WorkTimelineClient jobs={jobs} />;
+  return (
+    <>
+      <HashScroller />
+      <WorkTimelineClient jobs={jobs} />
+    </>
+  );
 }

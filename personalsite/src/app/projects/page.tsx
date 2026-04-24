@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { projects } from "@/data/projectsData";
 import type { Project, ProjectLink } from "@/data/projectsData";
 import type { Metadata } from "next";
+import { HashScroller } from "@/app/components/HashScroller";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -24,6 +25,7 @@ const LINK_LABEL: Record<ProjectLink["type"], string> = {
 export default function ProjectsPage() {
   return (
     <article className="mx-auto max-w-[800px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <HashScroller />
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
         Projects
       </p>
