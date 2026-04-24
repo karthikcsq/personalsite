@@ -1,132 +1,151 @@
-'use client';
+"use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import ReactMarkdown from 'react-markdown';
-import HomePageHead from '@/app/components/HomePageHead';
-import { Send, ArrowRight } from 'lucide-react';
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import { ArrowUp, X } from "lucide-react";
+import { ChatArtifact, type Artifact } from "@/app/components/ChatArtifact";
 
-// Convert bare URLs to markdown links so ReactMarkdown renders them as clickable
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  artifacts?: Artifact[];
+}
+
+const STARTER_CHIPS = [
+  "What is Karthik building right now?",
+  "Where has he worked?",
+  "Show me his research.",
+  "What does he write about?",
+];
+
 function linkifyUrls(text: string): string {
   return text.replace(
     /(?<!\]\()(?<!\()(https?:\/\/[^\s)<>]+)/g,
-    (url) => `[${url}](${url})`
+    (url) => `[${url}](${url})`,
   );
 }
 
 export default function HomePage() {
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [queue, setQueue] = useState<string[]>([]);
-  const [queueNavIndex, setQueueNavIndex] = useState(-1); // -1 = not browsing
-  const [savedInput, setSavedInput] = useState(""); // preserved input while browsing queue
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [queueNavIndex, setQueueNavIndex] = useState(-1);
+  const [savedInput, setSavedInput] = useState("");
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const isProcessingRef = useRef(false);
   const messagesRef = useRef(messages);
 
-  // Keep refs in sync
-  useEffect(() => { messagesRef.current = messages; }, [messages]);
-  useEffect(() => { isProcessingRef.current = isProcessing; }, [isProcessing]);
-
-  // Auto-scroll to the bottom when new messages appear
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesRef.current = messages;
+  }, [messages]);
+  useEffect(() => {
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
-  // Process a single message through the API
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, [input]);
+
   const processMessage = useCallback(async (messageText: string) => {
     setIsProcessing(true);
-
-    const userMessage = { role: "user", content: messageText };
-    setMessages(prev => [...prev, userMessage]);
-
-    // Capture the index for the assistant placeholder
+    const userMessage: Message = { role: "user", content: messageText };
+    setMessages((prev) => [...prev, userMessage]);
     const assistantIndex = messagesRef.current.length + 1;
-    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      const updatedMessages = [...messagesRef.current, userMessage];
-
+      const updated = [...messagesRef.current, userMessage];
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: messageText,
-          messages: updatedMessages
-        }),
+        body: JSON.stringify({ message: messageText, messages: updated }),
       });
-
-      if (!response.ok) throw new Error("Something went wrong");
+      if (!response.ok) throw new Error("Request failed");
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let accumulatedContent = "";
+      let accumulated = "";
+      let buffer = "";
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') break;
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  accumulatedContent += parsed.content;
-                  setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[assistantIndex] = {
-                      role: "assistant",
-                      content: accumulatedContent
-                    };
-                    return newMessages;
-                  });
-                }
-              } catch (e) {
-                console.error("Error parsing chunk:", e);
-              }
+      if (!reader) return;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6);
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.artifacts) {
+              setMessages((prev) => {
+                const next = [...prev];
+                next[assistantIndex] = {
+                  ...next[assistantIndex],
+                  artifacts: parsed.artifacts as Artifact[],
+                };
+                return next;
+              });
+            } else if (parsed.content) {
+              accumulated += parsed.content;
+              setMessages((prev) => {
+                const next = [...prev];
+                next[assistantIndex] = {
+                  ...next[assistantIndex],
+                  content: accumulated,
+                };
+                return next;
+              });
             }
+          } catch {
+            // ignore malformed chunk
           }
         }
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[assistantIndex] = {
+    } catch {
+      setMessages((prev) => {
+        const next = [...prev];
+        next[assistantIndex] = {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again."
+          content: "Something snapped. Try again?",
         };
-        return newMessages;
+        return next;
       });
     } finally {
       setIsProcessing(false);
     }
   }, []);
 
-  // Process next queued message when processing finishes
   useEffect(() => {
     if (!isProcessing && queue.length > 0 && queueNavIndex === -1) {
       const next = queue[0];
-      setQueue(prev => prev.slice(1));
+      setQueue((prev) => prev.slice(1));
       processMessage(next);
     }
   }, [isProcessing, queue, queueNavIndex, processMessage]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (input.trim() === "") return;
+  const submit = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
 
     if (queueNavIndex >= 0) {
-      // Editing a queued message: update the queue entry and exit nav mode
-      setQueue(prev => {
+      setQueue((prev) => {
         const updated = [...prev];
-        updated[queueNavIndex] = input;
+        updated[queueNavIndex] = trimmed;
         return updated;
       });
       setQueueNavIndex(-1);
@@ -135,68 +154,67 @@ export default function HomePage() {
       inputRef.current?.focus();
       return;
     }
-
     if (isProcessingRef.current) {
-      // Currently processing: add to queue
-      setQueue(prev => [...prev, input]);
+      setQueue((prev) => [...prev, trimmed]);
       setInput("");
       inputRef.current?.focus();
       return;
     }
-
-    // Not processing: send immediately
-    processMessage(input);
+    processMessage(trimmed);
     setInput("");
     inputRef.current?.focus();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submit(input);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit(input);
+      return;
+    }
     if (queue.length === 0) return;
 
-    if (e.key === "ArrowUp") {
+    if (e.key === "ArrowUp" && !e.shiftKey) {
       e.preventDefault();
       if (queueNavIndex === -1) {
-        // Entering queue navigation: save current input
         setSavedInput(input);
         const newIndex = queue.length - 1;
         setQueueNavIndex(newIndex);
         setInput(queue[newIndex]);
       } else if (queueNavIndex > 0) {
-        const newIndex = queueNavIndex - 1;
-        // Save edits to current queue item before moving
-        setQueue(prev => {
+        setQueue((prev) => {
           const updated = [...prev];
           updated[queueNavIndex] = input;
           return updated;
         });
+        const newIndex = queueNavIndex - 1;
         setQueueNavIndex(newIndex);
         setInput(queue[newIndex]);
       }
-    } else if (e.key === "ArrowDown") {
+    } else if (e.key === "ArrowDown" && !e.shiftKey) {
       e.preventDefault();
       if (queueNavIndex === -1) return;
-
-      // Save edits to current queue item
-      setQueue(prev => {
+      setQueue((prev) => {
         const updated = [...prev];
         updated[queueNavIndex] = input;
         return updated;
       });
-
       if (queueNavIndex < queue.length - 1) {
         const newIndex = queueNavIndex + 1;
         setQueueNavIndex(newIndex);
         setInput(queue[newIndex]);
       } else {
-        // Past the end: restore saved input
         setQueueNavIndex(-1);
         setInput(savedInput);
         setSavedInput("");
       }
     } else if (e.key === "Escape" && queueNavIndex >= 0) {
       e.preventDefault();
-      // Save edits and exit nav mode
-      setQueue(prev => {
+      setQueue((prev) => {
         const updated = [...prev];
         updated[queueNavIndex] = input;
         return updated;
@@ -208,197 +226,371 @@ export default function HomePage() {
   };
 
   const removeFromQueue = (index: number) => {
-    setQueue(prev => prev.filter((_, i) => i !== index));
+    setQueue((prev) => prev.filter((_, i) => i !== index));
     if (queueNavIndex >= 0) {
       if (index === queueNavIndex) {
         setQueueNavIndex(-1);
         setInput(savedInput);
         setSavedInput("");
       } else if (index < queueNavIndex) {
-        setQueueNavIndex(prev => prev - 1);
+        setQueueNavIndex((prev) => prev - 1);
       }
     }
   };
 
+  const resetChat = () => {
+    setMessages([]);
+    setQueue([]);
+    setQueueNavIndex(-1);
+    setInput("");
+    setSavedInput("");
+    inputRef.current?.focus();
+  };
+
+  const inChat = messages.length > 0;
+  // Group artifacts per assistant turn; reverse turn order (newest turn on top)
+  // but preserve the intent-driven order WITHIN each turn.
+  const artifactTurns = messages
+    .filter((m) => m.role === "assistant" && m.artifacts && m.artifacts.length > 0)
+    .slice()
+    .reverse();
+  const allArtifacts: Artifact[] = artifactTurns.flatMap((m) => m.artifacts ?? []);
+
   return (
-    <>
-      <HomePageHead />
-      <section className="relative flex flex-col min-h-screen text-premium-100 overflow-hidden">
-
-      <div className={`flex flex-col h-screen w-full max-w-4xl mx-auto px-6 md:px-8 transition-all duration-700 ease-out relative ${
-        messages.length === 0 ? 'justify-center' : 'justify-start'
-      }`} style={{ zIndex: 10 }}>
-        {/* Header - fades out when chat starts */}
-        <div
-          className={`flex flex-col items-center transition-all duration-700 ease-out ${
-            messages.length === 0 ? 'mb-12 opacity-100 scale-100' : 'h-0 mb-0 opacity-0 scale-95 overflow-hidden'
-          }`}
-        >
-          <h1 className="text-5xl md:text-6xl font-light font-host-grotesk text-premium-50 mb-4 text-center tracking-tight">
-            Hi, I&apos;m Karthik
-          </h1>
-          <h2 className="text-xl md:text-2xl font-light font-host-grotesk text-premium-300 mb-10 text-center max-w-2xl">
-            Ideator, builder, dreamer.
-          </h2>
-
-          {/* Premium CTA Button */}
-          <a
-            href="/about"
-            className="group relative overflow-hidden px-8 py-4 bg-premium-800/40 border border-premium-700/40 backdrop-blur-sm rounded-xl transition-all duration-300 hover:bg-premium-800/60 hover:border-accent-600/40 hover:scale-105 shadow-premium-lg"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-accent-600/0 via-accent-600/10 to-accent-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative flex items-center gap-3">
-              <span className="font-host-grotesk text-sm font-medium text-premium-100 tracking-wide">Read About Me</span>
-              <ArrowRight className="w-4 h-4 text-accent-500 group-hover:translate-x-1 transition-transform duration-300" />
-            </div>
-          </a>
-        </div>
-
-        {/* Messages container with fade mask */}
-        <div
-          className={`relative flex-grow overflow-y-auto mb-6 transition-all duration-700 ease-out premium-scrollbar ${
-            messages.length === 0 ? 'hidden' : 'opacity-100'
-          }`}
-          style={{
-            paddingTop: messages.length > 0 ? '3rem' : '0',
-            paddingBottom: '1rem',
-            WebkitMaskImage: messages.length > 0 ? 'linear-gradient(to bottom, transparent 0%, black 40px)' : 'none',
-            maskImage: messages.length > 0 ? 'linear-gradient(to bottom, transparent 0%, black 40px)' : 'none'
-          }}
-        >
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`mb-6 animate-fade-in ${
-                message.role === "user" ? "text-right" : "text-left"
-              }`}
+    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
+      {/* Top strip (always present, changes density) */}
+      <header
+        className={`sticky top-0 z-40 border-b border-transparent bg-[var(--color-surface)]/85 backdrop-blur-sm transition-all ${
+          inChat ? "border-[var(--color-hairline)]" : ""
+        }`}
+      >
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 md:px-8">
+          <Link href="/" className="group flex items-center gap-2">
+            <span className="font-serif text-[20px] italic leading-none text-[var(--color-ink)]">
+              karthik
+            </span>
+            <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-accent)]" />
+          </Link>
+          <nav className="flex items-center gap-5 text-sm">
+            {inChat && (
+              <button
+                onClick={resetChat}
+                className="text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
+              >
+                New conversation
+              </button>
+            )}
+            <Link
+              href="/work"
+              className="hidden text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)] sm:inline"
             >
-              <div
-                className={`inline-block px-6 py-4 rounded-2xl max-w-[85%] shadow-premium-md backdrop-blur-sm border ${
-                  message.role === "user"
-                    ? "bg-accent-600/20 border-accent-600/30 text-premium-50"
-                    : "bg-premium-800/40 border-premium-700/30 text-premium-100"
-                }`}
-              >
-                {message.role === "user" ? (
-                  <span className="font-host-grotesk font-normal">{message.content}</span>
-                ) : message.content === "" ? (
-                  // Loading indicator with blue theme
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
-                  </div>
-                ) : (
-                  <ReactMarkdown
-                    components={{
-                      a: ({...props}) => (
-                        <a {...props} className="text-accent-400 hover:text-accent-300 underline transition-colors" target="_blank" rel="noopener noreferrer" />
-                      ),
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      code: ({inline, ...props}: any) => {
-                        return inline ?
-                          <code {...props} className="bg-premium-950/60 px-2 py-1 rounded text-sm font-mono text-accent-400" /> :
-                          <code {...props} className="block bg-premium-950/60 p-4 rounded-lg text-sm font-mono overflow-x-auto border border-premium-700/30" />
-                      },
-                      ul: ({...props}) => (
-                        <ul {...props} className="list-disc pl-6 mt-3 space-y-1" />
-                      ),
-                      ol: ({...props}) => (
-                        <ol {...props} className="list-decimal pl-6 mt-3 space-y-1" />
-                      ),
-                      h1: ({...props}) => (
-                        <h1 {...props} className="text-2xl font-semibold mt-4 mb-3 text-premium-50" />
-                      ),
-                      h2: ({...props}) => (
-                        <h2 {...props} className="text-xl font-semibold mt-4 mb-2 text-premium-50" />
-                      ),
-                      p: ({...props}) => (
-                        <p {...props} className="my-2 leading-relaxed font-host-grotesk" />
-                      ),
-                    }}
-                  >
-                    {linkifyUrls(message.content)}
-                  </ReactMarkdown>
-                )}
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+              See everything
+            </Link>
+          </nav>
         </div>
+      </header>
 
-        {/* Queue display */}
-        {queue.length > 0 && (
-          <div className="flex flex-wrap gap-2 pb-3 px-1">
-            <span className="text-xs text-premium-500 font-host-grotesk self-center mr-1">Queued:</span>
-            {queue.map((item, index) => (
+      {/* PRE-CHAT HERO */}
+      {!inChat && (
+        <section className="mx-auto flex min-h-[calc(100vh-68px)] w-full max-w-[680px] flex-col justify-center px-5 pb-24 md:px-6">
+          <div className="rise" style={{ animationDelay: "80ms" }}>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+              Portfolio · conversational
+            </p>
+            <h1 className="mt-5 text-[clamp(2.5rem,6.5vw,4.25rem)] font-medium leading-[0.96] tracking-[-0.02em] text-[var(--color-ink)]">
+              Karthik Thyagarajan.
+            </h1>
+            <p className="mt-6 max-w-[560px] font-serif text-[clamp(1.1rem,2vw,1.4rem)] italic leading-snug text-[var(--color-ink-muted)]">
+              Founder, engineer, and student, happiest with a hard problem.
+            </p>
+            <p className="mt-4 text-[14px] text-[var(--color-ink-subtle)]">
+              Ask the chat anything.
+            </p>
+          </div>
+
+          <div className="rise mt-3" style={{ animationDelay: "200ms" }}>
+            <form onSubmit={handleSubmit} className="relative">
               <div
-                key={index}
-                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-host-grotesk border transition-all cursor-default ${
-                  queueNavIndex === index
-                    ? "bg-accent-600/20 border-accent-600/40 text-accent-300"
-                    : "bg-premium-800/30 border-premium-700/30 text-premium-400"
+                className={`flex items-end gap-2 rounded-[14px] border bg-[var(--color-surface-raised)] px-4 py-3 shadow-[var(--shadow-soft)] transition-all focus-within:border-[var(--color-accent)] focus-within:shadow-[var(--shadow-lift)] ${
+                  queueNavIndex >= 0
+                    ? "border-[var(--color-accent)]"
+                    : "border-[var(--color-hairline)]"
                 }`}
               >
-                <span className="truncate max-w-[200px]">{item}</span>
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  placeholder={
+                    queueNavIndex >= 0
+                      ? "Editing queued message…"
+                      : "Ask anything about Karthik"
+                  }
+                  className="flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none"
+                  autoFocus
+                />
                 <button
-                  onClick={() => removeFromQueue(index)}
-                  className="opacity-0 group-hover:opacity-100 text-premium-500 hover:text-premium-200 transition-opacity ml-0.5"
-                  type="button"
+                  type="submit"
+                  disabled={!input.trim()}
+                  aria-label="Send"
+                  className="group/btn flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-surface)] transition-all hover:bg-[var(--color-accent-hover)] disabled:opacity-30"
                 >
-                  &times;
+                  <ArrowUp className="h-4 w-4" />
                 </button>
               </div>
-            ))}
-            <span className="text-xs text-premium-600 font-host-grotesk self-center ml-1">
-              (&#8593;&#8595; to edit)
-            </span>
-          </div>
-        )}
+            </form>
 
-        {/* Input bar */}
-        <form
-          onSubmit={handleSubmit}
-          className={`flex gap-3 pb-8 transition-all duration-700 ease-out ${
-            messages.length === 0 ? '' : 'sticky bottom-0'
-          }`}
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            ref={inputRef}
-            placeholder={queueNavIndex >= 0 ? "Editing queued message..." : "Ask me anything..."}
-            className={`flex-grow px-6 py-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-600/50 focus:border-accent-600/50 bg-premium-900/40 text-premium-100 placeholder-premium-400 backdrop-blur-sm transition-all font-host-grotesk shadow-premium-md ${
-              queueNavIndex >= 0
-                ? "border-accent-600/40"
-                : "border-premium-700/40"
-            }`}
-          />
-          <button
-            type="submit"
-            className="bg-accent-600 text-premium-950 px-6 py-4 rounded-xl hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm font-host-grotesk font-medium flex items-center gap-2 shadow-premium-md hover:scale-105"
-            disabled={!input.trim()}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {STARTER_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => submit(chip)}
+                  className="group rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="rise mt-16 flex items-center gap-5 text-xs text-[var(--color-ink-subtle)]"
+            style={{ animationDelay: "360ms" }}
           >
-            <span className="hidden sm:inline">{queueNavIndex >= 0 ? "Save" : "Send"}</span>
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
+            <Link href="/work" className="transition-colors hover:text-[var(--color-ink)]">
+              Work
+            </Link>
+            <span className="h-3 w-px bg-[var(--color-hairline)]" />
+            <Link href="/projects" className="transition-colors hover:text-[var(--color-ink)]">
+              Projects
+            </Link>
+            <span className="h-3 w-px bg-[var(--color-hairline)]" />
+            <Link href="/blog" className="transition-colors hover:text-[var(--color-ink)]">
+              Writing
+            </Link>
+            <span className="h-3 w-px bg-[var(--color-hairline)]" />
+            <Link href="/gallery" className="transition-colors hover:text-[var(--color-ink)]">
+              Photography
+            </Link>
+            <span className="h-3 w-px bg-[var(--color-hairline)]" />
+            <Link href="/about" className="transition-colors hover:text-[var(--color-ink)]">
+              About
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* IN-CHAT SPLIT */}
+      {inChat && (
+        <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+          {/* Chat column */}
+          <div className="flex h-[calc(100vh-68px)] flex-col">
+            <div className="ink-mask-top flex-1 overflow-y-auto pt-8 pb-6 quiet-scroll">
+              <div className="mx-auto max-w-[620px] space-y-8 pr-1">
+                {messages.map((msg, i) => (
+                  <div key={i} className="rise">
+                    {msg.role === "user" ? (
+                      <UserBubble content={msg.content} />
+                    ) : (
+                      <AssistantBubble content={msg.content} artifacts={msg.artifacts} />
+                    )}
+                  </div>
+                ))}
+                <div ref={chatEndRef} className="h-px" />
+              </div>
+            </div>
+
+            {/* Queue strip */}
+            {queue.length > 0 && (
+              <div className="mx-auto flex w-full max-w-[620px] flex-wrap items-center gap-1.5 pb-3">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-ink-subtle)]">
+                  Queued
+                </span>
+                {queue.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`group flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] transition-colors ${
+                      queueNavIndex === index
+                        ? "border-[var(--color-accent)] bg-[var(--color-accent-tint)] text-[var(--color-accent-hover)]"
+                        : "border-[var(--color-hairline)] bg-[var(--color-surface-raised)] text-[var(--color-ink-muted)]"
+                    }`}
+                  >
+                    <span className="max-w-[160px] truncate">{item}</span>
+                    <button
+                      onClick={() => removeFromQueue(index)}
+                      className="text-[var(--color-ink-subtle)] opacity-0 transition-opacity hover:text-[var(--color-ink)] group-hover:opacity-100"
+                      aria-label="Remove"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                <span className="ml-1 font-mono text-[10px] text-[var(--color-ink-faint)]">
+                  ↑↓ to edit
+                </span>
+              </div>
+            )}
+
+            {/* Input (docked) */}
+            <form onSubmit={handleSubmit} className="mx-auto w-full max-w-[620px] pb-8">
+              <div
+                className={`flex items-end gap-2 rounded-[14px] border bg-[var(--color-surface-raised)] px-4 py-3 shadow-[var(--shadow-soft)] transition-all focus-within:border-[var(--color-accent)] focus-within:shadow-[var(--shadow-lift)] ${
+                  queueNavIndex >= 0
+                    ? "border-[var(--color-accent)]"
+                    : "border-[var(--color-hairline)]"
+                }`}
+              >
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  placeholder={
+                    queueNavIndex >= 0 ? "Editing queued message…" : "Ask a follow-up"
+                  }
+                  className="flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim()}
+                  aria-label="Send"
+                  className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-surface)] transition-all hover:bg-[var(--color-accent-hover)] disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Artifact panel (desktop only; mobile renders inline) */}
+          <aside className="hidden h-[calc(100vh-68px)] overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
+            {allArtifacts.length === 0 ? (
+              <ArtifactEmpty />
+            ) : (
+              <div>
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+                  Receipts
+                </p>
+                {allArtifacts.map((art, i) => (
+                  <ChatArtifact key={art.id + "-" + i} artifact={art} index={i} />
+                ))}
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserBubble({ content }: { content: string }) {
+  return (
+    <div className="flex justify-end">
+      <div className="max-w-[85%] rounded-[14px] rounded-tr-[4px] bg-[var(--color-ink)] px-4 py-2.5 text-[15px] leading-relaxed text-[var(--color-surface)]">
+        {content}
+      </div>
+    </div>
+  );
+}
+
+function AssistantBubble({
+  content,
+  artifacts,
+}: {
+  content: string;
+  artifacts?: Artifact[];
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-[6px] h-[6px] w-[6px] flex-none rounded-full bg-[var(--color-accent)]" />
+        <div className="min-w-0 flex-1">
+          {content === "" ? (
+            <TypingIndicator />
+          ) : (
+            <div className="prose prose-sm max-w-none text-[15px] leading-[1.7]">
+              <ReactMarkdown
+                components={{
+                  a: (props) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--color-accent)] underline decoration-1 underline-offset-[3px] transition-colors hover:text-[var(--color-accent-hover)]"
+                    />
+                  ),
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  code: ({ inline, ...props }: any) =>
+                    inline ? (
+                      <code
+                        {...props}
+                        className="rounded bg-[var(--color-surface-muted)] px-1.5 py-0.5 font-mono text-[0.92em] text-[var(--color-ink)]"
+                      />
+                    ) : (
+                      <code
+                        {...props}
+                        className="block overflow-x-auto rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)] p-4 font-mono text-[13px] text-[var(--color-ink)]"
+                      />
+                    ),
+                  p: (props) => <p {...props} className="my-2 text-[var(--color-ink)]" />,
+                  ul: (props) => (
+                    <ul {...props} className="my-2 list-disc space-y-1 pl-5" />
+                  ),
+                  ol: (props) => (
+                    <ol {...props} className="my-2 list-decimal space-y-1 pl-5" />
+                  ),
+                }}
+              >
+                {linkifyUrls(content)}
+              </ReactMarkdown>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Hide scrollbar */}
-      <style jsx global>{`
-        .premium-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
+      {/* Mobile: inline artifacts below the assistant message */}
+      {artifacts && artifacts.length > 0 && (
+        <div className="lg:hidden mt-1 pl-5">
+          {artifacts.map((art, i) => (
+            <ChatArtifact key={art.id + "-m-" + i} artifact={art} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
-        /* Firefox scrollbar */
-        .premium-scrollbar {
-          scrollbar-width: none;
-        }
-      `}</style>
-    </section>
-    </>
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1.5 py-2">
+      <span className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]" />
+      <span
+        className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]"
+        style={{ animationDelay: "120ms" }}
+      />
+      <span
+        className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]"
+        style={{ animationDelay: "240ms" }}
+      />
+    </div>
+  );
+}
+
+function ArtifactEmpty() {
+  return (
+    <div className="flex h-full flex-col justify-center text-center">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        Receipts panel
+      </p>
+      <p className="mt-3 font-serif text-[17px] italic leading-snug text-[var(--color-ink-muted)]">
+        Whatever Karthik&apos;s chat pulls up, it lands here.
+      </p>
+      <p className="mt-2 text-[13px] text-[var(--color-ink-faint)]">
+        Work entries, projects, and writing, materialized as you ask.
+      </p>
+    </div>
   );
 }

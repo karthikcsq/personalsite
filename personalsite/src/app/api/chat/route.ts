@@ -2,11 +2,124 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import bm25Model from "@/data/bm25-model.json";
+import { getJobsFromYaml } from "@/utils/jobUtils";
+import { findProjectByTitle } from "@/utils/projectUtils";
 
 // Type for chat messages
 interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
+}
+
+// Artifact payload sent to client for dynamic component rendering
+type Artifact =
+  | {
+      kind: "work";
+      id: string;
+      data: {
+        role: string;
+        company: string;
+        year: string;
+        description: string[];
+        icon: string;
+      };
+    }
+  | {
+      kind: "project";
+      id: string;
+      data: {
+        title: string;
+        tools: string;
+        date: string;
+        link?: string;
+        bullets: string[];
+      };
+    }
+  | {
+      kind: "blog";
+      id: string;
+      data: {
+        title: string;
+        slug: string;
+        excerpt: string;
+      };
+    };
+
+interface PineconeMatch {
+  id?: string;
+  score?: number;
+  metadata?: Record<string, unknown>;
+}
+
+function extractArtifacts(matches: PineconeMatch[], limit = 3): Artifact[] {
+  // Build an artifact per match in the order provided, deduplicating by kind+key.
+  // Caller controls ordering (intent-weighted) and which matches are eligible.
+  const jobs = getJobsFromYaml();
+  const seen = new Set<string>();
+  const out: Artifact[] = [];
+
+  for (const match of matches) {
+    if (out.length >= limit) break;
+    const meta = match.metadata || {};
+    const contentType = meta.content_type as string | undefined;
+    let artifact: Artifact | null = null;
+    let kind: Artifact["kind"] | null = null;
+
+    if (contentType === "professional") {
+      const company = (meta.company as string) || "";
+      if (!company) continue;
+      const job = jobs.find(
+        (j) =>
+          j.company.toLowerCase() === company.toLowerCase() ||
+          j.company.toLowerCase().includes(company.toLowerCase()),
+      );
+      if (!job) continue;
+      kind = "work";
+      artifact = {
+        kind,
+        id: `work:${job.company}`,
+        data: {
+          role: job.title,
+          company: job.company,
+          year: job.year,
+          description: job.description,
+          icon: job.icon,
+        },
+      };
+    } else if (contentType === "project") {
+      const title = (meta.project_title as string) || (meta.title as string) || "";
+      if (!title) continue;
+      const project = findProjectByTitle(title);
+      if (!project) continue;
+      kind = "project";
+      artifact = {
+        kind,
+        id: `project:${project.title}`,
+        data: {
+          title: project.title,
+          tools: project.tools,
+          date: project.date,
+          link: project.link,
+          bullets: project.bullets,
+        },
+      };
+    } else if (contentType === "blog_post") {
+      const title = (meta.title as string) || "";
+      const slug = (meta.slug as string) || "";
+      if (!title || !slug) continue;
+      kind = "blog";
+      const text = (meta.text as string) || "";
+      const excerpt = text.slice(0, 220).replace(/\s+/g, " ").trim();
+      artifact = { kind, id: `blog:${slug}`, data: { title, slug, excerpt } };
+    }
+
+    if (!artifact || !kind) continue;
+    if (seen.has(artifact.id)) continue;
+    seen.add(artifact.id);
+    out.push(artifact);
+  }
+
+  return out;
 }
 
 // Estimate token count (rough approximation: 1 token ≈ 4 characters)
@@ -299,6 +412,63 @@ STYLE RULES (follow strictly):
       messagesToSend = [{ role: "user", content: message }];
     }
 
+    // Run dedicated per-kind retrieval to guarantee artifact diversity.
+    // The main RAG retrieval can be dominated by one content type (often blog posts),
+    // so we query separately with a metadata filter for each artifact-worthy kind.
+    const ARTIFACT_KINDS = [
+      { filter: { content_type: "professional" }, topK: 3 },
+      { filter: { content_type: "project" }, topK: 3 },
+      { filter: { content_type: "blog_post" }, topK: 3 },
+    ];
+
+    // Dedicated per-kind retrieval. Hybrid BM25+dense scores differ by orders of
+    // magnitude across content types so we rank WITHIN each kind, then order kinds
+    // by query intent rather than raw score.
+    const perKindResults = await Promise.all(
+      ARTIFACT_KINDS.map((k) =>
+        index
+          .query({
+            vector: queryEmbedding,
+            sparseVector: sparseQuery.indices.length > 0 ? sparseQuery : undefined,
+            topK: k.topK,
+            includeMetadata: true,
+            filter: k.filter,
+          })
+          .catch((e) => {
+            console.error(`Filter ${JSON.stringify(k.filter)} failed:`, e);
+            return { matches: [] as PineconeMatch[] };
+          }),
+      ),
+    );
+
+    const q = currentQuery.toLowerCase();
+    const intentOrder: Array<"work" | "project" | "blog"> = (() => {
+      const work = /\b(work|job|role|company|companies|employer|intern|internship|experience|career|hire|employ)/.test(q);
+      const project = /\b(project|built|building|build|made|create|created|ship|shipped|hack)/.test(q);
+      const writing = /\b(write|writing|wrote|blog|post|think|thought|essay|article|read)/.test(q);
+      if (work) return ["work", "project", "blog"];
+      if (project) return ["project", "work", "blog"];
+      if (writing) return ["blog", "project", "work"];
+      return ["project", "work", "blog"];
+    })();
+
+    const topPerKind: Record<string, PineconeMatch | undefined> = {
+      work: (perKindResults[0].matches as PineconeMatch[])[0],
+      project: (perKindResults[1].matches as PineconeMatch[])[0],
+      blog: (perKindResults[2].matches as PineconeMatch[])[0],
+    };
+
+    const orderedMatches = intentOrder
+      .map((k) => topPerKind[k])
+      .filter((m): m is PineconeMatch => !!m);
+
+    const artifacts = extractArtifacts(orderedMatches, 3);
+    console.log(
+      `🎨 Intent: ${intentOrder.join(">")}  Emitting ${artifacts.length} artifact(s): ${artifacts
+        .map((a) => a.kind)
+        .join(", ")}`,
+    );
+
     // Generate streaming response
     const stream = await openai.chat.completions.create({
       model: "gpt-5.3-chat-latest",
@@ -313,6 +483,12 @@ STYLE RULES (follow strictly):
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
+          // Emit artifacts as the first event so client can render the panel immediately
+          if (artifacts.length > 0) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ artifacts })}\n\n`),
+            );
+          }
           for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
