@@ -7,9 +7,6 @@ export interface ProjectLink {
 }
 
 export interface ProjectDisplay {
-  borderColor: string;
-  glowColor: string;
-  hoverColor?: string;
   embedUrl?: string;
   embedHeight?: number;
   images?: { src: string; alt: string; width: number; height: number }[];

@@ -1,226 +1,201 @@
-'use client';
+import Link from "next/link";
+import Image from "next/image";
+import type { Metadata } from "next";
 
-import { Linkedin, Github, Mail, FileText, Code, GraduationCap, Lightbulb, Quote } from 'lucide-react';
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Karthik Thyagarajan — CS & AI at Purdue, building ML systems for robotics and startups.",
+};
+
+const SKILLS = [
+  "Machine Learning",
+  "PyTorch",
+  "Computer Vision",
+  "Robotics",
+  "Quantum Computing",
+  "TypeScript",
+  "Python",
+  "C++",
+  "AWS",
+  "AR / XR",
+];
+
+const EXPLORING = [
+  "Reinforcement learning for IoT security",
+  "AR/XR video memory systems",
+  "Neural radiance fields and 3D SLAM",
+  "Multi-agent systems and RAG pipelines",
+];
+
+const INTERESTS = [
+  { label: "Photography", image: "/interests/photography-interest.jpg", href: "/gallery" },
+  { label: "Music", image: "/interests/music-interest.jpg" },
+  { label: "Travel", image: "/interests/travel-interest.jpg" },
+  { label: "AI / ML", image: "/interests/ai-interest.jpg" },
+];
+
+const CONNECT = [
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06" },
+  { label: "GitHub", href: "https://github.com/karthikcsq" },
+  { label: "Email", href: "mailto:karthik6002@gmail.com" },
+  { label: "Resume (PDF)", href: "/resume.pdf" },
+];
 
 export default function AboutPage() {
-
-  const skills = [
-    "Machine Learning", "PyTorch", "Computer Vision", "Quantum Computing",
-    "TypeScript", "C++", "Python", "AWS", "Robotics", "AR/XR"
-  ];
-
-  const interests = [
-    { label: "Photography", image: "/interests/photography-interest.jpg" },
-    { label: "Music", image: "/interests/music-interest.jpg" },
-    { label: "Travel", image: "/interests/travel-interest.jpg" },
-    { label: "AI/ML", image: "/interests/ai-interest.jpg" }
-  ];
-
   return (
-    <div className="relative min-h-screen text-premium-100 overflow-hidden">
+    <article className="mx-auto max-w-[720px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        About
+      </p>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-28 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
-        {/* Hero Section */}
-        <div className="mb-12 animate-fade-in">
-          <div className="relative overflow-hidden rounded-2xl border border-premium-700/40 bg-premium-950/60 backdrop-blur-xl shadow-xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-premium-950/80 via-premium-900/50 to-premium-900/20 opacity-90" />
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-premium-950/60 via-transparent to-transparent" />
-            <div className="relative px-8 py-10 sm:px-10 sm:py-12">
-              <div className="mb-8">
-                <h1 className="font-host-grotesk text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-premium-50 mb-4">
-                  Karthik Thyagarajan
-                </h1>
-                <div className="h-0.5 w-20 bg-gradient-to-r from-accent-500 to-transparent" />
-              </div>
-              <p className="font-host-grotesk text-xl sm:text-2xl text-premium-100/90 font-light max-w-3xl leading-relaxed">
-                Building intelligent systems at the intersection of ML, robotics, and quantum computing
-              </p>
-            </div>
-          </div>
-        </div>
+      <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
+        Karthik Thyagarajan.
+      </h1>
 
-        {/* Skills */}
-        <div className="flex flex-wrap gap-3 mb-10 animate-fade-in">
-          {skills.map((skill) => (
-            <span
-              key={skill}
-              className="px-4 py-2 bg-premium-800/40 backdrop-blur-md border border-premium-700/40 text-sm font-host-grotesk text-premium-200 hover:bg-premium-800/60 hover:border-accent-600/40 hover:text-premium-100 transition-all duration-300 cursor-default rounded-lg shadow-premium"
+      <p className="mt-6 max-w-[620px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
+        CS and AI at Purdue, building ML systems for robots and startups. Not trying
+        to sound like anyone else.
+      </p>
+
+      <section className="mt-14 space-y-5 text-[16px] leading-[1.75] text-[var(--color-ink)]">
+        <p>
+          I grew up building things that were probably too ambitious for the week I
+          had. That habit followed me into college: I am a founding engineer at Repple,
+          co-founded buildpurdue (a campus accelerator), and spend the rest of my time
+          in research labs and hackathons.
+        </p>
+        <p>
+          What I care about: systems that actually ship, interfaces that respect the
+          person using them, and the stretch of engineering where ML, robotics, and
+          quantum brush against each other. I am not precious about which layer of the
+          stack I work on, as long as the thing gets out the door.
+        </p>
+      </section>
+
+      <Divider />
+
+      <Section label="Education">
+        <p className="text-[16px] text-[var(--color-ink)]">
+          <span className="font-medium">Purdue University</span>
+          <span className="text-[var(--color-ink-subtle)]"> · 2023–2027</span>
+        </p>
+        <p className="mt-1 text-[14.5px] text-[var(--color-ink-muted)]">
+          B.S. in Computer Science &amp; Artificial Intelligence (double major).
+        </p>
+      </Section>
+
+      <Divider />
+
+      <Section label="Currently exploring">
+        <ul className="space-y-2.5">
+          {EXPLORING.map((item) => (
+            <li
+              key={item}
+              className="relative pl-5 text-[15.5px] leading-relaxed text-[var(--color-ink)]"
             >
+              <span className="absolute left-0 top-[10px] h-px w-3 bg-[var(--color-accent)]" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Divider />
+
+      <Section label="Skills">
+        <p className="text-[15px] leading-[1.9] text-[var(--color-ink)]">
+          {SKILLS.map((skill, i) => (
+            <span key={skill}>
               {skill}
+              {i < SKILLS.length - 1 && (
+                <span className="mx-2 text-[var(--color-ink-faint)]">·</span>
+              )}
             </span>
           ))}
+        </p>
+      </Section>
+
+      <Divider />
+
+      <Section label="Interests">
+        <div className="grid grid-cols-2 gap-3">
+          {INTERESTS.map((interest) => {
+            const Tag = interest.href ? Link : "div";
+            const props = interest.href ? { href: interest.href } : {};
+            return (
+              <Tag
+                key={interest.label}
+                {...(props as { href: string })}
+                className="group relative block aspect-[4/3] overflow-hidden rounded-md"
+              >
+                <Image
+                  src={interest.image}
+                  alt={interest.label}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  sizes="(max-width: 768px) 50vw, 360px"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[oklch(20%_0.018_55_/_0.55)] to-transparent p-3">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-surface)]">
+                    {interest.label}
+                  </span>
+                </div>
+              </Tag>
+            );
+          })}
         </div>
+      </Section>
 
-        {/* Connect Section */}
-        <div className="mb-12 group relative overflow-hidden bg-premium-900/40 border border-accent-600/30 p-8 backdrop-blur-xl hover:border-accent-600/50 transition-all duration-300 rounded-xl shadow-premium-lg">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-accent-700/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative z-10">
-            <div className="mb-6 flex items-center gap-3">
-              <Mail className="w-5 h-5 text-accent-500" />
-              <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Connect</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <Divider />
+
+      <Section label="Connect">
+        <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          {CONNECT.map((c) => (
+            <li key={c.label}>
               <a
-                href="https://www.linkedin.com/in/karthikthyagarajan06"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-blue-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
+                href={c.href}
+                target={c.href.startsWith("http") ? "_blank" : undefined}
+                rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="group inline-flex items-baseline gap-1.5 text-[15.5px] text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)]"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10 flex items-center gap-3">
-                  <Linkedin className="w-5 h-5 text-premium-300 group-hover/link:text-blue-400 transition-colors" />
-                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">LinkedIn</p>
-                </div>
+                <span className="border-b border-[var(--color-hairline-strong)] pb-0.5 group-hover:border-[var(--color-accent)]">
+                  {c.label}
+                </span>
+                <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
+                  ↗
+                </span>
               </a>
+            </li>
+          ))}
+        </ul>
+      </Section>
 
-              <a
-                href="https://github.com/karthikcsq"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-gray-400/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-500/0 to-gray-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10 flex items-center gap-3">
-                  <Github className="w-5 h-5 text-premium-300 group-hover/link:text-gray-300 transition-colors" />
-                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">GitHub</p>
-                </div>
-              </a>
+      <Divider />
 
-              <a
-                href="/resume.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-purple-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10 flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-premium-300 group-hover/link:text-purple-400 transition-colors" />
-                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">Resume</p>
-                </div>
-              </a>
-
-              <a
-                href="mailto:karthik6002@gmail.com"
-                className="group/link relative overflow-hidden bg-premium-800/30 border border-premium-700/30 p-5 hover:border-red-500/40 hover:bg-premium-800/50 transition-all duration-300 rounded-lg shadow-premium"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/10 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10 flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-premium-300 group-hover/link:text-red-400 transition-colors" />
-                  <p className="font-host-grotesk font-medium text-premium-100 text-sm">Email</p>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto">
-
-          {/* About Card */}
-          <div className="lg:col-span-2 group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10">
-              <div className="mb-8 flex items-center gap-3">
-                <Code className="w-6 h-6 text-accent-500" />
-                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">About</h2>
-              </div>
-              <p className="font-host-grotesk text-base text-premium-300 leading-relaxed mb-5 font-light">
-                CS & AI student at Purdue University. Working on startups, AR/XR video analysis, and full stack applications.
-                Previously built ML infrastructure at scale and developed quantum algorithms for real-world applications.
-              </p>
-              <p className="font-host-grotesk text-base text-premium-300 leading-relaxed font-light">
-                Passionate about pushing the boundaries of what&apos;s possible with intelligent systems.
-              </p>
-            </div>
-          </div>
-
-          {/* Education Card */}
-          <div className="group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10">
-              <div className="mb-8 flex items-center gap-3">
-                <GraduationCap className="w-6 h-6 text-accent-500" />
-                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Education</h2>
-              </div>
-              <h3 className="font-host-grotesk text-lg font-medium text-premium-100 mb-3">Purdue University</h3>
-              <p className="font-host-grotesk text-sm text-premium-400 leading-relaxed font-light">
-                B.S. in Computer Science & Artificial Intelligence
-              </p>
-            </div>
-          </div>
-
-          {/* Currently Exploring Card */}
-          <div className="group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-10 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10">
-              <div className="mb-8 flex items-center gap-3">
-                <Lightbulb className="w-6 h-6 text-accent-500" />
-                <h2 className="font-host-grotesk text-2xl font-medium text-premium-50">Currently Exploring</h2>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-host-grotesk text-base text-premium-300 font-light">Reinforcement learning for IoT security</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-host-grotesk text-base text-premium-300 font-light">AR/XR video memory systems</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-host-grotesk text-base text-premium-300 font-light">Neural radiance fields & 3D SLAM</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-500 mt-2 flex-shrink-0"></div>
-                  <span className="font-host-grotesk text-base text-premium-300 font-light">Multi-agent systems & RAG pipelines</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Interests Grid */}
-          <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-            {interests.map((interest) => {
-              const Component = interest.label === "Photography" ? "a" : "div";
-              const linkProps = interest.label === "Photography" ? { href: "/gallery" } : {};
-
-              return (
-                <Component
-                  key={interest.label}
-                  {...linkProps}
-                  className="group relative overflow-hidden border border-premium-700/30 backdrop-blur-sm hover:border-accent-600/40 transition-all duration-300 aspect-[4/3] rounded-xl shadow-premium-md cursor-pointer"
-                >
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{ backgroundImage: `url(${interest.image})` }}
-                  />
-                  {/* Dark Overlay */}
-                  <div className="absolute inset-0 bg-premium-950/50 group-hover:bg-premium-950/30 transition-colors duration-300" />
-                  {/* Text */}
-                  <div className="relative z-10 h-full flex items-center justify-center">
-                    <p className="font-host-grotesk text-lg font-medium text-premium-50 drop-shadow-lg">{interest.label}</p>
-                  </div>
-                </Component>
-              );
-            })}
-          </div>
-
-          {/* Quote Card */}
-          <div className="lg:col-span-3 group relative overflow-hidden bg-premium-900/40 border border-premium-700/30 p-8 backdrop-blur-xl hover:border-accent-600/40 transition-all duration-300 rounded-xl shadow-premium-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-600/5 to-premium-800/10 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10 flex items-center gap-4">
-              <Quote className="w-10 h-10 text-accent-500/40 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-host-grotesk text-base text-premium-300 leading-relaxed font-light italic mb-3">
-                  He who has a why to live for can bear almost any how.
-                </p>
-                <p className="font-host-grotesk text-xs text-premium-400 font-light">— Friedrich Nietzsche</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <blockquote className="my-10 border-l-2 border-[var(--color-accent)] pl-6">
+        <p className="font-serif text-[20px] italic leading-snug text-[var(--color-ink-muted)]">
+          He who has a why to live for can bear almost any how.
+        </p>
+        <footer className="mt-3 text-[13px] text-[var(--color-ink-subtle)]">
+          Friedrich Nietzsche
+        </footer>
+      </blockquote>
+    </article>
   );
+}
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section className="my-10">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        {label}
+      </p>
+      {children}
+    </section>
+  );
+}
+
+function Divider() {
+  return <div className="h-px bg-[var(--color-hairline)]" />;
 }

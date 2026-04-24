@@ -1,61 +1,80 @@
 "use client";
-import { JobEntry } from "@/utils/jobUtils";
 import Image from "next/image";
-import Link from "next/link";
-import { scrollToCenter } from "@/utils/scrollUtils";
+import { JobEntry } from "@/utils/jobUtils";
 
-interface Props { jobs: JobEntry[] }
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+interface Props {
+  jobs: JobEntry[];
+}
 
 export function WorkTimelineClient({ jobs }: Props) {
   return (
-    <section className="relative min-h-screen text-white py-12 px-4 sm:px-6 overflow-x-hidden">
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40 md:pr-32 lg:pr-40">
-        <h1 className="text-5xl md:text-7xl font-light text-center font-host-grotesk mb-6 tracking-tight">Work Experience</h1>
-        <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
-          My professional journey and experiences
-        </p>
-        <Link
-          href="#work"
-          onClick={(event) => scrollToCenter(event, "#work")}
-          className="mt-8 self-center w-10 h-10 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-300 text-gray-400 hover:text-white"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </Link>
-      </div>
-      <div className="relative gap-8 max-w-4xl mx-auto px-4 sm:px-0" style={{ zIndex: 10 }}>
-        <div className="absolute left-[39px] sm:left-[50px] top-0 h-full w-1" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)`, zIndex: 10 }}></div>
-        {jobs.map((job, index) => {
-          const rgbValues = job.color.match(/\d+/g);
-          if (!rgbValues) return null;
-          const r = parseInt(rgbValues[0]);
-          const g = parseInt(rgbValues[1]);
-          const b = parseInt(rgbValues[2]);
-          const rgbaBorder = `rgba(${r}, ${g}, ${b}, 0.9)`;
-          const rgbaShadow1 = `rgba(${r}, ${g}, ${b}, 0.8)`;
-          const rgbaShadow2 = `rgba(${r}, ${g}, ${b}, 0.6)`;
-          return (
-            <div key={index} className="grid grid-cols-[50px_1fr] sm:grid-cols-[100px_1fr] mb-8 gap-4 sm:gap-8 relative" style={{ zIndex: 10 }}>
-              <div className="relative flex items-center justify-center" id="work">
-                <div className="w-12 h-12 sm:w-25 sm:h-25 rounded-full flex items-center justify-center shadow-md" style={{ backgroundColor: "rgba(255,255,255,1)", boxShadow: `0 0 10px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.4)`, zIndex: 10 }}>
-                  <Image src={job.icon} alt={`${job.title} Icon`} width={48} height={48} className="w-8 h-8 sm:w-20 sm:h-20 object-contain" />
+    <article className="mx-auto max-w-[760px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        Work
+      </p>
+      <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
+        Where I&apos;ve worked.
+      </h1>
+      <p className="mt-5 max-w-[560px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
+        Research labs, startups, and whatever shipped in between.
+      </p>
+
+      <ol className="mt-14">
+        {jobs.map((job, i) => (
+          <li
+            key={i}
+            id={slugify(job.company)}
+            className="relative border-t border-[var(--color-hairline)] py-8 last:border-b"
+          >
+            <div className="grid grid-cols-[44px_1fr] gap-5 md:grid-cols-[56px_1fr] md:gap-7">
+              <div className="relative flex flex-none items-start pt-0.5">
+                <div className="relative h-11 w-11 overflow-hidden rounded-md bg-[var(--color-surface-muted)] md:h-12 md:w-12">
+                  <Image
+                    src={job.icon}
+                    alt={job.company}
+                    fill
+                    className="object-contain p-1.5"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 </div>
               </div>
-              <div className="relative flex flex-col items-start p-4 sm:p-6 rounded-lg shadow-lg backdrop-blur-xs text-white" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", border: `2px solid ${rgbaBorder}`, boxShadow: `0 0 10px ${rgbaShadow1}, 0 0 20px ${rgbaShadow2}` }}>
-                <div className="mb-2">
-                  <h2 className="text-lg sm:text-xl font-semibold">{job.title}</h2>
-                  <p className="text-xs sm:text-sm text-gray-300">{job.company}</p>
-                  <p className="text-xs sm:text-sm text-gray-300">{job.year}</p>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h2 className="text-[19px] font-medium leading-tight tracking-[-0.01em] text-[var(--color-ink)] md:text-[21px]">
+                    {job.title}
+                  </h2>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
+                    {job.year}
+                  </span>
                 </div>
-                <ul className="list-disc list-inside text-sm sm:text-base text-gray-200">
-                  {job.description.map((point, i) => <li key={i}>{point}</li>)}
+                <p className="mt-1 text-[14.5px] text-[var(--color-ink-muted)]">
+                  {job.company}
+                </p>
+                <ul className="mt-4 space-y-2.5">
+                  {job.description.map((bullet, j) => (
+                    <li
+                      key={j}
+                      className="relative pl-5 text-[15px] leading-[1.65] text-[var(--color-ink)]"
+                    >
+                      <span className="absolute left-0 top-[12px] h-px w-3 bg-[var(--color-hairline-strong)]" />
+                      {bullet}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
-          );
-        })}
-      </div>
-    </section>
+          </li>
+        ))}
+      </ol>
+    </article>
   );
 }

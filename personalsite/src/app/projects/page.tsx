@@ -1,34 +1,81 @@
-"use client";
-
 import Image from "next/image";
-import Link from "next/link";
-import { scrollToCenter } from '@/utils/scrollUtils';
-import { projects } from '@/data/projectsData';
-import type { Project, ProjectLink } from '@/data/projectsData';
+import { ArrowUpRight } from "lucide-react";
+import { projects } from "@/data/projectsData";
+import type { Project, ProjectLink } from "@/data/projectsData";
+import type { Metadata } from "next";
 
-function ProjectCard({ project, isFirst }: { project: Project; isFirst: boolean }) {
-  const { display, links } = project;
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "Selected projects, experiments, and things Karthik has shipped.",
+};
 
+const LINK_LABEL: Record<ProjectLink["type"], string> = {
+  github: "GitHub",
+  devpost: "Devpost",
+  website: "Visit",
+  npm: "npm",
+  appstore: "App Store",
+  linkedin: "LinkedIn",
+  arxiv: "arXiv",
+  pdf: "PDF",
+  youtube: "YouTube",
+};
+
+export default function ProjectsPage() {
   return (
-    <div
-      className="max-w-2xl text-center p-6 rounded-lg shadow-lg backdrop-blur-xs"
-      style={{
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        border: `2px solid ${display.borderColor}`,
-        boxShadow: `0 0 10px ${display.glowColor}, 0 0 20px ${display.glowColor.replace(/[\d.]+\)$/, '0.6)')}`,
-      }}
-    >
-      <h2 className="text-3xl font-bold mb-4" {...(isFirst ? { id: "projects" } : {})}>
-        {project.title}
-      </h2>
-      <p className="text-lg mb-6">{project.description}</p>
+    <article className="mx-auto max-w-[800px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        Projects
+      </p>
+      <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
+        Things I&apos;ve built.
+      </h1>
+      <p className="mt-5 max-w-[560px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
+        Hackathon wins, research prototypes, and shipped products.
+      </p>
 
-      {/* Embed (YouTube/Instagram) */}
+      <ol className="mt-14">
+        {projects.map((project) => (
+          <ProjectBlock key={project.id} project={project} />
+        ))}
+      </ol>
+    </article>
+  );
+}
+
+function ProjectBlock({ project }: { project: Project }) {
+  const { display, links } = project;
+  return (
+    <li
+      id={project.id}
+      className="border-t border-[var(--color-hairline)] py-10 last:border-b"
+    >
+      <header className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h2 className="text-[22px] font-medium leading-tight tracking-[-0.01em] text-[var(--color-ink)] md:text-[26px]">
+          {project.title}
+        </h2>
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
+          {project.date}
+        </span>
+        {project.awards && (
+          <span className="rounded-sm bg-[var(--color-accent-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--color-accent-hover)]">
+            {project.awards}
+          </span>
+        )}
+      </header>
+
+      <p className="mt-3 text-[15.5px] leading-[1.7] text-[var(--color-ink)]">
+        {project.description}
+      </p>
+
+      <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        {project.tools}
+      </p>
+
       {display.embedUrl && (
-        <div className="mb-6">
+        <div className="mt-6 overflow-hidden rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)]">
           <iframe
-            className="w-full rounded-lg shadow-lg"
-            width="500"
+            className="block w-full"
             height={display.embedHeight ?? 375}
             src={display.embedUrl}
             title={`${project.title} embed`}
@@ -38,115 +85,41 @@ function ProjectCard({ project, isFirst }: { project: Project; isFirst: boolean 
         </div>
       )}
 
-      {/* Images */}
       {display.images && display.images.length > 0 && (
-        <div className="flex flex-col items-center justify-center my-8 space-y-6">
+        <div className="mt-6 flex flex-col gap-4">
           {display.images.map((img) => (
-            <Image
+            <div
               key={img.src}
-              src={img.src}
-              alt={img.alt}
-              width={img.width}
-              height={img.height}
-              className="rounded-lg shadow-md border-3 border-gray-700"
-            />
+              className="overflow-hidden rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)]"
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                className="h-auto w-full"
+              />
+            </div>
           ))}
         </div>
       )}
 
-      {/* Links */}
-      <div className="flex items-center justify-center space-x-4">
-        {links.map((link) => (
-          <ProjectLinkButton key={link.url} link={link} hoverColor={display.hoverColor} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProjectLinkButton({ link, hoverColor }: { link: ProjectLink; hoverColor?: string }) {
-  if (link.type === "github") {
-    return (
-      <a
-        href={link.url}
-        className="inline-block hover:scale-110 hover:transition duration-300"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Image
-          src="/githublogo.png"
-          alt="GitHub Logo"
-          width={1125}
-          height={417}
-          className="w-32 h-13 bg-white p-2 rounded-lg shadow-md"
-        />
-      </a>
-    );
-  }
-
-  if (link.type === "arxiv") {
-    return (
-      <a
-        href={link.url}
-        className="inline-block hover:scale-110 hover:transition duration-300"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Image
-          src="/arxivlogo.jpg"
-          alt="arXiv Logo"
-          width={1125}
-          height={417}
-          className="h-13 w-auto bg-white p-2 rounded-lg shadow-md"
-        />
-      </a>
-    );
-  }
-
-  const textHoverClass = link.type === "pdf" && hoverColor?.includes("indigo")
-    ? `${hoverColor} hover:text-white`
-    : link.type === "pdf" && hoverColor?.includes("red")
-      ? `${hoverColor} hover:text-white`
-      : hoverColor ?? "hover:bg-gray-400";
-
-  return (
-    <a
-      href={link.url}
-      className={`inline-block px-6 py-3 text-lg font-semibold text-black bg-white rounded-lg ${textHoverClass} hover:scale-110 hover:transition duration-300`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {link.label}
-    </a>
-  );
-}
-
-export default function ProjectsPage() {
-  return (
-    <section className="relative flex flex-col font-host-grotesk text-white text-left overflow-hidden">
-      {/* Header Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40 md:pr-32 lg:pr-40 pt-24">
-        <h1 className="text-5xl md:text-7xl font-light text-center font-host-grotesk mb-6 tracking-tight">Projects</h1>
-        <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
-          Building solutions that make a difference
-        </p>
-        <Link
-          href="#projects"
-          onClick={(event) => scrollToCenter(event, "#projects")}
-          className="mt-8 self-center w-10 h-10 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-300 text-gray-400 hover:text-white"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </Link>
-      </div>
-
-      {/* Projects Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 space-y-8">
-        {projects.map((project, index) => (
-          <ProjectCard key={project.id} project={project} isFirst={index === 0} />
-        ))}
-      </div>
-    </section>
+      {links.length > 0 && (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {links.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-[var(--color-hairline-strong)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              {LINK_LABEL[link.type] ?? link.label}
+              <ArrowUpRight className="h-3 w-3 opacity-60 transition-opacity group-hover:opacity-100" />
+            </a>
+          ))}
+        </div>
+      )}
+    </li>
   );
 }

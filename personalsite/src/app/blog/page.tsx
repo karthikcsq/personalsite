@@ -1,94 +1,63 @@
-import Link from 'next/link';
-import { getSortedPosts } from '@/utils/blogUtils';
-import { Metadata } from 'next';
-import { BookOpen, Calendar, ArrowRight } from 'lucide-react';
+import Link from "next/link";
+import { getSortedPosts } from "@/utils/blogUtils";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Blog',
-  description: 'Read about Karthik Thyagarajan\'s thoughts on technology, research, and personal experiences. Insights from a software engineer and researcher.',
-  keywords: ['blog', 'technology', 'research', 'software engineering', 'Karthik Thyagarajan'],
+  title: "Writing",
+  description:
+    "Essays and notes by Karthik Thyagarajan on AI, research, and things worth thinking about.",
 };
 
 export default async function BlogIndex() {
   const posts = getSortedPosts();
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
+    <article className="mx-auto max-w-[720px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+        Writing
+      </p>
+      <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
+        Notes and essays.
+      </h1>
+      <p className="mt-5 max-w-[540px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
+        Thinking out loud about AI, research, startups, and the occasional tangent.
+      </p>
 
-      <div className="max-w-5xl mx-auto w-full px-6 sm:px-8 pt-32 pb-20 relative" style={{ zIndex: 10 }}>
-        {/* Header */}
-        <div className="mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm">
-            <BookOpen className="w-4 h-4 text-white" />
-            <span className="text-xs font-host-grotesk font-medium text-white tracking-wide uppercase">Writing & Thoughts</span>
-          </div>
-
-          <h1 className="font-host-grotesk text-5xl sm:text-6xl font-light tracking-tight text-white mb-4">Blog</h1>
-          <div className="h-0.5 w-16 bg-gradient-to-r from-blue-500 to-transparent mb-6"></div>
-          <p className="font-host-grotesk text-lg text-gray-400 max-w-2xl">
-            Exploring ideas at the intersection of technology, AI, and innovation
-          </p>
-        </div>
-
-        {posts.length === 0 ? (
-          <div className="text-center py-20">
-            <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-            <p className="text-gray-500 font-host-grotesk text-lg">No posts available yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {posts.map((post, index) => (
+      {posts.length === 0 ? (
+        <p className="mt-16 text-[var(--color-ink-muted)]">Nothing published yet.</p>
+      ) : (
+        <ol className="mt-14">
+          {posts.map((post) => (
+            <li
+              key={post.slug}
+              className="border-t border-[var(--color-hairline)] last:border-b"
+            >
               <Link
-                key={post.slug}
                 href={`/blog/${post.slug}`}
-                className="group block"
-                style={{
-                  animation: 'fadeIn 0.6s ease-out forwards',
-                  animationDelay: `${index * 0.1}s`,
-                  opacity: 0
-                }}
+                className="group block py-7 transition-colors"
               >
-                <article className="relative overflow-hidden bg-white/[0.02] border border-white/10 hover:border-blue-500/30 p-8 rounded-xl backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.04] hover:scale-[1.01] shadow-lg hover:shadow-blue-500/10">
-                  {/* Hover gradient effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  <div className="relative z-10">
-                    {/* Date Badge */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <Calendar className="w-4 h-4 text-gray-500" />
-                      <time className="text-sm text-gray-500 font-host-grotesk font-light tracking-wide">
-                        {post.date}
-                      </time>
-                    </div>
-
-                    {/* Title */}
-                    <h2 className="text-2xl sm:text-3xl font-host-grotesk font-medium text-white mb-4 group-hover:text-blue-400 transition-colors duration-300">
-                      {post.title}
-                    </h2>
-
-                    {/* Summary */}
-                    {post.summary && (
-                      <p className="text-gray-400 font-host-grotesk font-light leading-relaxed mb-6 line-clamp-2">
-                        {post.summary}
-                      </p>
-                    )}
-
-                    {/* Read More Link */}
-                    <div className="flex items-center gap-2 text-white font-host-grotesk font-medium text-sm group-hover:gap-3 transition-all duration-300">
-                      <span>Read Article</span>
-                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </div>
-                  </div>
-
-                  {/* Corner accent */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-bl-full" />
-                </article>
+                <time className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
+                  {post.date}
+                </time>
+                <h2 className="mt-2 font-serif text-[clamp(1.4rem,2.5vw,1.75rem)] italic leading-tight text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-accent)]">
+                  {post.title}
+                </h2>
+                {post.summary && (
+                  <p className="mt-3 line-clamp-2 max-w-[600px] text-[15px] leading-[1.65] text-[var(--color-ink-muted)]">
+                    {post.summary}
+                  </p>
+                )}
+                <span className="mt-4 inline-flex items-center gap-1 text-[13px] text-[var(--color-ink-muted)] transition-colors group-hover:text-[var(--color-accent)]">
+                  Read
+                  <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </span>
               </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-    </section>
+            </li>
+          ))}
+        </ol>
+      )}
+    </article>
   );
 }

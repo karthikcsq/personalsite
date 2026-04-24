@@ -1,147 +1,223 @@
 "use client";
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
-import React, { useEffect, useState } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { scrollToCenter } from '@/utils/scrollUtils';
+const STRIP_HEIGHT = 320; // uniform image height across all albums
+const AUTO_SCROLL_SPEED = 30; // px / second
 
 export default function GalleryPage() {
   const [galleryData, setGalleryData] = useState<{ [folder: string]: string[] }>({});
-  const [isMobile, setIsMobile] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // Check if we're on a mobile device
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Set initial value
-    checkIsMobile();
-    
-    // Add event listener for window resize
-    window.addEventListener('resize', checkIsMobile);
-    
-    // Fetch the folder and image data from the API
-    fetch('/api/gallery')
+    fetch("/api/gallery")
       .then((res) => res.json())
-      .then((data) => setGalleryData(data));
-      
-    // Clean up
-    return () => window.removeEventListener('resize', checkIsMobile);
+      .then((data) => {
+        setGalleryData(data);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
   }, []);
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
-      <div className="max-w-full mx-auto w-full px-4 pt-16 pb-16 md:pr-32 lg:pr-40 relative" style={{ zIndex: 10 }}>
-        {/* Title Section */}
-        <div className="flex flex-col items-center justify-center min-h-screen md:pl-32 lg:pl-40">
-          <h1 className="text-5xl md:text-7xl font-light text-center font-host-grotesk mb-6 tracking-tight">
-            Gallery
-          </h1>
-          <p className="text-center text-lg text-gray-400 tracking-wide max-w-2xl mx-auto mb-12">
-            A visual journey through my travels and adventures
-          </p>
+    <article className="pt-16 pb-24 md:pt-24">
+      <div className="mx-auto max-w-[720px] px-5 md:px-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+          Photography
+        </p>
+        <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
+          What I&apos;ve seen.
+        </h1>
+        <p className="mt-5 max-w-[540px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
+          Mostly travel. A second language when the words fail me.
+        </p>
+        <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-faint)]">
+          Drag to explore.
+        </p>
+      </div>
 
-          {/* Arrow Button */}
-          <Link
-            href="#images"
-            onClick={(event) => scrollToCenter(event, "#images")}
-            className="mt-8 self-center w-10 h-10 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-300 text-gray-400 hover:text-white"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Link>
-        </div>
-
-        {/* Gallery Section */}
-        <div id="images"></div>
-        <div className="flex flex-col items-start py-20 space-y-24">
-          {Object.entries(galleryData).map(([folder, images], index) => (
-            <div key={folder} className="w-full max-w-[1400px] px-4 md:px-8">
-              <h2 className="text-2xl md:text-3xl font-light uppercase tracking-widest mb-8 font-host-grotesk">
+      <div className="mt-14 space-y-14">
+        {!loaded ? (
+          <GallerySkeleton />
+        ) : Object.keys(galleryData).length === 0 ? (
+          <p className="px-5 text-[var(--color-ink-muted)] md:px-8">No albums yet.</p>
+        ) : (
+          Object.entries(galleryData).map(([folder, images], i) => (
+            <section key={folder}>
+              <h2 className="mx-auto mb-5 max-w-[1280px] px-5 font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-ink)] md:px-8">
                 {folder}
               </h2>
-              <EmblaCarousel images={images} isMobile={isMobile} />
-            </div>
-          ))}
-        </div>
+              <Marquee images={images} reverse={i % 2 === 1} />
+            </section>
+          ))
+        )}
       </div>
-    </section>
+    </article>
   );
 }
 
-function EmblaCarousel({
-  images,
-  isMobile
-}: {
-  images: string[],
-  isMobile: boolean
-}) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: 'center',
-    containScroll: 'trimSnaps',
-    dragFree: true,
-    slidesToScroll: isMobile ? 1 : 2
-  });
+function Marquee({ images, reverse = false }: { images: string[]; reverse?: boolean }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0); // transform X in pixels; always ≤ 0 for the loop
+  const halfRef = useRef(0); // width of one copy of the image list (half the track)
+  const draggingRef = useRef(false);
+  const lastXRef = useRef(0);
+  const movedRef = useRef(0);
 
+  // Duplicate list so we can wrap seamlessly between the two halves
+  const doubled = [...images, ...images];
+
+  // Measure + loop
   useEffect(() => {
-    if (emblaApi) {
-      // Reinitialize Embla when isMobile changes
-      emblaApi.reInit();
-    }
-  }, [emblaApi, isMobile]);
+    const track = trackRef.current;
+    if (!track) return;
 
-  const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
-  const scrollNext = () => emblaApi && emblaApi.scrollNext();
+    const measure = () => {
+      halfRef.current = track.scrollWidth / 2;
+    };
+
+    measure();
+
+    // Re-measure once images finish loading (their natural widths change track width)
+    const imgs = Array.from(track.querySelectorAll("img"));
+    const onLoad = () => measure();
+    imgs.forEach((img) => {
+      if (!img.complete) img.addEventListener("load", onLoad);
+    });
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+
+    let raf = 0;
+    let last = performance.now();
+    // direction: forward is negative X (moves left); reverse is positive X
+    const direction = reverse ? 1 : -1;
+
+    const applyTransform = () => {
+      track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+    };
+
+    const wrap = () => {
+      const half = halfRef.current;
+      if (half <= 0) return;
+      // Keep offset in (-half, 0]
+      while (offsetRef.current <= -half) offsetRef.current += half;
+      while (offsetRef.current > 0) offsetRef.current -= half;
+    };
+
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      if (!draggingRef.current) {
+        offsetRef.current += (direction * AUTO_SCROLL_SPEED * dt) / 1000;
+        wrap();
+        applyTransform();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      imgs.forEach((img) => img.removeEventListener("load", onLoad));
+      ro.disconnect();
+    };
+  }, [reverse, images]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    draggingRef.current = true;
+    lastXRef.current = e.clientX;
+    movedRef.current = 0;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return;
+    const dx = e.clientX - lastXRef.current;
+    lastXRef.current = e.clientX;
+    movedRef.current += Math.abs(dx);
+    offsetRef.current += dx;
+    const half = halfRef.current;
+    if (half > 0) {
+      while (offsetRef.current <= -half) offsetRef.current += half;
+      while (offsetRef.current > 0) offsetRef.current -= half;
+    }
+    const track = trackRef.current;
+    if (track) track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    draggingRef.current = false;
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (movedRef.current > 4) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
   return (
-    <div className="embla w-full">
-      <div className="embla__viewport" ref={emblaRef}>
-        <div className="embla__container flex items-center">
-          {images.map((src, index) => (
-            <div
-              key={index}
-              className={`embla__slide flex items-center justify-center flex-shrink-0 ${
-                isMobile ? 'w-full' : 'w-1/2'
-              } px-3`}
-            >
-              <div className="relative w-full rounded-2xl overflow-hidden group cursor-pointer">
-                <Image
-                  src={src}
-                  alt={`Image ${index + 1}`}
-                  width={800}
-                  height={600}
-                  className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-                />
-              </div>
-            </div>
-          ))}
+    <div
+      className="overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onClickCapture={onClickCapture}
+      style={{ touchAction: "pan-y" }}
+    >
+      <div
+        ref={trackRef}
+        className="flex gap-3"
+        style={{
+          width: "max-content",
+          willChange: "transform",
+          transform: "translate3d(0,0,0)",
+        }}
+      >
+        {doubled.map((src, index) => (
+          <div
+            key={index}
+            className="relative flex-none overflow-hidden rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)]"
+            style={{ height: STRIP_HEIGHT }}
+          >
+            <Image
+              src={src}
+              alt=""
+              width={1600}
+              height={STRIP_HEIGHT}
+              className="block object-cover"
+              style={{ height: STRIP_HEIGHT, width: "auto" }}
+              unoptimized
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GallerySkeleton() {
+  return (
+    <div className="space-y-14">
+      {[0, 1].map((row) => (
+        <div key={row}>
+          <div className="mx-auto mb-5 max-w-[1280px] px-5 md:px-8">
+            <div className="h-3 w-32 bg-[var(--color-surface-muted)]" />
+          </div>
+          <div className="flex gap-3 overflow-hidden px-5 md:px-8" style={{ height: STRIP_HEIGHT }}>
+            {[0, 1, 2, 3].map((j) => (
+              <div
+                key={j}
+                className="flex-none rounded-md bg-[var(--color-surface-muted)]"
+                style={{ height: STRIP_HEIGHT, width: STRIP_HEIGHT * 1.4 }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      
-      <div className="flex justify-center mt-8 space-x-6">
-        <button
-          className="embla__prev p-3 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-105"
-          onClick={scrollPrev}
-          aria-label="Previous image"
-        >
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button
-          className="embla__next p-3 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-105"
-          onClick={scrollNext}
-          aria-label="Next image"
-        >
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      ))}
     </div>
   );
 }

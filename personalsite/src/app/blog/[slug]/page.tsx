@@ -1,72 +1,82 @@
-import { getPostBySlug, getSortedPosts } from '@/utils/blogUtils';
-import { Metadata } from 'next';
+import Link from "next/link";
+import { getPostBySlug, getSortedPosts } from "@/utils/blogUtils";
+import { Metadata } from "next";
 
-// Fix: Make both params and searchParams Promise types
 type Props = {
-  params: Promise<{ slug: string }>,
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
-}
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-// Generate metadata for SEO
-export async function generateMetadata(
-  { params }: Props
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const post = await getPostBySlug(resolvedParams.slug);
   return {
     title: post.title,
-    description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
-    keywords: ['blog', 'Karthik Thyagarajan', 'technology', 'research', post.title],
-    authors: [{ name: 'Karthik Thyagarajan' }],
+    description:
+      post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+    keywords: [
+      "blog",
+      "Karthik Thyagarajan",
+      "technology",
+      "research",
+      post.title,
+    ],
+    authors: [{ name: "Karthik Thyagarajan" }],
     openGraph: {
       title: post.title,
-      description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
-      type: 'article',
+      description:
+        post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+      type: "article",
       publishedTime: post.date,
-      authors: ['Karthik Thyagarajan'],
+      authors: ["Karthik Thyagarajan"],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: post.title,
-      description: post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
+      description:
+        post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
     },
   };
 }
 
-// Generate static paths for all blog slugs
-export async function generateStaticParams(): Promise<
-  { slug: string }[]
-> {
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getSortedPosts();
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-// Remove searchParams from the parameters since you're not using it
 export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
-  
   const post = await getPostBySlug(resolvedParams.slug);
 
   return (
-    <section className="relative flex flex-col min-h-screen text-white overflow-hidden">
-      <div className="max-w-4xl mx-auto w-full p-4 pt-28 pb-16 relative" style={{ zIndex: 10 }}>
-        {/* Blog Post Container */}
-        <div 
-          className="rounded-lg backdrop-blur-sm p-8"
-          style={{ 
-            backgroundColor: "rgba(0, 0, 0, 0.3)",
-            boxShadow: "0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4)"
-          }}
-        >
-          <h1 className="font-host-grotesk text-4xl font-bold mb-2 text-white">{post.title}</h1>
-          <div className="text-sm text-gray-300 mb-6 font-host-grotesk">{post.date}</div>
-          
-          <article
-            className="prose prose-invert"
-            dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-          />
-        </div>
-      </div>
-    </section>
+    <article className="mx-auto max-w-[720px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <Link
+        href="/blog"
+        className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)] transition-colors hover:text-[var(--color-accent)]"
+      >
+        <span>←</span> Writing
+      </Link>
+
+      <time className="mt-10 block font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
+        {post.date}
+      </time>
+
+      <h1 className="mt-3 font-serif text-[clamp(2rem,4.5vw,3rem)] italic leading-[1.05] tracking-tight text-[var(--color-ink)]">
+        {post.title}
+      </h1>
+
+      {post.summary && (
+        <p className="mt-5 max-w-[620px] text-[17px] leading-[1.6] text-[var(--color-ink-muted)]">
+          {post.summary}
+        </p>
+      )}
+
+      <div className="my-12 h-px bg-[var(--color-hairline)]" />
+
+      <div
+        className="prose"
+        dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+      />
+    </article>
   );
 }

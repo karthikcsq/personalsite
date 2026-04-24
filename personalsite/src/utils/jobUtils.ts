@@ -7,7 +7,6 @@ export interface JobEntry {
   company: string;
   description: string[];
   year: string; // combined date range
-  color: string;
   icon: string; // path to icon under /public/companies
 }
 
@@ -21,38 +20,6 @@ interface YamlExperienceItem {
 
 interface RootYaml {
   experience?: YamlExperienceItem[];
-}
-
-// Generate deterministic cool color based on index
-function getCoolColor(index: number): string {
-  // Use index as seed for deterministic "random" values
-  const hueRange = 50; // 50 degrees of hue range (200-250)
-  const hue = 200 + ((index * 137.508) % hueRange); // Blue-focused range, avoiding purple (200-250°)
-  const saturation = 25 + (index * 23) % 25; // 25-50% (lower saturation, less glowy)
-  const lightness = 50 + (index * 17) % 30;  // 50-80% (medium-high lightness)
-
-  // Convert HSL to RGB
-  const h = hue / 360;
-  const s = saturation / 100;
-  const l = lightness / 100;
-
-  const hue2rgb = (p: number, q: number, t: number) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1/6) return p + (q - p) * 6 * t;
-    if (t < 1/2) return q;
-    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-    return p;
-  };
-
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-
-  const r = Math.round(hue2rgb(p, q, h + 1/3) * 255);
-  const g = Math.round(hue2rgb(p, q, h) * 255);
-  const b = Math.round(hue2rgb(p, q, h - 1/3) * 255);
-
-  return `rgb(${r}, ${g}, ${b})`;
 }
 
 // Simple icon filename inference: take first word of company lowercased and match existing file names manually map if needed.
@@ -110,13 +77,12 @@ export function getJobsFromYaml(): JobEntry[] {
   const experience = data.experience || [];
 
   // Map experience entries to JobEntry format.
-  const jobs: JobEntry[] = experience.map((item, idx) => ({
+  const jobs: JobEntry[] = experience.map((item) => ({
     title: item.role,
     company: item.company,
     description: item.bullets,
     year: `${item.start_date} - ${item.end_date}`,
-    color: getCoolColor(idx),
-    icon: getIconForCompany(item.company)
+    icon: getIconForCompany(item.company),
   }));
   return jobs;
 }
