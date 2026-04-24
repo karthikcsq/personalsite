@@ -1,0 +1,87 @@
+# My ongoing involvements: orgs and communities I'm part of, written in first
+# person. Richer than a resume bullet, narrower than a work entry. Feeds the
+# /involvement page and the `involvement` chat artifact.
+
+involvement:
+  - slug: "buildpurdue"
+    title: "buildpurdue"
+    role: "Co-President & Co-Founder"
+    org: "buildpurdue"
+    tagline: "Founder-led, peer-to-peer density for student builders at Purdue."
+    link: "https://buildpurdue.org"
+    start_date: "Sep 2025"
+    end_date: "Present"
+    date: "Sep 2025 - Present"
+    location: "Purdue University, West Lafayette, IN"
+    tools: "Next.js, TypeScript, PostgreSQL, Supabase, RBAC, Leadership, Operations"
+
+    what_it_is: |
+      buildpurdue is a founder-led, peer-to-peer community for student builders
+      at Purdue. The core identity is density and agency: the more active
+      founders there are in the same room, building alongside each other, the
+      faster everyone compounds. Progress comes from proximity, not from
+      programming.
+
+      It isn't a top-down accelerator that hands founders a curriculum and waits
+      for them to graduate. It's a dense group of people already shipping,
+      giving each other real feedback, and pulling in operators and investors
+      when the group needs them.
+    my_role: |
+      I'm Co-President and co-founded the current iteration of buildpurdue.
+      I shape the operational framework the org runs on. I lead the build of
+      the internal software platform that manages it. And I spend a lot of my
+      time making sure the room stays dense with people who are actually
+      shipping.
+    contributions:
+      - area: "Operational framework"
+        detail: |
+          Shaped the playbook for how buildpurdue selects its cohort, runs its
+          cadence, and keeps the community peer-to-peer rather than
+          lecture-driven. The framework protects founder agency: founders set
+          their own goals and use the group as leverage, not as a gate.
+      - area: "Operating platform"
+        detail: |
+          Led the build of buildpurdue's internal platform in Next.js and
+          TypeScript on Supabase / PostgreSQL, with RBAC pipelines for cohort
+          tracking, alumni management, mentor matching, and event logistics.
+          Primary contributor on the codebase, working alongside the rest of
+          the team.
+      - area: "Partnerships & events"
+        detail: |
+          Forged partnerships with VC firms and recruited a rotating bench of
+          industry mentors. Organizes on-campus sessions where operators give
+          student founders direct feedback, and workshops on topics like
+          finding a first paying customer and co-founder selection.
+      - area: "Density & agency"
+        detail: |
+          Deliberately optimizes buildpurdue for density of active founders in
+          the room. The best advice a student founder gets usually comes from
+          another student founder who is two months ahead of them. Making sure
+          that conversation actually happens, and happens often, is the whole
+          point.
+
+    # POV paragraphs — what I actually think about this work. These are the
+    # lines the chat will want to quote when someone asks "why buildpurdue?"
+    point_of_view:
+      - |
+        Most startups don't fail because of bad ideas. They fail because of
+        unknown unknowns that only experience can teach you. buildpurdue exists
+        to compress that experience gap for student founders before they burn
+        two years on a dead thesis.
+      - |
+        There's a sharp difference between campus feedback and operator
+        feedback. Campus feedback is pattern-matched from people who have read
+        about startups. Operator feedback comes from people who have bet, lost,
+        and adjusted. Student founders need the second kind, and most campus
+        orgs can't deliver it.
+      - |
+        The most progress comes from density. A student founder two months
+        ahead of you is more useful than a curriculum and more honest than a
+        lecture. buildpurdue is designed around that: peer-to-peer,
+        founder-led, and built to keep the room full of people who are
+        actually shipping.
+      - |
+        Running buildpurdue is the clearest version of my "founder-engineer
+        first" identity. I co-designed the org, led the build of its software,
+        and I recruit the people who make the room worth being in. It's an
+        operation I'm running.
