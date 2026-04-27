@@ -150,3 +150,6 @@ dist
 
 # venv
 **/.venv
+
+linkedin_posts
+all_linkedin_data

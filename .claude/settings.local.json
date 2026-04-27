@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(mkdir -p personalsite/.claude/skills/quote-harvest python-rag/rag-docs/corpus)",
+      "Bash(touch python-rag/rag-docs/corpus/.gitkeep)"
     ],
     "deny": [],
     "ask": []
