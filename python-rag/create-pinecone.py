@@ -137,7 +137,7 @@ def load_projects_json():
 # === TEXT FILE LOADING ===
 def load_text_files():
     # Load regular text files (excluding projects_deep_dive.txt which is now sourced from projects.json)
-    loader = DirectoryLoader(TEXT_DIRECTORY, glob="**/*.txt", loader_cls=TextLoader)
+    loader = DirectoryLoader(TEXT_DIRECTORY, glob="**/*.txt", loader_cls=TextLoader, exclude=["**/linkedin/**"])
     text_docs = loader.load()
     for doc in text_docs:
         doc.metadata.update({"source_type": "text", "file_path": doc.metadata["source"]})
@@ -151,7 +151,106 @@ def load_text_files():
     # Load projects from shared JSON
     project_docs = load_projects_json()
 
-    return text_docs + yaml_docs + blog_docs + project_docs
+    # Load corpus files — Karthik's own opinionated prose, indexed per artifact
+    corpus_docs = load_corpus_files()
+
+    return text_docs + yaml_docs + blog_docs + project_docs + corpus_docs
+
+
+def parse_corpus_frontmatter(raw):
+    """Extract YAML frontmatter and body from a markdown file with a `---`-fenced
+    frontmatter block at the top. Returns (frontmatter_dict, body_str). If no
+    frontmatter is present, returns ({}, raw)."""
+    if not raw.startswith('---'):
+        return {}, raw
+    parts = raw.split('---', 2)
+    if len(parts) < 3:
+        return {}, raw
+    try:
+        fm = yaml.safe_load(parts[1]) or {}
+    except yaml.YAMLError:
+        fm = {}
+    body = parts[2].lstrip('\n')
+    return fm, body
+
+
+def load_corpus_files():
+    """Load `rag-docs/corpus/*.md` files. Each file is a per-artifact corpus
+    of Karthik's opinionated prose, with frontmatter declaring `applies_to`
+    (artifact ids like `project:caladrius`, `work:Peraton Labs`,
+    `involvement:buildpurdue`, `topic:agents`) and `topics` (free-form tags).
+
+    Each file becomes one Document. Metadata is set so retrieval can both
+    surface these chunks semantically AND route them back to the right card
+    via the chat route's directory-index lookup. Multi-applies_to files are
+    indexed once with all ids in `applies_to_ids`, and the FIRST id's kind
+    determines `content_type` (most files apply to a single artifact)."""
+    corpus_dir = os.path.join(TEXT_DIRECTORY, 'corpus')
+    docs = []
+    if not os.path.isdir(corpus_dir):
+        return docs
+
+    kind_to_content_type = {
+        'project': 'project',
+        'work': 'professional',
+        'involvement': 'involvement',
+        'blog': 'blog_post',
+        'topic': 'opinion',
+    }
+
+    for filename in os.listdir(corpus_dir):
+        if not filename.endswith('.md'):
+            continue
+        full_path = os.path.join(corpus_dir, filename)
+        try:
+            with open(full_path, 'r', encoding='utf-8') as f:
+                raw = f.read()
+        except (IOError, OSError):
+            continue
+
+        fm, body = parse_corpus_frontmatter(raw)
+        if not body.strip():
+            continue
+
+        applies_to = fm.get('applies_to') or []
+        if not isinstance(applies_to, list):
+            applies_to = []
+        applies_to = [str(x) for x in applies_to if isinstance(x, str)]
+
+        topics = fm.get('topics') or []
+        if not isinstance(topics, list):
+            topics = []
+        topics = [str(x) for x in topics if isinstance(x, str)]
+
+        primary_id = applies_to[0] if applies_to else ''
+        kind = primary_id.split(':', 1)[0] if ':' in primary_id else 'opinion'
+        content_type = kind_to_content_type.get(kind, 'opinion')
+
+        metadata = {
+            'source_type': 'corpus',
+            'content_type': content_type,
+            'file_path': full_path,
+            'applies_to_ids': applies_to,
+            'topics': topics,
+        }
+
+        # Hook in artifact-specific metadata fields so existing retrieval
+        # filters and the directory-index lookup find these chunks. We mirror
+        # whatever the corresponding kind already uses elsewhere.
+        if primary_id.startswith('project:'):
+            metadata['project_title'] = primary_id.split(':', 1)[1]
+        elif primary_id.startswith('work:'):
+            metadata['company'] = primary_id.split(':', 1)[1]
+        elif primary_id.startswith('involvement:'):
+            slug = primary_id.split(':', 1)[1]
+            metadata['involvement_slug'] = slug
+            metadata['slug'] = slug
+        elif primary_id.startswith('blog:'):
+            metadata['slug'] = primary_id.split(':', 1)[1]
+
+        docs.append(Document(page_content=body, metadata=metadata))
+
+    return docs
 
 def load_yaml_files():
     """Load and process YAML files from the rag-docs directory"""
@@ -479,6 +578,17 @@ def chunk_documents(documents):
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1200,
                 chunk_overlap=200,
+                separators=["\n## ", "\n### ", "\n\n", "\n", ". ", " ", ""]
+            )
+        elif source_type == 'corpus':
+            # Corpus files are organized by `## <Sub-topic>` headings — Karthik's
+            # takes grouped thematically. Split on those boundaries so each
+            # chunk is one sub-topic of opinion (the natural unit of his
+            # voice on a given subject), with leading sub-topic header
+            # preserved as context.
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1000,
+                chunk_overlap=150,
                 separators=["\n## ", "\n### ", "\n\n", "\n", ". ", " ", ""]
             )
         elif source_type == 'yaml':

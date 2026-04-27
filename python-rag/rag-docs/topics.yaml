@@ -1,0 +1,20 @@
+# Topics registry — non-artifact-tied takes Karthik wants to surface in the
+# chatbot's receipts panel. Each entry resolves a `topic:<slug>` corpus file
+# (under `python-rag/rag-docs/corpus/topic_<slug>.md`) to a display title and
+# tagline shown on the NoteArtifact tile.
+#
+# Schema:
+#   - slug:    matches `topic:<slug>` and `corpus/topic_<slug>.md`
+#     title:   short caption shown on the tile (e.g. "On agents")
+#     tagline: optional one-line subtitle under the title
+#
+# Authoring flow: run `/quote-harvest topic:<slug>` to draft the corpus file,
+# then add the entry here, then re-run `uv run python create-pinecone.py`.
+#
+# Empty list is fine — the runtime falls back to `title = "On <slug>"` when a
+# retrieved topic isn't in this registry.
+
+topics:
+  - slug: "agents"
+    title: "On agents"
+    tagline: "When agents save time and money, not just effort."
