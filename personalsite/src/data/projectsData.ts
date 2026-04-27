@@ -3,7 +3,7 @@ import projectsJson from './projects.json';
 export interface ProjectLink {
   label: string;
   url: string;
-  type: "github" | "devpost" | "website" | "npm" | "appstore" | "linkedin" | "arxiv" | "pdf" | "youtube";
+  type: "github" | "devpost" | "website" | "npm" | "appstore" | "linkedin" | "arxiv" | "pdf" | "youtube" | "instagram";
 }
 
 export interface ProjectDisplay {

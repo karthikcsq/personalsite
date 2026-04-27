@@ -20,6 +20,7 @@ const LINK_LABEL: Record<ProjectLink["type"], string> = {
   arxiv: "arXiv",
   pdf: "PDF",
   youtube: "YouTube",
+  instagram: "Instagram",
 };
 
 export default function ProjectsPage() {

@@ -9,6 +9,7 @@ export type Artifact = { annotation?: string } & (
   | { kind: "project"; id: string; data: ProjectData }
   | { kind: "blog"; id: string; data: BlogData }
   | { kind: "involvement"; id: string; data: InvolvementData }
+  | { kind: "note"; id: string; data: NoteData }
 );
 
 interface WorkData {
@@ -19,13 +20,43 @@ interface WorkData {
   icon: string;
 }
 
+export interface ProjectLink {
+  label: string;
+  url: string;
+  type:
+    | "github"
+    | "devpost"
+    | "website"
+    | "npm"
+    | "appstore"
+    | "linkedin"
+    | "arxiv"
+    | "pdf"
+    | "youtube"
+    | "instagram";
+}
+
 interface ProjectData {
   title: string;
   tools: string;
   date: string;
   link?: string;
   description: string;
+  links?: ProjectLink[];
 }
+
+const PROJECT_LINK_LABEL: Record<ProjectLink["type"], string> = {
+  github: "GitHub",
+  devpost: "Devpost",
+  website: "Visit",
+  npm: "npm",
+  appstore: "App Store",
+  linkedin: "LinkedIn",
+  arxiv: "arXiv",
+  pdf: "PDF",
+  youtube: "YouTube",
+  instagram: "Instagram",
+};
 
 interface BlogData {
   title: string;
@@ -40,6 +71,13 @@ interface InvolvementData {
   slug: string;
   tagline: string;
   bullets: string[];
+  links?: ProjectLink[];
+}
+
+interface NoteData {
+  slug: string;
+  title: string;
+  tagline: string;
 }
 
 export function ChatArtifact({ artifact, index = 0 }: { artifact: Artifact; index?: number }) {
@@ -57,6 +95,9 @@ export function ChatArtifact({ artifact, index = 0 }: { artifact: Artifact; inde
       )}
       {artifact.kind === "involvement" && (
         <InvolvementArtifact data={artifact.data} annotation={artifact.annotation} />
+      )}
+      {artifact.kind === "note" && (
+        <NoteArtifact data={artifact.data} annotation={artifact.annotation} />
       )}
     </div>
   );
@@ -78,29 +119,6 @@ function RightTopAnnotation({ text, circleY }: { text: string; circleY: number }
       className="pointer-events-none absolute hidden lg:block"
       style={{ top: `${wingTop}px`, right: "90px", width: "240px", height: "80px" }}
     >
-      <div className="absolute inset-0 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
-        <div
-          className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] text-[var(--color-ink)] shadow-[var(--shadow-soft)]"
-          style={{ right: "4px", top: "23px", transform: "translateY(-50%)", width: "200px" }}
-        >
-          {text}
-        </div>
-        <svg
-          className="absolute inset-0 text-[var(--color-accent)] opacity-80"
-          viewBox="0 0 240 80"
-          width={240}
-          height={80}
-          fill="none"
-        >
-          <path
-            d="M 40 23 L 30 23 L 9 44"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
       <svg
         className="absolute inset-0 text-[var(--color-accent)] opacity-40 transition-opacity duration-200 ease-out group-hover:opacity-80"
         viewBox="0 0 240 80"
@@ -108,8 +126,24 @@ function RightTopAnnotation({ text, circleY }: { text: string; circleY: number }
         height={80}
         fill="none"
       >
+        <path
+          d="M 9 44 L 30 23 L 40 23"
+          pathLength={1}
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="1"
+          className="[stroke-dashoffset:1] transition-[stroke-dashoffset] [transition-duration:120ms] ease-out [transition-delay:120ms] group-hover:[stroke-dashoffset:0] group-hover:[transition-delay:0ms]"
+        />
         <circle cx={6} cy={44} r={3} stroke="currentColor" strokeWidth="1.25" />
       </svg>
+      <div
+        className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] text-[var(--color-ink)] shadow-[var(--shadow-soft)] opacity-0 transition-[opacity,transform] [transition-duration:120ms] ease-out [transition-delay:0ms] [transform:translateY(-50%)_scaleY(0)] group-hover:opacity-100 group-hover:[transform:translateY(-50%)_scaleY(1)] group-hover:[transition-delay:120ms]"
+        style={{ right: "4px", top: "23px", width: "200px", transformOrigin: "left center" }}
+      >
+        {text}
+      </div>
     </div>
   );
 }
@@ -186,35 +220,7 @@ function LeftCenterAnnotation({
         transform: "translateY(-50%)",
       }}
     >
-      {/* Textbox + connector: hover-revealed */}
-      <div
-        className="absolute inset-0 transition-opacity duration-200 ease-out"
-        style={{ opacity: isHovered ? 1 : 0 }}
-      >
-        <div
-          className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] text-[var(--color-ink)] shadow-[var(--shadow-soft)]"
-          style={{ left: "4px", top: "20px", transform: "translateY(-50%)", width: "190px" }}
-        >
-          {text}
-        </div>
-        <svg
-          className="absolute inset-0 text-[var(--color-accent)] opacity-80"
-          viewBox={`0 0 ${wingWidth} ${wingHeight}`}
-          width={wingWidth}
-          height={wingHeight}
-          fill="none"
-        >
-          <path
-            d="M 194 20 L 214 20 L 234 40"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-
-      {/* Indicator: always-visible circle at the card's left edge. */}
+      {/* Always-visible connector + circle anchor at the card's left edge. */}
       <svg
         className="absolute inset-0 text-[var(--color-accent)] transition-opacity duration-200 ease-out"
         viewBox={`0 0 ${wingWidth} ${wingHeight}`}
@@ -223,8 +229,39 @@ function LeftCenterAnnotation({
         fill="none"
         style={{ opacity: isHovered ? 0.8 : 0.4 }}
       >
+        <path
+          d="M 234 40 L 214 20 L 194 20"
+          pathLength={1}
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="1"
+          style={{
+            strokeDashoffset: isHovered ? 0 : 1,
+            transition: "stroke-dashoffset 120ms ease-out",
+            transitionDelay: isHovered ? "0ms" : "120ms",
+          }}
+        />
         <circle cx={234} cy={40} r={3} stroke="currentColor" strokeWidth="1.25" />
       </svg>
+
+      {/* Textbox: unfolds vertically on hover, after connector extends. */}
+      <div
+        className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] text-[var(--color-ink)] shadow-[var(--shadow-soft)]"
+        style={{
+          left: "4px",
+          top: "20px",
+          width: "190px",
+          opacity: isHovered ? 1 : 0,
+          transform: `translateY(-50%) scaleY(${isHovered ? 1 : 0})`,
+          transformOrigin: "right center",
+          transition: "opacity 120ms ease-out, transform 120ms ease-out",
+          transitionDelay: isHovered ? "120ms" : "0ms",
+        }}
+      >
+        {text}
+      </div>
     </div>,
     document.body,
   );
@@ -394,9 +431,21 @@ function WorkArtifact({ data, annotation }: { data: WorkData; annotation?: strin
 function ProjectArtifact({ data, annotation }: { data: ProjectData; annotation?: string }) {
   return (
     <ArtifactShell label="Project" annotation={annotation} annotationBelowOffset={2}>
-      <h3 className="text-[19px] font-medium leading-tight tracking-tight text-[var(--color-ink)]">
-        {data.title}
-      </h3>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-[19px] font-medium leading-tight tracking-tight text-[var(--color-ink)]">
+          {data.title}
+        </h3>
+        {data.link && (
+          <Link
+            href={data.link}
+            data-primary-link
+            className="flex shrink-0 items-center gap-1 text-xs text-[var(--color-ink-muted)] transition-colors group-hover:text-[var(--color-accent)]"
+          >
+            See full
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        )}
+      </div>
       <p className="mt-1 text-xs uppercase tracking-wider text-[var(--color-ink-subtle)]">
         {data.date}
       </p>
@@ -406,15 +455,21 @@ function ProjectArtifact({ data, annotation }: { data: ProjectData; annotation?:
       <p className="mt-4 text-[14px] leading-relaxed text-[var(--color-ink)]">
         {data.description}
       </p>
-      {data.link && (
-        <Link
-          href={data.link}
-          data-primary-link
-          className="mt-5 inline-flex items-center gap-1 border-b border-[var(--color-accent)] pb-0.5 text-sm text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
-        >
-          See full
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
+      {data.links && data.links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {data.links.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/link inline-flex items-center gap-1.5 rounded-full border border-[var(--color-hairline-strong)] bg-[var(--color-surface-raised)] px-3 py-1 text-[12px] text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              {PROJECT_LINK_LABEL[link.type] ?? link.label}
+              <ArrowUpRight className="h-3 w-3 opacity-60 transition-opacity group-hover/link:opacity-100" />
+            </a>
+          ))}
+        </div>
       )}
     </ArtifactShell>
   );
@@ -461,6 +516,22 @@ function InvolvementArtifact({
           ))}
         </ul>
       )}
+      {data.links && data.links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {data.links.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/link inline-flex items-center gap-1.5 rounded-full border border-[var(--color-hairline-strong)] bg-[var(--color-surface-raised)] px-3 py-1 text-[12px] text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              {PROJECT_LINK_LABEL[link.type] ?? link.label}
+              <ArrowUpRight className="h-3 w-3 opacity-60 transition-opacity group-hover/link:opacity-100" />
+            </a>
+          ))}
+        </div>
+      )}
     </ArtifactShell>
   );
 }
@@ -481,6 +552,44 @@ function BlogArtifact({ data, annotation }: { data: BlogData; annotation?: strin
         {data.excerpt.length >= 200 && "…"}
       </p>
     </ArtifactShell>
+  );
+}
+
+// NoteArtifact: a quote-only tile for non-artifact-tied takes
+// (`topic:<slug>`). Renders the verbatim picker quote as the centerpiece —
+// no metadata grid, no links, no annotation wing (the quote IS the artifact).
+// Visually scaled to ~60% the height of a project card so it reads as a
+// lightweight "Karthik's voice on this" surface in the receipts panel.
+function NoteArtifact({ data, annotation }: { data: NoteData; annotation?: string }) {
+  // Fallback text for the rare case where a topic surfaces without a picker
+  // quote (corpus is empty or the picker rejected every candidate). Keeps the
+  // tile from rendering blank — but the card's whole reason to exist is the
+  // quote, so this should be vanishingly rare.
+  const quote = annotation && annotation.trim().length > 0
+    ? annotation.trim()
+    : (data.tagline || "");
+  return (
+    <article
+      className="group relative border-t border-[var(--color-hairline)] py-5 transition-colors hover:border-[var(--color-accent)]"
+    >
+      <header className="mb-2 flex items-baseline justify-between gap-3">
+        <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
+          <span className="h-[5px] w-[5px] rounded-full bg-[var(--color-accent)]" />
+          Take
+        </span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+          {data.title}
+        </span>
+      </header>
+      <blockquote className="border-l-2 border-[var(--color-accent)] pl-4">
+        <p className="font-serif text-[16px] italic leading-snug text-[var(--color-ink)]">
+          {quote}
+        </p>
+      </blockquote>
+      <p className="mt-3 text-right font-mono text-[10.5px] uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]">
+        — Karthik
+      </p>
+    </article>
   );
 }
 

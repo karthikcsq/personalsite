@@ -12,33 +12,55 @@ interface Message {
 }
 
 // Bank of suggested questions that rotate through the UI. The pre-chat hero
-// shows 4 at a time and the in-chat rail shows 3 — both draw from this bank,
-// so users always see fresh prompts as the conversation progresses. Keep
-// entries short (≤ ~50 chars) and conversational (third person, no em dashes).
-const QUESTION_BANK: readonly string[] = [
-  "What is Karthik building right now?",
-  "Where has he worked?",
-  "Show me his research.",
-  "What does he write about?",
-  "Tell me about Repple.",
-  "What is google-tools-mcp?",
-  "What's his take on MCP?",
-  "How did he get into AI?",
-  "Which hackathons has he won?",
-  "Tell me about buildpurdue.",
-  "What does he do at buildpurdue?",
-  "Why did he co-found buildpurdue?",
-  "What did he do at Peraton Labs?",
-  "What's Veritas?",
-  "Show me his favorite project.",
-  "What's he studying at Purdue?",
-  "Has he done quantum computing research?",
-  "What did he build at the Naval Research Lab?",
-  "What's his view on the future of AI work?",
-  "What tools does he use to build?",
-  "Tell me something surprising about him.",
-  "What's Caladrius?",
+// shows 4 at a time and the in-chat rail shows 3 — both draw from this bank.
+// Each entry is tagged with one or more categories so the rotation can drift
+// toward a visitor's interest as they click chips. Keep entries short
+// (≤ ~50 chars) and conversational (third person, no em dashes).
+type Category = "work" | "opinions" | "life";
+type Question = { text: string; tags: readonly Category[] };
+
+const QUESTION_BANK: readonly Question[] = [
+  // Work — what he's built, where he's worked, what he's researching.
+  { text: "What is Karthik building right now?", tags: ["work"] },
+  { text: "Where has he worked?", tags: ["work"] },
+  { text: "Show me his research.", tags: ["work"] },
+  { text: "Tell me about Repple.", tags: ["work"] },
+  { text: "What is google-tools-mcp?", tags: ["work"] },
+  { text: "Which hackathons has he won?", tags: ["work"] },
+  { text: "Tell me about buildpurdue.", tags: ["work"] },
+  { text: "What did he do at Peraton Labs?", tags: ["work"] },
+  { text: "What's Veritas?", tags: ["work"] },
+  { text: "What's Caladrius?", tags: ["work"] },
+  { text: "What did he build at the Naval Research Lab?", tags: ["work"] },
+  { text: "Has he done quantum computing research?", tags: ["work"] },
+  { text: "What tools does he use to build?", tags: ["work"] },
+  { text: "Show me his favorite project.", tags: ["work", "opinions"] },
+
+  // Opinions — takes, philosophy, why-he-thinks-what-he-thinks.
+  { text: "What's his take on MCP?", tags: ["opinions"] },
+  { text: "What does he write about?", tags: ["opinions"] },
+  { text: "What's his view on the future of AI work?", tags: ["opinions"] },
+  { text: "Does he think AGI is close?", tags: ["opinions"] },
+  { text: "What AI company would he start?", tags: ["opinions"] },
+  { text: "What makes a great engineer in his view?", tags: ["opinions"] },
+  { text: "What does he think about quantum computing?", tags: ["opinions"] },
+  { text: "Why did he co-found buildpurdue?", tags: ["opinions", "work"] },
+  { text: "What does he do at buildpurdue?", tags: ["opinions", "work"] },
+  { text: "Why can't agents book a restaurant yet?", tags: ["opinions"] },
+
+  // Life — story, background, what he's like outside the resume.
+  { text: "How did he get into AI?", tags: ["life"] },
+  { text: "Where did he grow up?", tags: ["life"] },
+  { text: "Tell me about his time at TJHSST.", tags: ["life"] },
+  { text: "What's he studying at Purdue?", tags: ["life"] },
+  { text: "Tell me something surprising about him.", tags: ["life"] },
+  { text: "Does he play any instruments?", tags: ["life"] },
+  { text: "Show me his photography.", tags: ["life"] },
+  { text: "What does he do outside of code?", tags: ["life"] },
+  { text: "Where is he based?", tags: ["life"] },
 ];
+
+const CATEGORIES: readonly Category[] = ["work", "opinions", "life"];
 
 function shuffled<T>(arr: readonly T[]): T[] {
   const a = [...arr];
@@ -47,6 +69,32 @@ function shuffled<T>(arr: readonly T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// Allocate `count` slots across categories using max-min fair share by weight.
+// Each iteration picks the category with the highest weight/(slots+1) ratio,
+// which keeps minority categories visible until weights really diverge.
+function allocateSlots(
+  count: number,
+  weights: Record<Category, number>,
+  capacity: Record<Category, number>,
+): Record<Category, number> {
+  const slots: Record<Category, number> = { work: 0, opinions: 0, life: 0 };
+  for (let i = 0; i < count; i++) {
+    let best: Category | null = null;
+    let bestScore = -Infinity;
+    for (const c of CATEGORIES) {
+      if (slots[c] >= capacity[c]) continue;
+      const score = weights[c] / (slots[c] + 1);
+      if (score > bestScore) {
+        bestScore = score;
+        best = c;
+      }
+    }
+    if (!best) break;
+    slots[best]++;
+  }
+  return slots;
 }
 
 function linkifyUrls(text: string): string {
@@ -63,10 +111,24 @@ export default function HomePage() {
   const [queue, setQueue] = useState<string[]>([]);
   const [queueNavIndex, setQueueNavIndex] = useState(-1);
   const [savedInput, setSavedInput] = useState("");
-  // Shuffled once per session so the first chips a visitor sees are random,
-  // but the rotation order stays stable as they chat.
-  const [rotatedBank] = useState<string[]>(() => shuffled(QUESTION_BANK));
+  // Per-category shuffled queues, frozen for the session so order stays stable
+  // as the user chats. We pull from these in `pickChips` according to category
+  // weights, which drift as the user clicks chips.
+  const [rotatedByCategory] = useState<Record<Category, Question[]>>(() => {
+    const buckets: Record<Category, Question[]> = { work: [], opinions: [], life: [] };
+    for (const q of QUESTION_BANK) for (const t of q.tags) buckets[t].push(q);
+    for (const c of CATEGORIES) buckets[c] = shuffled(buckets[c]);
+    return buckets;
+  });
   const [chipCursor, setChipCursor] = useState(0);
+  // Category weights start equal so the first hero shows a balanced mix
+  // (~2 work + 1 opinions + 1 life). Each chip click bumps its tags, so
+  // subsequent rotations drift toward whatever the visitor seems curious about.
+  const [categoryWeights, setCategoryWeights] = useState<Record<Category, number>>({
+    work: 1,
+    opinions: 1,
+    life: 1,
+  });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -288,6 +350,7 @@ export default function HomePage() {
     setInput("");
     setSavedInput("");
     setChipCursor(0);
+    setCategoryWeights({ work: 1, opinions: 1, life: 1 });
     inputRef.current?.focus();
   };
 
@@ -320,15 +383,52 @@ export default function HomePage() {
   }, [messages, queue]);
 
   const pickChips = (count: number): string[] => {
+    // Available chips per category, in stable shuffled order, minus anything
+    // already asked or queued this session.
+    const available: Record<Category, Question[]> = { work: [], opinions: [], life: [] };
+    for (const c of CATEGORIES) {
+      available[c] = rotatedByCategory[c].filter((q) => !askedSet.has(q.text));
+    }
+
+    // Allocate slots across categories by weight (max-min fair). The cursor
+    // rotates which chip we pull from each category's queue per turn.
+    const capacity: Record<Category, number> = {
+      work: available.work.length,
+      opinions: available.opinions.length,
+      life: available.life.length,
+    };
+    const slots = allocateSlots(count, categoryWeights, capacity);
+
     const out: string[] = [];
-    const n = rotatedBank.length;
-    if (n === 0) return out;
-    for (let i = 0; i < n && out.length < count; i++) {
-      const q = rotatedBank[(chipCursor + i) % n];
-      if (askedSet.has(q) || out.includes(q)) continue;
-      out.push(q);
+    const used = new Set<string>();
+    for (const c of CATEGORIES) {
+      const queue = available[c];
+      if (queue.length === 0) continue;
+      let picked = 0;
+      for (let i = 0; i < queue.length && picked < slots[c]; i++) {
+        const q = queue[(chipCursor + i) % queue.length];
+        if (used.has(q.text)) continue;
+        out.push(q.text);
+        used.add(q.text);
+        picked++;
+      }
     }
     return out;
+  };
+
+  // Click-handler for chip buttons. Looks up the chip's tags in the bank and
+  // bumps each one's weight, so the next rotation leans toward the visitor's
+  // demonstrated interest. Typed (non-chip) questions don't bump weights.
+  const submitChip = (text: string) => {
+    const entry = QUESTION_BANK.find((q) => q.text === text);
+    if (entry) {
+      setCategoryWeights((prev) => {
+        const next = { ...prev };
+        for (const t of entry.tags) next[t] = next[t] + 1;
+        return next;
+      });
+    }
+    submit(text);
   };
 
   const heroChips = pickChips(4);
@@ -422,7 +522,7 @@ export default function HomePage() {
                 {heroChips.map((chip) => (
                   <button
                     key={chip}
-                    onClick={() => submit(chip)}
+                    onClick={() => submitChip(chip)}
                     className="group rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
                   >
                     {chip}
@@ -523,7 +623,7 @@ export default function HomePage() {
                 {inChatChips.map((chip) => (
                   <button
                     key={chip}
-                    onClick={() => submit(chip)}
+                    onClick={() => submitChip(chip)}
                     className="rounded-full border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-3 py-1 text-[12px] text-[var(--color-ink-muted)] transition-all hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
                   >
                     {chip}

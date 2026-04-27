@@ -7,6 +7,21 @@ export interface Contribution {
   detail: string;
 }
 
+export interface InvolvementLink {
+  label: string;
+  url: string;
+  type:
+    | "github"
+    | "devpost"
+    | "website"
+    | "npm"
+    | "appstore"
+    | "linkedin"
+    | "arxiv"
+    | "pdf"
+    | "youtube";
+}
+
 export interface InvolvementEntry {
   slug: string;
   title: string;
@@ -14,6 +29,7 @@ export interface InvolvementEntry {
   org: string;
   tagline: string;
   link?: string;
+  links: InvolvementLink[];
   date: string;
   startDate: string;
   endDate: string;
@@ -31,6 +47,12 @@ interface YamlContribution {
   detail?: string;
 }
 
+interface YamlLink {
+  label?: string;
+  url?: string;
+  type?: string;
+}
+
 interface YamlInvolvementItem {
   slug: string;
   title?: string;
@@ -38,6 +60,7 @@ interface YamlInvolvementItem {
   org?: string;
   tagline?: string;
   link?: string;
+  links?: YamlLink[];
   date?: string;
   start_date?: string;
   end_date?: string;
@@ -78,6 +101,33 @@ function normalize(item: YamlInvolvementItem): InvolvementEntry {
   const start = item.start_date || '';
   const end = item.end_date || '';
   const date = item.date || (start && end ? `${start} - ${end}` : '');
+  const linkTypes = new Set([
+    'github', 'devpost', 'website', 'npm', 'appstore',
+    'linkedin', 'arxiv', 'pdf', 'youtube',
+  ]);
+  const inferType = (url: string): InvolvementLink['type'] => {
+    const u = url.toLowerCase();
+    if (u.includes('github.com')) return 'github';
+    if (u.includes('devpost.com')) return 'devpost';
+    if (u.includes('npmjs.com')) return 'npm';
+    if (u.includes('apps.apple.com')) return 'appstore';
+    if (u.includes('linkedin.com')) return 'linkedin';
+    if (u.includes('arxiv.org')) return 'arxiv';
+    if (u.endsWith('.pdf')) return 'pdf';
+    if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube';
+    return 'website';
+  };
+  const explicitLinks: InvolvementLink[] = (item.links || [])
+    .filter((l): l is YamlLink & { url: string } => !!l && typeof l.url === 'string')
+    .map((l) => {
+      const type = (l.type && linkTypes.has(l.type) ? l.type : inferType(l.url)) as InvolvementLink['type'];
+      return { label: l.label || type, url: l.url, type };
+    });
+  const links: InvolvementLink[] = [...explicitLinks];
+  if (item.link && !links.some((l) => l.url === item.link)) {
+    const type = inferType(item.link);
+    links.unshift({ label: type, url: item.link, type });
+  }
   return {
     slug: item.slug,
     title: item.title || item.slug,
@@ -85,6 +135,7 @@ function normalize(item: YamlInvolvementItem): InvolvementEntry {
     org: item.org || item.title || item.slug,
     tagline: item.tagline || '',
     link: item.link,
+    links,
     date,
     startDate: start,
     endDate: end,
