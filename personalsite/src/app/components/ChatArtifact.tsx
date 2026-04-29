@@ -233,6 +233,7 @@ function RightTopAnnotation({
       )}
 
       <div
+        data-annot-textbox={interactive ? "true" : undefined}
         className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] shadow-[var(--shadow-soft)]"
         style={{
           right: `${textboxRight}px`,
@@ -339,6 +340,7 @@ function LeftCenterInteractive({
       />
 
       <div
+        data-annot-textbox="true"
         className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] shadow-[var(--shadow-soft)]"
         style={{
           left: `${textboxLeft}px`,
@@ -562,17 +564,27 @@ function ArtifactShell({
       return;
     }
     const id = requestAnimationFrame(() => {
+      const textbox = article.querySelector(
+        "[data-annot-textbox]",
+      ) as HTMLElement | null;
+      const wing = textbox?.parentElement as HTMLElement | null;
+      if (!textbox || !wing) {
+        setOverflowPad(0);
+        return;
+      }
+      // Measure the article's natural flow height with no extra padding.
       const prev = article.style.paddingBottom;
       article.style.paddingBottom = "0px";
       const naturalHeight = article.clientHeight;
-      const overflow = article.scrollHeight - naturalHeight;
+      // Textbox bottom in article coords. Uses offsetTop chain (layout
+      // position, ignores the scaleY transform on the textbox).
+      const textboxBottom = wing.offsetTop + textbox.offsetTop + textbox.offsetHeight;
       article.style.paddingBottom = prev;
-      // Same gate as before — only pad when there's a real overflow. When
-      // there is, add a 10%-of-card-height buffer on top so the textbox has
-      // breathing room rather than sitting flush against the bottom.
-      setOverflowPad(
-        overflow > 0 ? Math.ceil(overflow + naturalHeight * 0.1) : 0,
-      );
+      // Require the article to extend at least textboxBottom + 10% buffer.
+      // If the textbox already sits in the upper 90%, no pad needed.
+      const required = textboxBottom + naturalHeight * 0.1;
+      const pad = required - naturalHeight;
+      setOverflowPad(pad > 0 ? Math.ceil(pad) : 0);
     });
     return () => cancelAnimationFrame(id);
   }, [annotationTapped, isOverlay, annotation]);

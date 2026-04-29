@@ -192,6 +192,21 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: messageText, messages: updated }),
       });
+      if (response.status === 429) {
+        let msg = "You're sending messages too quickly. Try again in a minute.";
+        try {
+          const data = await response.json();
+          if (data?.error) msg = data.error;
+        } catch {
+          // keep default
+        }
+        setMessages((prev) => {
+          const next = [...prev];
+          next[assistantIndex] = { role: "assistant", content: msg };
+          return next;
+        });
+        return;
+      }
       if (!response.ok) throw new Error("Request failed");
 
       const reader = response.body?.getReader();
@@ -354,6 +369,23 @@ export default function HomePage() {
     }
   };
 
+  const startEditQueue = (index: number) => {
+    if (queueNavIndex === index) return;
+    if (queueNavIndex === -1) {
+      setSavedInput(input);
+      setInput(queue[index]);
+    } else {
+      setQueue((prev) => {
+        const updated = [...prev];
+        updated[queueNavIndex] = input;
+        return updated;
+      });
+      setInput(queue[index]);
+    }
+    setQueueNavIndex(index);
+    inputRef.current?.focus();
+  };
+
   const removeFromQueue = (index: number) => {
     setQueue((prev) => prev.filter((_, i) => i !== index));
     if (queueNavIndex >= 0) {
@@ -462,7 +494,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
       {/* PRE-CHAT HERO */}
       {!inChat && (
-        <section className="mx-auto flex w-full max-w-[680px] flex-col px-5 pt-12 pb-16 md:min-h-[calc(100dvh-68px)] md:justify-center md:px-6 md:pt-0 md:pb-8">
+        <section className="mx-auto flex w-full max-w-[680px] flex-col px-7 pt-12 pb-16 md:min-h-[calc(100dvh-68px)] md:justify-center md:px-6 md:pt-0 md:pb-8">
           <div className="rise" style={{ animationDelay: "80ms" }}>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
               Portfolio · conversational
@@ -525,7 +557,7 @@ export default function HomePage() {
           </div>
 
           <nav
-            className="rise mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[var(--color-ink-subtle)] md:mt-16"
+            className="rise mt-12 grid grid-cols-3 gap-x-5 gap-y-3 text-xs text-[var(--color-ink-subtle)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 md:mt-16"
             style={{ animationDelay: "360ms" }}
             aria-label="Sections"
           >
@@ -537,7 +569,10 @@ export default function HomePage() {
               { href: "/gallery", label: "Photography" },
               { href: "/about", label: "About" },
             ].map((item, i, arr) => (
-              <span key={item.href} className="inline-flex items-center gap-x-5">
+              <span
+                key={item.href}
+                className="inline-flex items-center gap-x-5"
+              >
                 <Link
                   href={item.href}
                   className="transition-colors hover:text-[var(--color-ink)]"
@@ -547,7 +582,7 @@ export default function HomePage() {
                 {i < arr.length - 1 && (
                   <span
                     aria-hidden="true"
-                    className="h-3 w-px bg-[var(--color-hairline)]"
+                    className="hidden h-3 w-px bg-[var(--color-hairline)] sm:inline-block"
                   />
                 )}
               </span>
@@ -628,9 +663,19 @@ export default function HomePage() {
                         : "border-[var(--color-hairline)] bg-[var(--color-surface-raised)] text-[var(--color-ink-muted)]"
                     }`}
                   >
-                    <span className="max-w-[160px] truncate">{item}</span>
                     <button
-                      onClick={() => removeFromQueue(index)}
+                      type="button"
+                      onClick={() => startEditQueue(index)}
+                      className="max-w-[160px] truncate text-left hover:text-[var(--color-ink)]"
+                      aria-label="Edit queued message"
+                    >
+                      {item}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromQueue(index);
+                      }}
                       className="text-[var(--color-ink-subtle)] opacity-0 transition-opacity hover:text-[var(--color-ink)] group-hover:opacity-100"
                       aria-label="Remove"
                     >
@@ -748,11 +793,11 @@ function AssistantBubble({
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="mt-[6px] h-[6px] w-[6px] flex-none rounded-full bg-[var(--color-accent)]" />
-        <div className="min-w-0 flex-1">
+        <div className="-mt-[4px] min-w-0 flex-1">
           {content === "" ? (
             <TypingIndicator />
           ) : (
-            <div className="prose prose-sm max-w-none text-[15px] leading-[1.7]">
+            <div className="max-w-none text-[15px] leading-[1.7]">
               <ReactMarkdown
                 components={{
                   a: (props) => (
@@ -776,12 +821,12 @@ function AssistantBubble({
                         className="block overflow-x-auto rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)] p-4 font-mono text-[13px] text-[var(--color-ink)]"
                       />
                     ),
-                  p: (props) => <p {...props} className="my-2 text-[var(--color-ink)]" />,
+                  p: (props) => <p {...props} className="my-2 first:mt-0 last:mb-0 text-[var(--color-ink)]" />,
                   ul: (props) => (
-                    <ul {...props} className="my-2 list-disc space-y-1 pl-5 marker:text-[var(--color-ink)]" />
+                    <ul {...props} className="my-2 first:mt-0 last:mb-0 list-disc space-y-1 pl-5 marker:text-[var(--color-ink)]" />
                   ),
                   ol: (props) => (
-                    <ol {...props} className="my-2 list-decimal space-y-1 pl-5 marker:text-[var(--color-ink)]" />
+                    <ol {...props} className="my-2 first:mt-0 last:mb-0 list-decimal space-y-1 pl-5 marker:text-[var(--color-ink)]" />
                   ),
                 }}
               >
@@ -817,17 +862,12 @@ function AssistantBubble({
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-1.5 py-2">
-      <span className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]" />
-      <span
-        className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]"
-        style={{ animationDelay: "120ms" }}
-      />
-      <span
-        className="tick h-[6px] w-[6px] rounded-full bg-[var(--color-ink-faint)]"
-        style={{ animationDelay: "240ms" }}
-      />
-    </div>
+    <span className="relative inline-block font-serif italic text-[15px] leading-[1.7] text-[var(--color-ink-muted)]">
+      Thinking
+      <span className="pointer-events-none absolute bottom-[3px] left-0 right-0 h-[2px] overflow-hidden">
+        <span className="underline-scrub block h-full w-[40%] bg-[var(--color-accent)]" />
+      </span>
+    </span>
   );
 }
 

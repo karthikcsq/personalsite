@@ -34,12 +34,12 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-[var(--color-hairline)] bg-[var(--color-surface)]/85 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 md:px-8">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-7 py-4 md:px-8">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="h-5 w-[3px] bg-[var(--color-accent)]" />
             <span className="font-serif text-[20px] italic leading-none text-[var(--color-ink)]">
-              karthik
+              Karthik
             </span>
-            <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-accent)]" />
           </Link>
 
           {/* Desktop nav */}
