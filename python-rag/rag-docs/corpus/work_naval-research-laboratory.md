@@ -9,7 +9,7 @@ This was the first time I did ML research at a job, and it was incredible seeing
 
 The biggest insight came from my technical lead: you could represent information about the acoustic space as colors in an RGB dimension, and the space itself as a two-dimensional image around the instrument. That's what made the whole thing work.
 
-What I took away from watching that kind of thinking is that the best researchers are able to abstract away a problem, treating data and vectors as just numbers being mapped to each other, not images, not sound data. At their core, they're all just signals, and they can be mapped to each other and used in conjunction. It's very rare that someone transfers a whole architecture from one domain to another. The key move isn't "ML is interdisciplinary" — it's that architectures are portable when you find the right representation.
+What I took away from watching that kind of thinking is that the best researchers are able to abstract away a problem, treating data and vectors as just numbers being mapped to each other, not images, not sound data. At their core, they're all just signals, and they can be mapped to each other and used in conjunction. It's very rare that someone transfers a whole architecture from one domain to another. Architectures travel between fields when you find the right representation. Acoustic data became a 2D RGB image, and an image-to-image translation model could do the work of a physics simulator.
 
 ## Building RAG before RAG was mainstream
 

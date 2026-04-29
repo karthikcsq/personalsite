@@ -27,7 +27,7 @@ To be honest, I didn't really see the results of that until six or seven months 
 
 ## The hardest engineering problem was time
 
-Surprisingly enough, it was all the time stuff: the interaction between the weekly resets, the daily resets, the checkpoints, and the snapshots; the changing week over week and comparing it to previous weeks; UTC versus EST versus PST for different users. There were so many complicated, small, hard-to-find bugs, especially trying to test something that operated on a daily basis when testing operates on the scale of milliseconds.
+The hardest engineering problem turned out to be time. Weekly resets, daily resets, checkpoints, snapshots, week-over-week comparisons, UTC versus EST versus PST for different users. There were so many small, hard-to-find bugs, especially trying to test something that operates on a daily cadence when tests run on the scale of milliseconds.
 
 ## AI workout plans: honest assessment
 
@@ -39,7 +39,7 @@ Our goal is to make money off of it. Once we have enough users and enough data, 
 
 The reason gamification produces better data, not just more data, is that it creates consistency and improvement. This in turn creates more consistent data, as well as more data per user. The more data we have per user, the better the recommendations will be.
 
-Right now, we're still vulnerable to fast followers, but as we grow, we will build an elephant: a community of users who are locked into the competition and progress they have built through the app.
+Right now we're vulnerable to fast followers. The defense we're building is the community itself: users locked into the competition and progress they've already accumulated, which a clone can't replicate.
 
 ## Marketing before we had a UI
 

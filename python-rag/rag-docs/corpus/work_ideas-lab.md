@@ -9,7 +9,7 @@ It was the model, to be honest. Trying to write a model with minimal public code
 
 ## Reproducibility in robotics
 
-I'm not sure exactly what the solution looks like, but especially when it came to robotics research, it didn't make any sense that the way models got installed in robotic agents was so poorly documented. Training pipelines also need to be reproducible.
+Robotics research has the worst version of this problem. The methods for getting a trained model running on a physical robot are barely documented, and training pipelines are rarely reproducible without rebuilding the whole rig from memory.
 
 What's different about robotics is the hardware coupling and sensor calibration. Setting up RGB-D cameras is not easy, and neither is real-time streaming the data to a server across multiple GPUs.
 
@@ -23,4 +23,4 @@ It's really hard. It's so hard being thrown into the deep end of having to under
 
 ## Slowly, then all at once
 
-It unfortunately barely happened, at the end, when we were about to wrap up. We made fast progress, achieving nearly all our results in the last three weeks. Progress on a new project is always like this: slowly, then all at once. Once you've tried enough things, pieces just start clicking together, and progress comes quickly once the bottlenecks clear.
+The all-at-once moment came late. We made nearly all our progress in the last three weeks. Progress on a new project is always like this: slowly, then all at once. Once you've tried enough things, pieces just start clicking together, and progress comes quickly once the bottlenecks clear.

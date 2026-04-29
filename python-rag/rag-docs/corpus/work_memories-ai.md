@@ -19,7 +19,7 @@ It's separate spaces with a joint layer that embeds higher level representations
 
 ## Why long context isn't the answer
 
-Gemini can process stuff, but our work was on 4-6 hours of video, something Gemini cannot do the way they process things. 4-6 hours of video is just way too many frames for any standard VLM to process using traditional methods. Context is simply not there yet.
+Gemini handles long video, but not 4–6 hours of it. That's too many frames for any standard VLM to take in directly. Long context isn't the answer yet.
 
 ## What it taught me about personal AI
 

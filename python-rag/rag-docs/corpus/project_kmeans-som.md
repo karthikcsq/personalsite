@@ -5,7 +5,7 @@ topics: [clustering, machine-learning, research, undergrad-research]
 
 ## Why dimensionality is the real problem with k-means
 
-In high dimensional data, distances are large, and thus, clustering can often be led astray by the sheer magnitude that Euclidean distance scales to. By using self organizing maps, we can reduce the dimensionality of the problem in an intelligent fashion, allowing for the scale of distances to be far more applicable for clustering.
+In high dimensional data, distances are large, and thus, clustering can often be led astray by the sheer magnitude that Euclidean distance scales to. Self-organizing maps reduce dimensionality while preserving topology, which keeps Euclidean distances meaningful at the scale clustering actually operates on.
 
 Preserving topology matters for data with high dimensionality and underlying structure. Dimensionality reduction without preserving that underlying structure can introduce nonexistent patterns into the data.
 

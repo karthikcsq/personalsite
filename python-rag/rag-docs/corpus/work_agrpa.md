@@ -13,7 +13,7 @@ If the drone was too fast, the images would blur. If we flew too high for better
 
 ## Multi-stream beats single-stream
 
-Adding the sensors was a concession, but it wasn't a huge change. In reality it was just another camera (infrared), which we were able to produce better results with in combination with the others. It's always important, especially in real world ML, to take advantage of as many distinguishable data streams as possible to improve accuracy.
+Adding the sensors was a tradeoff against simplicity, but a small one. In reality it was just another camera (infrared), which we were able to produce better results with in combination with the others. It's always important, especially in real world ML, to take advantage of as many distinguishable data streams as possible to improve accuracy.
 
 ## What hardtech ML costs that software ML doesn't
 

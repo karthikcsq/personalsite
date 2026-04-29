@@ -13,14 +13,14 @@ Customer support chatbots are a clear example. Research assistant agents that ju
 
 ## Why agentic coding, Zapier, and Clay work
 
-Agentic coding tools are genuinely useful (duh), but Zapier also has an amazing agent. Clay has a great agentic system as well.
+Agentic coding tools are useful (duh), but Zapier also has an amazing agent. Clay has a great agentic system as well.
 
-It genuinely takes so much time to set up an automation properly. Same thing with analyzing GTM leads in Clay. Having an agent that correctly converts vague user intent into structured insights is the most useful part of the agent.
+It takes so much time to set up an automation properly. Same thing with analyzing GTM leads in Clay. Having an agent that correctly converts vague user intent into structured insights is the most useful part of the agent.
 
 ## The gate before building one
 
-The thing to detect is if the data is genuinely so unstructured or hard to look through for insights that an agent is necessary. For example, I built an agent on my personal website, and it was genuinely useless because it only answered a small subset of questions about my work and projects. Instead, I've grown it so that it is able to answer tons of questions about my opinions, experiences, and my life.
+The thing to detect is whether the data is so unstructured or hard to look through for insights that an agent is necessary. For example, I built an agent on my personal website, and it was genuinely useless because it only answered a small subset of questions about my work and projects. Instead, I've grown it so that it is able to answer tons of questions about my opinions, experiences, and my life.
 
 ## What's overhyped
 
-It's when people make an agent that no one has tested or used. I fell victim to this many times, but I'm not someone who can be the arbiter of whether or not an agent is useful. But if you use the agent in practice and it produces genuinely useful results for people by saving them time and money, then it's good. Same as any product.
+It's when people make an agent that no one has tested or used. I fell victim to this many times, but I'm not someone who can be the arbiter of whether or not an agent is useful. But if you use the agent in practice and it produces useful results for people by saving them time and money, then it's good. Same as any product.

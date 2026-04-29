@@ -7,7 +7,7 @@ topics: [founders, community, purdue, density, cohort, operating-model, crm, wan
 
 The main problem we aimed to fix at BuildPurdue was that there was no density of founders. What that meant was that Purdue was producing a lot of great founders, but they weren't in the same place. Aspiring founders couldn't talk to them to figure out what they should do to improve. We couldn't celebrate each other's successes. There was no publicity of the accomplishments that founders at Purdue were having. We weren't tracking them because we didn't know they existed until they had graduated and left.
 
-Because of that, we created BuildPurdue to solve that primary single problem: how do we make a dense community of founders at Purdue?
+Because of that, we created BuildPurdue to solve that one problem: how do we make a dense community of founders at Purdue?
 
 ## Operating model
 
@@ -15,7 +15,7 @@ BuildPurdue runs two primary things.
 
 First, we run Night Shift every week. This is an open-to-all co-working event that runs from Saturday 7 pm to 3 am, and people stay for quite a while. It inspires founders to meet people who are working on real things and just be around others who want to stay dedicated to a project they're passionate about.
 
-Second, we have an exclusive program called The Cohort for those who are actually making progress on their ventures. This is application-based, and we select those who we have found to have a viable business idea and who have actually made progress, whether that's customer discovery or building an MVP. These cohort members get exclusive access to alternating weeks of workshops and co-working, which again aim to serve the purpose of a dense community of founders at Purdue. The workshops are completely founder-led, discussion-based workshops, not guest speakers where they're being taught how to do something, but rather how can we dissect a problem facing one of our cohort member's ventures by listening to the thoughts and opinions of the other intelligent people in the same room.
+Second, we have an exclusive program called The Cohort for those who are actually making progress on their ventures. This is application-based, and we select those who we have found to have a viable business idea and who have actually made progress, whether that's customer discovery or building an MVP. These cohort members get exclusive access to alternating weeks of workshops and co-working, which again aim to serve the purpose of a dense community of founders at Purdue. The workshops are completely founder-led and discussion-based. There's no guest speaker teaching the room how to do something. We take a problem one cohort venture is currently facing and dissect it together, using the thinking of everyone else there.
 
 We also have guest speaking events, as well as larger events such as panels, Q&As, pitch nights, startup career fairs, but none of those are our primary offerings.
 

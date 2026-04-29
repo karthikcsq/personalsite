@@ -13,7 +13,7 @@ Veritas combines cryptographic proof-of-personhood with ML-powered response qual
 
 ## Why this problem fit the hackathon
 
-We wanted to figure out a real problem that could be nearly completely solved with proof-of-personhood, using World ID, one of the sponsors for the hackathon. We realized we needed to find a high-economic-impact area of fraud that also has low digital adoption and operates virtually at scale. There was one field that caught our eye, because the person themselves matters so much to the quality of the data, which is clinical trials. There are $35B in the clinical trial industry, and up to 4% is fraud.
+We wanted a real problem that proof-of-personhood could mostly solve on its own, using World ID, one of the sponsors for the hackathon. We needed a high-economic-impact area of fraud that also has low digital adoption and operates virtually at scale. One field caught our eye, because the person themselves matters so much to the quality of the data: clinical trials. The clinical trials industry is $35B, and up to 4% of it is fraud.
 
 Going tool-first like this is definitely specifically a hackathon move. In the real world, it's better to look for a problem first, and then a solution. For the hackathon specifically, we opted for this approach.
 
