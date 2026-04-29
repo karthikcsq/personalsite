@@ -37,7 +37,7 @@ export function InvolvementClient({ involvements }: Props) {
 
 function InvolvementSection({ inv }: { inv: InvolvementEntry }) {
   return (
-    <section id={inv.slug} className="border-t border-[var(--color-hairline)] pt-10">
+    <section id={inv.slug} className="scroll-mt-[80px] border-t border-[var(--color-hairline)] pt-10">
       <header>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 className="text-[clamp(1.4rem,2.6vw,1.75rem)] font-medium leading-tight tracking-[-0.01em] text-[var(--color-ink)]">

@@ -51,7 +51,7 @@ function ProjectBlock({ project }: { project: Project }) {
   return (
     <li
       id={project.id}
-      className="border-t border-[var(--color-hairline)] py-10 last:border-b"
+      className="scroll-mt-[80px] border-t border-[var(--color-hairline)] py-10 last:border-b"
     >
       <header className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h2 className="text-[22px] font-medium leading-tight tracking-[-0.01em] text-[var(--color-ink)] md:text-[26px]">

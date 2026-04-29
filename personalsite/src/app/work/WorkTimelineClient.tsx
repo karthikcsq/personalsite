@@ -23,7 +23,7 @@ export function WorkTimelineClient({ jobs }: Props) {
         Where I&apos;ve worked.
       </h1>
       <p className="mt-5 max-w-[560px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
-        Research labs, startups, and whatever shipped in between.
+        Research labs, startups, and big tech.
       </p>
 
       <ol className="mt-14">
@@ -31,7 +31,7 @@ export function WorkTimelineClient({ jobs }: Props) {
           <li
             key={i}
             id={slugify(job.company)}
-            className="relative border-t border-[var(--color-hairline)] py-8 last:border-b"
+            className="relative scroll-mt-[80px] border-t border-[var(--color-hairline)] py-8 last:border-b"
           >
             <div className="grid grid-cols-[44px_1fr] gap-5 md:grid-cols-[56px_1fr] md:gap-7">
               <div className="relative flex flex-none items-start pt-0.5">
