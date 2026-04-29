@@ -2,13 +2,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { ArrowUp, X } from "lucide-react";
+import { ArrowUp, MessageSquarePlus, X } from "lucide-react";
 import { ChatArtifact, type Artifact } from "@/app/components/ChatArtifact";
-import {
-  ChatThreadProvider,
-  CitationChip,
-  artifactLabel,
-} from "@/app/components/ChatThread";
+import { ChatThreadProvider, CitationChip } from "@/app/components/ChatThread";
+import { ArtifactOverlay } from "@/app/components/ArtifactOverlay";
 
 interface Message {
   role: "user" | "assistant";
@@ -109,6 +106,19 @@ function linkifyUrls(text: string): string {
   );
 }
 
+// Repair markdown links that arrived split across line breaks. CommonMark
+// requires `[text](url)` with no whitespace between `]` and `(`, so the LLM
+// (or a soft-wrap upstream) emitting `[text]\n(url)` would render as plain
+// text. Two passes:
+//   1. Collapse any whitespace+newlines between `]` and `(` into nothing.
+//   2. Replace newlines INSIDE the link text `[ ... ]` with a single space,
+//      so a wrapped label still parses as one link.
+function repairMarkdownLinks(text: string): string {
+  return text
+    .replace(/\]\s*\n+\s*\(/g, "](")
+    .replace(/\[([^\]\n]*?)\n+([^\]]*?)\]/g, (_m, a, b) => `[${a} ${b}]`);
+}
+
 export default function HomePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -116,15 +126,24 @@ export default function HomePage() {
   const [queue, setQueue] = useState<string[]>([]);
   const [queueNavIndex, setQueueNavIndex] = useState(-1);
   const [savedInput, setSavedInput] = useState("");
-  // Per-category shuffled queues, frozen for the session so order stays stable
-  // as the user chats. We pull from these in `pickChips` according to category
-  // weights, which drift as the user clicks chips.
-  const [rotatedByCategory] = useState<Record<Category, Question[]>>(() => {
+  // Per-category queues, frozen for the session so order stays stable as the
+  // user chats. The shuffle uses Math.random() and can't run during SSR (it
+  // would mismatch the client render), so we start with the deterministic bank
+  // order and shuffle once on mount via useEffect below. We pull from these in
+  // `pickChips` according to category weights, which drift as the user clicks
+  // chips.
+  const [rotatedByCategory, setRotatedByCategory] = useState<Record<Category, Question[]>>(() => {
     const buckets: Record<Category, Question[]> = { work: [], opinions: [], life: [] };
     for (const q of QUESTION_BANK) for (const t of q.tags) buckets[t].push(q);
-    for (const c of CATEGORIES) buckets[c] = shuffled(buckets[c]);
     return buckets;
   });
+  useEffect(() => {
+    setRotatedByCategory((prev) => {
+      const next: Record<Category, Question[]> = { work: [], opinions: [], life: [] };
+      for (const c of CATEGORIES) next[c] = shuffled(prev[c]);
+      return next;
+    });
+  }, []);
   const [chipCursor, setChipCursor] = useState(0);
   // Category weights start equal so the first hero shows a balanced mix
   // (~2 work + 1 opinions + 1 life). Each chip click bumps its tags, so
@@ -441,41 +460,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
-      {/* Top strip (always present, changes density) */}
-      <header
-        className={`sticky top-0 z-40 border-b border-transparent bg-[var(--color-surface)]/85 backdrop-blur-sm transition-all ${
-          inChat ? "border-[var(--color-hairline)]" : ""
-        }`}
-      >
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 md:px-8">
-          <Link href="/" className="group flex items-center gap-2">
-            <span className="font-serif text-[20px] italic leading-none text-[var(--color-ink)]">
-              karthik
-            </span>
-            <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-accent)]" />
-          </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            {inChat && (
-              <button
-                onClick={resetChat}
-                className="text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
-              >
-                New conversation
-              </button>
-            )}
-            <Link
-              href="/work"
-              className="hidden text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)] sm:inline"
-            >
-              See everything
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       {/* PRE-CHAT HERO */}
       {!inChat && (
-        <section className="mx-auto flex min-h-[calc(100vh-68px)] w-full max-w-[680px] flex-col justify-center px-5 pb-8 md:px-6">
+        <section className="mx-auto flex w-full max-w-[680px] flex-col px-5 pt-12 pb-16 md:min-h-[calc(100dvh-68px)] md:justify-center md:px-6 md:pt-0 md:pb-8">
           <div className="rise" style={{ animationDelay: "80ms" }}>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
               Portfolio · conversational
@@ -537,34 +524,35 @@ export default function HomePage() {
             )}
           </div>
 
-          <div
-            className="rise mt-16 flex items-center gap-5 text-xs text-[var(--color-ink-subtle)]"
+          <nav
+            className="rise mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[var(--color-ink-subtle)] md:mt-16"
             style={{ animationDelay: "360ms" }}
+            aria-label="Sections"
           >
-            <Link href="/work" className="transition-colors hover:text-[var(--color-ink)]">
-              Work
-            </Link>
-            <span className="h-3 w-px bg-[var(--color-hairline)]" />
-            <Link href="/projects" className="transition-colors hover:text-[var(--color-ink)]">
-              Projects
-            </Link>
-            <span className="h-3 w-px bg-[var(--color-hairline)]" />
-            <Link href="/involvement" className="transition-colors hover:text-[var(--color-ink)]">
-              Involvement
-            </Link>
-            <span className="h-3 w-px bg-[var(--color-hairline)]" />
-            <Link href="/blog" className="transition-colors hover:text-[var(--color-ink)]">
-              Writing
-            </Link>
-            <span className="h-3 w-px bg-[var(--color-hairline)]" />
-            <Link href="/gallery" className="transition-colors hover:text-[var(--color-ink)]">
-              Photography
-            </Link>
-            <span className="h-3 w-px bg-[var(--color-hairline)]" />
-            <Link href="/about" className="transition-colors hover:text-[var(--color-ink)]">
-              About
-            </Link>
-          </div>
+            {[
+              { href: "/work", label: "Work" },
+              { href: "/projects", label: "Projects" },
+              { href: "/involvement", label: "Involvement" },
+              { href: "/blog", label: "Writing" },
+              { href: "/gallery", label: "Photography" },
+              { href: "/about", label: "About" },
+            ].map((item, i, arr) => (
+              <span key={item.href} className="inline-flex items-center gap-x-5">
+                <Link
+                  href={item.href}
+                  className="transition-colors hover:text-[var(--color-ink)]"
+                >
+                  {item.label}
+                </Link>
+                {i < arr.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="h-3 w-px bg-[var(--color-hairline)]"
+                  />
+                )}
+              </span>
+            ))}
+          </nav>
 
           <div
             className="rise mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--color-ink-subtle)]"
@@ -599,10 +587,18 @@ export default function HomePage() {
       {/* IN-CHAT SPLIT */}
       {inChat && (
         <ChatThreadProvider>
+        <ArtifactOverlay />
         <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
           {/* Chat column */}
-          <div className="flex h-[calc(100vh-68px)] flex-col">
-            <div className="ink-mask-top flex-1 overflow-y-auto pt-8 pb-6 quiet-scroll">
+          <div className="relative flex h-[calc(100dvh-68px)] flex-col">
+            {/* Top blur band: messages scrolling up pass behind a soft blur
+                instead of fading to the surface color. The band itself fades
+                out at its bottom edge so the transition is gradual. */}
+            <div
+              aria-hidden="true"
+              className="chat-blur-top pointer-events-none absolute inset-x-0 top-0 z-10 h-10"
+            />
+            <div className="flex-1 overflow-y-auto pt-8 pb-6 quiet-scroll">
               <div className="mx-auto max-w-[620px] space-y-8 pr-1">
                 {messages.map((msg, i) => (
                   <div key={i} className="rise">
@@ -666,6 +662,19 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* New conversation: icon-only, sits above the input. */}
+            <div className="mx-auto flex w-full max-w-[620px] items-center justify-end pb-1">
+              <button
+                type="button"
+                onClick={resetChat}
+                aria-label="New conversation"
+                title="New conversation"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-ink-faint)] transition-colors hover:text-[var(--color-accent)]"
+              >
+                <MessageSquarePlus className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              </button>
+            </div>
+
             {/* Input (docked) */}
             <form onSubmit={handleSubmit} className="mx-auto w-full max-w-[620px] pb-8">
               <div
@@ -698,15 +707,12 @@ export default function HomePage() {
             </form>
           </div>
 
-          {/* Artifact panel (desktop only; mobile renders inline) */}
-          <aside className="hidden h-[calc(100vh-68px)] overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
+          {/* Artifact panel (desktop only; mobile uses pill → overlay) */}
+          <aside className="hidden h-[calc(100dvh-68px)] overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
             {allArtifacts.length === 0 ? (
               <ArtifactEmpty />
             ) : (
               <div>
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
-                  Receipts
-                </p>
                 {allArtifacts.map((art, i) => (
                   <ChatArtifact key={art.id + "-" + i} artifact={art} index={i} />
                 ))}
@@ -779,32 +785,30 @@ function AssistantBubble({
                   ),
                 }}
               >
-                {linkifyUrls(content)}
+                {linkifyUrls(repairMarkdownLinks(content))}
               </ReactMarkdown>
             </div>
           )}
         </div>
       </div>
 
-      {/* Citation chips row (thread variant) — desktop only, anchors the
-          SVG threads from this turn's mentions to their cards in the aside. */}
+      {/* Citation chips row. On desktop, hovering threads to the matching
+          card in the aside; on mobile, tapping pushes the card into the
+          bottom-sheet overlay (handled inside CitationChip). */}
       {showCitations && (
-        <div className="hidden flex-wrap items-center gap-1.5 pl-5 lg:flex">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 pl-5">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]">
             Pulled from
           </span>
           {artifacts!.map((art) => (
-            <CitationChip key={art.id} id={art.id} label={artifactLabel(art)} />
+            <CitationChip key={art.id} artifact={art} />
           ))}
-        </div>
-      )}
-
-      {/* Mobile: inline artifacts below the assistant message */}
-      {artifacts && artifacts.length > 0 && (
-        <div className="lg:hidden mt-1 pl-5">
-          {artifacts.map((art, i) => (
-            <ChatArtifact key={art.id + "-m-" + i} artifact={art} index={i} />
-          ))}
+          <span
+            aria-hidden="true"
+            className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-faint)] lg:hidden"
+          >
+            Tap to read
+          </span>
         </div>
       )}
     </div>
@@ -830,10 +834,7 @@ function TypingIndicator() {
 function ArtifactEmpty() {
   return (
     <div className="flex h-full flex-col justify-center text-center">
-      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
-        Receipts panel
-      </p>
-      <p className="mt-3 font-serif text-[17px] italic leading-snug text-[var(--color-ink-muted)]">
+      <p className="font-serif text-[17px] italic leading-snug text-[var(--color-ink-muted)]">
         Whatever Karthik&apos;s chat pulls up, it lands here.
       </p>
       <p className="mt-2 text-[13px] text-[var(--color-ink-faint)]">

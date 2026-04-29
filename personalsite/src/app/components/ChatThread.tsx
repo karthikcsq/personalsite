@@ -25,6 +25,11 @@ type Ctx = {
   setActive: React.Dispatch<React.SetStateAction<string | null>>;
   registerCard: (id: string, el: HTMLElement | null) => void;
   getCard: (id: string) => HTMLElement | null;
+  // Mobile uses citation pills as the primary entry to a card. Tapping a pill
+  // pushes the matching artifact into `overlay`, which the bottom-sheet
+  // component renders. Desktop never sets this; the threading flow takes over.
+  overlay: Artifact | null;
+  setOverlay: (a: Artifact | null) => void;
 };
 
 const ChatThreadCtx = createContext<Ctx | null>(null);
@@ -35,6 +40,7 @@ export function useChatThread(): Ctx | null {
 
 export function ChatThreadProvider({ children }: { children: ReactNode }) {
   const [activeId, setActive] = useState<string | null>(null);
+  const [overlay, setOverlay] = useState<Artifact | null>(null);
   const cards = useRef<Map<string, HTMLElement>>(new Map());
 
   const registerCard = useCallback((id: string, el: HTMLElement | null) => {
@@ -45,7 +51,9 @@ export function ChatThreadProvider({ children }: { children: ReactNode }) {
   const getCard = useCallback((id: string) => cards.current.get(id) ?? null, []);
 
   return (
-    <ChatThreadCtx.Provider value={{ activeId, setActive, registerCard, getCard }}>
+    <ChatThreadCtx.Provider
+      value={{ activeId, setActive, registerCard, getCard, overlay, setOverlay }}
+    >
       {children}
     </ChatThreadCtx.Provider>
   );
@@ -87,17 +95,20 @@ function targetScrollTopForCenter(card: HTMLElement, scroller: HTMLElement): num
   return Math.max(0, Math.min(max, desired));
 }
 
-// Citation chip rendered inside the assistant message. Hovering scrolls the
-// matching card into view in the artifact panel and, after the scroll
-// settles, activates it (which brightens the border and unfolds the wing
-// with the quote).
+// Citation chip rendered inside the assistant message. On desktop, hover
+// scrolls the matching card into view in the artifact panel and, after the
+// scroll settles, activates it (brightening the border and unfolding the
+// wing with the quote). On mobile (`< lg`), there is no side panel — tapping
+// the chip pushes the artifact into the bottom-sheet overlay instead.
 //
 // Each chip owns three timers: enter (debounce on hover-in), open (delay
 // between scroll start and wing reveal), and leave (debounce on hover-out).
 // The leave handler uses a functional setActive so it only clears activation
 // if THIS chip is still the active one — otherwise rapid hover across chips
 // would let one chip's leave timer cancel another's activation.
-export function CitationChip({ id, label }: { id: string; label: string }) {
+export function CitationChip({ artifact }: { artifact: Artifact }) {
+  const id = artifact.id;
+  const label = artifactLabel(artifact);
   const ctx = useChatThread();
   const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -187,7 +198,16 @@ export function CitationChip({ id, label }: { id: string; label: string }) {
   };
 
   // Click pins activation immediately and bypasses the hover debounce.
+  // On mobile (< lg), there is no side panel — open the artifact overlay
+  // instead so tapping a pill is the primary way to read the receipt.
   const onClick = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 1023px)").matches
+    ) {
+      ctx?.setOverlay(artifact);
+      return;
+    }
     clearTimers();
     beginActivate();
   };
@@ -202,14 +222,15 @@ export function CitationChip({ id, label }: { id: string; label: string }) {
       onFocus={onEnter}
       onBlur={onLeave}
       onClick={onClick}
-      className={`group/cite inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] font-mono text-[10.5px] uppercase tracking-[0.14em] transition-colors ${
+      title={label}
+      className={`group/cite inline-flex min-h-[32px] items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors lg:min-h-0 lg:px-2.5 lg:py-[3px] lg:text-[10.5px] ${
         isActive
           ? "border-[var(--color-accent)] bg-[var(--color-accent-tint)] text-[var(--color-accent)]"
           : "border-[var(--color-hairline)] bg-[var(--color-surface-raised)] text-[var(--color-ink-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
       }`}
     >
       <span
-        className={`h-[5px] w-[5px] rounded-full transition-colors ${
+        className={`h-[5px] w-[5px] flex-none rounded-full transition-colors ${
           isActive
             ? "bg-[var(--color-accent)]"
             : "bg-[var(--color-hairline-strong)] group-hover/cite:bg-[var(--color-accent)]"
