@@ -283,7 +283,7 @@ async function buildSearchQuery(
     .join("\n") || "";
 
   const rewriteResponse = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     temperature: 0,
     messages: [
       {
@@ -921,7 +921,7 @@ ${directoryText}`,
               // Stage 2: per-artifact annotation picker. For each cited id,
               // load its corpus (concatenated bodies of every corpus file
               // whose `applies_to` includes this id). If empty, the card
-              // surfaces with no annotation. Otherwise, ask gpt-4o-mini to
+              // surfaces with no annotation. Otherwise, ask gpt-5.4-nano to
               // extract a verbatim fragment that speaks to THIS reply, or
               // null if nothing fits.
               const annotations = new Map<string, string>();
@@ -932,7 +932,7 @@ ${directoryText}`,
                   let pickerJson = "{}";
                   try {
                     const picker = await openai.chat.completions.create({
-                      model: "gpt-4o-mini",
+                      model: "gpt-5.4-nano",
                       // Higher temperature widens the candidate set the model
                       // proposes. Server-side random pick (below) does the
                       // actual variety. Verbatim validation still gates each
