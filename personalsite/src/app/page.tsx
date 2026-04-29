@@ -3,7 +3,12 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowUp, X } from "lucide-react";
-import { ChatArtifact, type Artifact } from "@/app/components/ChatArtifact";
+import { ChatArtifact, useAnnotationStyle, type Artifact } from "@/app/components/ChatArtifact";
+import {
+  ChatThreadProvider,
+  CitationChip,
+  artifactLabel,
+} from "@/app/components/ChatThread";
 
 interface Message {
   role: "user" | "assistant";
@@ -565,6 +570,7 @@ export default function HomePage() {
 
       {/* IN-CHAT SPLIT */}
       {inChat && (
+        <ChatThreadProvider>
         <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
           {/* Chat column */}
           <div className="flex h-[calc(100vh-68px)] flex-col">
@@ -680,6 +686,7 @@ export default function HomePage() {
             )}
           </aside>
         </div>
+        </ChatThreadProvider>
       )}
     </div>
   );
@@ -702,6 +709,9 @@ function AssistantBubble({
   content: string;
   artifacts?: Artifact[];
 }) {
+  const annotStyle = useAnnotationStyle();
+  const showCitations =
+    annotStyle === "thread" && content !== "" && artifacts && artifacts.length > 0;
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
@@ -749,6 +759,19 @@ function AssistantBubble({
           )}
         </div>
       </div>
+
+      {/* Citation chips row (thread variant) — desktop only, anchors the
+          SVG threads from this turn's mentions to their cards in the aside. */}
+      {showCitations && (
+        <div className="hidden flex-wrap items-center gap-1.5 pl-5 lg:flex">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]">
+            Pulled from
+          </span>
+          {artifacts!.map((art) => (
+            <CitationChip key={art.id} id={art.id} label={artifactLabel(art)} />
+          ))}
+        </div>
+      )}
 
       {/* Mobile: inline artifacts below the assistant message */}
       {artifacts && artifacts.length > 0 && (
