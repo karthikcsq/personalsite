@@ -1,0 +1,15 @@
+# Normalize line endings: store LF in the repo, let Git handle conversion
+# on checkout per-platform. This silences "LF will be replaced by CRLF"
+# warnings on Windows checkouts.
+* text=auto eol=lf
+
+# Binary files — never normalize
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
