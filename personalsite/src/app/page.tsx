@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowUp, X } from "lucide-react";
-import { ChatArtifact, useAnnotationStyle, type Artifact } from "@/app/components/ChatArtifact";
+import { ChatArtifact, type Artifact } from "@/app/components/ChatArtifact";
 import {
   ChatThreadProvider,
   CitationChip,
@@ -709,9 +709,7 @@ function AssistantBubble({
   content: string;
   artifacts?: Artifact[];
 }) {
-  const annotStyle = useAnnotationStyle();
-  const showCitations =
-    annotStyle === "thread" && content !== "" && artifacts && artifacts.length > 0;
+  const showCitations = content !== "" && artifacts && artifacts.length > 0;
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">

@@ -3,17 +3,8 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { useSearchParams } from "next/navigation";
 import { useChatThread } from "@/app/components/ChatThread";
 
-type AnnotationStyle = "circle" | "peek" | "mark" | "thread";
-
-export function useAnnotationStyle(): AnnotationStyle {
-  const params = useSearchParams();
-  const v = params?.get("annot");
-  if (v === "peek" || v === "mark" || v === "thread") return v;
-  return "circle";
-}
 
 
 export type Artifact = { annotation?: string } & (
@@ -124,12 +115,10 @@ export function ChatArtifact({ artifact, index = 0 }: { artifact: Artifact; inde
 function RightTopAnnotation({
   text,
   circleY,
-  peek = false,
   open = false,
 }: {
   text: string;
   circleY: number;
-  peek?: boolean;
   open?: boolean;
 }) {
   // Wing internal geometry places the circle at cy=44 within an 80-tall wing.
@@ -147,7 +136,7 @@ function RightTopAnnotation({
         width={240}
         height={80}
         fill="none"
-        style={{ opacity: peek ? (open ? 1 : 0.7) : open ? 0.8 : 0.4 }}
+        style={{ opacity: open ? 0.8 : 0.4 }}
       >
         <path
           d="M 9 44 L 30 23 L 40 23"
@@ -158,7 +147,7 @@ function RightTopAnnotation({
           strokeLinejoin="round"
           strokeDasharray="1"
           style={{
-            strokeDashoffset: peek ? 0 : open ? 0 : 1,
+            strokeDashoffset: open ? 0 : 1,
             transition: "stroke-dashoffset 120ms ease-out",
             transitionDelay: open ? "0ms" : "120ms",
           }}
@@ -172,11 +161,11 @@ function RightTopAnnotation({
           top: "23px",
           width: "200px",
           transformOrigin: "left center",
-          color: peek && !open ? "var(--color-ink-muted)" : "var(--color-ink)",
-          opacity: peek ? (open ? 1 : 0.65) : open ? 1 : 0,
-          transform: `translateY(-50%) scaleY(${peek || open ? 1 : 0})`,
-          transition: "opacity 150ms ease-out, transform 120ms ease-out, color 150ms ease-out",
-          transitionDelay: peek ? "0ms" : open ? "120ms" : "0ms",
+          color: "var(--color-ink)",
+          opacity: open ? 1 : 0,
+          transform: `translateY(-50%) scaleY(${open ? 1 : 0})`,
+          transition: "opacity 150ms ease-out, transform 120ms ease-out",
+          transitionDelay: open ? "120ms" : "0ms",
         }}
       >
         {text}
@@ -194,13 +183,11 @@ function LeftCenterAnnotation({
   cardRef,
   open,
   circleY,
-  peek = false,
 }: {
   text: string;
   cardRef: RefObject<HTMLElement | null>;
   open: boolean;
   circleY: number;
-  peek?: boolean;
 }) {
   const [pos, setPos] = useState<{ top: number; left: number; height: number } | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -266,7 +253,7 @@ function LeftCenterAnnotation({
         width={wingWidth}
         height={wingHeight}
         fill="none"
-        style={{ opacity: peek ? (open ? 1 : 0.7) : open ? 0.8 : 0.4 }}
+        style={{ opacity: open ? 0.8 : 0.4 }}
       >
         <path
           d="M 234 40 L 214 20 L 194 20"
@@ -277,7 +264,7 @@ function LeftCenterAnnotation({
           strokeLinejoin="round"
           strokeDasharray="1"
           style={{
-            strokeDashoffset: peek ? 0 : open ? 0 : 1,
+            strokeDashoffset: open ? 0 : 1,
             transition: "stroke-dashoffset 120ms ease-out",
             transitionDelay: open ? "0ms" : "120ms",
           }}
@@ -285,20 +272,19 @@ function LeftCenterAnnotation({
         <circle cx={234} cy={40} r={3} stroke="currentColor" strokeWidth="1.25" />
       </svg>
 
-      {/* Textbox: unfolds vertically on hover, after connector extends.
-          In peek mode, textbox is always rendered at lower opacity. */}
+      {/* Textbox: unfolds vertically on hover, after connector extends. */}
       <div
         className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] shadow-[var(--shadow-soft)]"
         style={{
           left: "4px",
           top: "20px",
           width: "190px",
-          color: peek && !open ? "var(--color-ink-muted)" : "var(--color-ink)",
-          opacity: peek ? (open ? 1 : 0.65) : open ? 1 : 0,
-          transform: `translateY(-50%) scaleY(${peek || open ? 1 : 0})`,
+          color: "var(--color-ink)",
+          opacity: open ? 1 : 0,
+          transform: `translateY(-50%) scaleY(${open ? 1 : 0})`,
           transformOrigin: "right center",
-          transition: "opacity 150ms ease-out, transform 120ms ease-out, color 150ms ease-out",
-          transitionDelay: peek ? "0ms" : open ? "120ms" : "0ms",
+          transition: "opacity 150ms ease-out, transform 120ms ease-out",
+          transitionDelay: open ? "120ms" : "0ms",
         }}
       >
         {text}
@@ -334,24 +320,21 @@ function ArtifactShell({
   annotationBelowOffset?: number;
   children: React.ReactNode;
 }) {
-  const annotStyle = useAnnotationStyle();
   const thread = useChatThread();
   const articleRef = useRef<HTMLElement | null>(null);
   const [cardHovered, setCardHovered] = useState(false);
 
-  // In thread mode, register this card with the thread provider so the
-  // citation chips can scroll to it on hover.
+  // Register this card with the thread provider so the citation chips can
+  // scroll to it on hover.
   useEffect(() => {
-    if (annotStyle !== "thread" || !thread) return;
+    if (!thread) return;
     const el = articleRef.current;
     thread.registerCard(artifactId, el);
     return () => thread.registerCard(artifactId, null);
-  }, [annotStyle, thread, artifactId]);
+  }, [thread, artifactId]);
 
-  const isThreadActive = annotStyle === "thread" && thread?.activeId === artifactId;
-  // Drive the wing reveal off either local hover or thread activation. In
-  // peek mode the wing component ignores `open` for resting opacity (it's
-  // always visible); `open` still bumps it to full intensity.
+  const isThreadActive = thread?.activeId === artifactId;
+  // Drive the wing reveal off either local hover or thread activation.
   const annotationOpen = cardHovered || isThreadActive;
   // Title bounds in card-local coords (measured from the <h3> inside this
   // card). Falls back to sensible defaults before measurement completes.
@@ -405,7 +388,7 @@ function ArtifactShell({
   return (
     <article
       ref={articleRef}
-      data-thread-card={annotStyle === "thread" ? artifactId : undefined}
+      data-thread-card={artifactId}
       className={`group relative cursor-pointer border-t py-7 transition-colors ${
         isThreadActive
           ? "border-[var(--color-accent)]"
@@ -413,11 +396,11 @@ function ArtifactShell({
       }`}
       onMouseEnter={() => {
         setCardHovered(true);
-        if (annotStyle === "thread" && thread) thread.setActive(artifactId);
+        if (thread) thread.setActive(artifactId);
       }}
       onMouseLeave={() => {
         setCardHovered(false);
-        if (annotStyle === "thread" && thread) {
+        if (thread) {
           // Only clear if WE'RE the active one — never stomp another
           // card/chip's activation.
           thread.setActive((prev) => (prev === artifactId ? null : prev));
@@ -425,35 +408,25 @@ function ArtifactShell({
       }}
       onClick={handleCardClick}
     >
-      {annotation && annotStyle !== "mark" && !isLeftCenter && (
+      {annotation && !isLeftCenter && (
         <RightTopAnnotation
           text={annotation}
           circleY={circleY}
-          peek={annotStyle === "peek"}
           open={annotationOpen}
         />
       )}
-      {annotation && annotStyle !== "mark" && isLeftCenter && (
+      {annotation && isLeftCenter && (
         <LeftCenterAnnotation
           text={annotation}
           cardRef={articleRef}
           open={annotationOpen}
           circleY={circleY}
-          peek={annotStyle === "peek"}
         />
       )}
       <header className="mb-4 flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
           <span className="h-[5px] w-[5px] rounded-full bg-[var(--color-accent)]" />
           {label}
-          {annotation && annotStyle === "mark" && (
-            <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)]/40 px-1.5 py-[1px] text-[9.5px] tracking-[0.16em] text-[var(--color-accent)] transition-colors group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent)]/5">
-              <span aria-hidden className="font-serif text-[12px] not-italic leading-none">
-                &ldquo;
-              </span>
-              note
-            </span>
-          )}
         </span>
         {href && linkText && (
           <Link
@@ -467,18 +440,6 @@ function ArtifactShell({
         )}
       </header>
       {children}
-      {annotation && annotStyle === "mark" && (
-        <div
-          aria-hidden={!cardHovered}
-          className="grid grid-rows-[0fr] transition-[grid-template-rows,opacity] duration-200 ease-out group-hover:grid-rows-[1fr] opacity-0 group-hover:opacity-100"
-        >
-          <div className="overflow-hidden">
-            <p className="mt-4 border-l-2 border-[var(--color-accent)] pl-3 font-serif text-[14px] italic leading-snug text-[var(--color-ink-muted)]">
-              {annotation}
-            </p>
-          </div>
-        </div>
-      )}
     </article>
   );
 }
@@ -676,23 +637,21 @@ function NoteArtifact({ id, data, annotation }: { id: string; data: NoteData; an
   const quote = annotation && annotation.trim().length > 0
     ? annotation.trim()
     : (data.tagline || "");
-  const annotStyle = useAnnotationStyle();
   const thread = useChatThread();
   const articleRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    if (annotStyle !== "thread" || !thread) return;
+    if (!thread) return;
     const el = articleRef.current;
     thread.registerCard(id, el);
     return () => thread.registerCard(id, null);
-  }, [annotStyle, thread, id]);
-  const isThreadActive = annotStyle === "thread" && thread?.activeId === id;
+  }, [thread, id]);
+  const isThreadActive = thread?.activeId === id;
   return (
     <article
       ref={articleRef}
-      data-thread-card={annotStyle === "thread" ? id : undefined}
-      onMouseEnter={() => annotStyle === "thread" && thread?.setActive(id)}
+      data-thread-card={id}
+      onMouseEnter={() => thread?.setActive(id)}
       onMouseLeave={() =>
-        annotStyle === "thread" &&
         thread?.setActive((prev) => (prev === id ? null : prev))
       }
       className={`group relative border-t py-5 transition-colors ${
