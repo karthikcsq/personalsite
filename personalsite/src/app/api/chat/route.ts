@@ -426,7 +426,8 @@ export async function POST(req: NextRequest) {
       includeMetadata: true,
     });
 
-    console.log(`⏱️  Embedding + Pinecone: ${Date.now() - tRetrievalStart}ms`);
+    const retrievalMs = Date.now() - tRetrievalStart;
+    console.log(`⏱️  Embedding + Pinecone: ${retrievalMs}ms`);
     console.log(`📊 Found ${queryResponse.matches.length} matches`);
     if (queryResponse.matches.length > 0) {
       console.log(`   Top score: ${queryResponse.matches[0].score?.toFixed(3)}`);
@@ -673,6 +674,7 @@ LINK RULES (strict):
 - If you also want to link to a project's repo or external URL, use the EXACT URL that appears in the retrieved Context for that project (e.g. \`https://github.com/karthikcsq/google-tools-mcp\`, \`https://www.npmjs.com/package/google-tools-mcp\`). Wrap it as a labeled link: \`[GitHub](...)\`, \`[npm](...)\`, \`[arXiv](...)\`. Do NOT shorten, guess, or truncate URLs. Do NOT emit the bare URL.
 - NEVER link a project name to a bare profile URL (e.g. \`https://github.com/karthikcsq\` without the repo path). NEVER invent a URL. If the Context doesn't have a specific URL, link only to the on-site project section.
 - Same rule for involvement and work: link to \`/involvement#<slug>\` and \`/work#<company-slug>\` respectively, using slugs that appear in the retrieved Context. Labels go on every link.
+- **Bare-page links are FORBIDDEN when referring to a specific item.** When you mention a specific project, involvement, work experience, or blog post, you MUST link to the anchored URL (\`/projects#<slug>\`, \`/involvement#<slug>\`, \`/work#<company-slug>\`, \`/blog/<slug>\`), NOT the bare index page. Example bad: \`he co-founded [buildpurdue](https://www.karthikthyagarajan.com/involvement)\` — this drops the visitor at the top of the involvement index instead of his buildpurdue section. Example good: \`he co-founded [buildpurdue](https://www.karthikthyagarajan.com/involvement#buildpurdue)\`. Bare-page links (\`/involvement\`, \`/projects\`, \`/work\`, \`/blog\`) are ONLY acceptable for generic catch-all phrases like "see all his involvement" or "browse his projects" — never when a specific item is named.
 - **For "show me his X" / list-style queries:** never produce a bare URL list. Each item must include the project/work name and at least one short sentence of substance (what it is, what makes it interesting). The reply must read as a discussion, not a dump. Example bad: \`QKD Research Paper: https://arxiv.org/abs/...\`. Example good: \`his [Photonic Implementation of QKD](https://www.karthikthyagarajan.com/projects#qkd) ([arXiv](https://arxiv.org/abs/2509.04389)) — explores secure quantum communication using near-infrared lasers.\`
 When you reference a blog post that appears in the Context, link DIRECTLY to that post using the slug shown in its label: \`/blog/<slug>\`. NEVER link to the generic \`/blog\` index page when a specific post is the source of what you're saying. If a chunk is labeled \`kind=blog_post slug="future-of-ai-work"\`, link to \`https://www.karthikthyagarajan.com/blog/future-of-ai-work\`.
 
@@ -777,12 +779,20 @@ STYLE RULES (follow strictly):
       async start(controller) {
         let replyText = "";
         let tFirstToken = 0;
+        const timings: Record<string, number> = {
+          rewriter: tRewriteEnd - tRewriteStart,
+          retrieval: retrievalMs,
+          ttft: 0,
+          stream: 0,
+          postStream: 0,
+        };
         try {
           for await (const chunk of stream) {
             const delta = chunk.choices[0]?.delta?.content || "";
             if (!delta) continue;
             if (tFirstToken === 0) {
               tFirstToken = Date.now();
+              timings.ttft = tFirstToken - tStreamStart;
               console.log(`⏱️  TTFT (main stream first token): ${tFirstToken - tStreamStart}ms`);
             }
             replyText += delta;
@@ -791,138 +801,164 @@ STYLE RULES (follow strictly):
             );
           }
           const tStreamEnd = Date.now();
+          timings.stream = tStreamEnd - tStreamStart;
           console.log(`⏱️  Main stream total: ${tStreamEnd - tStreamStart}ms (${replyText.length} chars)`);
 
-          // Post-hoc citation extraction. Ask a cheap model to identify which
-          // artifacts the finished reply actually talks about. This runs
-          // AFTER the visible stream completes, so it adds one short round
-          // trip of latency but doesn't block the reply.
-          if (artifactDirectory.length > 0 && replyText.trim().length > 20) {
+          // Post-hoc citation pipeline. The main LLM is heavily prompted to
+          // emit canonical anchor URLs for every direct artifact it mentions
+          // (`/projects#<id>`, `/blog/<slug>`, `/involvement#<slug>`,
+          // `/work#<company-slug>`), so direct-artifact citations come from
+          // parsing the reply text — no model call needed. The only
+          // remaining LLM step is a SCOPED extractor that decides which
+          // topic cards (abstract takes, no URL form) the reply anchors.
+          // That extractor and the direct-artifact pickers run in parallel.
+          if (replyText.trim().length > 20) {
             try {
-              // Stage 1: citation extractor. Pick which directory entries the
-              // reply substantively touches. No annotation work here — just
-              // index numbers.
-              const tExtractorStart = Date.now();
-              const extractor = await openai.chat.completions.create({
-                model: "gpt-5.4-nano",
-                temperature: 0,
-                max_completion_tokens: 200,
-                response_format: { type: "json_object" },
-                messages: [
-                  {
-                    role: "system",
-                    content: `You pick the receipt cards that match what an assistant reply actually talks about. Each card is a numeric index from the DIRECTORY below.
-
-Return JSON: {"cited":[<index>,<index>,...]}
-
-Rules for inclusion:
-- The reply names the card (its title, role, or company) → include it.
-- The reply substantively discusses content unique to that card (a specific feature, claim, decision, or outcome) → include it.
-- BLOG CARDS ARE SOURCES OF VIEWS. If the reply expresses a thesis, framing, opinion, or argument that a blog card's title/blurb covers, INCLUDE the blog — even if the reply doesn't name the post. The blog is the source of the take. Phrases like "he wrote about this", "a full piece on it", or any distinctive coined term from the blurb (e.g. "project economy") are strong signals to cite that blog.
-- TOPIC CARDS (labels prefixed with [Karthik's take on "..."]) ARE THE CANONICAL HOME OF HIS STANCE. They follow an aggressive inclusion rule: if the reply substantively states or discusses Karthik's view on the topic's subject — even abstractly, even without naming a specific feature, even when the reply also covers projects — INCLUDE the topic card. A topic card is NEVER "merely topically adjacent" to a reply about its subject; it IS the take. When the visitor asks "what does he think about X?" and the reply states his position on X, the topic:X card MUST be cited if it appears in the directory. The topic card should generally come FIRST in the cited list — the take anchors the reply.
-
-Rules for exclusion:
-- The card is only topically adjacent. Two AI projects don't cite each other just because the reply mentions AI. Two "internal platforms" don't cite each other just because the word appears. (This exclusion applies to work/project/involvement cards. Blogs and topics follow the inclusion rules above.)
-- The reply only name-drops a card without engaging it.
-- The reply is a refusal, generic, or off-topic → return {"cited":[]}.
-
-Don't invent indexes. Only return integers that appear in the DIRECTORY.
-
-Order by first meaningful reference in the reply.
-
-DIRECTORY:
-${directoryText}`,
-                  },
-                  {
-                    role: "user",
-                    content: `REPLY:\n${replyText}\n\nReturn JSON now.`,
-                  },
-                ],
-              });
-
-              console.log(`⏱️  Citation extractor: ${Date.now() - tExtractorStart}ms`);
-              const raw = extractor.choices[0]?.message?.content || "{}";
-
-              // Coerce a cited entry to a valid integer index. Tolerates the
-              // model returning {index: N}, "N", a bare id string (legacy),
-              // or a plain int.
-              const resolveIndex = (item: unknown): number | null => {
-                if (typeof item === "number" && indexToId.has(item)) return item;
-                if (typeof item === "string") {
-                  const n = parseInt(item, 10);
-                  if (!Number.isNaN(n) && indexToId.has(n)) return n;
-                  const asIndex = idToIndex.get(item);
-                  if (asIndex !== undefined) return asIndex;
-                  return null;
-                }
-                if (!item || typeof item !== "object") return null;
-                const rec = item as Record<string, unknown>;
-                if (typeof rec.index === "number" && indexToId.has(rec.index)) {
-                  return rec.index;
-                }
-                if (typeof rec.index === "string") {
-                  const n = parseInt(rec.index, 10);
-                  if (!Number.isNaN(n) && indexToId.has(n)) return n;
-                }
-                if (typeof rec.id === "string") {
-                  const asIndex = idToIndex.get(rec.id);
-                  if (asIndex !== undefined) return asIndex;
-                }
-                return null;
-              };
-
-              let citedIds: string[] = [];
-              try {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed.cited)) {
-                  for (const item of parsed.cited) {
-                    const index = resolveIndex(item);
-                    if (index === null) continue;
-                    citedIds.push(indexToId.get(index)!);
-                  }
-                }
-              } catch {
-                citedIds = [];
+              // Slugify a company name the way WorkTimelineClient.tsx does so
+              // a `/work#<slug>` URL in the reply maps back to the canonical
+              // `work:<Company>` id.
+              const slugifyCompany = (s: string) =>
+                s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+              const companySlugToId = new Map<string, string>();
+              for (const j of allJobs) {
+                companySlugToId.set(slugifyCompany(j.company), `work:${j.company}`);
               }
+              const projectIdSet = new Set(allProjects.map((p) => p.id));
+              const involvementSlugSet = new Set(allInvolvements.map((i) => i.slug));
 
-              // URL-match fallback. The extractor sees a directory of project /
-              // work / involvement labels but NOT the URLs each card carries.
-              // For terse "show me his X" replies that list URLs without prose,
-              // the extractor often returns 0 cited cards because nothing
-              // "substantively discusses" the artifact. Force-cite any card
-              // whose canonical link or external URL appears verbatim in the
-              // reply. This is purely additive — never excludes the extractor's
-              // picks, only adds ones it missed.
-              const replyLower = replyText.toLowerCase();
-              const citedSet = new Set(citedIds);
-              const tryAddByUrl = (id: string, urls: string[]) => {
-                if (citedSet.has(id)) return;
+              // Build the URL-to-id map for external link matching (project
+              // repos, npm, arXiv, involvement external pages). Stripped of
+              // protocol so trailing slashes / http vs https don't matter.
+              const externalUrlToId: Array<{ url: string; id: string }> = [];
+              const pushExternal = (id: string, urls: Array<string | undefined>) => {
                 for (const u of urls) {
                   if (!u) continue;
-                  // Match against host+path (strip protocol) so trailing slashes
-                  // and protocol differences don't matter.
                   const stripped = u.replace(/^https?:\/\//i, "").toLowerCase();
                   if (stripped.length < 8) continue;
-                  if (replyLower.includes(stripped)) {
-                    citedIds.push(id);
-                    citedSet.add(id);
-                    return;
-                  }
+                  externalUrlToId.push({ url: stripped, id });
                 }
               };
               for (const project of allProjects) {
-                const id = `project:${project.id}`;
-                const urls = [
-                  ...(project.links || []).map((l) => l.url),
-                  project.display?.embedUrl || "",
-                ];
-                tryAddByUrl(id, urls);
+                pushExternal(
+                  `project:${project.id}`,
+                  [
+                    ...(project.links || []).map((l) => l.url),
+                    project.display?.embedUrl,
+                  ],
+                );
               }
               for (const inv of allInvolvements) {
-                const id = `involvement:${inv.slug}`;
-                const urls = (inv.links || []).map((l) => l.url);
-                tryAddByUrl(id, urls);
+                pushExternal(`involvement:${inv.slug}`, (inv.links || []).map((l) => l.url));
               }
+
+              // URL-parse direct citations. Order by first appearance in
+              // reply text so the receipts panel renders cards roughly in
+              // the order the reader encounters them.
+              const tParseStart = Date.now();
+              const replyLower = replyText.toLowerCase();
+              type Hit = { id: string; offset: number };
+              const hits: Hit[] = [];
+              const seen = new Set<string>();
+              const pushHit = (id: string, offset: number) => {
+                if (offset < 0 || seen.has(id)) return;
+                seen.add(id);
+                hits.push({ id, offset });
+              };
+
+              // Canonical on-site anchors. Use the literal pattern the LLM
+              // is told to emit. Slug capture is lenient (any safe URL char)
+              // but only IDs that exist in the catalog get pushed.
+              const scanPattern = (re: RegExp, mapper: (slug: string) => string | null) => {
+                let m: RegExpExecArray | null;
+                while ((m = re.exec(replyLower)) !== null) {
+                  const slug = m[1];
+                  const id = mapper(slug);
+                  if (id) pushHit(id, m.index);
+                }
+              };
+              // Match either the full-domain form or a bare path. LLMs
+              // sometimes emit paths without `karthikthyagarajan.com` (just
+              // `[label](/involvement#slug)`). Allow:
+              //   karthikthyagarajan.com/<path>
+              //   <start-of-string|whitespace|(|[> /<path>
+              // The non-capturing prefix accepts either alternative; the
+              // slug is always group 1.
+              scanPattern(
+                /(?:karthikthyagarajan\.com|(?:^|[\s(\[]))\/projects#([a-z0-9-]+)/g,
+                (slug) => (projectIdSet.has(slug) ? `project:${slug}` : null),
+              );
+              scanPattern(
+                /(?:karthikthyagarajan\.com|(?:^|[\s(\[]))\/blog\/([a-z0-9-]+)/g,
+                (slug) => (retrievedBlogs.has(slug) ? `blog:${slug}` : null),
+              );
+              scanPattern(
+                /(?:karthikthyagarajan\.com|(?:^|[\s(\[]))\/involvement#([a-z0-9-]+)/g,
+                (slug) => (involvementSlugSet.has(slug) ? `involvement:${slug}` : null),
+              );
+              scanPattern(
+                /(?:karthikthyagarajan\.com|(?:^|[\s(\[]))\/work#([a-z0-9-]+)/g,
+                (slug) => companySlugToId.get(slug) || null,
+              );
+
+              // External URLs (project repos, arXiv, npm, involvement links).
+              // Cheap substring scan since URLs are long enough that false
+              // positives are vanishingly unlikely.
+              for (const { url, id } of externalUrlToId) {
+                if (seen.has(id)) continue;
+                const idx = replyLower.indexOf(url);
+                if (idx >= 0) pushHit(id, idx);
+              }
+
+              // Fuzzy name matching as a fallback for replies that mention
+              // an artifact by name without linking to it (the LLM is
+              // prompted to link, but doesn't always). Splits the artifact
+              // name on non-alphanumeric AND camelCase boundaries, then
+              // matches against the reply allowing any (or no) separator
+              // between parts. So "BuildPurdue" matches "buildpurdue",
+              // "build purdue", "build-purdue"; "Memories.ai" matches
+              // "memories ai", "memories.ai"; "google-tools-mcp" matches
+              // "Google Tools MCP".
+              const splitWords = (s: string): string[] =>
+                s
+                  .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+                  .split(/[^a-zA-Z0-9]+/)
+                  .filter((p) => p.length > 0);
+              const fuzzyNameRegex = (name: string): RegExp | null => {
+                const parts = splitWords(name);
+                if (parts.length === 0) return null;
+                const totalLen = parts.reduce((a, p) => a + p.length, 0);
+                // Skip names that are too short — high false-positive risk
+                // (e.g. a 3-char company name might appear in unrelated
+                // prose). 5 chars is enough to be distinctive in practice.
+                if (totalLen < 5) return null;
+                return new RegExp(parts.join("[^a-z0-9]*"), "i");
+              };
+              const nameMatchers: Array<{ id: string; re: RegExp }> = [];
+              const addNameMatcher = (id: string, name: string) => {
+                if (seen.has(id)) return;
+                const re = fuzzyNameRegex(name);
+                if (re) nameMatchers.push({ id, re });
+              };
+              for (const project of allProjects) {
+                addNameMatcher(`project:${project.id}`, project.title);
+              }
+              for (const inv of allInvolvements) {
+                addNameMatcher(`involvement:${inv.slug}`, inv.title);
+              }
+              for (const j of allJobs) {
+                addNameMatcher(`work:${j.company}`, j.company);
+              }
+              for (const { id, re } of nameMatchers) {
+                if (seen.has(id)) continue;
+                const m = re.exec(replyText);
+                if (m) pushHit(id, m.index);
+              }
+
+              hits.sort((a, b) => a.offset - b.offset);
+              const directCitedIds: string[] = hits.map((h) => h.id);
+              console.log(
+                `⏱️  URL-parse cited (${Date.now() - tParseStart}ms): direct=${directCitedIds.length}, topic-candidates=${retrievedTopics.size}`,
+              );
 
               // Verbatim validator factory. The picker output is a substring
               // claim against THAT artifact's corpus context — never against
@@ -948,14 +984,7 @@ ${directoryText}`,
                 return segments.every((seg) => hay.includes(seg));
               };
 
-              // Stage 2: per-artifact annotation picker, fired in parallel.
-              // We tried batching these into one call to share the prompt
-              // rules across artifacts, but `gpt-5.4-nano` is decode-bound:
-              // one call decoding N artifacts' candidates serially is slower
-              // than N parallel calls each decoding one. Total wall-clock
-              // for N parallel pickers ≈ max(per_artifact_decode), batched ≈
-              // sum(per_artifact_decode). Parallel wins.
-              const annotations = new Map<string, string>();
+              // Per-candidate validators (used inside runPicker below).
               const startsWithBarePronoun = (q: string): boolean => {
                 const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").toLowerCase();
                 return /^(that|this|it|they|them|those|these|such|he|she|here|there)\b/.test(
@@ -976,12 +1005,28 @@ ${directoryText}`,
                 ) {
                   return true;
                 }
+                // Pattern C: position / role restatement. The card already
+                // shows role + organization + dates (label format:
+                // "<role> at <company>" / "<title> (<role>, <date>)"), so a
+                // quote that just restates "I am the X of Y" duplicates
+                // visible card content. Catches "I am/I'm the founder of",
+                // "I'm the founding engineer at", "I am co-founder and
+                // president of", etc.
+                if (
+                  /^(i\s+am|i'?m|i\s+serve\s+as)\s+(the\s+|a\s+|an\s+)?(co[-\s]?founder|founder|founding\s+\w+|president|vice[\s-]?president|ceo|cto|coo|cfo|chair(?:man|person|woman)?|director|head|lead(?:er)?|engineer|owner|partner|principal|chief|manager)\b/i.test(
+                    cleaned,
+                  )
+                ) {
+                  return true;
+                }
                 return false;
               };
 
-              const tPickerStart = Date.now();
-              await Promise.all(
-                citedIds.map(async (id) => {
+              // Per-artifact annotation picker. Defined as a closure so it
+              // can be invoked from both the direct-artifact and topic legs
+              // (which share the same `annotations` map).
+              const annotations = new Map<string, string>();
+              const runPicker = async (id: string): Promise<void> => {
                   const corpus = getCorpusForArtifact(id);
                   if (!corpus) return;
                   const tThisStart = Date.now();
@@ -1022,6 +1067,7 @@ What makes a good candidate (in priority order):
 
 What to AVOID:
 - Definitional restatements ("we built X, a Y for Z", "X is a Y that ..."). The card already says what the artifact is. Skip them even if prominent in the corpus.
+- **Position / role restatements** ("I am the president and co-founder of X", "I'm the founding engineer at Y", "I serve as Z of W", "my role at X is Y"). The card already shows the role, title, company, and dates. Restating them adds nothing — pick a line that says WHY he's there or WHAT he believes about the work, not WHAT his title is.
 - Flat feature lists or accomplishments.
 - Generic platitudes.
 
@@ -1124,14 +1170,112 @@ ${corpus}`,
                     `🎯 Picker for ${id} (${tThisEnd - tThisStart}ms): ${valid.length} candidate(s)\n` +
                     valid.map((v, i) => `   ${i === valid.indexOf(chosen) ? "▶" : " "} ${v.slice(0, 80)}${v.length > 80 ? "…" : ""}`).join("\n"),
                   );
-                }),
-              );
-              console.log(`⏱️  Pickers (parallel, n=${citedIds.length}): ${Date.now() - tPickerStart}ms`);
+              };
 
-              // Stage 3: hydrate + emit.
+              // Topic-only scoped extractor. Topics are abstract takes that
+              // don't get URL-linked in the reply, so they need a model call
+              // to decide which were anchored. Scope is just the retrieved
+              // topic candidates → much smaller prompt and decision space
+              // than the original directory-wide extractor.
+              const topicEntries = [...retrievedTopics.entries()];
+              const runTopicExtractor = async (): Promise<string[]> => {
+                if (topicEntries.length === 0) return [];
+                const topicDirectory = topicEntries
+                  .map(
+                    ([slug, t], i) =>
+                      `[${i + 1}] [Karthik's take on "${slug}"] ${t.title}${t.tagline ? ` (${t.tagline})` : ""}`,
+                  )
+                  .join("\n");
+                const tStart = Date.now();
+                let raw = "{}";
+                try {
+                  const res = await openai.chat.completions.create({
+                    model: "gpt-5.4-nano",
+                    temperature: 0,
+                    max_completion_tokens: 100,
+                    response_format: { type: "json_object" },
+                    messages: [
+                      {
+                        role: "system",
+                        content: `You decide which Karthik-take cards are anchored by an assistant reply. Each card represents Karthik's stance on a topic.
+
+Return JSON: {"cited":[<index>,<index>,...]} (zero or more integers from the DIRECTORY).
+
+Inclusion rule: TOPIC CARDS ARE THE CANONICAL HOME OF HIS STANCE. If the reply substantively states or discusses Karthik's view on the topic's subject — even abstractly, even when the reply also covers projects — INCLUDE the topic card. A topic card is NEVER "merely topically adjacent" to a reply about its subject; it IS the take.
+
+If the reply doesn't engage with any take in the directory, return {"cited":[]}.
+
+Don't invent indexes. Only return integers that appear in the DIRECTORY.
+
+DIRECTORY:
+${topicDirectory}`,
+                      },
+                      { role: "user", content: `REPLY:\n${replyText}\n\nReturn JSON now.` },
+                    ],
+                  });
+                  raw = res.choices[0]?.message?.content || "{}";
+                } catch (err) {
+                  console.error("Topic extractor failed:", err);
+                  return [];
+                }
+                console.log(`⏱️  Topic extractor: ${Date.now() - tStart}ms`);
+                const out: string[] = [];
+                try {
+                  const parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed.cited)) {
+                    for (const item of parsed.cited) {
+                      const n =
+                        typeof item === "number"
+                          ? item
+                          : typeof item === "string"
+                            ? parseInt(item, 10)
+                            : NaN;
+                      if (Number.isFinite(n) && n >= 1 && n <= topicEntries.length) {
+                        const slug = topicEntries[n - 1][0];
+                        const id = `topic:${slug}`;
+                        if (!out.includes(id)) out.push(id);
+                      }
+                    }
+                  }
+                } catch {
+                  // ignore
+                }
+                return out;
+              };
+
+              // Fire both legs in parallel. Direct pickers start immediately
+              // off the URL-parsed citedIds. The topic leg first runs the
+              // extractor, then fires pickers for any topics it returned.
+              const tParallelStart = Date.now();
+              const directPickersDone = (async () => {
+                if (directCitedIds.length === 0) return;
+                const t = Date.now();
+                await Promise.all(directCitedIds.map(runPicker));
+                console.log(
+                  `⏱️  Pickers (direct, n=${directCitedIds.length}): ${Date.now() - t}ms`,
+                );
+              })();
+              const topicLegDone = (async (): Promise<string[]> => {
+                const ids = await runTopicExtractor();
+                if (ids.length === 0) return [];
+                const t = Date.now();
+                await Promise.all(ids.map(runPicker));
+                console.log(`⏱️  Pickers (topic, n=${ids.length}): ${Date.now() - t}ms`);
+                return ids;
+              })();
+              const [, topicCitedIds] = await Promise.all([directPickersDone, topicLegDone]);
+              timings.postStream = Date.now() - tParallelStart;
+              console.log(
+                `⏱️  Post-stream pipeline (parallel): ${timings.postStream}ms`,
+              );
+
+              // Stage 3: hydrate + emit. Topics anchor takes, so they come
+              // first in the receipts panel, followed by direct artifacts in
+              // URL-appearance order.
+              const allCitedIds = [...topicCitedIds, ...directCitedIds];
               const emittedIds = new Set<string>();
               const artifactsOut: Artifact[] = [];
-              for (const id of citedIds) {
+              for (const id of allCitedIds) {
                 const artifact = hydrateArtifactById(
                   id,
                   retrievedBlogs,
@@ -1149,7 +1293,7 @@ ${corpus}`,
                 );
               }
               console.log(
-                `🧾 Cited: [${citedIds
+                `🧾 Cited: [${allCitedIds
                   .map((id) => (annotations.has(id) ? `${id} ✓quote` : id))
                   .join(", ")}] → ${artifactsOut.length} artifact(s)`,
               );
@@ -1159,6 +1303,9 @@ ${corpus}`,
             }
           }
 
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ timings })}\n\n`),
+          );
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {

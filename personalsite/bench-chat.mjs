@@ -24,6 +24,7 @@ async function bench(query) {
   let firstContentAt = 0;
   let bytes = 0;
   let artifactsSeen = 0;
+  let timings = null;
   const decoder = new TextDecoder();
   let buf = "";
   while (true) {
@@ -41,12 +42,14 @@ async function bench(query) {
         const obj = JSON.parse(event);
         if (obj.content && firstContentAt === 0) firstContentAt = Date.now();
         if (obj.artifacts) artifactsSeen += obj.artifacts.length;
+        if (obj.timings) timings = obj.timings;
       } catch {}
     }
   }
   const total = Date.now() - t0;
+  const t = timings || {};
   console.log(
-    `  TTFB: ${firstByteAt - t0}ms | first content token: ${firstContentAt - t0}ms | total: ${total}ms | artifacts: ${artifactsSeen} | ${bytes}B`,
+    `  total: ${total}ms | TTFB: ${firstByteAt - t0}ms | TTFT: ${t.ttft ?? "?"}ms | stream: ${t.stream ?? "?"}ms | postStream: ${t.postStream ?? "?"}ms | rewriter: ${t.rewriter ?? 0}ms | retrieval: ${t.retrieval ?? "?"}ms | artifacts: ${artifactsSeen} | ${bytes}B`,
   );
   // Brief pause so per-request server logs don't interleave.
   await new Promise((r) => setTimeout(r, 500));
