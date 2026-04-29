@@ -168,6 +168,47 @@ The cleanup pass is conservative, not stylistic. You are NOT making it sound bet
 
 When you do apply fixes, list them concisely after writing (e.g. "Fixed: em dashes around teammates clause; run-on of 'He remembered sitting down...' split; parallel structure in 'There was no reason...'"). Karthik wants to see what you changed, not justify each one.
 
+### 4c. Style review with approval (mandatory before diff)
+
+After the grammar cleanup pass, do a second pass for weak phrasing. Unlike 4b (which is automatic and applied silently), this pass requires Karthik's explicit approval per item. The fixes here touch voice and word choice, so the risk of overwriting his phrasing is real — never apply silently.
+
+Scan the cleaned prose (both newly transcribed sections AND any older sections you'll be appending into) for the following failure points. These are the patterns that ship past the grammar pass but still read as weak.
+
+1. **Dangling intensifiers.** "Especially X," "particularly Y," "even Z" used with no comparison baseline. The intensifier promises a contrast the sentence never delivers. Either supply the baseline ("especially in robotics, compared to NLP") or drop the intensifier.
+2. **"Doesn't make sense" misused.** Karthik uses this to mean "is unjustified" or "is irrational," but the phrase literally means "is incoherent." If the thing being described is merely frustrating or unjustified — not logically incoherent — replace with the actual claim ("was unjustifiable," "was wasteful," "was avoidable").
+3. **Vague or passive verbs.** "Got installed," "process stuff," "do things," "deal with it." If the verb hides who acts or what specifically happens, replace it. Models aren't "installed" — they're deployed, loaded, integrated, run on. Don't soften the action.
+4. **Hedge-then-complain structure.** Opening a thought with "I'm not sure exactly..." or "I don't really know..." followed by a grievance. The hedge undercuts the complaint and abdicates the take. Either commit to the take or commit to the question — not both.
+5. **Filler intensifiers used 3+ times in one doc.** "Genuinely," "really," "absolutely," "actually," "literally," "definitely." Once is fine. Three or more means the word has stopped doing work. Cut all but the one or two where the contrast against its absence is the actual point.
+6. **Redundancy in qualifier stacks.** "Primary single problem," "nearly completely solved," "most very best." Pick one. Stacked qualifiers cancel each other out or reveal the writer hedging mid-claim.
+7. **Orphan pronouns.** Sentences starting with "It" or "they" where the antecedent is two paragraphs back, ambiguous, or missing. Distinct from the 4b pronoun pass — this is about distance and clarity, not grammar agreement.
+8. **Number/agreement that survived 4b.** Singular product names ("Gemini") with plural pronouns ("they"). Aggregate nouns treated inconsistently. The grammar pass catches most; this pass catches the ones that read as grammatical but feel off.
+9. **Broken metaphors.** Figurative phrases that don't actually track ("build an elephant" for a moat, "boil the ocean" used as praise). If the metaphor doesn't compress meaning faster than literal phrasing, drop it or replace with a metaphor that does work.
+10. **Wrong word choice.** "Concession" where "tradeoff" is meant. "Disinterested" where "uninterested" is meant. Words that are close to right but carry the wrong connotation. Trust the reader to feel the slip even if they can't name it.
+11. **Tense slips inside one thought.** Past tense narrating a problem the speaker says they're still inside. "I'm working on X, and X didn't make sense" — pick one frame.
+12. **Contrastive parallelism that crept in.** "It's not X, it's Y" / "less about X, more about Y." Already forbidden in 4b for transcription, but easy to introduce when rewriting. Re-check.
+
+For each instance you find, present a numbered item to Karthik with this shape:
+
+> **N. `<filename>:<line>` — <one-line failure mode label>**
+>
+> > "<original sentence verbatim>"
+>
+> **Issue:** <one sentence; name the failure mode and what it does to the reader>
+>
+> **Proposed:**
+> > "<rewritten sentence>"
+
+Then wait. Karthik replies "approve / deny / edit" per number, possibly in batch ("apply 1, 3, 5; deny 2; reword 4 to..."). For denials, ask whether the original is fine or whether the failure point itself was a false positive (so you don't flag it again next pass). For edits, apply his version verbatim — never re-rewrite his rewrite.
+
+**Discipline:**
+- Cap the list at the strongest 8–12 items per session. If you find more, surface only the strongest and offer to do a second pass after.
+- Don't reach. If a sentence is plain but not weak, leave it. Karthik's voice is plain on purpose.
+- Don't propose rewrites that introduce contrastive parallelism or em dashes. The rewrite must pass 4b's checklist itself.
+- Show the user-facing text only, not your scan notes. Don't say "I'm scanning for hedge-then-complain..." — just present the items.
+- If zero issues are found, say so in one sentence and move on. Don't manufacture findings to justify the step.
+
+After Karthik responds, apply the approved rewrites in place (in the cleaned prose, before sub-topic organization). The diff in step 6 reflects the post-rewrite state.
+
 ### 5. Organize by sub-topic
 
 Group the cleaned prose into sub-topics. Each sub-topic gets a `## <Title>` heading. Examples of good sub-topic titles:
