@@ -1,6 +1,6 @@
 ---
 applies_to: [project:repple]
-topics: [fitness, competition, co-founding, mobile, gamification, motivation, ELO, data-moat]
+topics: [fitness, competition, co-founding, mobile, gamification, motivation, ELO, data-moat, community-building, distribution, marketing, B2C, network-effects]
 ---
 
 ## Why it's fun
@@ -40,3 +40,33 @@ Our goal is to make money off of it. Once we have enough users and enough data, 
 The reason gamification produces better data, not just more data, is that it creates consistency and improvement. This in turn creates more consistent data, as well as more data per user. The more data we have per user, the better the recommendations will be.
 
 Right now, we're still vulnerable to fast followers, but as we grow, we will build an elephant: a community of users who are locked into the competition and progress they have built through the app.
+
+## Marketing before we had a UI
+
+We put out a reel once a week promoting Repple before we even had a UI. We had skits, jokes, ads, beta testing announcements, but we kept up the pace of production. We had campus-wide challenges and put stickers on every building on campus too.
+
+We landed because we made genuinely funny content. People knew our name, and the reach was high. By marketing early, we built anticipation and education, so that when we released the app, we wouldn't have to spend time teaching people it existed first.
+
+## Stickers and campus density
+
+Stickers on every building on campus marketed toward our ICP directly. Since most of our audience is on campus, and we wanted a tightly knit Repple community, we wanted those in the same location to use Repple together. That's why the stickers worked.
+
+Repple does work without local density, but it works best when friends work out together. Local density at a college is the best way to have that become likely.
+
+## Quantity beats polish
+
+We just posted everything we made. Quantity beat trying to make something too serious or too perfect. It ended up catching on.
+
+Many videos flopped, but it didn't matter. Enough did well to get the word out. Volume is what matters. If even a few do well, it makes the volume worthwhile.
+
+Our highest performing reel was a Snapchat video recreation: our founder walking up to some people in an academic building and just laughing while telling them about Repple. That's when we realized that just posting authentically catches on. Recognizable authenticity matters. It doesn't matter how.
+
+## Distribution is everything for B2C
+
+For Repple, since we are B2C, distribution channels are the most important part. We didn't have budget for Instagram ads, so instead we opted for something that would get high ROI for little cost.
+
+For B2C, that's a universal claim. Without distribution, you will fall flat, especially for something like Repple which needs the network effect to grow.
+
+## How we grew Repple
+
+We grew Repple by building a community that cared about our mission. We got the word out through any means necessary.
