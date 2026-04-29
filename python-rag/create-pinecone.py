@@ -19,10 +19,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone as PineconeStore
 from langchain_core.documents import Document
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from bm25 import SimpleBM25
 
-load_dotenv()
+# Walk up from this file to find the repo-root .env (one canonical source
+# shared with Next.js). find_dotenv handles the case where the script is
+# run from python-rag/ or anywhere else.
+load_dotenv(find_dotenv())
 
 # === CONFIGURATION ===
 # Paths are relative to python-rag/ directory
