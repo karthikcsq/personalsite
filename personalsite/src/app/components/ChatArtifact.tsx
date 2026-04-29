@@ -914,6 +914,7 @@ function BlogArtifact({ id, data, annotation, mode }: { id: string; data: BlogDa
       href={`/blog/${data.slug}`}
       linkText="Read full"
       annotation={annotation}
+      annotationBelowOffset={1}
       mode={mode}
     >
       <h3 className="font-serif text-[22px] italic leading-tight text-[var(--color-ink)]">
