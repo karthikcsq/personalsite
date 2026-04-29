@@ -2,8 +2,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-const STRIP_HEIGHT = 320; // uniform image height across all albums
+const stripHeight_DESKTOP = 320;
+const stripHeight_MOBILE = 220;
 const AUTO_SCROLL_SPEED = 30; // px / second
+
+function useStripHeight() {
+  const [h, setH] = useState(stripHeight_DESKTOP);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => setH(mq.matches ? stripHeight_MOBILE : stripHeight_DESKTOP);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+  return h;
+}
 
 export default function GalleryPage() {
   const [galleryData, setGalleryData] = useState<{ [folder: string]: string[] }>({});
@@ -57,6 +70,7 @@ export default function GalleryPage() {
 }
 
 function Marquee({ images, reverse = false }: { images: string[]; reverse?: boolean }) {
+  const stripHeight = useStripHeight();
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0); // transform X in pixels; always ≤ 0 for the loop
   const halfRef = useRef(0); // width of one copy of the image list (half the track)
@@ -180,15 +194,15 @@ function Marquee({ images, reverse = false }: { images: string[]; reverse?: bool
           <div
             key={index}
             className="relative flex-none overflow-hidden rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)]"
-            style={{ height: STRIP_HEIGHT }}
+            style={{ height: stripHeight }}
           >
             <Image
               src={src}
               alt=""
               width={1600}
-              height={STRIP_HEIGHT}
+              height={stripHeight}
               className="block object-cover"
-              style={{ height: STRIP_HEIGHT, width: "auto" }}
+              style={{ height: stripHeight, width: "auto" }}
               unoptimized
               draggable={false}
             />
@@ -200,6 +214,7 @@ function Marquee({ images, reverse = false }: { images: string[]; reverse?: bool
 }
 
 function GallerySkeleton() {
+  const stripHeight = useStripHeight();
   return (
     <div className="space-y-14">
       {[0, 1].map((row) => (
@@ -207,12 +222,12 @@ function GallerySkeleton() {
           <div className="mx-auto mb-5 max-w-[1280px] px-5 md:px-8">
             <div className="h-3 w-32 bg-[var(--color-surface-muted)]" />
           </div>
-          <div className="flex gap-3 overflow-hidden px-5 md:px-8" style={{ height: STRIP_HEIGHT }}>
+          <div className="flex gap-3 overflow-hidden px-5 md:px-8" style={{ height: stripHeight }}>
             {[0, 1, 2, 3].map((j) => (
               <div
                 key={j}
                 className="flex-none rounded-md bg-[var(--color-surface-muted)]"
-                style={{ height: STRIP_HEIGHT, width: STRIP_HEIGHT * 1.4 }}
+                style={{ height: stripHeight, width: stripHeight * 1.4 }}
               />
             ))}
           </div>
