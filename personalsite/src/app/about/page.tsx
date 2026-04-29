@@ -22,10 +22,10 @@ const SKILLS = [
 ];
 
 const EXPLORING = [
-  "Reinforcement learning for IoT security",
-  "AR/XR video memory systems",
-  "Neural radiance fields and 3D SLAM",
-  "Multi-agent systems and RAG pipelines",
+  "MCP and agent-callable real-world services",
+  "Agents that save time, not just effort",
+  "Chat-first interfaces and AI-native product surfaces",
+  "Founder density at the undergrad level",
 ];
 
 const INTERESTS = [
@@ -54,9 +54,28 @@ export default function AboutPage() {
       </h1>
 
       <p className="mt-6 max-w-[620px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
-        CS and AI at Purdue, building ML systems for robots and startups. Not trying
-        to sound like anyone else.
+        Someone who can't leave a good idea alone.
       </p>
+
+      <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2">
+        {CONNECT.map((c) => (
+          <li key={c.label}>
+            <a
+              href={c.href}
+              target={c.href.startsWith("http") ? "_blank" : undefined}
+              rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="group inline-flex items-baseline gap-1.5 text-[15px] text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)]"
+            >
+              <span className="border-b border-[var(--color-hairline-strong)] pb-0.5 group-hover:border-[var(--color-accent)]">
+                {c.label}
+              </span>
+              <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
+                ↗
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
 
       <section className="mt-14 space-y-5 text-[16px] leading-[1.75] text-[var(--color-ink)]">
         <p>
@@ -145,30 +164,6 @@ export default function AboutPage() {
             );
           })}
         </div>
-      </Section>
-
-      <Divider />
-
-      <Section label="Connect">
-        <ul className="flex flex-wrap gap-x-6 gap-y-2">
-          {CONNECT.map((c) => (
-            <li key={c.label}>
-              <a
-                href={c.href}
-                target={c.href.startsWith("http") ? "_blank" : undefined}
-                rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group inline-flex items-baseline gap-1.5 text-[15.5px] text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)]"
-              >
-                <span className="border-b border-[var(--color-hairline-strong)] pb-0.5 group-hover:border-[var(--color-accent)]">
-                  {c.label}
-                </span>
-                <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
-                  ↗
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
       </Section>
 
       <Divider />
