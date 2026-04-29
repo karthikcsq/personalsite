@@ -121,6 +121,7 @@ Required in `.env.local` (not tracked in git):
 - `PINECONE_INDEX_NAME` - Name of Pinecone index
 - `OPENAI_API_KEY` - OpenAI API for embeddings and chat completions
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - S3 gallery images (if needed server-side)
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL` / `KV_REST_API_TOKEN` from the Vercel/Upstash integration) - Upstash Redis for `/api/chat` rate limiting (10/min, 60/hr per IP). If unset, rate limiting is skipped with a console warning.
 - `NEXT_PUBLIC_*` - Any client-side env vars
 
 ## Important Constraints

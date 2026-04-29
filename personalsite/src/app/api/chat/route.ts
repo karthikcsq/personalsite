@@ -7,6 +7,7 @@ import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
 import { resolveTopic } from "@/utils/topicsUtils";
 import { projects as projectsCatalog } from "@/data/projectsData";
 import { getCorpusForArtifact } from "@/utils/quotesUtils";
+import { checkChatRateLimit, getClientIdentifier } from "@/utils/rateLimit";
 
 // Type for chat messages
 interface ChatMessage {
@@ -363,6 +364,28 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
+    const clientId = getClientIdentifier(req);
+    const rl = await checkChatRateLimit(clientId);
+    if (!rl.success) {
+      const retryAfter = Math.max(1, Math.ceil((rl.reset - Date.now()) / 1000));
+      const window = rl.scope === "minute" ? "a minute" : "an hour";
+      return NextResponse.json(
+        {
+          error: `You're sending messages too quickly. Please try again in ${window}.`,
+          retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(rl.limit),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(rl.reset),
+          },
+        },
+      );
+    }
+
     const body = await req.json();
     const { message, messages: conversationHistory } = body;
 
@@ -1314,13 +1337,17 @@ ${topicDirectory}`,
       },
     });
 
-    return new Response(readableStream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    const streamHeaders: Record<string, string> = {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    };
+    if (rl.scope !== 'disabled') {
+      streamHeaders['X-RateLimit-Limit'] = String(rl.limit);
+      streamHeaders['X-RateLimit-Remaining'] = String(rl.remaining);
+      streamHeaders['X-RateLimit-Reset'] = String(rl.reset);
+    }
+    return new Response(readableStream, { headers: streamHeaders });
 
   } catch (error) {
     console.error("Error in chat API:", error);
