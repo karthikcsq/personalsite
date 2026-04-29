@@ -736,10 +736,10 @@ function AssistantBubble({
                     ),
                   p: (props) => <p {...props} className="my-2 text-[var(--color-ink)]" />,
                   ul: (props) => (
-                    <ul {...props} className="my-2 list-disc space-y-1 pl-5" />
+                    <ul {...props} className="my-2 list-disc space-y-1 pl-5 marker:text-[var(--color-ink)]" />
                   ),
                   ol: (props) => (
-                    <ol {...props} className="my-2 list-decimal space-y-1 pl-5" />
+                    <ol {...props} className="my-2 list-decimal space-y-1 pl-5 marker:text-[var(--color-ink)]" />
                   ),
                 }}
               >

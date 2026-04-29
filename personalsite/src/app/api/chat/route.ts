@@ -686,6 +686,7 @@ STYLE RULES (follow strictly):
 - NEVER say "and honestly," or "honestly," as filler.
 - AVOID unnecessary groups of three ("A, B, and C"). Only list three items if all three are needed.
 - AVOID flowery or inflated language. Be direct and plain. Say what you mean without dressing it up.
+- NEVER reference the retrieval system or your sources in the reply. Do not say "in the context", "in the docs", "from what's available", "based on the info I have", "the retrieved context", or any variant. You are speaking AS someone who knows Karthik. Just state the fact directly. Bad: "He has a couple of standout hackathon wins in the context:". Good: "He's got a couple of standout hackathon wins:".
 
 Context about Karthik:
 ${contexts}`;
@@ -718,7 +719,8 @@ STYLE RULES (follow strictly):
 - NEVER use contrastive parallelism ("not X, but Y", "less about X, more about Y", "it's not just X, it's Y").
 - NEVER say "and honestly," or "honestly," as filler.
 - AVOID unnecessary groups of three ("A, B, and C"). Only list three items if all three are needed.
-- AVOID flowery or inflated language. Be direct and plain. Say what you mean without dressing it up.`;
+- AVOID flowery or inflated language. Be direct and plain. Say what you mean without dressing it up.
+- NEVER reference the retrieval system or your sources in the reply. Do not say "in the context", "in the docs", "from what's available", "based on the info I have", "the retrieved context", or any variant. You are speaking AS someone who knows Karthik. Just state the fact directly. Bad: "He has a couple of standout hackathon wins in the context:". Good: "He's got a couple of standout hackathon wins:".`;
     }
 
     // Build messages array with conversation history
@@ -733,7 +735,7 @@ STYLE RULES (follow strictly):
     // Generate streaming response. Artifacts are emitted as citations are
     // detected in the stream, so nothing is pushed upfront.
     const stream = await openai.chat.completions.create({
-      model: "gpt-5.3-chat-latest",
+      model: "gpt-5.4",
       messages: [
         { role: "system", content: systemPrompt },
         ...messagesToSend
@@ -774,7 +776,7 @@ STYLE RULES (follow strictly):
               // reply substantively touches. No annotation work here — just
               // index numbers.
               const extractor = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: "gpt-5.4-nano",
                 temperature: 0,
                 response_format: { type: "json_object" },
                 messages: [
@@ -970,7 +972,7 @@ What makes a good candidate (in priority order):
 4. **A narrative moment.** A specific scene, conversation, or memory that gives texture. Example: "the judge for our track had worked at a medical practice" beats "we won 2nd place."
 
 What to AVOID:
-- The one-sentence "what the artifact is" summary. The card's description already tells the visitor what the thing is — repeating it is the boring choice. If the corpus has a line like "We built X, a Y for Z", DO NOT propose it.
+- The one-sentence "what the artifact is" summary. The card's description already tells the visitor what the thing is — repeating it is the boring choice. If the corpus has a line like "We built X, a Y for Z", DO NOT propose it. This includes ANY definitional restatement: "we built <name>, a/an <category> for <audience>", "<name> is a <category> that ...", "we created <name> to <do the obvious thing the name implies>". These add zero insight beyond the card's existing title and blurb. Skip them even if they're the most prominent sentence in the corpus — surface the SECOND-most prominent line if that's the take, the motivation, or the rationale.
 - Flat feature lists or accomplishments ("we won X award", "it has 200 users") — the card already shows trophies and metrics.
 - Generic platitudes that could apply to any project ("it was hard but we shipped it").
 
@@ -1023,6 +1025,33 @@ ${corpus}`,
                     );
                   };
 
+                  // Reject definitional restatements: "we built X, a Y for Z",
+                  // "we created X, an Y", "X is a Y that ...". These add no
+                  // insight beyond what the artifact card's title and blurb
+                  // already convey. The picker prompt forbids them but the
+                  // model often falls back to them when no clearer take is
+                  // obvious; this is the safety net.
+                  const isDefinitionalRestatement = (q: string): boolean => {
+                    const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").trim();
+                    // Pattern A: "<we|I> <built|created|...> <Name>, a/an <category>..."
+                    if (
+                      /^(we|i)\s+(built|created|made|developed|launched|shipped|wrote|designed|built out|put together)\b[^,.]{1,60},\s+(a|an)\s+/i.test(
+                        cleaned,
+                      )
+                    ) {
+                      return true;
+                    }
+                    // Pattern B: "<Name> is a/an <category> that/for ..." — a
+                    // gloss-style definition. Match a leading capitalized
+                    // proper noun (1-4 words) followed by "is a/an".
+                    if (
+                      /^[A-Z][\w-]*(?:\s+[A-Z][\w-]*){0,3}\s+is\s+(a|an)\s+/.test(cleaned)
+                    ) {
+                      return true;
+                    }
+                    return false;
+                  };
+
                   // Validate each candidate verbatim AND for stand-alone
                   // intelligibility. Drop any that fail.
                   const valid = candidates.filter((c) => {
@@ -1033,6 +1062,12 @@ ${corpus}`,
                     if (startsWithBarePronoun(c)) {
                       console.warn(
                         `Picker candidate for ${id} rejected (bare pronoun start): ${c}`,
+                      );
+                      return false;
+                    }
+                    if (isDefinitionalRestatement(c)) {
+                      console.warn(
+                        `Picker candidate for ${id} rejected (definitional restatement): ${c}`,
                       );
                       return false;
                     }
