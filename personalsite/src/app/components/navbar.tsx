@@ -63,12 +63,14 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <Link
-              href="/"
-              className="text-sm text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-accent)]"
-            >
-              ← Ask the chat
-            </Link>
+            {pathname !== "/" && (
+              <Link
+                href="/"
+                className="text-sm text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-accent)]"
+              >
+                ← Ask the chat
+              </Link>
+            )}
           </nav>
 
           {/* Mobile toggle */}
@@ -105,12 +107,14 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/"
-            className="mt-6 text-sm text-[var(--color-ink-muted)]"
-          >
-            ← Ask the chat
-          </Link>
+          {pathname !== "/" && (
+            <Link
+              href="/"
+              className="mt-6 text-sm text-[var(--color-ink-muted)]"
+            >
+              ← Ask the chat
+            </Link>
+          )}
         </div>
       </div>
     </>

@@ -8,7 +8,7 @@ export default function ConditionalChrome({ children }: { children: React.ReactN
 
   return (
     <>
-      {!isHome && <Navbar />}
+      <Navbar />
       <main className={isHome ? "" : "min-h-screen"}>{children}</main>
     </>
   );
