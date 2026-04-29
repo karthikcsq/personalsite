@@ -475,7 +475,7 @@ export default function HomePage() {
 
       {/* PRE-CHAT HERO */}
       {!inChat && (
-        <section className="mx-auto flex min-h-[calc(100vh-68px)] w-full max-w-[680px] flex-col justify-center px-5 pb-24 md:px-6">
+        <section className="mx-auto flex min-h-[calc(100vh-68px)] w-full max-w-[680px] flex-col justify-center px-5 pb-8 md:px-6">
           <div className="rise" style={{ animationDelay: "80ms" }}>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
               Portfolio · conversational
@@ -564,6 +564,34 @@ export default function HomePage() {
             <Link href="/about" className="transition-colors hover:text-[var(--color-ink)]">
               About
             </Link>
+          </div>
+
+          <div
+            className="rise mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--color-ink-subtle)]"
+            style={{ animationDelay: "440ms" }}
+          >
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-faint)]">
+              Connect
+            </span>
+            {[
+              { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06" },
+              { label: "GitHub", href: "https://github.com/karthikcsq" },
+              { label: "Email", href: "mailto:karthik6002@gmail.com" },
+              { label: "Resume", href: "/resume.pdf" },
+            ].map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                target={c.href.startsWith("http") ? "_blank" : undefined}
+                rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-ink)]"
+              >
+                <span>{c.label}</span>
+                <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
+                  ↗
+                </span>
+              </a>
+            ))}
           </div>
         </section>
       )}
