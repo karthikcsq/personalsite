@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-29T00:00:00Z",
+  "title": "Design System: Karthik Thyagarajan",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Vermilion",
+        "canonical": "oklch(53% 0.225 26)",
+        "tonalRamp": [
+          "oklch(20% 0.12 26)",
+          "oklch(30% 0.16 26)",
+          "oklch(40% 0.20 26)",
+          "oklch(53% 0.225 26)",
+          "oklch(65% 0.20 26)",
+          "oklch(78% 0.14 26)",
+          "oklch(88% 0.08 26)",
+          "oklch(95% 0.024 23)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Vermilion Deep",
+        "canonical": "oklch(47% 0.22 25)"
+      },
+      "accent-soft": {
+        "role": "tertiary",
+        "displayName": "Vermilion Wash",
+        "canonical": "oklch(92% 0.05 25)"
+      },
+      "accent-tint": {
+        "role": "tertiary",
+        "displayName": "Vermilion Tint",
+        "canonical": "oklch(95% 0.024 23)"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Cream Surface",
+        "canonical": "oklch(95% 0.022 82)",
+        "tonalRamp": [
+          "oklch(20% 0.018 55)",
+          "oklch(42% 0.018 60)",
+          "oklch(58% 0.014 65)",
+          "oklch(72% 0.012 70)",
+          "oklch(84% 0.024 78)",
+          "oklch(90% 0.032 82)",
+          "oklch(95% 0.022 82)",
+          "oklch(97% 0.016 82)"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Cream Raised",
+        "canonical": "oklch(97% 0.016 82)"
+      },
+      "surface-muted": {
+        "role": "neutral",
+        "displayName": "Cream Muted",
+        "canonical": "oklch(92% 0.028 82)"
+      },
+      "surface-sunken": {
+        "role": "neutral",
+        "displayName": "Cream Sunken",
+        "canonical": "oklch(90% 0.032 82)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Warm Ink",
+        "canonical": "oklch(20% 0.018 55)"
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "oklch(42% 0.018 60)"
+      },
+      "ink-subtle": {
+        "role": "neutral",
+        "displayName": "Ink Subtle",
+        "canonical": "oklch(58% 0.014 65)"
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "oklch(72% 0.012 70)"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(84% 0.024 78)"
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "oklch(74% 0.028 78)"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The home headline. One per page." },
+      "headline": { "displayName": "Headline", "purpose": "Section openers on About, Work, Projects." },
+      "voice": { "displayName": "Voice (Serif Italic)", "purpose": "Subtitles, blockquotes, the artifact-empty line. Always italic, always Source Serif 4, always voicing Karthik." },
+      "body": { "displayName": "Body", "purpose": "Chat answers, About prose, project descriptions. Capped at 65-75ch in long-form." },
+      "label": { "displayName": "Label (Mono)", "purpose": "System labels and kickers (Receipts, Try, Queued, About). Uppercase, 0.2em tracking." }
+    },
+    "shadows": [
+      { "name": "soft", "value": "0 1px 2px oklch(20% 0.015 60 / 0.04), 0 2px 6px oklch(20% 0.015 60 / 0.04)", "purpose": "Resting state of the input shell. Almost invisible." },
+      { "name": "lift", "value": "0 4px 12px oklch(20% 0.015 60 / 0.06), 0 1px 3px oklch(20% 0.015 60 / 0.04)", "purpose": "Focus state of the input shell." }
+    ],
+    "motion": [
+      { "name": "rise", "value": "cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Default ease-out for staggered reveals (480ms)." },
+      { "name": "slip", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Steeper ease-out for slip-in entrances (520ms)." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Send Button",
+      "kind": "button",
+      "refersTo": "button-send",
+      "description": "The one true button on the site. Pill, vermilion fill, arrow-up icon.",
+      "html": "<button class=\"ds-btn-send\" aria-label=\"Send\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m5 12 7-7 7 7\"/><path d=\"M12 19V5\"/></svg></button>",
+      "css": ".ds-btn-send { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: oklch(53% 0.225 26); color: oklch(95% 0.022 82); border: none; cursor: pointer; transition: background 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-btn-send:hover { background: oklch(47% 0.22 25); } .ds-btn-send:disabled { opacity: 0.3; cursor: not-allowed; } .ds-btn-send:focus-visible { outline: 2px solid oklch(53% 0.225 26); outline-offset: 2px; }"
+    },
+    {
+      "name": "Suggestion Chip",
+      "kind": "chip",
+      "refersTo": "chip-suggestion",
+      "description": "Rotating question chips below the hero input and inside the chat rail.",
+      "html": "<button class=\"ds-chip-suggestion\">What is Karthik building right now?</button>",
+      "css": ".ds-chip-suggestion { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 9999px; border: 1px solid oklch(84% 0.024 78); background: oklch(97% 0.016 82); color: oklch(42% 0.018 60); font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 13px; line-height: 1; cursor: pointer; transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1), color 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-chip-suggestion:hover { border-color: oklch(20% 0.018 55); color: oklch(20% 0.018 55); }"
+    },
+    {
+      "name": "Citation Chip",
+      "kind": "chip",
+      "refersTo": "citation-chip",
+      "description": "Inline 'Pulled from' chip beneath an assistant message. Threads to its artifact card on hover.",
+      "html": "<button class=\"ds-chip-citation\">Repple</button>",
+      "css": ".ds-chip-citation { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; border: 1px solid oklch(74% 0.028 78); background: oklch(97% 0.016 82); color: oklch(20% 0.018 55); font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 12px; line-height: 1; cursor: pointer; transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1), color 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-chip-citation:hover, .ds-chip-citation[data-active=\"true\"] { border-color: oklch(53% 0.225 26); color: oklch(53% 0.225 26); }"
+    },
+    {
+      "name": "User Bubble",
+      "kind": "custom",
+      "refersTo": "bubble-user",
+      "description": "Right-aligned user message bubble with one asymmetric corner.",
+      "html": "<div class=\"ds-bubble-user\">Tell me about Repple.</div>",
+      "css": ".ds-bubble-user { display: inline-block; max-width: 85%; padding: 10px 16px; background: oklch(20% 0.018 55); color: oklch(95% 0.022 82); border-radius: 14px; border-top-right-radius: 4px; font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 1.5; }"
+    },
+    {
+      "name": "Input Shell",
+      "kind": "input",
+      "refersTo": "input-shell",
+      "description": "The chat composer. Cream-raised surface with hairline border that turns vermilion on focus.",
+      "html": "<form class=\"ds-input-shell\"><textarea class=\"ds-input-shell__field\" rows=\"1\" placeholder=\"Ask anything about Karthik\"></textarea><button class=\"ds-input-shell__send\" aria-label=\"Send\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m5 12 7-7 7 7\"/><path d=\"M12 19V5\"/></svg></button></form>",
+      "css": ".ds-input-shell { display: flex; align-items: flex-end; gap: 8px; padding: 12px 16px; background: oklch(97% 0.016 82); border: 1px solid oklch(84% 0.024 78); border-radius: 14px; box-shadow: 0 1px 2px oklch(20% 0.015 60 / 0.04), 0 2px 6px oklch(20% 0.015 60 / 0.04); transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-input-shell:focus-within { border-color: oklch(53% 0.225 26); box-shadow: 0 4px 12px oklch(20% 0.015 60 / 0.06), 0 1px 3px oklch(20% 0.015 60 / 0.04); } .ds-input-shell__field { flex: 1; resize: none; padding: 6px 0; background: transparent; color: oklch(20% 0.018 55); font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 1.5; border: none; outline: none; } .ds-input-shell__field::placeholder { color: oklch(72% 0.012 70); } .ds-input-shell__send { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: oklch(53% 0.225 26); color: oklch(95% 0.022 82); border: none; cursor: pointer; transition: background 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-input-shell__send:hover { background: oklch(47% 0.22 25); }"
+    },
+    {
+      "name": "Artifact Card",
+      "kind": "card",
+      "refersTo": "bubble-user",
+      "description": "An entry in the receipts panel. No card surface; separated by a hairline that turns vermilion on hover.",
+      "html": "<a class=\"ds-artifact\" href=\"#\"><span class=\"ds-artifact__dot\"></span><div class=\"ds-artifact__body\"><p class=\"ds-artifact__label\">Project</p><h3 class=\"ds-artifact__title\">Repple</h3><p class=\"ds-artifact__desc\">A reps-based productivity tool that turns workouts into compounding streaks.</p></div></a>",
+      "css": ".ds-artifact { display: flex; gap: 12px; padding: 28px 0; border-top: 1px solid oklch(84% 0.024 78); text-decoration: none; transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1); } .ds-artifact:hover { border-top-color: oklch(53% 0.225 26); } .ds-artifact__dot { flex: none; width: 5px; height: 5px; margin-top: 8px; border-radius: 9999px; background: oklch(53% 0.225 26); } .ds-artifact__body { flex: 1; min-width: 0; } .ds-artifact__label { margin: 0 0 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1; letter-spacing: 0.2em; text-transform: uppercase; color: oklch(58% 0.014 65); } .ds-artifact__title { margin: 0 0 6px; font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: oklch(20% 0.018 55); } .ds-artifact__desc { margin: 0; font-family: 'Host Grotesk', ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: oklch(42% 0.018 60); }"
+    },
+    {
+      "name": "Voice Subtitle",
+      "kind": "custom",
+      "refersTo": "voice",
+      "description": "The italic serif subtitle that voices Karthik beneath the home headline.",
+      "html": "<p class=\"ds-voice\">Founder, engineer, and student, happiest with a hard problem.</p>",
+      "css": ".ds-voice { margin: 0; max-width: 560px; font-family: 'Source Serif 4', 'Iowan Old Style', Georgia, serif; font-style: italic; font-weight: 400; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.3; color: oklch(42% 0.018 60); }"
+    },
+    {
+      "name": "Mono Kicker Label",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Tiny mono label that sits above headlines and section titles.",
+      "html": "<p class=\"ds-kicker\">Portfolio · conversational</p>",
+      "css": ".ds-kicker { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 400; line-height: 1; letter-spacing: 0.2em; text-transform: uppercase; color: oklch(58% 0.014 65); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lit Reading Room",
+    "overview": "A warm, paper-cream surface holding a quiet conversation, with one bright object on the desk. The site reads first as a piece of writing and second as software. Density is low at rest, but the chrome is engineered, not sketched: hairlines are deliberate, type is set with care, and one saturated color is reserved for the moment something actually happens. The aesthetic rejects three things by name. It rejects the vibecoded look (bento grids, glassmorphism, gradient text, hero-metric stat blocks). It rejects the corporate look (SaaS landing voice, Trusted-by walls, navy-and-gold palettes). It rejects the brutalist look (oversize black borders, monospace-everywhere, deliberately ugly grids). The reference points are Lovable (chat-first interface with a receipts panel) and Tennr (editorial-warm UI density that still feels engineered).",
+    "keyCharacteristics": [
+      "Cream surface, warm ink, one vermilion accent",
+      "Sans for structure, serif italic for voice, mono for system labels",
+      "Hairlines and tonal layering instead of shadows",
+      "Stillness at rest, motion only on real events",
+      "Functional color: vermilion marks the live cursor of attention, never decoration"
+    ],
+    "rules": [
+      { "name": "The One Bright Object Rule", "body": "Vermilion is the only saturated color on any screen. It marks the live cursor of attention and nothing else. If you find yourself reaching for vermilion to decorate a heading, a divider, or a card edge that is not interactive, stop. The accent stays rare so it stays loud.", "section": "colors" },
+      { "name": "The No True Black, No True White Rule", "body": "Never #000, never #fff. Every neutral carries a hue cast (warm 55-82 in OKLCH). Cold grays read as default-template; the warm cast is the signature.", "section": "colors" },
+      { "name": "The Italic Voice Rule", "body": "Source Serif 4 only ever appears italic. Roman serif weights are forbidden on this site. The italic carries the personal voice; setting it upright would turn voice into editorial drag.", "section": "typography" },
+      { "name": "The Mono Labels Only Rule", "body": "Mono is reserved for system labels and kickers. Not for body, not for code blocks larger than a phrase, not for emphasis.", "section": "typography" },
+      { "name": "The Tonal Lift Rule", "body": "When a surface needs to sit above the page, raise it by stepping up the cream scale and outlining it with a hairline. Reach for shadow-soft only on the input shell.", "section": "elevation" },
+      { "name": "The No Decorative Shadow Rule", "body": "Shadows are not atmospheric. They never sit under hero text, never glow under buttons, never blur a card edge for depth. Two shadow tokens exist; both belong to the input.", "section": "elevation" },
+      { "name": "The No Filled Surfaces Rule", "body": "Outside of the user message bubble and the send button, no UI element has a filled background heavier than surface-raised. Cards, chips, artifacts, citations all live on the cream scale, separated by hairlines.", "section": "elevation" },
+      { "name": "The Asymmetric Bubble Rule", "body": "The user bubble has one corner cut to rounded-xs (top-right). That asymmetry is the only place radius varies inside a single shape on the site. Don't propagate it.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep vermilion (oklch(53% 0.225 26)) reserved for the live cursor of attention: send button, avatar dot, focused input border, active citation, blockquote rule, inline links inside chat answers.",
+      "Do layer surfaces tonally (surface to surface-raised to surface-muted) and separate them with 1px hairlines. Reach for shadow only on the input shell.",
+      "Do use Source Serif 4 only in italic, only for voice (subtitles, blockquotes, the artifact-empty line). Roman serif is forbidden.",
+      "Do use mono at 11px, 0.2em tracking, uppercase, for system labels (Receipts, Try, Queued, kickers).",
+      "Do cap body line length at 65-75ch in long-form contexts (About prose, blog posts, chat answers).",
+      "Do ease motion with cubic-bezier(0.2, 0.8, 0.2, 1) (rise) or cubic-bezier(0.16, 1, 0.3, 1) (slip). Both are exponential ease-out curves. Disable all custom motion when prefers-reduced-motion: reduce.",
+      "Do match new interactive states to the existing pattern: hairline border at rest, vermilion border on focus or active."
+    ],
+    "donts": [
+      "Don't use #000 or #fff. Every neutral carries a 55-82 hue cast in OKLCH. Cold grays read as template.",
+      "Don't decorate with vermilion. No vermilion underlines on every link, no vermilion section dividers, no vermilion icons that aren't interactive. The accent is rare on purpose.",
+      "Don't wrap things in cards. The artifact panel uses hairlines and tonal lift, not card surfaces. Nested cards are always wrong.",
+      "Don't use side-stripe borders (border-left greater than 1px as a colored stripe) on callouts, alerts, or list items. The blockquote vermilion rule is the exception, not a pattern to copy.",
+      "Don't ship a hero-metric template (big number plus small label plus supporting stat). That's the SaaS cliche.",
+      "Don't use bento grids, glassmorphism, gradient text, or Trusted-by logo walls. These are the vibecoded and corporate anti-references from PRODUCT.md.",
+      "Don't ship a brutalist grid: oversize black borders, monospace-everywhere, Helvetica-on-white-with-yellow-blocks. Restraint, not aggression.",
+      "Don't add ambient or decorative motion. Motion fires on real events only.",
+      "Don't introduce a second saturated color. If a feature seems to need one, the answer is almost always a tonal step or a hairline change instead.",
+      "Don't rename or reorder the section headers in DESIGN.md. Tooling depends on exact headers."
+    ]
+  }
+}
