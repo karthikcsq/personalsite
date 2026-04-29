@@ -285,6 +285,7 @@ async function buildSearchQuery(
   const rewriteResponse = await openai.chat.completions.create({
     model: "gpt-5.4-nano",
     temperature: 0,
+    max_completion_tokens: 50,
     messages: [
       {
         role: "system",
@@ -384,13 +385,30 @@ export async function POST(req: NextRequest) {
 
     const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
 
-    // Step 1: Conversation-aware query rewriting
-    const searchQuery = await buildSearchQuery(openai, currentQuery, conversationHistory);
+    // Step 1: Conversation-aware query rewriting.
+    // Skip on the first turn — pronoun resolution is moot when there's no
+    // prior context, and the rewriter call adds ~1s of pure TTFT overhead.
+    const priorTurns = (conversationHistory || []).filter(
+      (m: ChatMessage) => m.role !== "system",
+    );
+    const hasPriorContext =
+      priorTurns.length > 1 ||
+      (priorTurns.length === 1 && priorTurns[0].content !== currentQuery);
+    const tRewriteStart = Date.now();
+    const searchQuery = hasPriorContext
+      ? await buildSearchQuery(openai, currentQuery, conversationHistory)
+      : currentQuery;
+    const tRewriteEnd = Date.now();
 
     console.log(`🔍 Original: "${currentQuery}"`);
-    console.log(`🔄 Rewritten: "${searchQuery}"`);
+    console.log(
+      hasPriorContext
+        ? `🔄 Rewritten (${tRewriteEnd - tRewriteStart}ms): "${searchQuery}"`
+        : `⏭️  Rewriter skipped (first turn)`,
+    );
 
     // Step 2: Embed the rewritten query
+    const tRetrievalStart = Date.now();
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: searchQuery,
@@ -408,6 +426,7 @@ export async function POST(req: NextRequest) {
       includeMetadata: true,
     });
 
+    console.log(`⏱️  Embedding + Pinecone: ${Date.now() - tRetrievalStart}ms`);
     console.log(`📊 Found ${queryResponse.matches.length} matches`);
     if (queryResponse.matches.length > 0) {
       console.log(`   Top score: ${queryResponse.matches[0].score?.toFixed(3)}`);
@@ -753,18 +772,26 @@ STYLE RULES (follow strictly):
       .map((e) => `[${e.index}] ${e.label}`)
       .join("\n");
 
+    const tStreamStart = Date.now();
     const readableStream = new ReadableStream({
       async start(controller) {
         let replyText = "";
+        let tFirstToken = 0;
         try {
           for await (const chunk of stream) {
             const delta = chunk.choices[0]?.delta?.content || "";
             if (!delta) continue;
+            if (tFirstToken === 0) {
+              tFirstToken = Date.now();
+              console.log(`⏱️  TTFT (main stream first token): ${tFirstToken - tStreamStart}ms`);
+            }
             replyText += delta;
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ content: delta })}\n\n`),
             );
           }
+          const tStreamEnd = Date.now();
+          console.log(`⏱️  Main stream total: ${tStreamEnd - tStreamStart}ms (${replyText.length} chars)`);
 
           // Post-hoc citation extraction. Ask a cheap model to identify which
           // artifacts the finished reply actually talks about. This runs
@@ -775,9 +802,11 @@ STYLE RULES (follow strictly):
               // Stage 1: citation extractor. Pick which directory entries the
               // reply substantively touches. No annotation work here — just
               // index numbers.
+              const tExtractorStart = Date.now();
               const extractor = await openai.chat.completions.create({
                 model: "gpt-5.4-nano",
                 temperature: 0,
+                max_completion_tokens: 200,
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -811,6 +840,7 @@ ${directoryText}`,
                 ],
               });
 
+              console.log(`⏱️  Citation extractor: ${Date.now() - tExtractorStart}ms`);
               const raw = extractor.choices[0]?.message?.content || "{}";
 
               // Coerce a cited entry to a valid integer index. Tolerates the
@@ -918,26 +948,49 @@ ${directoryText}`,
                 return segments.every((seg) => hay.includes(seg));
               };
 
-              // Stage 2: per-artifact annotation picker. For each cited id,
-              // load its corpus (concatenated bodies of every corpus file
-              // whose `applies_to` includes this id). If empty, the card
-              // surfaces with no annotation. Otherwise, ask gpt-5.4-nano to
-              // extract a verbatim fragment that speaks to THIS reply, or
-              // null if nothing fits.
+              // Stage 2: per-artifact annotation picker, fired in parallel.
+              // We tried batching these into one call to share the prompt
+              // rules across artifacts, but `gpt-5.4-nano` is decode-bound:
+              // one call decoding N artifacts' candidates serially is slower
+              // than N parallel calls each decoding one. Total wall-clock
+              // for N parallel pickers ≈ max(per_artifact_decode), batched ≈
+              // sum(per_artifact_decode). Parallel wins.
               const annotations = new Map<string, string>();
+              const startsWithBarePronoun = (q: string): boolean => {
+                const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").toLowerCase();
+                return /^(that|this|it|they|them|those|these|such|he|she|here|there)\b/.test(
+                  cleaned,
+                );
+              };
+              const isDefinitionalRestatement = (q: string): boolean => {
+                const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").trim();
+                if (
+                  /^(we|i)\s+(built|created|made|developed|launched|shipped|wrote|designed|built out|put together)\b[^,.]{1,60},\s+(a|an)\s+/i.test(
+                    cleaned,
+                  )
+                ) {
+                  return true;
+                }
+                if (
+                  /^[A-Z][\w-]*(?:\s+[A-Z][\w-]*){0,3}\s+is\s+(a|an)\s+/.test(cleaned)
+                ) {
+                  return true;
+                }
+                return false;
+              };
+
+              const tPickerStart = Date.now();
               await Promise.all(
                 citedIds.map(async (id) => {
                   const corpus = getCorpusForArtifact(id);
                   if (!corpus) return;
+                  const tThisStart = Date.now();
                   let pickerJson = "{}";
                   try {
                     const picker = await openai.chat.completions.create({
                       model: "gpt-5.4-nano",
-                      // Higher temperature widens the candidate set the model
-                      // proposes. Server-side random pick (below) does the
-                      // actual variety. Verbatim validation still gates each
-                      // candidate before we use it.
                       temperature: 0.9,
+                      max_completion_tokens: 400,
                       response_format: { type: "json_object" },
                       messages: [
                         {
@@ -948,41 +1001,35 @@ Return JSON: {"candidates": ["<verbatim substring 8-22 words>", ...]} OR {"candi
 
 Return up to 3 candidates ORDERED by direct relevance to the reply, most relevant first.
 
-- **Index 0 (REQUIRED, most relevant):** the single line in the corpus that most directly speaks to the specific point the reply makes about this artifact. If the reply argues "X enables Y", index 0 must be a line that supports, sharpens, or directly addresses that claim. The website picks index 0 most of the time, so it has to fit the reply.
-- **Index 1-2 (OPTIONAL, alternates for variety):** strong lines from DIFFERENT sub-topic sections that ALSO speak to the reply (lower priority than index 0 but still relevant). The website picks these occasionally to avoid repetition. If no other candidate is genuinely relevant, omit them — return only index 0. Never pad with a weak fit.
+- **Index 0 (REQUIRED, most relevant):** the single line in the corpus that most directly speaks to the specific point the reply makes about this artifact. The website picks index 0 most of the time, so it has to fit the reply.
+- **Index 1-2 (OPTIONAL, alternates for variety):** strong lines from DIFFERENT sub-topic sections that ALSO speak to the reply. Omit if no other candidate is genuinely relevant. Never pad with a weak fit.
 
-Critical: do not bury the most relevant line at index 1 or 2 to make room for variety. Relevance dominates. If the corpus has one perfect line and two so-so alternates, return just the perfect line.
+Critical: relevance dominates. If the corpus has one perfect line and two so-so alternates, return just the perfect line.
 
 Hard rules:
-- Each candidate MUST be a contiguous, case-insensitive substring of the CORPUS below. No paraphrase, no rewording, no splice. Copy exact characters.
-- Target 12-35 words each. Err LONGER when context demands it. The quote must stand alone as a self-contained, intelligible thought to a reader who has not seen the surrounding paragraph. A short fragment that loses meaning out of context (10 words but unintelligible) is WORSE than a 30-word quote that reads cleanly on its own.
-- **Antecedent rule (STRICT).** A quote that starts with — or relies on — an unanchored pronoun or demonstrative is broken. The word's referent MUST appear inside the quote.
-   - **Banned starts (regex-rejected server-side, do not waste a slot on these):** "That ...", "This ...", "It ...", "They ...", "Them ...", "Those ...", "These ...", "Such ...", "He ...", "She ...", "Here ...", "There ...", and any "What that ...", "What this ..." opener.
-   - **Failure example:** "What that meant was loading the medical history quickly..." — REJECTED. The reader has no idea what "that" refers to.
-   - **Failure example:** "we took the first step to modeling that reality" — REJECTED. What reality?
-   - **Fix:** extend backward to include the antecedent ("the difficulty of building healthcare products is HIPAA, so we took the first step to modeling that reality") OR pick a different fragment that starts with a noun, "we", "I", or the artifact's name.
-- **Sentence boundaries.** Start the quote at the beginning of a sentence or natural phrase boundary. End at a sentence-ending period, question mark, or strong clause break. Don't begin mid-clause with a conjunction ("and", "but", "so", "because") unless the quote is clearly a continuation that still parses alone.
-- Mid-quote "…" is allowed only if both halves are individually verbatim substrings AND the result still reads as a coherent thought.
+- Each candidate MUST be a contiguous, case-insensitive substring of the CORPUS below. No paraphrase. Copy exact characters.
+- Target 12-35 words each. The quote must stand alone as a self-contained, intelligible thought.
+- **Antecedent rule (STRICT).** Banned starts (regex-rejected server-side): "That ...", "This ...", "It ...", "They ...", "Them ...", "Those ...", "These ...", "Such ...", "He ...", "She ...", "Here ...", "There ...", "What that ...", "What this ...". Extend backward to include the antecedent or pick a fragment that starts with a noun, "we", "I", or the artifact's name.
+- Start at a sentence/phrase boundary. End at a sentence-ending period, question mark, or strong clause break.
+- Mid-quote "…" is allowed only if both halves are individually verbatim AND the result reads coherently.
 - Do NOT wrap any value in quote marks yourself.
 
 What makes a good candidate (in priority order):
-1. **A take.** A claim, opinion, or sharp observation Karthik makes that goes beyond "what the thing is." Example: "the future of agents lies in control" beats "we built an RL system."
-2. **A motivation.** Why he built it / why it exists / what was missing without it. Example: "Purdue had no peer-to-peer layer for people who actually ship" beats "BuildPurdue is a community."
-3. **A design rationale.** Why he made a specific choice that an outsider wouldn't expect. Example: "we wanted the agent to have access to almost everything" beats "we used reinforcement learning."
-4. **A narrative moment.** A specific scene, conversation, or memory that gives texture. Example: "the judge for our track had worked at a medical practice" beats "we won 2nd place."
+1. **A take.** A claim, opinion, or sharp observation that goes beyond "what the thing is."
+2. **A motivation.** Why he built it / why it exists / what was missing without it.
+3. **A design rationale.** Why he made a specific choice an outsider wouldn't expect.
+4. **A narrative moment.** A specific scene, conversation, or memory that gives texture.
 
 What to AVOID:
-- The one-sentence "what the artifact is" summary. The card's description already tells the visitor what the thing is — repeating it is the boring choice. If the corpus has a line like "We built X, a Y for Z", DO NOT propose it. This includes ANY definitional restatement: "we built <name>, a/an <category> for <audience>", "<name> is a <category> that ...", "we created <name> to <do the obvious thing the name implies>". These add zero insight beyond the card's existing title and blurb. Skip them even if they're the most prominent sentence in the corpus — surface the SECOND-most prominent line if that's the take, the motivation, or the rationale.
-- Flat feature lists or accomplishments ("we won X award", "it has 200 users") — the card already shows trophies and metrics.
-- Generic platitudes that could apply to any project ("it was hard but we shipped it").
+- Definitional restatements ("we built X, a Y for Z", "X is a Y that ..."). The card already says what the artifact is. Skip them even if prominent in the corpus.
+- Flat feature lists or accomplishments.
+- Generic platitudes.
 
-**When to return an empty array:** ONLY if the corpus is genuinely off-topic for what the reply discusses about this artifact (the reply argues about something the corpus has zero coverage of). If the reply touches this artifact at all and the corpus has any opinionated content, return at least one candidate. A brief mention in the reply still deserves Karthik's voice attached — silence is the worst outcome, not redundancy.
-
-Apply rules 1-4 to RANK and CHOOSE among candidates, not to gate whether you surface anything. If the corpus's strongest line is "merely" a sharp narrative moment rather than a thesis, that line is still a worthy candidate.
+**When to return []:** ONLY if the corpus is genuinely off-topic for what the reply discusses. Otherwise return at least one candidate.
 
 ARTIFACT: ${id}
 
-CORPUS (the only source you may quote from — substring match is enforced on every candidate):
+CORPUS (the only source you may quote from — substring match enforced):
 ${corpus}`,
                         },
                         {
@@ -996,64 +1043,24 @@ ${corpus}`,
                     console.error(`Picker failed for ${id}:`, err);
                     return;
                   }
+                  const tThisEnd = Date.now();
                   let candidates: string[] = [];
                   try {
                     const parsed = JSON.parse(pickerJson);
                     if (Array.isArray(parsed.candidates)) {
                       candidates = parsed.candidates
                         .filter((c: unknown): c is string => typeof c === "string")
-                        .map((c) => c.trim())
-                        .filter((c) => c.length > 0);
+                        .map((c: string) => c.trim())
+                        .filter((c: string) => c.length > 0);
                     } else if (typeof parsed.quote === "string") {
-                      // Tolerate legacy single-quote shape.
                       candidates = [parsed.quote.trim()].filter((c) => c.length > 0);
                     }
                   } catch {
                     return;
                   }
-                  // Reject candidates that start with a bare pronoun or
-                  // demonstrative — these can't stand alone because the
-                  // antecedent lives in a sentence outside the quote.
-                  // Examples: "That meant loading…", "What that did was…",
-                  // "It was inefficient…", "This was the first time…".
-                  // The picker prompt already forbids this but the model
-                  // doesn't reliably honor it; this regex is the safety net.
-                  const startsWithBarePronoun = (q: string): boolean => {
-                    const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").toLowerCase();
-                    return /^(that|this|it|they|them|those|these|such|he|she|here|there)\b/.test(
-                      cleaned,
-                    );
-                  };
-
-                  // Reject definitional restatements: "we built X, a Y for Z",
-                  // "we created X, an Y", "X is a Y that ...". These add no
-                  // insight beyond what the artifact card's title and blurb
-                  // already convey. The picker prompt forbids them but the
-                  // model often falls back to them when no clearer take is
-                  // obvious; this is the safety net.
-                  const isDefinitionalRestatement = (q: string): boolean => {
-                    const cleaned = q.replace(/^[\s"'\u201C\u201D…]+/, "").trim();
-                    // Pattern A: "<we|I> <built|created|...> <Name>, a/an <category>..."
-                    if (
-                      /^(we|i)\s+(built|created|made|developed|launched|shipped|wrote|designed|built out|put together)\b[^,.]{1,60},\s+(a|an)\s+/i.test(
-                        cleaned,
-                      )
-                    ) {
-                      return true;
-                    }
-                    // Pattern B: "<Name> is a/an <category> that/for ..." — a
-                    // gloss-style definition. Match a leading capitalized
-                    // proper noun (1-4 words) followed by "is a/an".
-                    if (
-                      /^[A-Z][\w-]*(?:\s+[A-Z][\w-]*){0,3}\s+is\s+(a|an)\s+/.test(cleaned)
-                    ) {
-                      return true;
-                    }
-                    return false;
-                  };
-
-                  // Validate each candidate verbatim AND for stand-alone
-                  // intelligibility. Drop any that fail.
+                // Build the corpora block. Each artifact is fenced so the
+                // model can clearly map candidates back to ids. The verbatim
+                // server-side check uses the per-id corpus map, so even if
                   const valid = candidates.filter((c) => {
                     if (!isVerbatimAgainst(corpus, c)) {
                       console.warn(`Picker candidate for ${id} failed verbatim check: ${c}`);
@@ -1075,18 +1082,13 @@ ${corpus}`,
                   });
                   if (valid.length === 0) {
                     console.log(
-                      `🎯 Picker for ${id}: no valid candidates (raw count: ${candidates.length})`,
+                      `🎯 Picker for ${id} (${tThisEnd - tThisStart}ms): no valid candidates (raw count: ${candidates.length})`,
                     );
                     return;
                   }
 
-                  // Section-deduplicate. If the corpus is organized by `## `
-                  // sub-topic headings, drop candidates that share a section
-                  // — keep the first per section so we never pick two near-
-                  // duplicates from the same theme. This compensates for
-                  // the picker often returning three quotes from the same
-                  // (most-relevant-looking) section.
-                  const sections = corpus.split(/\n## /); // first piece is pre-header, rest are sections
+                  // Section-deduplicate within this artifact's corpus.
+                  const sections = corpus.split(/\n## /);
                   const sectionOf = (q: string): number => {
                     const needle = q.toLowerCase().replace(/\s+/g, " ").trim();
                     for (let i = 0; i < sections.length; i++) {
@@ -1109,12 +1111,6 @@ ${corpus}`,
                   }
 
                   const pool = deduped.length > 0 ? deduped : valid;
-                  // Weighted pick: index 0 (the picker's most-relevant) wins
-                  // 50% of the time, alternates split the other 50%. The
-                  // picker only includes alternates that are also genuinely
-                  // relevant, so a 50/50 split surfaces variety without
-                  // pushing irrelevant quotes. Single-candidate returns
-                  // always pick that one.
                   let chosen: string;
                   if (pool.length === 1 || Math.random() < 0.5) {
                     chosen = pool[0];
@@ -1125,11 +1121,12 @@ ${corpus}`,
                   const trimmed = chosen.replace(/^["\u201C\u201D]+|["\u201C\u201D]+$/g, "");
                   annotations.set(id, `\u201C${trimmed}\u201D`);
                   console.log(
-                    `🎯 Picker for ${id}: ${valid.length} candidate(s)\n` +
+                    `🎯 Picker for ${id} (${tThisEnd - tThisStart}ms): ${valid.length} candidate(s)\n` +
                     valid.map((v, i) => `   ${i === valid.indexOf(chosen) ? "▶" : " "} ${v.slice(0, 80)}${v.length > 80 ? "…" : ""}`).join("\n"),
                   );
                 }),
               );
+              console.log(`⏱️  Pickers (parallel, n=${citedIds.length}): ${Date.now() - tPickerStart}ms`);
 
               // Stage 3: hydrate + emit.
               const emittedIds = new Set<string>();

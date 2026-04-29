@@ -75,16 +75,16 @@ function getScrollParent(el: HTMLElement): HTMLElement {
   return document.scrollingElement as HTMLElement;
 }
 
-// True if at least half the card is already visible inside its scroll
-// container — in which case scrollIntoView would either be a no-op or a
-// trivial nudge, and we should open the wing immediately.
-function alreadyVisible(card: HTMLElement, scroller: HTMLElement): boolean {
+// Compute the scrollTop value that would put the card's vertical center on
+// the scroller's vertical center. Clamped to the scroller's valid range so
+// we don't try to scroll past the ends.
+function targetScrollTopForCenter(card: HTMLElement, scroller: HTMLElement): number {
   const c = card.getBoundingClientRect();
   const r = scroller.getBoundingClientRect();
-  const top = Math.max(c.top, r.top);
-  const bottom = Math.min(c.bottom, r.bottom);
-  const visible = Math.max(0, bottom - top);
-  return c.height > 0 && visible / c.height >= 0.5;
+  const cardCenterInScroller = c.top - r.top + scroller.scrollTop + c.height / 2;
+  const desired = cardCenterInScroller - scroller.clientHeight / 2;
+  const max = scroller.scrollHeight - scroller.clientHeight;
+  return Math.max(0, Math.min(max, desired));
 }
 
 // Citation chip rendered inside the assistant message. Hovering scrolls the
@@ -132,15 +132,17 @@ export function CitationChip({ id, label }: { id: string; label: string }) {
       return;
     }
     const scroller = getScrollParent(card);
-    if (alreadyVisible(card, scroller)) {
-      // Card is already in view — open the wing instantly, no scroll.
+    // Always center the card vertically in the panel, even if it's already
+    // partially visible. `scrollIntoView({block: "center"})` no-ops in some
+    // browsers when the card sits anywhere in the central band, so compute
+    // the target scrollTop ourselves and animate the panel to it.
+    const target = targetScrollTopForCenter(card, scroller);
+    if (Math.abs(target - scroller.scrollTop) < 2) {
+      // Already centered (within a pixel). Skip the scroll, open the wing.
       ctx.setActive(id);
       return;
     }
-    // Card is off-screen: scroll it in, then open the wing the moment the
-    // smooth scroll settles. `scrollend` is the right signal here; the
-    // timeout is just a safety net for browsers/edge cases that don't fire it.
-    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    scroller.scrollTo({ top: target, behavior: "smooth" });
     const ac = new AbortController();
     const fire = () => {
       cancelPendingScroll();
