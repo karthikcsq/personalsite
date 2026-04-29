@@ -138,7 +138,7 @@
   },
   {
     "id": "kmeans-som",
-    "title": "Enhancing Cluster Cohesion: Integrating Self-Organizing Maps with K-Means Clustering for Improving Unsupervised Learning Distinctions",
+    "title": "Self-Organizing Maps × K-Means",
     "date": "2023",
     "description": "This project explores how SOM, known for its capability to uncover topological structures, fared against traditional centroid-based approaches in capturing intricate data relationships.",
     "ragNarrative": "A research project exploring how Self-Organizing Maps (SOM), known for their capability to uncover topological structures, fared against traditional centroid-based approaches like K-Means in capturing intricate data relationships. The study integrates SOM with K-Means clustering to improve unsupervised learning distinctions and cluster cohesion.",
