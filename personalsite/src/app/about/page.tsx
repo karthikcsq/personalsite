@@ -77,7 +77,7 @@ export default function AboutPage() {
         ))}
       </ul>
 
-      <section className="mt-14 space-y-5 text-[16px] leading-[1.75] text-[var(--color-ink)]">
+      <section className="mt-10 mb-6 space-y-5 text-[16px] leading-[1.75] text-[var(--color-ink)]">
         <p>
           I grew up building things that were probably too ambitious for the week I
           had. That habit followed me into college: I am a founding engineer at Repple,
