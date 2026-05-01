@@ -118,7 +118,7 @@ interface PineconeMatch {
 // the ID doesn't resolve.
 function hydrateArtifactById(
   id: string,
-  retrievedBlogs: Map<string, { title: string; text: string }>,
+  retrievedBlogs: Map<string, { title: string; text: string; summary: string }>,
   annotation?: string,
 ): Artifact | null {
   const note = annotation && annotation.trim().length > 0 ? annotation.trim() : undefined;
