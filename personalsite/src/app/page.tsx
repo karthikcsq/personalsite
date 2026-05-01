@@ -49,10 +49,11 @@ interface Message {
 }
 
 // Bank of suggested questions that rotate through the UI. The pre-chat hero
-// shows 4 at a time and the in-chat rail shows 3 — both draw from this bank.
-// Each entry is tagged with one or more categories so the rotation can drift
-// toward a visitor's interest as they click chips. Keep entries short
-// (≤ ~50 chars) and conversational (third person, no em dashes).
+// shows 3 at a time (one per category, see pickChips below) and the in-chat
+// rail shows 3 — both draw from this bank. Each entry is tagged with one or
+// more categories so the rotation drifts toward a visitor's interest as they
+// click chips. Keep entries short (≤ ~50 chars) and conversational (third
+// person, no em dashes).
 type Category = "work" | "opinions" | "life";
 type Question = { text: string; tags: readonly Category[] };
 
@@ -664,7 +665,11 @@ export default function HomePage() {
     }
 
     // Allocate slots across categories by weight (max-min fair). The cursor
-    // rotates which chip we pull from each category's queue per turn.
+    // rotates which chip we pull from each category's queue per turn. With
+    // the default equal weights {1,1,1} and count=3 this produces exactly
+    // one chip per category — that's the hero's "one from each area" promise.
+    // As the visitor clicks chips, the matching category's weight grows and
+    // future rotations skew toward whatever they keep asking about.
     const capacity: Record<Category, number> = {
       work: available.work.length,
       opinions: available.opinions.length,
@@ -704,7 +709,7 @@ export default function HomePage() {
     submit(text);
   };
 
-  const heroChips = pickChips(4);
+  const heroChips = pickChips(3);
   const inChatChips = pickChips(3);
 
   return (
