@@ -42,7 +42,7 @@ export default function GalleryPage() {
           What I&apos;ve seen.
         </h1>
         <p className="mt-5 max-w-[540px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">
-          Mostly travel. A second language when the words fail me.
+          A second language when the words fail me.
         </p>
         <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-faint)]">
           Drag to explore.
