@@ -159,6 +159,24 @@ html, body {
 }
 .annot-pulse { animation: annotPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
+/* Skeleton shimmer for artifact placeholders. A faint highlight slides
+   left-to-right across a tinted-cream block, signaling "loading, more
+   coming" without committing to a spinner. */
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-muted) 0%,
+    var(--color-hairline) 50%,
+    var(--color-surface-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Sheet motion (mobile artifact overlay) */
 @keyframes sheetIn {
   from { transform: translateY(100%); }
@@ -184,7 +202,8 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .rise, .slip, .tick, .annot-pulse,
   .underline-scrub, .ribbon-pip, .caret-blink, .verb-fade,
-  .sheet-in, .sheet-out, .scrim-in, .scrim-out {
+  .sheet-in, .sheet-out, .scrim-in, .scrim-out,
+  .skeleton-shimmer {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
