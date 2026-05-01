@@ -542,6 +542,14 @@ function ArtifactShell({
   }, [thread, artifactId]);
 
   const isThreadActive = thread?.activeId === artifactId;
+  // When this card is active because a citation chip in a specific reply
+  // activated it, prefer that turn's quote over whatever the panel artifact
+  // happens to carry (the panel's annotation is the most-recent turn's, due
+  // to dedup). Falls back to the prop in overlay mode and on direct hover.
+  const displayAnnotation =
+    !isOverlay && isThreadActive && thread?.activeAnnotation
+      ? thread.activeAnnotation
+      : annotation;
   // In overlay mode (touch), there's no hover. Tap toggles the wing open.
   const [annotationTapped, setAnnotationTapped] = useState(false);
   const annotationOpen = isOverlay
@@ -700,7 +708,7 @@ function ArtifactShell({
     >
       {annotation && !isLeftCenter && (
         <RightTopAnnotation
-          text={annotation}
+          text={displayAnnotation ?? annotation}
           circleY={circleY}
           open={annotationOpen}
           interactive={isOverlay}
@@ -711,7 +719,7 @@ function ArtifactShell({
       )}
       {annotation && isLeftCenter && (
         <LeftCenterAnnotation
-          text={annotation}
+          text={displayAnnotation ?? annotation}
           cardRef={articleRef}
           open={annotationOpen}
           circleY={circleY}
@@ -934,13 +942,6 @@ function BlogArtifact({ id, data, annotation, mode }: { id: string; data: BlogDa
 // Visually scaled to ~60% the height of a project card so it reads as a
 // lightweight "Karthik's voice on this" surface in the receipts panel.
 function NoteArtifact({ id, data, annotation, mode }: { id: string; data: NoteData; annotation?: string; mode?: ArtifactMode }) {
-  // Fallback text for the rare case where a topic surfaces without a picker
-  // quote (corpus is empty or the picker rejected every candidate). Keeps the
-  // tile from rendering blank — but the card's whole reason to exist is the
-  // quote, so this should be vanishingly rare.
-  const quote = annotation && annotation.trim().length > 0
-    ? annotation.trim()
-    : (data.tagline || "");
   const isOverlay = mode === "overlay";
   const thread = useChatThread();
   const articleRef = useRef<HTMLElement | null>(null);
@@ -951,16 +952,44 @@ function NoteArtifact({ id, data, annotation, mode }: { id: string; data: NoteDa
     return () => thread.registerCard(id, null);
   }, [thread, id, isOverlay]);
   const isThreadActive = thread?.activeId === id;
+  // Same override logic as ArtifactShell — when a citation chip from a
+  // specific reply activated this card, surface that turn's quote rather than
+  // the most-recent panel-artifact one. The note's own quote IS its
+  // annotation, so this directly swaps the displayed text.
+  const effectiveAnnotation =
+    !isOverlay && isThreadActive && thread?.activeAnnotation
+      ? thread.activeAnnotation
+      : annotation;
+  // Fallback text for the rare case where a topic surfaces without a picker
+  // quote (corpus is empty or the picker rejected every candidate). Keeps the
+  // tile from rendering blank — but the card's whole reason to exist is the
+  // quote, so this should be vanishingly rare.
+  const quote = effectiveAnnotation && effectiveAnnotation.trim().length > 0
+    ? effectiveAnnotation.trim()
+    : (data.tagline || "");
+  // Direct hover on the card uses the card's own (most-recent) annotation, so
+  // clear any stale chip-set override on enter and on leave.
+  const handleEnter = () => {
+    if (!thread) return;
+    thread.setActive(id);
+    thread.setActiveAnnotation(null);
+  };
+  const handleLeave = () => {
+    if (!thread) return;
+    thread.setActive((prev) => {
+      if (prev === id) {
+        thread.setActiveAnnotation(null);
+        return null;
+      }
+      return prev;
+    });
+  };
   return (
     <article
       ref={articleRef}
       data-thread-card={id}
-      onMouseEnter={isOverlay ? undefined : () => thread?.setActive(id)}
-      onMouseLeave={
-        isOverlay
-          ? undefined
-          : () => thread?.setActive((prev) => (prev === id ? null : prev))
-      }
+      onMouseEnter={isOverlay ? undefined : handleEnter}
+      onMouseLeave={isOverlay ? undefined : handleLeave}
       className={
         isOverlay
           ? "group relative"

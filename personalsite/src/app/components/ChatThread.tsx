@@ -23,6 +23,14 @@ import type { Artifact } from "@/app/components/ChatArtifact";
 type Ctx = {
   activeId: string | null;
   setActive: React.Dispatch<React.SetStateAction<string | null>>;
+  // Per-activation quote override. The receipts panel dedupes artifacts by id
+  // (newest sighting wins), so the panel card's stored annotation is the
+  // most-recent turn's quote. When a citation chip from an OLDER turn
+  // activates a card, we stash that turn's quote here so the wing reveals the
+  // quote tied to the chat response that was actually clicked. Null means
+  // "use the card's own annotation prop" (current default).
+  activeAnnotation: string | null;
+  setActiveAnnotation: React.Dispatch<React.SetStateAction<string | null>>;
   registerCard: (id: string, el: HTMLElement | null) => void;
   getCard: (id: string) => HTMLElement | null;
   // Mobile uses citation pills as the primary entry to a card. Tapping a pill
@@ -40,6 +48,7 @@ export function useChatThread(): Ctx | null {
 
 export function ChatThreadProvider({ children }: { children: ReactNode }) {
   const [activeId, setActive] = useState<string | null>(null);
+  const [activeAnnotation, setActiveAnnotation] = useState<string | null>(null);
   const [overlay, setOverlay] = useState<Artifact | null>(null);
   const cards = useRef<Map<string, HTMLElement>>(new Map());
 
@@ -52,7 +61,16 @@ export function ChatThreadProvider({ children }: { children: ReactNode }) {
 
   return (
     <ChatThreadCtx.Provider
-      value={{ activeId, setActive, registerCard, getCard, overlay, setOverlay }}
+      value={{
+        activeId,
+        setActive,
+        activeAnnotation,
+        setActiveAnnotation,
+        registerCard,
+        getCard,
+        overlay,
+        setOverlay,
+      }}
     >
       {children}
     </ChatThreadCtx.Provider>
@@ -137,9 +155,14 @@ export function CitationChip({ artifact }: { artifact: Artifact }) {
   const beginActivate = () => {
     if (!ctx) return;
     cancelPendingScroll();
+    // Capture this turn's annotation so the wing reveals the quote tied to
+    // the chat response that actually owns this chip — not the most-recent
+    // annotation that happens to live on the deduped panel artifact.
+    const turnAnnotation = artifact.annotation ?? null;
     const card = ctx.getCard(id);
     if (!card) {
       ctx.setActive(id);
+      ctx.setActiveAnnotation(turnAnnotation);
       return;
     }
     const scroller = getScrollParent(card);
@@ -151,6 +174,7 @@ export function CitationChip({ artifact }: { artifact: Artifact }) {
     if (Math.abs(target - scroller.scrollTop) < 2) {
       // Already centered (within a pixel). Skip the scroll, open the wing.
       ctx.setActive(id);
+      ctx.setActiveAnnotation(turnAnnotation);
       return;
     }
     scroller.scrollTo({ top: target, behavior: "smooth" });
@@ -158,6 +182,7 @@ export function CitationChip({ artifact }: { artifact: Artifact }) {
     const fire = () => {
       cancelPendingScroll();
       ctx.setActive(id);
+      ctx.setActiveAnnotation(turnAnnotation);
     };
     scroller.addEventListener("scrollend", fire, { signal: ac.signal });
     const fallback = setTimeout(fire, SCROLL_FALLBACK_MS);
@@ -192,8 +217,15 @@ export function CitationChip({ artifact }: { artifact: Artifact }) {
     leaveTimer.current = setTimeout(() => {
       // Only clear if WE'RE still the active one. Prevents a stale leave
       // timer from a previously hovered chip from killing the activation
-      // a sibling chip just won.
-      ctx.setActive((prev) => (prev === id ? null : prev));
+      // a sibling chip just won. Annotation override clears in lockstep so
+      // we don't leave a stale quote behind for the next activation.
+      ctx.setActive((prev) => {
+        if (prev === id) {
+          ctx.setActiveAnnotation(null);
+          return null;
+        }
+        return prev;
+      });
     }, LEAVE_DELAY_MS);
   };
 
@@ -233,7 +265,7 @@ export function CitationChip({ artifact }: { artifact: Artifact }) {
         className={`h-[5px] w-[5px] flex-none rounded-full transition-colors ${
           isActive
             ? "bg-[var(--color-accent)]"
-            : "bg-[var(--color-hairline-strong)] group-hover/cite:bg-[var(--color-accent)]"
+            : "bg-[var(--color-ink-subtle)] group-hover/cite:bg-[var(--color-accent)]"
         }`}
       />
       {label}
