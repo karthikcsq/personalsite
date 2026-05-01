@@ -677,7 +677,14 @@ function ArtifactShell({
           ? undefined
           : () => {
               setCardHovered(true);
-              if (thread) thread.setActive(artifactId);
+              if (thread) {
+                thread.setActive(artifactId);
+                // Direct hover should show the card's own (most-recent)
+                // annotation, so drop any stale chip-set override and prevent
+                // the chip's pending leave timer from later nuking activeId
+                // while the cursor still sits on this card.
+                thread.setActiveAnnotation(null);
+              }
             }
       }
       onMouseLeave={
@@ -687,8 +694,15 @@ function ArtifactShell({
               setCardHovered(false);
               if (thread) {
                 // Only clear if WE'RE the active one — never stomp another
-                // card/chip's activation.
-                thread.setActive((prev) => (prev === artifactId ? null : prev));
+                // card/chip's activation. Annotation override clears in
+                // lockstep so the next activation starts clean.
+                thread.setActive((prev) => {
+                  if (prev === artifactId) {
+                    thread.setActiveAnnotation(null);
+                    return null;
+                  }
+                  return prev;
+                });
               }
             }
       }
