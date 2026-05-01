@@ -271,46 +271,46 @@ function pruneMessages(
   return prunedMessages;
 }
 
-// Build a conversation-aware search query using recent messages
-async function buildSearchQuery(
+// HyDE (Hypothetical Document Embeddings): generate a 1-2 sentence hypothetical
+// answer to the user's question. The hypothetical is concatenated with the
+// original query before embedding/sparse-encoding, which bridges vocabulary
+// gaps between general questions and specifically-worded source chunks.
+async function buildHydeQuery(
   openai: OpenAI,
   currentQuery: string,
   conversationHistory?: ChatMessage[]
 ): Promise<string> {
-  // Gather recent conversation context (last 4 messages)
   const recentContext = conversationHistory
     ?.slice(-4)
     .map(m => `${m.role}: ${m.content}`)
     .join("\n") || "";
 
-  const rewriteResponse = await openai.chat.completions.create({
+  const response = await openai.chat.completions.create({
     model: "gpt-5.4-nano",
     temperature: 0,
-    max_completion_tokens: 50,
+    max_completion_tokens: 80,
     messages: [
       {
         role: "system",
-        content: `You rewrite user questions into concise search queries over Karthik Thyagarajan's personal knowledge base (his work, projects, blog posts, opinions).
+        content: `You generate a 1-2 sentence hypothetical answer to a question about Karthik Thyagarajan, written as if you knew everything about him. The text is used only as a retrieval query (embedded against a vector store), never shown to the user.
 
 Rules:
-- Keep the user's original words. Resolve pronouns ("that", "it", "his latest") using recent conversation context.
-- You may add "Karthik Thyagarajan" if the query is about him.
-- You may add terms the USER explicitly mentioned or clearly implied (a company name they referenced, a project they asked about).
-- DO NOT invent or guess related technologies, frameworks, or concepts (no "LangChain", "RAG", "multi-agent", "agent architectures", "vector database", etc.) unless the user or conversation actually mentioned them. Adding these corrupts retrieval.
-- DO NOT add generic filler like "details about", "information regarding", "and its applications". These phrases bias retrieval toward unrelated chunks.
-- Keep it short. Under 15 words unless conversation context forces more.
-- Output ONLY the search query. No quotes, no explanations.`
+- Write confident, plain-prose declarative sentences. No question marks, no hedging, no "I think".
+- Resolve pronouns ("that", "his latest") using recent conversation context.
+- When the question uses general or category-level wording, name specific entities, places, projects, or activities you can plausibly infer about Karthik. Bridging vocabulary from general to specific is the entire point.
+- Do NOT invent specific facts you'd be embarrassed to be wrong about — exact dates, company names you've never heard of, named partners. If unsure, stay topical but vague ("Karthik has worked on several research projects").
+- Output ONLY the hypothetical answer prose. No prefix, no quotes, no explanation.`
       },
       {
         role: "user",
         content: recentContext
-          ? `Conversation so far:\n${recentContext}\n\nLatest message: "${currentQuery}"\n\nProduce an optimized search query.`
-          : `Message: "${currentQuery}"\n\nProduce an optimized search query.`
+          ? `Conversation so far:\n${recentContext}\n\nLatest question: "${currentQuery}"\n\nWrite the hypothetical answer.`
+          : `Question: "${currentQuery}"\n\nWrite the hypothetical answer.`
       }
     ],
   });
 
-  return rewriteResponse.choices[0]?.message?.content?.trim() || currentQuery;
+  return response.choices[0]?.message?.content?.trim() || "";
 }
 
 // === BM25 SPARSE ENCODER (mirrors python-rag/bm25.py tokenization) ===
@@ -408,50 +408,114 @@ export async function POST(req: NextRequest) {
 
     const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
 
-    // Step 1: Conversation-aware query rewriting.
-    // Skip on the first turn — pronoun resolution is moot when there's no
-    // prior context, and the rewriter call adds ~1s of pure TTFT overhead.
-    const priorTurns = (conversationHistory || []).filter(
-      (m: ChatMessage) => m.role !== "system",
-    );
-    const hasPriorContext =
-      priorTurns.length > 1 ||
-      (priorTurns.length === 1 && priorTurns[0].content !== currentQuery);
-    const tRewriteStart = Date.now();
-    const searchQuery = hasPriorContext
-      ? await buildSearchQuery(openai, currentQuery, conversationHistory)
-      : currentQuery;
-    const tRewriteEnd = Date.now();
+    // Step 1: Speculative-parallel HyDE.
+    // HyDE adds ~2s of latency (one nano LLM call). Most queries are specific
+    // enough that baseline retrieval on the raw query already returns strong
+    // matches, in which case we want to skip HyDE entirely. So:
+    //   1. Kick off HyDE in the background (don't await).
+    //   2. Run baseline retrieval (embed + Pinecone hybrid query) on the raw
+    //      query.
+    //   3. If baseline produced enough matches above threshold → discard HyDE.
+    //      Wall-time is back to pre-HyDE latency.
+    //   4. Else → await HyDE, run a second retrieval on
+    //      `original + hypothetical`, and merge by id (max score). Wall-time
+    //      is bounded by max(baseline, HyDE) + one extra retrieval.
+    // Cost: every query pays the HyDE API tokens, even when discarded. Worth
+    // it on this volume.
+    const tHydeStart = Date.now();
+    const hydePromise = buildHydeQuery(openai, currentQuery, conversationHistory);
 
     console.log(`🔍 Original: "${currentQuery}"`);
-    console.log(
-      hasPriorContext
-        ? `🔄 Rewritten (${tRewriteEnd - tRewriteStart}ms): "${searchQuery}"`
-        : `⏭️  Rewriter skipped (first turn)`,
-    );
 
-    // Step 2: Embed the rewritten query
     const tRetrievalStart = Date.now();
-    const embeddingResponse = await openai.embeddings.create({
+    const baselineEmbResp = await openai.embeddings.create({
       model: "text-embedding-3-small",
-      input: searchQuery,
+      input: currentQuery,
     });
-    const queryEmbedding = embeddingResponse.data[0].embedding;
-
-    // Step 3: Hybrid query - dense (semantic) + sparse (keyword/BM25)
-    const sparseQuery = encodeSparseQuery(searchQuery);
-    console.log(`🔑 Sparse query: ${sparseQuery.indices.length} terms`);
-
-    const queryResponse = await index.query({
-      vector: queryEmbedding,
-      sparseVector: sparseQuery.indices.length > 0 ? sparseQuery : undefined,
+    const baselineEmbedding = baselineEmbResp.data[0].embedding;
+    const baselineSparse = encodeSparseQuery(currentQuery);
+    const baselineResponse = await index.query({
+      vector: baselineEmbedding,
+      sparseVector: baselineSparse.indices.length > 0 ? baselineSparse : undefined,
       topK: 30,
       includeMetadata: true,
     });
+    const baselineMs = Date.now() - tRetrievalStart;
+    console.log(`⏱️  Baseline retrieval: ${baselineMs}ms (${baselineResponse.matches.length} matches)`);
+    if (baselineResponse.matches.length > 0) {
+      console.log(`   Top score: ${baselineResponse.matches[0].score?.toFixed(3)}`);
+    }
 
-    const retrievalMs = Date.now() - tRetrievalStart;
-    console.log(`⏱️  Embedding + Pinecone: ${retrievalMs}ms`);
-    console.log(`📊 Found ${queryResponse.matches.length} matches`);
+    // Decide whether the baseline result is "strong enough" to skip HyDE.
+    // Trigger is count-based, not top-score-based: hybrid scores aren't bounded
+    // to [0,1] (sparse contributions can push them into the tens), so an
+    // absolute score cutoff is hard to calibrate. A weak query like
+    // "does he play an instrument?" typically returns very few matches above
+    // the 0.45 threshold; a specific query returns many.
+    const HYDE_BYPASS_MIN_MATCHES = 3;
+    const baselineRelevantCount = baselineResponse.matches.filter(
+      (m) => m.score && m.score > 0.45,
+    ).length;
+    const baselineStrong = baselineRelevantCount >= HYDE_BYPASS_MIN_MATCHES;
+
+    let queryResponse = baselineResponse;
+    let hydeWaitMs = 0;
+    let retrievalMs = baselineMs;
+
+    if (baselineStrong) {
+      console.log(`⚡ Baseline strong (${baselineRelevantCount} ≥ ${HYDE_BYPASS_MIN_MATCHES}), HyDE discarded`);
+      // Avoid unhandled rejection on the speculative call.
+      hydePromise.catch(() => {});
+    } else {
+      console.log(`⚠️  Baseline weak (${baselineRelevantCount} < ${HYDE_BYPASS_MIN_MATCHES}), awaiting HyDE`);
+      let hypothetical = "";
+      try {
+        hypothetical = await hydePromise;
+      } catch (err) {
+        console.log(`⚠️  HyDE call failed: ${err}`);
+      }
+      hydeWaitMs = Date.now() - tHydeStart;
+      console.log(`💭 HyDE (${hydeWaitMs}ms): "${hypothetical}"`);
+
+      if (hypothetical) {
+        const expandedQuery = `${currentQuery} ${hypothetical}`;
+        const tExpStart = Date.now();
+        const expEmbResp = await openai.embeddings.create({
+          model: "text-embedding-3-small",
+          input: expandedQuery,
+        });
+        const expEmbedding = expEmbResp.data[0].embedding;
+        const expSparse = encodeSparseQuery(expandedQuery);
+        const expResponse = await index.query({
+          vector: expEmbedding,
+          sparseVector: expSparse.indices.length > 0 ? expSparse : undefined,
+          topK: 30,
+          includeMetadata: true,
+        });
+        const expMs = Date.now() - tExpStart;
+        retrievalMs += expMs;
+        console.log(`⏱️  HyDE retrieval: ${expMs}ms (${expResponse.matches.length} matches)`);
+
+        // Merge: dedupe by id, keep max score, sort descending.
+        type Match = (typeof baselineResponse.matches)[number];
+        const byId = new Map<string, Match>();
+        for (const m of [...baselineResponse.matches, ...expResponse.matches]) {
+          const existing = byId.get(m.id);
+          if (!existing || (m.score || 0) > (existing.score || 0)) {
+            byId.set(m.id, m);
+          }
+        }
+        queryResponse = {
+          ...baselineResponse,
+          matches: Array.from(byId.values()).sort(
+            (a, b) => (b.score || 0) - (a.score || 0),
+          ),
+        };
+        console.log(`🔀 Merged: ${queryResponse.matches.length} unique matches`);
+      }
+    }
+
+    console.log(`📊 Final pool: ${queryResponse.matches.length} matches`);
     if (queryResponse.matches.length > 0) {
       console.log(`   Top score: ${queryResponse.matches[0].score?.toFixed(3)}`);
       console.log(`   Content types: ${[...new Set(queryResponse.matches.map(m => m.metadata?.content_type))].join(', ')}`);
@@ -815,7 +879,7 @@ STYLE RULES (follow strictly):
         let replyText = "";
         let tFirstToken = 0;
         const timings: Record<string, number> = {
-          rewriter: tRewriteEnd - tRewriteStart,
+          rewriter: hydeWaitMs,
           retrieval: retrievalMs,
           ttft: 0,
           stream: 0,
