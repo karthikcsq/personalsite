@@ -11,19 +11,18 @@ import {
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import {
-  ArrowUp,
   Check,
   ChevronDown,
   Copy,
   MessageSquarePlus,
   Pencil,
   RotateCcw,
-  Square,
   X,
 } from "lucide-react";
 import { ChatArtifact, type Artifact } from "@/app/components/ChatArtifact";
 import { ChatThreadProvider, CitationChip } from "@/app/components/ChatThread";
 import { ArtifactOverlay } from "@/app/components/ArtifactOverlay";
+import { ChatInput } from "@/app/components/ChatInput";
 import { useChatMode } from "@/app/components/ChatModeContext";
 
 // Error markers stored in assistant content. Tag with a variant so the
@@ -730,38 +729,15 @@ export default function HomePage() {
           </div>
 
           <div className="rise mt-3" style={{ animationDelay: "200ms" }}>
-            <form onSubmit={handleSubmit} className="relative">
-              <div
-                className={`flex items-end gap-2 rounded-[14px] border bg-[var(--color-surface-raised)] px-4 py-3 shadow-[var(--shadow-soft)] transition-all focus-within:border-[var(--color-accent)] focus-within:shadow-[var(--shadow-lift)] ${
-                  queueNavIndex >= 0
-                    ? "border-[var(--color-accent)]"
-                    : "border-[var(--color-hairline)]"
-                }`}
-              >
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                  placeholder={
-                    queueNavIndex >= 0
-                      ? "Editing queued message…"
-                      : "Ask anything about Karthik"
-                  }
-                  className="flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim()}
-                  aria-label="Send"
-                  className="group/btn flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-surface)] transition-all hover:bg-[var(--color-accent-hover)] disabled:opacity-30"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </button>
-              </div>
-            </form>
+            <ChatInput
+              variant="hero"
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              inputRef={inputRef}
+              queueNavIndex={queueNavIndex}
+            />
 
             {heroChips.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
@@ -983,47 +959,17 @@ export default function HomePage() {
             </div>
 
             {/* Input (docked) */}
-            <form onSubmit={handleSubmit} className="mx-auto w-full max-w-[620px] pb-8">
-              <div
-                className={`flex items-end gap-2 rounded-[14px] border bg-[var(--color-surface-raised)] px-4 py-3 shadow-[var(--shadow-soft)] transition-all focus-within:border-[var(--color-accent)] focus-within:shadow-[var(--shadow-lift)] ${
-                  queueNavIndex >= 0
-                    ? "border-[var(--color-accent)]"
-                    : "border-[var(--color-hairline)]"
-                }`}
-              >
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                  placeholder={
-                    queueNavIndex >= 0 ? "Editing queued message…" : "Ask a follow-up"
-                  }
-                  className="flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none"
-                />
-                {isProcessing ? (
-                  <button
-                    type="button"
-                    onClick={stopGeneration}
-                    aria-label="Stop generating"
-                    title="Stop generating"
-                    className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-ink)] text-[var(--color-surface)] transition-all hover:bg-[var(--color-accent-hover)]"
-                  >
-                    <Square className="h-3 w-3" fill="currentColor" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={!input.trim()}
-                    aria-label="Send"
-                    className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-surface)] transition-all hover:bg-[var(--color-accent-hover)] disabled:opacity-30"
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </form>
+            <ChatInput
+              variant="docked"
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              inputRef={inputRef}
+              queueNavIndex={queueNavIndex}
+              isProcessing={isProcessing}
+              onStop={stopGeneration}
+            />
 
             {/* Undo toast: surfaces after a New-conversation reset. */}
             {resetSnapshot && (
