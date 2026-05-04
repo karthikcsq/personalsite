@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useChatThread } from "@/app/components/ChatThread";
@@ -141,24 +141,28 @@ function RightTopAnnotation({
 }) {
   // Geometry: desktop wing places the circle at vertical center (cy=44) with
   // the textbox above it (top:23 with translateY -50%). Interactive (mobile)
-  // mode flips that: circle near the TOP, textbox unfolds DOWN-AND-INWARD
-  // with a connector that bends from the circle down to the textbox edge.
+  // mode flips that: circle anchored at the wing's RIGHT edge so it sits
+  // near the card's right margin, textbox unfolds DOWN-AND-LEFT from there.
   const wingWidth = interactive ? 200 : 240;
   const wingHeight = 80;
   const wingRight = interactive ? 16 : 90;
-  const circleCx = interactive ? 12 : 6;
+  const circleCx = interactive ? wingWidth - 12 : 6;
   const circleCy = interactive ? 14 : 44;
-  const textboxRight = 4;
   const textboxWidth = interactive ? 170 : 200;
   const textboxTop = interactive ? 32 : 23;
-  const pathStartX = circleCx + 3;
-  const textboxLeftInWing = wingWidth - textboxRight - textboxWidth;
+  // Pin the textbox to the side OPPOSITE the dot. Interactive textbox at
+  // left:4 (textbox to the LEFT of the dot); desktop textbox at right:4.
+  const textboxLeftEdge = interactive ? 4 : wingWidth - 4 - textboxWidth;
+  const textboxRightEdge = textboxLeftEdge + textboxWidth;
+  // Path emits from the side of the dot facing the textbox and bends to
+  // the textbox edge nearest the dot.
+  const pathStartX = interactive ? circleCx - 3 : circleCx + 3;
   // Desktop path bends UP to the textbox above the circle.
-  // Interactive path bends DOWN to the textbox below the circle.
+  // Interactive path bends DOWN-LEFT to the textbox below-and-left.
   const pathBendY = interactive ? textboxTop + 4 : 23;
   const path = interactive
-    ? `M ${pathStartX} ${circleCy} L ${pathStartX + 14} ${pathBendY} L ${textboxLeftInWing + 4} ${pathBendY}`
-    : `M ${pathStartX} 44 L ${pathStartX + 21} 23 L ${textboxLeftInWing + 10} 23`;
+    ? `M ${pathStartX} ${circleCy} L ${pathStartX - 14} ${pathBendY} L ${textboxRightEdge - 4} ${pathBendY}`
+    : `M ${pathStartX} 44 L ${pathStartX + 21} 23 L ${textboxLeftEdge + 10} 23`;
 
   // Anchor the wing so the circle sits at `circleY` in card coords.
   const wingTop = Math.max(circleY - circleCy, 0);
@@ -206,27 +210,48 @@ function RightTopAnnotation({
         )}
       </svg>
 
-      {/* Interactive: doubled-size pulsating dot + 56px tap target over it. */}
+      {/* Interactive: pulsating dot at the wing's right edge with a mono
+          "Note" label to its LEFT, plus a tap target spanning both. The
+          label fades out when the textbox unfolds so the content isn't
+          doubly headed. */}
       {interactive && (
         <>
           <span
             aria-hidden="true"
-            className={`pointer-events-none absolute block h-[12px] w-[12px] rounded-full bg-[var(--color-accent)] ${
-              open ? "" : "annot-pulse"
-            }`}
-            style={{ left: `${circleCx - 6}px`, top: `${circleCy - 6}px` }}
-          />
+            className="pointer-events-none absolute flex items-center gap-2"
+            style={{
+              right: `${wingWidth - circleCx - 6}px`,
+              top: `${circleCy - 10}px`,
+              height: 20,
+            }}
+          >
+            <span
+              className="inline-flex items-center gap-1 rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-1.5 py-[3px] font-mono text-[10px] uppercase leading-none tracking-[0.14em] text-[var(--color-ink-subtle)] shadow-[var(--shadow-soft)] transition-opacity duration-150 ease-out"
+              style={{
+                opacity: open ? 0 : 1,
+                transitionDelay: open ? "0ms" : "150ms",
+              }}
+            >
+              Note
+              <ArrowRight className="h-2.5 w-2.5" strokeWidth={1.75} />
+            </span>
+            <span
+              className={`block h-[12px] w-[12px] flex-none rounded-full bg-[var(--color-accent)] ${
+                open ? "" : "annot-pulse"
+              }`}
+            />
+          </span>
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={open}
             aria-label={open ? "Hide note" : "Show note"}
-            className="pointer-events-auto absolute rounded-full"
+            className="pointer-events-auto absolute rounded-md"
             style={{
-              left: `${circleCx - 28}px`,
-              top: `${circleCy - 28}px`,
-              width: 56,
-              height: 56,
+              right: `${wingWidth - circleCx - 28}px`,
+              top: `${circleCy - 22}px`,
+              width: 110,
+              height: 44,
             }}
           />
         </>
@@ -236,11 +261,11 @@ function RightTopAnnotation({
         data-annot-textbox={interactive ? "true" : undefined}
         className="absolute rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-2.5 py-1.5 text-left font-mono text-[11px] leading-[15px] tracking-[0.01em] shadow-[var(--shadow-soft)]"
         style={{
-          right: `${textboxRight}px`,
+          left: `${textboxLeftEdge}px`,
           top: `${textboxTop}px`,
           width: `${textboxWidth}px`,
-          // Interactive: anchored top-right, unfolds down-and-left.
-          // Desktop:     vertically centered on top:23 line, scales vertically.
+          // Interactive: anchored top-right (closest corner to the dot),
+          // unfolds DOWN. Desktop: vertically centered on top:23 line.
           transformOrigin: interactive ? "right top" : "left center",
           color: "var(--color-ink)",
           opacity: open ? 1 : 0,
@@ -320,22 +345,40 @@ function LeftCenterInteractive({
 
       <span
         aria-hidden="true"
-        className={`pointer-events-none absolute block h-[12px] w-[12px] rounded-full bg-[var(--color-accent)] ${
-          open ? "" : "annot-pulse"
-        }`}
-        style={{ left: `${circleCx - 6}px`, top: `${circleCy - 6}px` }}
-      />
+        className="pointer-events-none absolute flex items-center gap-2"
+        style={{
+          left: `${circleCx - 6}px`,
+          top: `${circleCy - 10}px`,
+          height: 20,
+        }}
+      >
+        <span
+          className={`block h-[12px] w-[12px] flex-none rounded-full bg-[var(--color-accent)] ${
+            open ? "" : "annot-pulse"
+          }`}
+        />
+        <span
+          className="inline-flex items-center gap-1 rounded-[4px] border border-[var(--color-hairline)] bg-[var(--color-surface-raised)] px-1.5 py-[3px] font-mono text-[10px] uppercase leading-none tracking-[0.14em] text-[var(--color-ink-subtle)] shadow-[var(--shadow-soft)] transition-opacity duration-150 ease-out"
+          style={{
+            opacity: open ? 0 : 1,
+            transitionDelay: open ? "0ms" : "150ms",
+          }}
+        >
+          <ArrowLeft className="h-2.5 w-2.5" strokeWidth={1.75} />
+          Note
+        </span>
+      </span>
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
         aria-label={open ? "Hide note" : "Show note"}
-        className="pointer-events-auto absolute rounded-full"
+        className="pointer-events-auto absolute rounded-md"
         style={{
           left: `${circleCx - 28}px`,
-          top: `${circleCy - 28}px`,
-          width: 56,
-          height: 56,
+          top: `${circleCy - 22}px`,
+          width: 110,
+          height: 44,
         }}
       />
 
@@ -629,12 +672,13 @@ function ArtifactShell({
 
   // Anchor the circle either at the title's vertical center or at a
   // configurable offset below the title's bottom edge. Overlay mode uses a
-  // larger visible circle (12px vs 6px), so add extra vertical breathing room
-  // below the title to match the heavier dot.
+  // larger visible circle (12px vs 6px), so add extra vertical breathing
+  // room below the title to match the heavier dot — but only for the
+  // "below-title" anchor; "title-center" wants to land exactly on the title.
   const overlayBumpPx = isOverlay ? 10 : 0;
   const circleY =
     annotationAnchor === "title-center"
-      ? titleMetrics.center + overlayBumpPx
+      ? titleMetrics.center
       : titleMetrics.bottom + annotationBelowOffset + overlayBumpPx;
 
   // Clicking anywhere on the card triggers the card's primary link.
@@ -880,6 +924,11 @@ function InvolvementArtifact({
       linkText="See full"
       annotation={annotation}
       annotationVariant="right-top"
+      // On mobile (overlay), anchor the dot at the title's vertical center
+      // so it sits in empty space to the right of the title rather than
+      // floating over the role/date/tagline lines below it. Desktop keeps
+      // the below-title anchor where the wing has room to extend leftward.
+      annotationAnchor={mode === "overlay" ? "title-center" : "below-title"}
       annotationBelowOffset={2}
       mode={mode}
     >
