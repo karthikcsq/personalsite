@@ -36,7 +36,7 @@ I'll also define what being a “founder” is. To not confuse it with the Silic
 
 This definition is a vector, in the sense that it must have both magnitude and direction. You might notice that your team needs a slide deck made by tomorrow, so you go ahead and do it despite no one assigning you to that action. That is founder-like, just with minimal magnitude (and the initiative is appreciated nonetheless).
 
-The Power Law
+### The Power Law
 
 In a world where traditional wage labor is gone, we must shift to a system of primarily divergent thinking, not working to accomplish a predefined task, but rather to think of as many new tasks as possible, turning the chaos and hard-to-find needs of the real world into well scoped tasks, which can then be completed by AI.
 
