@@ -1,10 +1,10 @@
 ---
 title: "Stability in the Age of AI"
 date: "2026-05-09"
-summary: "What does stability look like in a world where traditional wage labor disappears?"
+summary: "Why societal stability rests on stable income, and what could replace it in an age of AI."
 ---
 
-## Why is AI Coming to Fruition Frightening? 
+## AI is coming to fruition: Why is it frightening? 
 
 The fear that AI will upend the economic order is widespread, and the question of whether it's justified is one I want to take seriously rather than dismiss or amplify. To do that, it helps to start with what we actually know.
 
@@ -12,7 +12,7 @@ I'll preface this by saying that we have no evidence to support or evidence agai
 
 What we have seen in both of these cases is periods of widespread, massive societal upheaval followed by a new status quo; however, the question is not so much that humanity will never find a status quo (with the exception of extinction-level AI catastrophe) but rather, what would that status quo look like? After all, after the industrial revolution, it was not so much the case that all manual labor vanished, but rather that manual labor changed and machines were able to do a large amount of the largely automatable work. Similarly, with the adoption of computers, there were a number of jobs whose entire demands had changed with their adoption. 
 
-Essentially, this begs the question: What does stability look like in an age of artificial intelligence? 
+Essentially, this begs the question: What does societal stability look like in an age of artificial intelligence? 
 
 I'd like to begin by breaking down one of the most essential core underpinnings of a modern society, which is the idea of a stable income. The reason why people pay for housing, for example, is because they earn wages in a stable fashion that they can continue to regularly pay for a house, which provides stable income to the owners of that house or banks, which in turn can provide stable loans with regular interest. This also is the underpinning policy of insurance, taxes, budgeting, and stocks. Insurers, for example, take on risk with the assumption that the larger insurance fund will continue to sustain itself due to the stability of income of all its constituents. Similarly, the government budget is set with an expectation of taxes, which is calculated based on the incomes of some 300 million Americans. 
 
@@ -36,15 +36,21 @@ I'll also define what being a “founder” is. To not confuse it with the Silic
 
 This definition is a vector, in the sense that it must have both magnitude and direction. You might notice that your team needs a slide deck made by tomorrow, so you go ahead and do it despite no one assigning you to that action. That is founder-like, just with minimal magnitude (and the initiative is appreciated nonetheless).
 
-The Power Law
+### The Power Law
 
-In a world where traditional wage labor is gone, we must shift to a system of primarily divergent thinking, not working to accomplish a predefined task, but rather to think of as many new tasks as possible, turning the chaos and hard-to-find needs of the real world into well scoped tasks, which can then be completed by AI.
+In a world where traditional wage labor is gone, we must shift to a system of primarily divergent thinking. Not working to accomplish a predefined task, but rather thinking of as many new tasks as possible, turning the chaos and hard-to-find needs of the real world into well-scoped problems that AI can then execute on.
 
-However, every idea is not going to be successful. Traditional wage labor is already scoped, and it is largely the job of a few higher-ups in organizations to be high-magnitude founders. In our new system, most individuals are just coming up with new ideas, and as a result, more risk is going to be taken, and the success rate of brand new ideas is simply not high (any entrepreneur will tell you this). This naturally creates the conditions for a power law of new ideas, in which (proportionally) few people can create and act on successful ideas. 
+To make this concrete, consider what work actually looks like in this system. A researcher notices that a particular intersection of two fields hasn't been explored, scopes a research question, and hands the literature review, data analysis, and initial drafting to AI. An designer develops a new aesthetic direction by combining unrelated traditions, then uses AI to produce variations at scale and iterate on what resonates. A community organizer notices that a specific group in their city lacks a particular service, designs the structure of an organization to provide it, and uses AI to handle the operational scaffolding. A founder in the traditional sense identifies an unmet need in a market, defines the product, and uses AI to build, test, and ship it. In all of these cases, the human contribution is the same: noticing the gap, defining its shape, and judging when the proposed solution actually fills it.
+
+However, every idea is not going to be successful. Traditional wage labor is already scoped, and it is largely the job of a few higher-ups in organizations to be high-magnitude founders. In our new system, most individuals are doing lower-magnitude gap-filling work, the kind that quietly improves a team, a field, or a community. A smaller subset takes higher-magnitude shots, and the success rate of those shots is not high (any entrepreneur will tell you this). The power law describes what happens at the tail, where a small number of high-magnitude attempts produce outsized impact.
+
+The implication is that economic activity in this system is fundamentally different in shape from wage labor. Under wage labor, output is roughly linear in hours worked. Under founder-economy work, output is heavily skewed. Most attempts produce modest value, a few produce enormous value, and the system as a whole produces innovation at a rate that the wage-labor system, with its narrower band of who gets to scope problems, cannot match.
 
 ### A Different Type Of Floor
 
-UBI on its own is not enough. It's a safety net that catches people when the wage market fails them, but doesn't give them opportunities for growth. A floor that only handles survival produces a population that can pay rent but cannot meaningfully take shots, as they lack the compute, the tools, the time, the networks, and the slack required to translate a spotted gap into a filled one. This is the two-tier dystopia that Silicon Valley startup founders are running from, where those on UBI don't have the freedom to uplift themselves and an upper class of those who profit off of surplus and transfers. In fact, this is the current startup demographic problem where the rich are able to found startups more easily, just scaled up, applied to everyone, and made permanent.
+UBI on its own is not enough. It's a safety net that catches people when the wage market fails them, but doesn't give them opportunities for growth. A floor that only handles survival produces a population that can pay rent but cannot meaningfully take shots, as they lack the compute, the tools, the time, the networks, and the slack required to translate a spotted gap into a filled one.
+
+A particular concern raised in some technology circles is what happens when AI comes to full fruition under a UBI-only regime. Those without pre-existing capital are stuck. Their UBI covers survival but provides no surplus to invest, no compute to build with, no time to spend on ventures that might fail. Meanwhile, those who entered the AI era with existing wealth can deploy it, take shots, and accumulate further. The result is a two-tier society; this is the current startup demographic problem (where the well-resourced can found more easily than the unresourced) made permanent and universal.
 
 What we need instead is a floor that is also a runway.
 
@@ -68,6 +74,6 @@ A runway funded by discretionary taxation of individual winners is fragile. Winn
 
 ## So, What Are We Left With?
 
-What emerges as a result is not a society without stable economic activity, nor is it a society where we manufacture wage labor that AI is actually performing, just to maintain the facade of human work. 
+What emerges as a result is neither a society lacking stable economic activity nor one where wage labor is artificially manufactured for the sake of preserving human work.
 
 Instead, survival and basic comfort are decoupled from economic activity, while cultural and societal growth is driven by a vastly greater population taking shots in every domain. Most of these attempts will fail. That is the nature of a power law and is not a flaw of the system but a feature of it. We will see an explosion of innovation in scientific research, art, institutional design, ventures, communities, and all other ways humans fill gaps.
