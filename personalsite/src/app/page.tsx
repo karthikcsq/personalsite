@@ -1,6 +1,7 @@
 "use client";
 import {
   memo,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -161,7 +162,7 @@ function repairMarkdownLinks(text: string): string {
     .replace(/\]\(([^)]*?)\)/g, (_m, url) => `](${url.replace(/\s+/g, "%20")})`);
 }
 
-export default function HomePage() {
+function HomePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -1516,5 +1517,16 @@ function CopyMessageButton({ content }: { content: string }) {
         </>
       )}
     </button>
+  );
+}
+
+// useSearchParams() inside HomePage forces this route to bail out of static
+// prerendering. Next requires the consumer to live under a Suspense boundary
+// so the bail-out is opt-in and explicit, not implicit across the whole tree.
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <HomePage />
+    </Suspense>
   );
 }
