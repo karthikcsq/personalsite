@@ -28,7 +28,7 @@ export async function generateMetadata({
   const prompt = readPromptParam(params.q);
   if (!prompt) return {};
 
-  const title = `“${prompt}” — ask Karthik`;
+  const title = `Ask Karthik: “${prompt}”`;
   const description = `Ask the site anything. This link opens the chat with: “${prompt}”.`;
   const ogImage = `/api/og?q=${encodeURIComponent(prompt)}`;
 
