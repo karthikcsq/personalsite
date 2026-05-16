@@ -9,6 +9,7 @@ import {
   type ComponentPropsWithoutRef,
 } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
   Check,
@@ -194,6 +195,10 @@ export default function HomePage() {
     opinions: 1,
     life: 1,
   });
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const didAutoSubmitRef = useRef(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -464,34 +469,51 @@ export default function HomePage() {
     }
   }, [isProcessing, queue, queueNavIndex, processMessage]);
 
-  const submit = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
+  const submit = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) return;
 
-    if (queueNavIndex >= 0) {
-      setQueue((prev) => {
-        const updated = [...prev];
-        updated[queueNavIndex] = trimmed;
-        return updated;
-      });
-      setQueueNavIndex(-1);
-      setSavedInput("");
-      setInput("");
-      inputRef.current?.focus();
-      return;
-    }
-    if (isProcessingRef.current) {
-      setQueue((prev) => [...prev, trimmed]);
+      if (queueNavIndex >= 0) {
+        setQueue((prev) => {
+          const updated = [...prev];
+          updated[queueNavIndex] = trimmed;
+          return updated;
+        });
+        setQueueNavIndex(-1);
+        setSavedInput("");
+        setInput("");
+        inputRef.current?.focus();
+        return;
+      }
+      if (isProcessingRef.current) {
+        setQueue((prev) => [...prev, trimmed]);
+        setInput("");
+        setChipCursor((prev) => prev + 4);
+        inputRef.current?.focus();
+        return;
+      }
+      processMessage(trimmed);
       setInput("");
       setChipCursor((prev) => prev + 4);
       inputRef.current?.focus();
-      return;
-    }
-    processMessage(trimmed);
-    setInput("");
-    setChipCursor((prev) => prev + 4);
-    inputRef.current?.focus();
-  };
+    },
+    [queueNavIndex, processMessage],
+  );
+
+  // Auto-submit ?q=... from the URL on first mount (ChatGPT/Claude-style deep
+  // link). Strip the param afterward so reloads don't resubmit. Cap length so a
+  // crafted URL can't push huge payloads through; rate-limiter is the backstop.
+  useEffect(() => {
+    if (didAutoSubmitRef.current) return;
+    const raw = searchParams.get("q");
+    if (!raw) return;
+    const trimmed = raw.trim().slice(0, 500);
+    if (!trimmed) return;
+    didAutoSubmitRef.current = true;
+    router.replace("/", { scroll: false });
+    requestAnimationFrame(() => submit(trimmed));
+  }, [searchParams, router, submit]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
