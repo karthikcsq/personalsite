@@ -734,10 +734,14 @@ export default function HomeChatClient() {
   const inChatChips = pickChips(3);
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
+    <div
+      className={`bg-[var(--color-surface)] text-[var(--color-ink)] ${
+        inChat ? "min-h-screen" : "h-[100dvh] overflow-hidden"
+      }`}
+    >
       {/* PRE-CHAT HERO */}
       {!inChat && (
-        <section className="mx-auto flex w-full max-w-[680px] flex-col px-7 pt-12 pb-16 md:min-h-screen md:justify-center md:px-6 md:pt-0 md:pb-8">
+        <section className="mx-auto flex h-full w-full max-w-[680px] flex-col justify-center px-7 py-12 md:px-6 md:py-8">
           <div className="rise" style={{ animationDelay: "80ms" }}>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
               Portfolio · conversational
@@ -777,7 +781,7 @@ export default function HomeChatClient() {
           </div>
 
           <nav
-            className="rise mt-12 grid grid-cols-3 gap-x-5 gap-y-3 text-xs text-[var(--color-ink-subtle)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 md:mt-16"
+            className="rise mt-12 grid grid-cols-3 gap-x-5 gap-y-3 text-sm text-[var(--color-ink-muted)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2 md:mt-16"
             style={{ animationDelay: "360ms" }}
             aria-label="Sections"
           >
@@ -795,9 +799,12 @@ export default function HomeChatClient() {
               >
                 <Link
                   href={item.href}
-                  className="transition-colors hover:text-[var(--color-ink)]"
+                  className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-accent)]"
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
+                    ↗
+                  </span>
                 </Link>
                 {i < arr.length - 1 && (
                   <span
@@ -810,10 +817,10 @@ export default function HomeChatClient() {
           </nav>
 
           <div
-            className="rise mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--color-ink-subtle)]"
+            className="rise mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--color-ink-muted)]"
             style={{ animationDelay: "440ms" }}
           >
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-faint)]">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
               Connect
             </span>
             {[
@@ -827,7 +834,7 @@ export default function HomeChatClient() {
                 href={c.href}
                 target={c.href.startsWith("http") ? "_blank" : undefined}
                 rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-ink)]"
+                className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-accent)]"
               >
                 <span>{c.label}</span>
                 <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
