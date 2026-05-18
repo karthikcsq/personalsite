@@ -75,6 +75,23 @@ function ProjectBlock({ project }: { project: Project }) {
         {project.tools}
       </p>
 
+      {links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {links.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-[var(--color-hairline-strong)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              {LINK_LABEL[link.type] ?? link.label}
+              <ArrowUpRight className="h-3 w-3 opacity-60 transition-opacity group-hover:opacity-100" />
+            </a>
+          ))}
+        </div>
+      )}
+
       {display.embedUrl && (
         <div className="mt-6 overflow-hidden rounded-md border border-[var(--color-hairline)] bg-[var(--color-surface-muted)]">
           <iframe
@@ -107,22 +124,6 @@ function ProjectBlock({ project }: { project: Project }) {
         </div>
       )}
 
-      {links.length > 0 && (
-        <div className="mt-5 flex flex-wrap gap-2">
-          {links.map((link) => (
-            <a
-              key={link.url}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-1.5 rounded-full border border-[var(--color-hairline-strong)] bg-[var(--color-surface-raised)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-            >
-              {LINK_LABEL[link.type] ?? link.label}
-              <ArrowUpRight className="h-3 w-3 opacity-60 transition-opacity group-hover:opacity-100" />
-            </a>
-          ))}
-        </div>
-      )}
     </li>
   );
 }
