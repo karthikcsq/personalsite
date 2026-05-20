@@ -24,6 +24,7 @@ interface RootYaml {
 
 // Simple icon filename inference: take first word of company lowercased and match existing file names manually map if needed.
 const ICON_MAP: Record<string, string> = {
+  'Samsung Research America — Advanced Intelligence Lab': '/companies/sra.png',
   'Peraton Labs': '/companies/peratonlabs.png',
   'Memories.ai': '/companies/memoriesai.png',
   'IDEAS Lab, Purdue University': '/companies/ideaslab.png',
