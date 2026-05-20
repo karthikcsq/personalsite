@@ -40,7 +40,8 @@ export function WorkTimelineClient({ jobs }: Props) {
                     src={job.icon}
                     alt={job.company}
                     fill
-                    className="object-contain p-1.5"
+                    sizes="48px"
+                    className="object-cover"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).style.display = "none";
                     }}

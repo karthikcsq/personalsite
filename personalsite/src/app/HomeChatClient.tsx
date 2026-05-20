@@ -781,7 +781,7 @@ export default function HomeChatClient() {
           </div>
 
           <nav
-            className="rise mt-12 grid grid-cols-3 gap-x-5 gap-y-3 text-sm text-[var(--color-ink-muted)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2 md:mt-16"
+            className="rise mt-12 grid grid-cols-3 gap-x-3 gap-y-3 text-sm text-[var(--color-ink-muted)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 md:mt-16"
             style={{ animationDelay: "360ms" }}
             aria-label="Sections"
           >
@@ -795,7 +795,7 @@ export default function HomeChatClient() {
             ].map((item, i, arr) => (
               <span
                 key={item.href}
-                className="inline-flex items-center gap-x-5"
+                className="inline-flex items-center gap-x-4"
               >
                 <Link
                   href={item.href}
