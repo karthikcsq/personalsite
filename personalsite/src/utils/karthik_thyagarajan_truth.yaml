@@ -74,6 +74,15 @@ skills:
     show_on: ["cv"]
 
 experience:
+  - role: AI Research Intern
+    show_on: ["cv", "resume"]
+    company: Samsung Research America, Advanced Intelligence Lab
+    location: Mountain View, CA
+    start_date: "May 2026"
+    end_date: "Aug 2026"
+    bullets:
+      - Researching on-device language models that continuously fuse raw device signals into autonomous agent reasoning and skill execution, enabling ambient, proactive intelligence for Bixby Edge AI.
+
   - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
     company: Peraton Labs
@@ -115,13 +124,13 @@ experience:
       - Engineered segmentation models achieving 92% accuracy on 50K+ images through agile sprints, reducing herbicide usage by 60% and costs by $150K annually.
 
   - role: ML Science & Engineering Apprenticeship
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     company: Naval Research Laboratory
     location: Washington, D.C.
     start_date: "Jun 2023"
     end_date: "Aug 2023"
     bullets:
-      - Developed novel ML algorithms for underwater acoustics, improving transmission loss prediction accuracy by 20% over physics-based simulations.
+      - Developed ML models improving underwater transmission loss prediction by 20% over physics-based simulations.
       - Built LangChain RAG system for classified document retrieval, reducing query time by 65%.
 
 projects:
@@ -131,17 +140,26 @@ projects:
     date: "Ongoing"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Built FastAPI and PostgreSQL backend with synchronized multiplayer functionality for iOS app with 200+ active users.
+      - Built realtime multiplayer backend with synchronized workout sessions for iOS app with 200+ users.
       - Developed a competitive gamification engine featuring custom ELO matchmaking algorithms, automated cron-based point aggregation, and generative AI workout plans that adapt to user performance metrics.
 
   - title: "buildpurdue"
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     tools: "Next.js, PostgreSQL, Supabase, UI/UX Design, Leadership, Mentorship"
     date: "Ongoing"
     link: "https://buildpurdue.org"
     bullets:
       - Co-founded a campus accelerator for 15 student startups, providing resources to validate core problems and refine go-to-market strategies.
       - Forged partnerships with 4 VC firms and industry mentors, allowing student founders to secure feedback and potential pre-seed funding.
+
+  - title: "google-tools-mcp"
+    show_on: ["cv", "resume"]
+    tools: "Python, MCP, Google APIs, OAuth, Pydantic"
+    date: "Ongoing"
+    link: "https://github.com/karthikcsq/google-tools-mcp"
+    bullets:
+      - Built MIT-licensed MCP server unifying 169 tools across Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms behind a single OAuth flow with auto re-auth and dynamic scope handling.
+      - Designed read-before-edit guards, lazy authentication, and multi-account profile support to enable safe agent orchestration across the full Google Workspace from one context.
 
   - title: "Caladrius (HackGT - 2nd Place)"
     show_on: ["cv", "resume"]
