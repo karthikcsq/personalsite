@@ -780,11 +780,12 @@ export default function HomeChatClient() {
           </div>
 
           <div
-            className="relative mt-12 border-y border-[var(--color-hairline)] bg-[var(--color-surface-wash)] px-4 py-5 md:mt-16"
+            className="relative mt-12 px-4 py-5 md:mt-16"
           >
+            <WoodPanelSurface />
             <BotanicalSprig />
             <nav
-              className="rise grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-3"
+              className="rise relative z-10 grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-3"
               style={{ animationDelay: "360ms" }}
               aria-label="Sections"
             >
@@ -820,7 +821,7 @@ export default function HomeChatClient() {
             </nav>
 
             <div
-              className="rise mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--color-ink-muted)]"
+              className="rise relative z-10 mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--color-ink-muted)]"
               style={{ animationDelay: "440ms" }}
             >
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
@@ -1051,12 +1052,59 @@ export default function HomeChatClient() {
   );
 }
 
+function WoodPanelSurface() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 1000 240"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible"
+      fill="none"
+    >
+      <path
+        d="M7 8C105 2 211 10 322 5C441 0 561 9 680 4C802 0 910 10 994 6L997 231C882 236 773 228 653 234C524 240 398 229 276 235C166 240 74 229 4 234Z"
+        fill="var(--color-surface-wash)"
+        stroke="var(--color-wood-edge)"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
+      />
+      <g
+        stroke="var(--color-wood-grain)"
+        strokeWidth="0.65"
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="round"
+        opacity="0.08"
+      >
+        <path d="M22 39C133 29 225 45 338 37C470 28 583 43 707 35C821 28 909 41 980 35" />
+        <path d="M11 72C118 64 230 81 354 70C472 60 601 79 724 68C836 58 926 76 993 70" />
+        <path d="M31 112C157 99 274 120 399 109C526 98 646 117 771 106C866 98 938 109 983 107" />
+        <path d="M15 156C121 146 229 164 344 155C470 145 587 163 706 153C828 142 916 159 990 151" />
+        <path d="M27 199C142 187 250 208 372 196C493 185 613 205 737 194C846 184 932 198 980 193" />
+      </g>
+      <g
+        stroke="var(--color-wood-grain)"
+        strokeWidth="0.8"
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="round"
+        opacity="0.36"
+      >
+        <path d="M420 217C447 183 456 140 456 102C456 67 470 43 497 24" />
+        <path d="M459 217C487 178 496 141 496 104C496 69 506 47 528 31" />
+        <path d="M701 219C721 194 730 167 729 143C728 119 737 102 758 89" />
+        <path d="M735 219C757 193 765 168 764 144C763 120 771 105 788 95" />
+        <path d="M161 124C177 110 191 108 204 119C217 130 232 130 247 116" />
+        <path d="M166 132C179 122 191 122 202 131C214 140 227 139 240 128" />
+      </g>
+    </svg>
+  );
+}
+
 function BotanicalSprig() {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 168 64"
-      className="pointer-events-none absolute right-3 top-0 h-16 w-40 -translate-y-1/2 overflow-visible"
+      className="pointer-events-none absolute right-3 top-0 z-20 h-16 w-40 -translate-y-1/2 overflow-visible"
       fill="none"
     >
       <path
@@ -1068,29 +1116,80 @@ function BotanicalSprig() {
       <path
         d="M119 33C117 22 121 14 132 9C134 20 130 28 119 33Z"
         stroke="var(--color-leaf)"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.78"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
       <path
         d="M99 25C98 14 91 8 80 6C80 17 87 23 99 25Z"
-        stroke="var(--color-leaf-soft)"
+        stroke="var(--color-leaf)"
+        fill="var(--color-leaf-soft)"
+        fillOpacity="0.82"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
       <path
         d="M74 17C69 8 60 5 50 8C55 17 63 20 74 17Z"
         stroke="var(--color-leaf)"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.72"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
       <path
         d="M48 18C45 29 37 35 26 35C28 25 35 19 48 18Z"
-        stroke="var(--color-leaf-soft)"
+        stroke="var(--color-leaf)"
+        fill="var(--color-leaf-soft)"
+        fillOpacity="0.78"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
+      <path d="M120 31L130 12M97 23L82 8M72 16L53 9M46 20L29 33" stroke="var(--color-leaf)" strokeWidth="0.65" strokeLinecap="round" opacity="0.7" />
       <circle cx="101" cy="26" r="1.75" fill="var(--color-leaf)" />
     </svg>
+  );
+}
+
+function BotanicalPageFrame() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <svg
+        viewBox="0 0 150 220"
+        className="absolute -left-8 top-5 h-44 w-32 opacity-55 md:-left-4 md:top-12 md:h-56 md:w-40 md:opacity-65"
+        fill="none"
+      >
+        <path
+          d="M5 208C22 177 34 146 42 114C50 80 70 48 113 12"
+          stroke="var(--color-leaf)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+        <path d="M35 140C18 134 10 121 11 103C29 108 38 120 35 140Z" fill="var(--color-leaf-soft)" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M44 109C60 103 69 90 68 73C51 78 42 91 44 109Z" fill="var(--color-leaf-mid)" fillOpacity="0.78" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M60 74C44 66 38 52 42 35C58 42 66 55 60 74Z" fill="var(--color-leaf-soft)" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M83 40C98 40 109 31 113 16C97 16 87 24 83 40Z" fill="var(--color-leaf-mid)" fillOpacity="0.76" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M34 137L13 106M46 106L66 76M59 70L43 39M86 38L110 18" stroke="var(--color-leaf)" strokeWidth="0.65" strokeLinecap="round" opacity="0.72" />
+      </svg>
+
+      <svg
+        viewBox="0 0 190 150"
+        className="absolute -bottom-8 -right-10 h-36 w-44 opacity-50 md:-bottom-5 md:-right-4 md:h-44 md:w-56 md:opacity-60"
+        fill="none"
+      >
+        <path
+          d="M188 138C153 127 126 111 104 90C79 66 49 51 6 47"
+          stroke="var(--color-leaf)"
+          strokeWidth="1.35"
+          strokeLinecap="round"
+        />
+        <path d="M139 118C143 100 154 90 171 87C169 105 158 115 139 118Z" fill="var(--color-leaf-soft)" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M109 93C96 82 92 68 98 52C113 62 117 76 109 93Z" fill="var(--color-leaf-mid)" fillOpacity="0.76" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M75 69C79 52 90 42 107 40C104 57 93 67 75 69Z" fill="var(--color-leaf-soft)" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M43 53C32 40 31 26 39 12C52 24 53 38 43 53Z" fill="var(--color-leaf-mid)" fillOpacity="0.74" stroke="var(--color-leaf)" strokeWidth="1.1" />
+        <path d="M142 115L168 90M108 90L99 55M78 66L104 43M42 50L39 15" stroke="var(--color-leaf)" strokeWidth="0.65" strokeLinecap="round" opacity="0.72" />
+      </svg>
+    </div>
   );
 }
 
