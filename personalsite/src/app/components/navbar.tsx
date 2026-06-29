@@ -37,7 +37,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-7 py-4 md:px-8">
           <Link href="/" className="flex items-center gap-2.5">
             <span className="h-5 w-[3px] bg-[var(--color-accent)]" />
-            <span className="font-serif text-[20px] italic leading-none text-[var(--color-ink)]">
+            <span className="text-[19px] font-medium leading-none tracking-[-0.035em] text-[var(--color-ink)]">
               Karthik
             </span>
           </Link>

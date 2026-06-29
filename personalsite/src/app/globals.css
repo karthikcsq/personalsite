@@ -2,33 +2,39 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  /* Surfaces (warmer cream ⇢ subtle variations) */
-  --color-surface: oklch(95% 0.022 82);
-  --color-surface-raised: oklch(97% 0.016 82);
-  --color-surface-muted: oklch(92% 0.028 82);
-  --color-surface-sunken: oklch(90% 0.032 82);
+  /* Surfaces: oat paper under warm daylight */
+  --color-surface: oklch(94% 0.032 82);
+  --color-surface-raised: oklch(96% 0.024 80);
+  --color-surface-muted: oklch(91% 0.038 80);
+  --color-surface-sunken: oklch(88% 0.042 78);
+  --color-surface-wash: oklch(90.5% 0.045 78);
 
-  /* Ink (warm near-black ⇢ tertiary) */
-  --color-ink: oklch(20% 0.018 55);
-  --color-ink-muted: oklch(42% 0.018 60);
-  --color-ink-subtle: oklch(58% 0.014 65);
-  --color-ink-faint: oklch(72% 0.012 70);
+  /* Ink: walnut rather than neutral black */
+  --color-ink: oklch(22% 0.026 50);
+  --color-ink-muted: oklch(43% 0.026 54);
+  --color-ink-subtle: oklch(57% 0.022 58);
+  --color-ink-faint: oklch(70% 0.018 64);
 
-  /* Hairlines (warm cream-tinted) */
-  --color-hairline: oklch(84% 0.024 78);
-  --color-hairline-strong: oklch(74% 0.028 78);
+  /* Hairlines: warm enough to belong to the paper */
+  --color-hairline: oklch(81% 0.038 74);
+  --color-hairline-strong: oklch(69% 0.042 68);
 
-  /* Accent: deep scarlet (single committed color) */
-  --color-accent: oklch(53% 0.225 26);
-  --color-accent-hover: oklch(47% 0.22 25);
-  --color-accent-soft: oklch(92% 0.05 25);
-  --color-accent-tint: oklch(95% 0.024 23);
+  /* Accent: a terracotta bookmark, still the only saturated hue */
+  --color-accent: oklch(52% 0.14 42);
+  --color-accent-hover: oklch(45% 0.14 40);
+  --color-accent-soft: oklch(89% 0.052 44);
+  --color-accent-tint: oklch(93% 0.032 44);
+
+  /* Botanical detail: living green against the wood-toned wash */
+  --color-leaf: oklch(43% 0.085 138);
+  --color-leaf-mid: oklch(56% 0.085 134);
+  --color-leaf-soft: oklch(72% 0.065 128);
 
   /* Semantic */
   --color-focus: var(--color-accent);
 
   /* Typography */
-  --font-sans: var(--font-host-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-source-serif), "Iowan Old Style", Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 
@@ -48,6 +54,9 @@
   color-scheme: light;
   --background: var(--color-surface);
   --foreground: var(--color-ink);
+  --color-leaf: oklch(43% 0.085 138);
+  --color-leaf-mid: oklch(56% 0.085 134);
+  --color-leaf-soft: oklch(72% 0.065 128);
 }
 
 html {
@@ -62,7 +71,6 @@ html, body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -246,4 +254,3 @@ html, body {
   font-style: italic;
   font-size: 1.05em;
 }
-

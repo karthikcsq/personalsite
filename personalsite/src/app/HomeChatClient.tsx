@@ -735,22 +735,21 @@ export default function HomeChatClient() {
 
   return (
     <div
-      className={`bg-[var(--color-surface)] text-[var(--color-ink)] ${
+      className={`relative bg-[var(--color-surface)] text-[var(--color-ink)] ${
         inChat ? "min-h-screen" : "h-[100dvh] overflow-hidden"
       }`}
     >
       {/* PRE-CHAT HERO */}
       {!inChat && (
-        <section className="mx-auto flex h-full w-full max-w-[680px] flex-col justify-center px-7 py-12 md:px-6 md:py-8">
+        <>
+        <BotanicalPageFrame />
+        <section className="relative z-10 mx-auto flex h-full w-full max-w-[680px] flex-col justify-center px-7 py-12 md:px-6 md:py-8">
           <div className="rise" style={{ animationDelay: "80ms" }}>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
-              Portfolio · conversational
-            </p>
-            <h1 className="mt-5 text-[clamp(2.5rem,6.5vw,4.25rem)] font-medium leading-[0.96] tracking-[-0.02em] text-[var(--color-ink)]">
-              Karthik Thyagarajan.
+            <h1 className="text-[clamp(2.65rem,6vw,3.85rem)] font-normal leading-[0.94] tracking-[-0.045em] text-[var(--color-ink)]">
+              Karthik Thyagarajan
             </h1>
-            <p className="mt-6 max-w-[560px] font-serif text-[clamp(1.1rem,2vw,1.4rem)] italic leading-snug text-[var(--color-ink-muted)]">
-              Founder, engineer, and student, happiest with a hard problem.
+            <p className="mt-5 max-w-[540px] text-[clamp(1.05rem,1.7vw,1.2rem)] leading-[1.45] tracking-[-0.01em] text-[var(--color-ink-muted)]">
+              Founder, engineer, and student. Happiest with a hard problem.
             </p>
           </div>
 
@@ -780,70 +779,76 @@ export default function HomeChatClient() {
             )}
           </div>
 
-          <nav
-            className="rise mt-12 grid grid-cols-3 gap-x-3 gap-y-3 text-sm text-[var(--color-ink-muted)] sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 md:mt-16"
-            style={{ animationDelay: "360ms" }}
-            aria-label="Sections"
+          <div
+            className="relative mt-12 border-y border-[var(--color-hairline)] bg-[var(--color-surface-wash)] px-4 py-5 md:mt-16"
           >
-            {[
-              { href: "/work", label: "Work" },
-              { href: "/projects", label: "Projects" },
-              { href: "/involvement", label: "Involvement" },
-              { href: "/blog", label: "Writing" },
-              { href: "/gallery", label: "Photography" },
-              { href: "/about", label: "About" },
-            ].map((item, i, arr) => (
-              <span
-                key={item.href}
-                className="inline-flex items-center gap-x-4"
-              >
-                <Link
-                  href={item.href}
+            <BotanicalSprig />
+            <nav
+              className="rise grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-3"
+              style={{ animationDelay: "360ms" }}
+              aria-label="Sections"
+            >
+              {[
+                { href: "/work", label: "Work" },
+                { href: "/projects", label: "Projects" },
+                { href: "/involvement", label: "Involvement" },
+                { href: "/blog", label: "Writing" },
+                { href: "/gallery", label: "Photography" },
+                { href: "/about", label: "About" },
+              ].map((item, i, arr) => (
+                <span
+                  key={item.href}
+                  className="inline-flex items-center gap-x-4"
+                >
+                  <Link
+                    href={item.href}
+                    className="group inline-flex items-baseline gap-1.5 border-b border-[var(--color-hairline-strong)] pb-1 text-[var(--color-ink)] transition-[border-color,color] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] focus-visible:border-[var(--color-accent)] focus-visible:text-[var(--color-accent)]"
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-[var(--color-ink-subtle)] transition-[color,transform] group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-[var(--color-accent)]">
+                      ↗
+                    </span>
+                  </Link>
+                  {i < arr.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="hidden h-3 w-px bg-[var(--color-hairline)] sm:inline-block"
+                    />
+                  )}
+                </span>
+              ))}
+            </nav>
+
+            <div
+              className="rise mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--color-ink-muted)]"
+              style={{ animationDelay: "440ms" }}
+            >
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
+                Connect
+              </span>
+              {[
+                { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06" },
+                { label: "GitHub", href: "https://github.com/karthikcsq" },
+                { label: "Email", href: "mailto:karthik6002@gmail.com" },
+                { label: "Resume", href: "/resume.pdf" },
+              ].map((c) => (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  target={c.href.startsWith("http") ? "_blank" : undefined}
+                  rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-accent)]"
                 >
-                  <span>{item.label}</span>
+                  <span>{c.label}</span>
                   <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
                     ↗
                   </span>
-                </Link>
-                {i < arr.length - 1 && (
-                  <span
-                    aria-hidden="true"
-                    className="hidden h-3 w-px bg-[var(--color-hairline)] sm:inline-block"
-                  />
-                )}
-              </span>
-            ))}
-          </nav>
-
-          <div
-            className="rise mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--color-ink-muted)]"
-            style={{ animationDelay: "440ms" }}
-          >
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
-              Connect
-            </span>
-            {[
-              { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06" },
-              { label: "GitHub", href: "https://github.com/karthikcsq" },
-              { label: "Email", href: "mailto:karthik6002@gmail.com" },
-              { label: "Resume", href: "/resume.pdf" },
-            ].map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                target={c.href.startsWith("http") ? "_blank" : undefined}
-                rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group inline-flex items-baseline gap-1 transition-colors hover:text-[var(--color-accent)]"
-              >
-                <span>{c.label}</span>
-                <span className="text-[var(--color-ink-faint)] transition-colors group-hover:text-[var(--color-accent)]">
-                  ↗
-                </span>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
         </section>
+        </>
       )}
 
       {/* IN-CHAT SPLIT */}
@@ -1043,6 +1048,49 @@ export default function HomeChatClient() {
         </ChatThreadProvider>
       )}
     </div>
+  );
+}
+
+function BotanicalSprig() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 168 64"
+      className="pointer-events-none absolute right-3 top-0 h-16 w-40 -translate-y-1/2 overflow-visible"
+      fill="none"
+    >
+      <path
+        d="M166 40C139 39 119 34 101 26C82 17 63 14 43 19C28 23 17 30 5 40"
+        stroke="var(--color-leaf)"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+      />
+      <path
+        d="M119 33C117 22 121 14 132 9C134 20 130 28 119 33Z"
+        stroke="var(--color-leaf)"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M99 25C98 14 91 8 80 6C80 17 87 23 99 25Z"
+        stroke="var(--color-leaf-soft)"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M74 17C69 8 60 5 50 8C55 17 63 20 74 17Z"
+        stroke="var(--color-leaf)"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M48 18C45 29 37 35 26 35C28 25 35 19 48 18Z"
+        stroke="var(--color-leaf-soft)"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <circle cx="101" cy="26" r="1.75" fill="var(--color-leaf)" />
+    </svg>
   );
 }
 

@@ -1,13 +1,13 @@
 import "@/app/globals.css";
-import { Host_Grotesk, Source_Serif_4 } from "next/font/google";
+import { Karla, Source_Serif_4 } from "next/font/google";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import ConditionalChrome from "@/app/components/ConditionalChrome";
 
-const hostGrotesk = Host_Grotesk({
+const karla = Karla({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-host-grotesk",
+  variable: "--font-karla",
   display: "swap",
 });
 
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${hostGrotesk.variable} ${sourceSerif.variable} h-full`}
+      className={`${karla.variable} ${sourceSerif.variable} h-full`}
     >
       <body className="h-full m-0 p-0 bg-surface text-ink antialiased">
         <ConditionalChrome>{children}</ConditionalChrome>
