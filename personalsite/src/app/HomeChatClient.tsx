@@ -856,9 +856,9 @@ export default function HomeChatClient() {
       {inChat && (
         <ChatThreadProvider>
         <ArtifactOverlay />
-        <div className="mx-auto grid h-full max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+        <div className="mx-auto grid h-full min-h-0 max-w-[1400px] grid-cols-1 gap-0 overflow-hidden px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
           {/* Chat column */}
-          <div className="relative flex h-full flex-col pb-[30px] md:pb-0">
+          <div className="relative flex h-full min-h-0 flex-col pb-[30px] md:pb-0">
             {/* Top blur band: messages scrolling up pass behind a soft blur
                 instead of fading to the surface color. The band itself fades
                 out at its bottom edge so the transition is gradual. */}
@@ -866,7 +866,7 @@ export default function HomeChatClient() {
               aria-hidden="true"
               className="chat-blur-top pointer-events-none absolute inset-x-0 top-0 z-10 h-10"
             />
-            <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto pt-8 pb-6 quiet-scroll">
+            <div ref={scrollContainerRef} className="relative min-h-0 flex-1 overflow-y-auto pt-8 pb-6 quiet-scroll">
               <div ref={messagesInnerRef} className="mx-auto max-w-[620px] space-y-8 pr-1">
                 {messages.map((msg, i) => {
                   const isLastAssistant =
@@ -902,7 +902,7 @@ export default function HomeChatClient() {
                 the input doesn't slide up/down as queue or chip rows appear
                 and disappear. */}
             <div
-              className="relative mx-auto w-full max-w-[620px] pb-5 md:pb-0"
+              className="relative mx-auto w-full max-w-[620px] shrink-0 pb-5"
               style={{ minHeight: 72 }}
             >
               {/* Jump-to-latest: 32px arrow circle anchored to the top edge
@@ -1037,14 +1037,26 @@ export default function HomeChatClient() {
           </div>
 
           {/* Artifact panel (desktop only; mobile uses pill → overlay) */}
-          <aside className="relative hidden h-full overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
+          <aside className="relative hidden h-full min-h-0 overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
             {allArtifacts.length === 0 ? (
               <ArtifactEmpty />
             ) : (
               <div>
-                {allArtifacts.map((art, i) => (
-                  <ChatArtifact key={art.id + "-" + i} artifact={art} index={i} />
-                ))}
+                {allArtifacts.map((art, i) => {
+                  const chapter = Math.floor(i / 3);
+                  const startsChapter = i % 3 === 0;
+
+                  return (
+                    <div key={art.id + "-" + i} className="relative">
+                      {startsChapter && (
+                        <BotanicalArtifactDivider
+                          from={chapter % 2 === 1 ? "right" : "left"}
+                        />
+                      )}
+                      <ChatArtifact artifact={art} index={i} />
+                    </div>
+                  );
+                })}
               </div>
             )}
           </aside>
@@ -1052,6 +1064,64 @@ export default function HomeChatClient() {
         </ChatThreadProvider>
       )}
     </div>
+  );
+}
+
+function BotanicalArtifactDivider({ from }: { from: "left" | "right" }) {
+  const fromLeft = from === "left";
+
+  return (
+    <svg
+      aria-hidden="true"
+      data-botanical-artifact-divider={from}
+      viewBox="0 0 180 46"
+      className={`pointer-events-none absolute top-0 z-10 h-[46px] w-[180px] -translate-y-1/2 overflow-visible ${
+        fromLeft ? "left-0 -scale-x-100" : "right-0"
+      }`}
+      fill="none"
+    >
+      <rect
+        x="0"
+        y="15"
+        width="180"
+        height="16"
+        fill="var(--color-surface)"
+      />
+      <path
+        d="M180 23C171 18 162 18 153 23S135 28 126 23S108 18 99 23S81 28 72 23S54 18 45 23S27 28 18 23"
+        stroke="var(--color-leaf)"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.78"
+      />
+      <path
+        d="M128 23C121 14 112 10 102 12C107 21 116 25 128 23Z"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.78"
+        stroke="var(--color-leaf)"
+        strokeWidth="0.85"
+      />
+      <path
+        d="M73 23C67 31 59 35 49 33C54 25 62 21 73 23Z"
+        fill="var(--color-leaf-soft)"
+        stroke="var(--color-leaf)"
+        strokeWidth="0.85"
+      />
+      <path
+        d="M46 22C40 13 32 9 22 11C27 19 35 24 46 22Z"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.72"
+        stroke="var(--color-leaf)"
+        strokeWidth="0.85"
+      />
+      <path
+        d="M126 22L104 13M71 24L51 32M44 21L24 12"
+        stroke="var(--color-leaf)"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+        opacity="0.68"
+      />
+    </svg>
   );
 }
 

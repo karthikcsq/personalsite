@@ -32,7 +32,7 @@ export function ChatInput({
   const isHero = variant === "hero";
   const formClass = isHero
     ? "relative"
-    : "relative mx-auto w-full max-w-[620px] pb-[env(safe-area-inset-bottom)] md:pb-8";
+    : "relative mx-auto w-full max-w-[620px] shrink-0 pb-[env(safe-area-inset-bottom)] md:pb-8";
   const placeholder =
     queueNavIndex >= 0
       ? "Editing queued message…"
