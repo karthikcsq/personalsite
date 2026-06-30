@@ -35,9 +35,8 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-40 border-b border-[var(--color-hairline)] bg-[var(--color-surface)]/85 backdrop-blur-sm">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-7 py-4 md:px-8">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="h-5 w-[3px] bg-[var(--color-accent)]" />
-            <span className="text-[19px] font-medium leading-none tracking-[-0.035em] text-[var(--color-ink)]">
+          <Link href="/" className="group">
+            <span className="border-b border-[var(--color-hairline-strong)] pb-0.5 text-[19px] font-medium leading-none tracking-[-0.035em] text-[var(--color-ink)] transition-colors group-hover:border-[var(--color-accent)]">
               Karthik
             </span>
           </Link>
@@ -97,10 +96,10 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`font-serif text-[32px] italic transition-colors ${
+                className={`border-b pb-1 text-[28px] font-medium tracking-[-0.025em] transition-colors ${
                   active
-                    ? "text-[var(--color-accent)]"
-                    : "text-[var(--color-ink)] hover:text-[var(--color-accent)]"
+                    ? "border-[var(--color-accent)] text-[var(--color-ink)]"
+                    : "border-transparent text-[var(--color-ink)] hover:border-[var(--color-hairline-strong)] hover:text-[var(--color-accent)]"
                 }`}
               >
                 {item.label}

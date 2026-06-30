@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/app/components/navbar";
 import { ChatModeProvider, useChatMode } from "@/app/components/ChatModeContext";
+import { InteriorBotanicalFrame } from "@/app/components/BotanicalDetails";
 
 function ChromeInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,7 +15,10 @@ function ChromeInner({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!hideNavbar && <Navbar />}
-      <main className={isHome ? "" : "min-h-screen"}>{children}</main>
+      <main className={isHome ? "" : "relative isolate min-h-screen overflow-hidden"}>
+        {!isHome && <InteriorBotanicalFrame />}
+        <div className={isHome ? "" : "relative z-10"}>{children}</div>
+      </main>
     </>
   );
 }

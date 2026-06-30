@@ -29,7 +29,6 @@
   --color-leaf: oklch(43% 0.085 138);
   --color-leaf-mid: oklch(56% 0.085 134);
   --color-leaf-soft: oklch(72% 0.065 128);
-  --color-wood-grain: oklch(46% 0.052 68);
   --color-wood-edge: oklch(69% 0.05 72);
 
   /* Semantic */
@@ -59,7 +58,6 @@
   --color-leaf: oklch(43% 0.085 138);
   --color-leaf-mid: oklch(56% 0.085 134);
   --color-leaf-soft: oklch(72% 0.065 128);
-  --color-wood-grain: oklch(46% 0.052 68);
   --color-wood-edge: oklch(69% 0.05 72);
 }
 

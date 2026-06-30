@@ -50,7 +50,7 @@ export default function AboutPage() {
       </p>
 
       <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)]">
-        Karthik Thyagarajan.
+        Karthik Thyagarajan
       </h1>
 
       <p className="mt-6 max-w-[620px] font-serif text-[clamp(1.05rem,1.8vw,1.3rem)] italic leading-snug text-[var(--color-ink-muted)]">

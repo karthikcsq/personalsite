@@ -107,11 +107,65 @@ export function ArtifactOverlay() {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="overflow-y-auto px-5 pb-8 pt-2 quiet-scroll">
-          <ChatArtifact artifact={rendered} mode="overlay" />
+        <div className="relative overflow-y-auto px-5 pb-8 pt-2 quiet-scroll">
+          <div>
+            <ChatArtifact artifact={rendered} mode="overlay" />
+          </div>
+          <MobileArtifactBranch />
         </div>
       </div>
     </div>,
     document.body,
+  );
+}
+
+function MobileArtifactBranch() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 190 62"
+      className="pointer-events-none ml-auto mt-4 block h-[58px] w-[178px] opacity-50"
+      fill="none"
+    >
+      <path
+        d="M189 48C157 48 132 42 111 32C87 20 59 17 10 27"
+        stroke="var(--color-leaf)"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+      <path
+        d="M151 45C149 31 155 21 168 16C170 30 164 40 151 45Z"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.78"
+        stroke="var(--color-leaf)"
+        strokeWidth="1"
+      />
+      <path
+        d="M113 32C111 19 102 11 89 10C91 23 99 30 113 32Z"
+        fill="var(--color-leaf-soft)"
+        stroke="var(--color-leaf)"
+        strokeWidth="1"
+      />
+      <path
+        d="M73 18C66 7 55 3 42 7C49 18 59 22 73 18Z"
+        fill="var(--color-leaf-mid)"
+        fillOpacity="0.74"
+        stroke="var(--color-leaf)"
+        strokeWidth="1"
+      />
+      <path
+        d="M39 21C34 34 24 41 10 40C14 27 24 21 39 21Z"
+        fill="var(--color-leaf-soft)"
+        stroke="var(--color-leaf)"
+        strokeWidth="1"
+      />
+      <path
+        d="M153 42L166 19M111 29L91 12M71 16L45 8M37 23L13 38"
+        stroke="var(--color-leaf)"
+        strokeWidth="0.6"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
+    </svg>
   );
 }

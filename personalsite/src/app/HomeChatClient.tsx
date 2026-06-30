@@ -736,7 +736,7 @@ export default function HomeChatClient() {
   return (
     <div
       className={`relative bg-[var(--color-surface)] text-[var(--color-ink)] ${
-        inChat ? "min-h-screen" : "h-[100dvh] overflow-hidden"
+        inChat ? "h-[calc(100dvh-69px)] overflow-hidden" : "h-[100dvh] overflow-hidden"
       }`}
     >
       {/* PRE-CHAT HERO */}
@@ -856,9 +856,9 @@ export default function HomeChatClient() {
       {inChat && (
         <ChatThreadProvider>
         <ArtifactOverlay />
-        <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+        <div className="mx-auto grid h-full max-w-[1400px] grid-cols-1 gap-0 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
           {/* Chat column */}
-          <div className="relative flex h-[calc(100dvh-68px)] flex-col">
+          <div className="relative flex h-full flex-col pb-[30px] md:pb-0">
             {/* Top blur band: messages scrolling up pass behind a soft blur
                 instead of fading to the surface color. The band itself fades
                 out at its bottom edge so the transition is gradual. */}
@@ -901,7 +901,10 @@ export default function HomeChatClient() {
             {/* Rail block: queue + Try chips. Always reserves a min-height so
                 the input doesn't slide up/down as queue or chip rows appear
                 and disappear. */}
-            <div className="relative mx-auto w-full max-w-[620px]" style={{ minHeight: 72 }}>
+            <div
+              className="relative mx-auto w-full max-w-[620px] pb-5 md:pb-0"
+              style={{ minHeight: 72 }}
+            >
               {/* Jump-to-latest: 32px arrow circle anchored to the top edge
                   of the rail block, so it floats just above the Try chips
                   (and just below the scroll viewport's bottom edge). */}
@@ -1034,7 +1037,7 @@ export default function HomeChatClient() {
           </div>
 
           {/* Artifact panel (desktop only; mobile uses pill → overlay) */}
-          <aside className="hidden h-[calc(100dvh-68px)] overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
+          <aside className="relative hidden h-full overflow-y-auto border-l border-[var(--color-hairline)] pl-12 pr-2 pt-8 pb-8 quiet-scroll lg:block">
             {allArtifacts.length === 0 ? (
               <ArtifactEmpty />
             ) : (
@@ -1068,33 +1071,6 @@ function WoodPanelSurface() {
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
       />
-      <g
-        stroke="var(--color-wood-grain)"
-        strokeWidth="0.65"
-        vectorEffect="non-scaling-stroke"
-        strokeLinecap="round"
-        opacity="0.08"
-      >
-        <path d="M22 39C133 29 225 45 338 37C470 28 583 43 707 35C821 28 909 41 980 35" />
-        <path d="M11 72C118 64 230 81 354 70C472 60 601 79 724 68C836 58 926 76 993 70" />
-        <path d="M31 112C157 99 274 120 399 109C526 98 646 117 771 106C866 98 938 109 983 107" />
-        <path d="M15 156C121 146 229 164 344 155C470 145 587 163 706 153C828 142 916 159 990 151" />
-        <path d="M27 199C142 187 250 208 372 196C493 185 613 205 737 194C846 184 932 198 980 193" />
-      </g>
-      <g
-        stroke="var(--color-wood-grain)"
-        strokeWidth="0.8"
-        vectorEffect="non-scaling-stroke"
-        strokeLinecap="round"
-        opacity="0.36"
-      >
-        <path d="M420 217C447 183 456 140 456 102C456 67 470 43 497 24" />
-        <path d="M459 217C487 178 496 141 496 104C496 69 506 47 528 31" />
-        <path d="M701 219C721 194 730 167 729 143C728 119 737 102 758 89" />
-        <path d="M735 219C757 193 765 168 764 144C763 120 771 105 788 95" />
-        <path d="M161 124C177 110 191 108 204 119C217 130 232 130 247 116" />
-        <path d="M166 132C179 122 191 122 202 131C214 140 227 139 240 128" />
-      </g>
     </svg>
   );
 }
@@ -1153,7 +1129,10 @@ function BotanicalSprig() {
 
 function BotanicalPageFrame() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 hidden overflow-hidden md:block"
+    >
       <svg
         viewBox="0 0 150 220"
         className="absolute -left-8 top-5 h-44 w-32 opacity-55 md:-left-4 md:top-12 md:h-56 md:w-40 md:opacity-65"
