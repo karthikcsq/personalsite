@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getPostBySlug, getSortedPosts } from "@/utils/blogUtils";
+import { OG_COLORS, OgBotanicalFrame } from "@/app/og-brand";
 
 export const alt = "Blog post by Karthik Thyagarajan";
 export const size = { width: 1200, height: 630 };
@@ -9,20 +10,17 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return getSortedPosts().map((p) => ({ slug: p.slug }));
 }
 
-const CREAM = "#efe7d3";
-const INK = "#241d18";
-const INK_MUTED = "#5a4f44";
-const VERMILION = "#c8391c";
-
 async function loadGoogleFont(
   family: string,
   weight: number,
+  style: "normal" | "italic",
   text: string,
 ): Promise<ArrayBuffer> {
+  const styleParam = style === "italic" ? "ital,wght@1," : "wght@";
   const url = `https://fonts.googleapis.com/css2?family=${family.replace(
     / /g,
     "+",
-  )}:wght@${weight}&text=${encodeURIComponent(text)}`;
+  )}:${styleParam}${weight}&text=${encodeURIComponent(text)}`;
   const css = await (await fetch(url)).text();
   const match = css.match(/src: url\((.+?)\) format/);
   if (!match) throw new Error(`Failed to load font ${family}`);
@@ -63,8 +61,8 @@ export default async function BlogOpengraphImage({
   const fontText = `${post.title}${date}${eyebrow}${url}`;
 
   const [serif, mono] = await Promise.all([
-    loadGoogleFont("Source Serif 4", 600, fontText),
-    loadGoogleFont("JetBrains Mono", 500, fontText),
+    loadGoogleFont("Source Serif 4", 500, "italic", fontText),
+    loadGoogleFont("JetBrains Mono", 500, "normal", fontText),
   ]);
 
   return new ImageResponse(
@@ -73,14 +71,15 @@ export default async function BlogOpengraphImage({
         style={{
           width: "100%",
           height: "100%",
-          background: CREAM,
+          background: OG_COLORS.surface,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "84px 96px",
-          color: INK,
+          color: OG_COLORS.ink,
         }}
       >
+        <OgBotanicalFrame />
         <div
           style={{
             display: "flex",
@@ -93,7 +92,7 @@ export default async function BlogOpengraphImage({
               display: "flex",
               width: 36,
               height: 4,
-              background: VERMILION,
+              background: OG_COLORS.accent,
             }}
           />
           <div
@@ -102,7 +101,7 @@ export default async function BlogOpengraphImage({
               fontFamily: "mono",
               fontSize: 20,
               letterSpacing: 5,
-              color: VERMILION,
+              color: OG_COLORS.accent,
             }}
           >
             {eyebrow}
@@ -113,10 +112,12 @@ export default async function BlogOpengraphImage({
           style={{
             display: "flex",
             fontFamily: "serif",
+            fontStyle: "italic",
+            fontWeight: 500,
             fontSize: titleFontSize(post.title),
             lineHeight: 1.08,
             letterSpacing: -1.6,
-            color: INK,
+            color: OG_COLORS.ink,
             maxWidth: 1010,
           }}
         >
@@ -130,7 +131,7 @@ export default async function BlogOpengraphImage({
             alignItems: "baseline",
             fontFamily: "mono",
             fontSize: 20,
-            color: INK_MUTED,
+            color: OG_COLORS.inkMuted,
           }}
         >
           <span style={{ display: "flex" }}>{date}</span>
@@ -141,7 +142,7 @@ export default async function BlogOpengraphImage({
     {
       ...size,
       fonts: [
-        { name: "serif", data: serif, style: "normal", weight: 600 },
+        { name: "serif", data: serif, style: "italic", weight: 500 },
         { name: "mono", data: mono, style: "normal", weight: 500 },
       ],
     },

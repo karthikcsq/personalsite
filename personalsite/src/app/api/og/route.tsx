@@ -1,16 +1,11 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
+import { OG_COLORS, OgBotanicalFrame } from "@/app/og-brand";
 
 // Dynamic OG image for /?q=<prompt> deep links. Renders the prompt as a
-// chat bubble in the site's cream/vermilion palette, matching the static
+// chat bubble in the site's oat/terracotta palette, matching the static
 // opengraph-image.tsx so a shared link card feels like an extension of the
 // brand rather than a generic fallback.
-
-const CREAM = "#efe7d3";
-const INK = "#241d18";
-const INK_MUTED = "#5a4f44";
-const VERMILION = "#c8391c";
-const BUBBLE_BORDER = "#d8ccb3";
 
 const SIZE = { width: 1200, height: 630 };
 const MAX_PROMPT = 200;
@@ -66,7 +61,7 @@ export async function GET(req: NextRequest) {
   const [serifItalic, mono, sans] = await Promise.all([
     loadGoogleFont("Source Serif 4", 500, "italic", fontText),
     loadGoogleFont("JetBrains Mono", 500, "normal", eyebrow),
-    loadGoogleFont("Host Grotesk", 500, "normal", `${footerLeft}${footerRight}`),
+    loadGoogleFont("Karla", 500, "normal", `${footerLeft}${footerRight}`),
   ]);
 
   const size = promptFontSize(display);
@@ -77,14 +72,15 @@ export async function GET(req: NextRequest) {
         style={{
           width: "100%",
           height: "100%",
-          background: CREAM,
+          background: OG_COLORS.surface,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 84px",
-          color: INK,
+          color: OG_COLORS.ink,
         }}
       >
+        <OgBotanicalFrame />
         <div
           style={{
             display: "flex",
@@ -97,7 +93,7 @@ export async function GET(req: NextRequest) {
               display: "flex",
               width: 36,
               height: 4,
-              background: VERMILION,
+              background: OG_COLORS.accent,
             }}
           />
           <div
@@ -106,7 +102,7 @@ export async function GET(req: NextRequest) {
               fontFamily: "mono",
               fontSize: 22,
               letterSpacing: 5,
-              color: VERMILION,
+              color: OG_COLORS.accent,
             }}
           >
             {eyebrow}
@@ -116,8 +112,8 @@ export async function GET(req: NextRequest) {
         <div
           style={{
             display: "flex",
-            background: "#fbf5e6",
-            border: `2px solid ${BUBBLE_BORDER}`,
+            background: OG_COLORS.surfaceRaised,
+            border: `2px solid ${OG_COLORS.hairline}`,
             borderRadius: 28,
             padding: "44px 56px",
             maxWidth: "100%",
@@ -132,7 +128,7 @@ export async function GET(req: NextRequest) {
               fontSize: size,
               lineHeight: 1.18,
               letterSpacing: -0.5,
-              color: INK,
+              color: OG_COLORS.ink,
             }}
           >
             {`\u201C${display}\u201D`}
@@ -146,7 +142,7 @@ export async function GET(req: NextRequest) {
             alignItems: "baseline",
             fontFamily: "sans",
             fontSize: 22,
-            color: INK_MUTED,
+            color: OG_COLORS.inkMuted,
           }}
         >
           <span style={{ display: "flex" }}>{footerLeft}</span>

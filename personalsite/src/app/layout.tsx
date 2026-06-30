@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     default: "Karthik Thyagarajan",
   },
   description:
-    "Karthik Thyagarajan — builder, researcher, engineer. Ask the site anything about his work, writing, and photography.",
+    "Karthik Thyagarajan — Builder, Researcher, Engineer. Ask the site anything about his work, writing, and photography.",
   keywords: [
     "Karthik Thyagarajan",
     "Machine Learning",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     url: "https://www.karthikthyagarajan.com",
     title: "Karthik Thyagarajan",
     description:
-      "Karthik Thyagarajan — builder, researcher, engineer. Ask the site anything.",
+      "Karthik Thyagarajan — Builder, Researcher, Engineer. Ask the site anything.",
     siteName: "Karthik Thyagarajan",
   },
   robots: {

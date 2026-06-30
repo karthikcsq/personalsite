@@ -1,14 +1,10 @@
 import { ImageResponse } from "next/og";
+import { OG_COLORS, OgBotanicalFrame } from "@/app/og-brand";
 
 export const alt =
-  "Karthik Thyagarajan — builder, researcher, engineer";
+  "Karthik Thyagarajan — Builder, Researcher, Engineer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-const CREAM = "#efe7d3";
-const INK = "#241d18";
-const INK_MUTED = "#5a4f44";
-const VERMILION = "#c8391c";
 
 async function loadGoogleFont(
   family: string,
@@ -26,13 +22,13 @@ async function loadGoogleFont(
 }
 
 export default async function OpengraphImage() {
-  const headline = "builder, researcher, engineer.";
+  const headline = "Builder, Researcher, Engineer.";
   const eyebrow = "KARTHIK THYAGARAJAN";
   const url = "karthikthyagarajan.com";
   const fontText = `${headline}${eyebrow}${url}`;
 
-  const [serif, mono] = await Promise.all([
-    loadGoogleFont("Source Serif 4", 600, fontText),
+  const [sans, mono] = await Promise.all([
+    loadGoogleFont("Karla", 500, fontText),
     loadGoogleFont("JetBrains Mono", 500, fontText),
   ]);
 
@@ -42,14 +38,15 @@ export default async function OpengraphImage() {
         style={{
           width: "100%",
           height: "100%",
-          background: CREAM,
+          background: OG_COLORS.surface,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "84px 96px",
-          color: INK,
+          color: OG_COLORS.ink,
         }}
       >
+        <OgBotanicalFrame />
         <div
           style={{
             display: "flex",
@@ -62,7 +59,7 @@ export default async function OpengraphImage() {
               display: "flex",
               width: 36,
               height: 4,
-              background: VERMILION,
+              background: OG_COLORS.accent,
             }}
           />
           <div
@@ -71,7 +68,7 @@ export default async function OpengraphImage() {
               fontFamily: "mono",
               fontSize: 22,
               letterSpacing: 5,
-              color: VERMILION,
+              color: OG_COLORS.accent,
             }}
           >
             {eyebrow}
@@ -82,15 +79,16 @@ export default async function OpengraphImage() {
           style={{
             display: "flex",
             flexDirection: "column",
-            fontFamily: "serif",
-            fontSize: 116,
-            lineHeight: 1.04,
-            letterSpacing: -2.5,
-            color: INK,
+            fontFamily: "sans",
+            fontSize: 110,
+            fontWeight: 500,
+            lineHeight: 1,
+            letterSpacing: -4,
+            color: OG_COLORS.ink,
           }}
         >
-          <span style={{ display: "flex" }}>builder, researcher,</span>
-          <span style={{ display: "flex" }}>engineer.</span>
+          <span style={{ display: "flex" }}>Builder, Researcher,</span>
+          <span style={{ display: "flex" }}>Engineer.</span>
         </div>
 
         <div
@@ -100,7 +98,7 @@ export default async function OpengraphImage() {
             alignItems: "baseline",
             fontFamily: "mono",
             fontSize: 22,
-            color: INK_MUTED,
+            color: OG_COLORS.inkMuted,
           }}
         >
           <span style={{ display: "flex" }}>{url}</span>
@@ -111,7 +109,7 @@ export default async function OpengraphImage() {
     {
       ...size,
       fonts: [
-        { name: "serif", data: serif, style: "normal", weight: 600 },
+        { name: "sans", data: sans, style: "normal", weight: 500 },
         { name: "mono", data: mono, style: "normal", weight: 500 },
       ],
     },
