@@ -8,6 +8,11 @@ import { resolveTopic } from "@/utils/topicsUtils";
 import { projects as projectsCatalog } from "@/data/projectsData";
 import { getCorpusForArtifact } from "@/utils/quotesUtils";
 import { checkChatRateLimit, getClientIdentifier } from "@/utils/rateLimit";
+import {
+  formatCanonicalWorkContext,
+  selectCanonicalJobsForQuery,
+  selectCanonicalReceiptJobs,
+} from "@/utils/workContext";
 
 // Type for chat messages
 interface ChatMessage {
@@ -110,7 +115,7 @@ interface PineconeMatch {
   metadata?: Record<string, unknown>;
 }
 
-// Hydrate a directory artifact ID ("work:Peraton Labs", "project:Veritas",
+// Hydrate a directory artifact ID ("work:<company>", "project:<slug>",
 // "blog:<slug>") into a full Artifact, using the local source-of-truth data
 // (YAML for work, projects.json for projects, and Pinecone metadata for blog
 // excerpts). `annotation` is the opinionated pull-quote written by the
@@ -407,6 +412,10 @@ export async function POST(req: NextRequest) {
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
 
     const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
+    const allJobs = getJobsFromYaml();
+    const canonicalJobs = selectCanonicalJobsForQuery(currentQuery, allJobs);
+    const canonicalReceiptJobs = selectCanonicalReceiptJobs(currentQuery, allJobs);
+    const canonicalWorkContext = formatCanonicalWorkContext(canonicalJobs);
 
     // Step 1: Speculative-parallel HyDE.
     // HyDE adds ~2s of latency (one nano LLM call). Most queries are specific
@@ -559,8 +568,21 @@ export async function POST(req: NextRequest) {
     const opinionMatches = relevantMatches.filter(
       (m) => m.metadata?.content_type === "opinion",
     );
+    const staleAggregateSources = new Set([
+      "faq.txt",
+      "summary.txt",
+      "personal_narrative.txt",
+    ]);
     const otherMatches = relevantMatches.filter(
-      (m) => m.metadata?.content_type !== "opinion",
+      (m) => {
+        if (m.metadata?.content_type === "opinion") return false;
+        if (!canonicalWorkContext) return true;
+        const filePath = String(m.metadata?.file_path || "")
+          .replaceAll("\\", "/")
+          .toLowerCase();
+        const fileName = filePath.split("/").at(-1) || "";
+        return !staleAggregateSources.has(fileName);
+      },
     );
 
     // For each topic that landed in retrieval (any chunk, any sub-topic),
@@ -596,6 +618,9 @@ export async function POST(req: NextRequest) {
     }
 
     const sections: string[] = [];
+    if (canonicalWorkContext) {
+      sections.push(canonicalWorkContext);
+    }
     if (fullTopicCorpora.length > 0) {
       const parts = fullTopicCorpora.map(
         (t) => `[topic:${t.slug}] (Karthik's full prose on this topic, every sub-topic he's written)\n${t.body}`,
@@ -632,11 +657,9 @@ export async function POST(req: NextRequest) {
     // Work and project lists come from the source-of-truth YAML. Blog entries
     // are filtered to just the posts that showed up in retrieval (otherwise
     // the extractor sees all blogs and over-matches).
-    const allJobs = getJobsFromYaml();
     const allProjects = projectsCatalog;
     const allInvolvements = getInvolvementsFromYaml();
-    // buildpurdue also lives in the resume YAML under projects:, which
-    // produces chunks tagged content_type=project, project_title="buildpurdue".
+    // An involvement can also appear in the resume YAML under projects:.
     // Those chunks should still feed retrieval, but any resulting artifact
     // should be the richer involvement card, not a bare project card.
     const involvementTitleToSlug = new Map<string, string>();
@@ -735,7 +758,7 @@ export async function POST(req: NextRequest) {
       artifactDirectory.map((e) => [e.id, e.index]),
     );
 
-    const hasRelevantContext = relevantMatches.length > 0 && contexts.trim().length > 0;
+    const hasRelevantContext = contexts.trim().length > 0;
 
     // Step 5: Build system prompt with personality.
     //
@@ -761,7 +784,7 @@ export async function POST(req: NextRequest) {
 - Involvement: https://www.karthikthyagarajan.com/involvement
 - Blog: https://www.karthikthyagarajan.com/blog
 - Gallery: https://www.karthikthyagarajan.com/gallery
-When someone asks for a resume, link to Projects or Work Experience. When someone asks about buildpurdue, leadership, or community, link to Involvement.`;
+When someone asks for a resume, link to Projects or Work Experience. When someone asks about leadership or community work, link to Involvement.`;
 
     const STYLE_RULES = `STYLE RULES (follow strictly):
 - Never use em dashes. Replace with commas or parentheses.
@@ -774,8 +797,6 @@ When someone asks for a resume, link to Projects or Work Experience. When someon
     if (hasRelevantContext) {
       systemPrompt = `You are Karthik's AI representative on his portfolio website (karthikthyagarajan.com). You know him well and speak about him with grounded enthusiasm. Conversational and factual.
 
-Karthik is a founder-engineer first and a CS & AI student at Purdue second. He's the founding engineer at Repple and co-founded buildpurdue. He's active in the AI and MCP open-source space.
-
 ${HARD_CONSTRAINTS}
 
 USE THE CONTEXT AGGRESSIVELY. Before saying "no specific writeup", scan every chunk for anything addressing the topic. A project description, a blog paragraph, a role bullet, an opinion section all count as his take. If Context has a dedicated section on the topic, surface its thrust. If only indirect evidence exists (projects he chose, problems he picked), describe those concretely and say that's what his stance amounts to. Only say "no info" when truly nothing in Context touches the question. Be specific: cite project names, company names, and numbers that appear in the Context.
@@ -787,25 +808,21 @@ REPLY STRUCTURE:
 
 THE TAKE SECTION ANCHORS THE REPLY (when present):
 - Lead with the take, not the projects. The first sentence states his stance using his vocabulary, his angle, his sharpness. No hedge ("Karthik is opinionated on X"), no project intro, no definition.
-- Use his phrasing where you can. A corpus line like "agents are only as good as the tools they're given" should land in the reply as that exact framing (third person: "He thinks agents are only as good as the tools they're given"), not smoothed into "agent capability depends on tooling." The visitor sees a verbatim quote from the same corpus rendered next to the reply, so the reply must read as the same voice.
-- Projects are evidence, not the headline. Repple, google-tools-mcp, etc. arrive AFTER the stance, as proof points for it.
+- Preserve distinctive phrasing from the corpus instead of smoothing it into generic summary language. The visitor sees a verbatim quote from the same corpus rendered next to the reply, so the reply must read as the same voice.
+- Projects are evidence, not the headline. Relevant project evidence arrives AFTER the stance, as proof points for it.
 - If the take section and project chunks disagree in emphasis, the take section wins. The visitor asked what he believes, not what he built.
-- Anecdotes and scenes carry their concrete detail. "I built an agent on my personal site and it was useless because…" should appear in the reply with that scene intact, not abstracted into "he learned from past experience."
-- Failure mode to avoid: visitor asks "what does he think about agents?", the take section says "agents are worth building when they save time, not effort," but the reply opens with "MCP is context injection" (a project framing). Wrong order. Right order: take section's framing first, then "his google-tools-mcp work extends that…".
+- Anecdotes and scenes carry their concrete detail. Keep the concrete event and consequence instead of abstracting it into a generic lesson.
+- Failure mode to avoid: visitor asks for a belief, but the reply opens with a project description. Lead with the take section's framing, then use projects as evidence.
 
 LINK RULES:
 - Every URL is wrapped as a labeled markdown link: \`[Label](url)\`. Never produce a bare URL. Labels are the human name of what's being linked (the project title, "GitHub", "arXiv", "Devpost", "npm", "PDF"), never the URL itself.
 - When you mention a project by name, the project name itself is the link. Default target: \`https://www.karthikthyagarajan.com/projects#<project-id>\` where \`<project-id>\` is the slug from the Context's directory entry.
-- USE SLUGS VERBATIM. Copy the slug exactly as it appears. Never reformat, re-spell, or insert / remove dashes. If the directory says \`kmeans-som\`, link to \`#kmeans-som\` (NOT \`#k-means-som\`). If the directory says \`google-tools-mcp\`, link to \`#google-tools-mcp\`. Wrong slug = broken anchor.
-- For repos and external URLs, use the EXACT URL from Context. Wrap as \`[GitHub](...)\`, \`[npm](...)\`, \`[arXiv](...)\`. Never shorten, guess, or truncate. Never link a project name to a bare profile URL like \`https://github.com/karthikcsq\`. Never invent a URL. If Context has no specific URL for the project, link only to \`/projects#<slug>\`.
+- USE SLUGS VERBATIM. Copy the slug exactly as it appears. Never reformat, re-spell, or insert / remove dashes. Wrong slug = broken anchor.
+- For repos and external URLs, use the EXACT URL from Context. Wrap as \`[GitHub](...)\`, \`[npm](...)\`, \`[arXiv](...)\`. Never shorten, guess, or truncate. Never link a project name to a bare profile URL. Never invent a URL. If Context has no specific URL for the project, link only to \`/projects#<slug>\`.
 - Same rule for involvement (\`/involvement#<slug>\`) and work (\`/work#<company-slug>\`). Slugs come from Context.
-- BARE-PAGE LINKS ARE FORBIDDEN when referring to a specific item. Bad: \`he co-founded [buildpurdue](https://www.karthikthyagarajan.com/involvement)\` (drops the visitor at the index). Good: \`he co-founded [buildpurdue](https://www.karthikthyagarajan.com/involvement#buildpurdue)\`. Bare-page links only work for catch-alls like "browse all his projects".
-- Blog posts: link to \`/blog/<slug>\` using the slug from the chunk's label. If a chunk is labeled \`kind=blog_post slug="future-of-ai-work"\`, link to \`https://www.karthikthyagarajan.com/blog/future-of-ai-work\`. Never link a specific post to the \`/blog\` index.
-- For "show me his X" / list-style queries: never produce a bare URL list. Each item gets the name plus a short sentence of substance. Bad: \`QKD Research Paper: https://arxiv.org/abs/...\`. Good: \`his [Photonic Implementation of QKD](https://www.karthikthyagarajan.com/projects#qkd) ([arXiv](https://arxiv.org/abs/2509.04389)), exploring secure quantum communication using near-infrared lasers.\`
-
-EXEMPLAR (opinion question, take section present, two distinct takes plus an anecdote):
-Visitor: "What does Karthik think about agents?"
-Reply: "He thinks agents are only as good as the tools they're given, and that narrow agents fall flat the moment a visitor asks something outside their slice. He learned that the hard way building an early agent on his own site that couldn't answer most questions about him. His [google-tools-mcp](https://www.karthikthyagarajan.com/projects#google-tools-mcp) ([npm](https://www.npmjs.com/package/google-tools-mcp)) work extends the same idea: the bottleneck is the tooling layer, not the model."
+- BARE-PAGE LINKS ARE FORBIDDEN when referring to a specific item. Link to that item's directory-provided anchor. Bare-page links only work for catch-alls like "browse all his projects".
+- Blog posts: link to \`/blog/<slug>\` using the slug from the chunk's label. Never link a specific post to the \`/blog\` index.
+- For "show me his X" / list-style queries: never produce a bare URL list. Each item gets the name plus a short sentence of substance.
 
 ${SITEMAP}
 
@@ -821,12 +838,11 @@ ${HARD_CONSTRAINTS}
 DEFAULT BEHAVIOR. Decline off-topic queries per Rule 1 in one short friendly sentence and redirect. If the question is plainly about Karthik but happened to miss the index, say you don't have specifics on that topic and suggest related areas you can help with (drawn from the list below). Do not invent details to fill the gap. The Hard Constraints still apply: no fabrication, no plural padding, no training-data inference.
 
 REDIRECT MENU (you may name these even with no Context, since they're scope hints, not factual claims):
-- Education at Purdue (CS & AI) and Thomas Jefferson High School
-- Work at Peraton Labs, Memories.ai, IDEAS Lab, AgRPA, Naval Research Lab
-- Projects like Repple, google-tools-mcp, Veritas, Caladrius, Verbatim
-- His views on AI, MCP, startups, entrepreneurship
-- buildpurdue, the campus accelerator he co-founded
-- His blog posts and quantum computing research
+- Education and background
+- Work experience and research roles
+- Projects and technical work
+- Leadership and community involvement
+- Writing, views, and interests
 
 ${SITEMAP}
 
@@ -1003,9 +1019,8 @@ ${STYLE_RULES}`;
               // prompted to link, but doesn't always). Splits the artifact
               // name on non-alphanumeric AND camelCase boundaries, then
               // matches against the reply allowing any (or no) separator
-              // between parts. So "BuildPurdue" matches "buildpurdue",
-              // "build purdue", "build-purdue"; "Memories.ai" matches
-              // "memories ai", "memories.ai"; "google-tools-mcp" matches
+              // between parts, so casing, spaces, punctuation, and dashes do
+              // not prevent a directory entity from matching the reply.
               // "Google Tools MCP".
               const splitWords = (s: string): string[] =>
                 s
@@ -1044,7 +1059,10 @@ ${STYLE_RULES}`;
               }
 
               hits.sort((a, b) => a.offset - b.offset);
-              const directCitedIds: string[] = hits.map((h) => h.id);
+              const directCitedIds: string[] = [
+                ...canonicalReceiptJobs.map((job) => `work:${job.company}`),
+                ...hits.map((h) => h.id),
+              ].filter((id, index, ids) => ids.indexOf(id) === index);
               console.log(
                 `⏱️  URL-parse cited (${Date.now() - tParseStart}ms): direct=${directCitedIds.length}, topic-candidates=${retrievedTopics.size}`,
               );

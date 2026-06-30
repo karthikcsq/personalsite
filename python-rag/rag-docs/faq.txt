@@ -1,13 +1,7 @@
 Karthik Thyagarajan - Frequently Asked Questions
 
 Q: Who is Karthik Thyagarajan?
-A: Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (graduating May 2027) with a 3.93 GPA. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US. He has worked at companies like Peraton Labs, Memories.ai, IDEAS Lab, AgRPA, and the Naval Research Laboratory. He co-founded buildpurdue (a campus startup accelerator where he serves as Co-President) and is a Founding Engineer at Repple (a competitive fitness app). He also built google-tools-mcp, an open-source MCP server for Google Workspace.
-
-Q: What is Karthik currently working on?
-A: Karthik is currently a Machine Learning Engineering Intern at Peraton Labs (since Jun 2025), building RL agents for IoT malware detection. He is also a Founding Engineer at Repple and Co-President of buildpurdue. He recently built and launched google-tools-mcp, an open-source MCP server for Google Workspace with 169 tools. He actively writes about MCP, AI agents, and the future of agent-tool interaction on LinkedIn, where he has 1,358+ followers.
-
-Q: What kind of roles is Karthik looking for?
-A: Karthik is open to Artificial Intelligence Intern, Machine Learning Intern, and Software Engineer roles. He is currently based in the San Francisco Bay Area.
+A: Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (graduating May 2027) with a 3.93 GPA. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US. He builds AI systems, open-source tools, and products including google-tools-mcp.
 
 Q: What is Karthik's favorite project?
 A: Karthik's favorite project is Repple. He loves that he built an app with real users that solves a real need: a sense of community and friendly competition at the gym.
@@ -16,29 +10,19 @@ Q: What tech stack does Karthik prefer?
 A: Karthik is most comfortable with Python for ML/backend work (PyTorch, FastAPI, Flask) and TypeScript/Next.js/React for frontend development. He has experience with AWS (S3, EC2, Lambda), GCP, Docker, and various AI/ML frameworks including LangChain, RAG systems, and reinforcement learning. For databases, he works with PostgreSQL and Supabase. He also works with Anthropic Claude and MCP tooling. His top skills on LinkedIn are Python, Machine Learning, Software Development, Computer Vision, and Quantum Computing.
 
 Q: Has Karthik published any research?
-A: Yes. Karthik published research on arXiv about a photonic implementation of quantum key distribution (https://arxiv.org/abs/2509.04389). He also conducted ML research at the Naval Research Laboratory on underwater acoustics and at IDEAS Lab on robotics/SLAM.
+A: Yes. Karthik published research on arXiv about a photonic implementation of quantum key distribution (https://arxiv.org/abs/2509.04389).
 
 Q: What is buildpurdue?
-A: buildpurdue is a founder-led, peer-to-peer community for student builders at Purdue, where Karthik serves as Co-President and co-founded the current iteration. Its core identity is density and agency: the most progress happens when active founders are in the same room, building alongside each other. It's not a top-down accelerator with a curriculum, it's a dense group of people already shipping who give each other real feedback. Karthik shapes the operational framework, leads the build of the internal platform (Next.js/TypeScript on Supabase/PostgreSQL with RBAC, as the primary contributor on a team), and recruits the operators, mentors, and VCs who come to campus for direct feedback sessions. buildpurdue also runs workshops on topics like finding a first paying customer and co-founder selection.
+A: buildpurdue is a founder-led, peer-to-peer community for student builders at Purdue. Its core identity is density and agency: the most progress happens when active founders are in the same room, building alongside each other. It's not a top-down accelerator with a curriculum, it's a dense group of people already shipping who give each other real feedback. Karthik helped shape the operational framework, built much of the internal platform (Next.js/TypeScript on Supabase/PostgreSQL with RBAC), and recruited operators, mentors, and VCs for direct feedback sessions. buildpurdue also runs workshops on topics like finding a first paying customer and co-founder selection.
 
 Q: What is Repple?
-A: Repple is a competitive fitness app for iOS with 200+ active users. Karthik is a Founding Engineer. The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards. It features synchronized multiplayer, ELO matchmaking, automated point aggregation, and AI-generated workout plans. Co-founded with Rishab Chakravarty, Arjun Chadha, and Ayush Guhan.
+A: Repple is a competitive fitness app for iOS with 200+ active users. The app helps make fitness more fun and consistent. Users earn points for workouts, create streaks, compete against friends in weekly matchups, and climb leaderboards. It features synchronized multiplayer, ELO matchmaking, automated point aggregation, and AI-generated workout plans.
 
 Q: What is google-tools-mcp?
 A: google-tools-mcp is an open-source MCP server Karthik built that unifies all of Google Workspace behind a single server and OAuth flow. It provides 169 tools covering Drive, Docs, Sheets, Slides, Gmail, Calendar, and Forms. Key features include auto re-auth, reading PDFs and Word docs directly from Drive, and read-before-edit guards to prevent blind overwrites. It's MIT licensed with no telemetry, supports multi-account profiles and service account automation. Install with: npx google-tools-mcp setup.
 
 Q: What programming languages does Karthik know?
 A: Karthik is proficient in Python, Java, C/C++, JavaScript, SQL, and TypeScript. He also works with frameworks like React, Next.js, Flask, and FastAPI. He has 85 skills listed on LinkedIn.
-
-Q: Where has Karthik worked?
-A: Karthik's work experience includes:
-- Founding Engineer at Repple (Nov 2025 - Present) - Competitive fitness app
-- Co-President at buildpurdue (Sep 2025 - Present) - Campus startup accelerator
-- Machine Learning Engineering Intern at Peraton Labs (Jun 2025 - Present) - RL agents for IoT malware detection
-- Computer Vision Researcher at Memories.ai (Feb 2025 - Aug 2025) - Video memory framework for AR
-- Undergraduate Robotics Researcher at IDEAS Lab (Mar 2025 - Jun 2025) - SLAM pipelines and neural radiance fields
-- Data Engineering Intern at AgRPA (Aug 2024 - Dec 2024) - Weed detection pipeline from drone imagery
-- ML Science & Engineering Apprenticeship at Naval Research Laboratory (Jun 2023 - Aug 2023) - Underwater acoustics ML
 
 Q: What are Karthik's interests outside of tech?
 A: Karthik is a classically trained pianist who achieved Royal Conservatory of Music Piano Examination Level 8. He also enjoys travel. His portfolio gallery showcases photos from Costa Rica, Hawaii, Kilimanjaro, Amsterdam, and more.
@@ -77,17 +61,7 @@ A: Karthik's published research is available online:
 - K-Means SOM Paper: https://www.karthikthyagarajan.com/K_Means_SOM.pdf
 
 Q: What is Karthik's experience with AI and machine learning?
-A: Karthik has deep experience in AI/ML spanning multiple domains:
-- Reinforcement learning for IoT security at Peraton Labs
-- Computer vision and video processing at Memories.ai
-- SLAM and neural radiance fields at IDEAS Lab
-- Weed detection segmentation models at AgRPA
-- Underwater acoustics ML at NRL
-- LangChain RAG systems (built at NRL and for this portfolio)
-- Generative AI workout plans for Repple
-- Multi-agent diagnostic systems (Caladrius hackathon project)
-- MCP tooling and AI agent infrastructure (google-tools-mcp)
-He is skilled with PyTorch, GANs, RL, diffusion models, LLMs (LangChain, RAG, CoT/Reasoning, RLHF), agents, and MCP. He is certified in both MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
+A: Karthik has experience across reinforcement learning, computer vision, SLAM, segmentation, RAG systems, generative AI, multi-agent systems, and MCP tooling. He is skilled with PyTorch, GANs, RL, diffusion models, LLMs (LangChain, RAG, CoT/Reasoning, RLHF), agents, and MCP. He is certified in both MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
 
 Q: Does Karthik have experience with quantum computing?
 A: Yes. Karthik has hands-on quantum computing experience including Qiskit, VQE, QAOA, and Quantum ML. He built a physical QKD prototype and published research on arXiv. He also created Quantum Racer, an educational Android game about quantum mechanics that reached 100+ students.
