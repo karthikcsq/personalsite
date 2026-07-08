@@ -82,7 +82,7 @@ experience:
     end_date: "Aug 2026"
     bullets:
       - Built an on-device signal router for always-on ambient AI on Bixby Edge AI, filtering device signals on-phone at 95% suppression and 90% intent-routing accuracy to reserve frontier models for events that need them.
-      - Built the developer SDK for Samsung's cross-device agent orchestrator, first deployed on XR glasses, letting any developer register custom tools and skills, and consolidated several prototypes into a single unified orchestration layer.
+      - Built the developer SDK for Samsung's cross-device agent orchestrator, first deployed on XR glasses, for registering custom tools and skills, and unified several prototypes into one orchestrator.
 
   - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
