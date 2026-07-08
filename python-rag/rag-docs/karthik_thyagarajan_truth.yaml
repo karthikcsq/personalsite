@@ -81,7 +81,7 @@ experience:
     start_date: "May 2026"
     end_date: "Aug 2026"
     bullets:
-      - Researching on-device language models that continuously fuse raw device signals into autonomous agent reasoning and skill execution, enabling ambient, proactive intelligence for Bixby Edge AI.
+      - Built an on-device signal router for always-on ambient AI on Bixby Edge AI, filtering device signals on-phone at 95% suppression and 90% intent-routing accuracy to reserve frontier models for events that need them.
 
   - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
