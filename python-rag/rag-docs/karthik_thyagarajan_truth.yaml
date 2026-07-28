@@ -117,7 +117,7 @@ experience:
     company: Memories.ai
     location: Remote
     start_date: "Feb 2025"
-    end_date: "Jun 2025"
+    end_date: "May 2025"
     bullets:
       - Built a video memory framework for hours-long video that vision language models cannot process directly, combining keyframe extraction, dynamic segmentation, CLIP indexing, and YOLO and SAM object and face detection to index 10K+ streams in Python, Flask, and PostgreSQL, with 60% throughput improvement from frame sampling optimization.
       - Implemented multimodal search over the index, combining transcript, visual, and entity embeddings with query rewriting, RAG-style semantic retrieval, and graph traversal across scenes, objects, and named people.
@@ -128,7 +128,7 @@ experience:
     company: IDEAS Lab
     location: West Lafayette, IN
     start_date: "Mar 2025"
-    end_date: "Jun 2025"
+    end_date: "May 2025"
     bullets:
       - Built a real-time SLAM pipeline in C++ and Python with RGB-D sensor fusion and Kalman filtering, streaming calibrated camera data to a multi-GPU server, improving 3D reconstruction accuracy 25% and reducing latency 30%.
       - Implemented neural radiance fields (NeRF) for novel view synthesis, generating photorealistic 3D scene reconstructions from camera data for autonomous navigation.
