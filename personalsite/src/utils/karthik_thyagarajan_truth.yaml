@@ -124,7 +124,7 @@ experience:
       - Published pymavi, the company's Python SDK, to PyPI with 2K+ downloads, implementing async processing, retry and backoff handling, and REST API integration for video analysis workflows.
 
   - role: Undergraduate Robotics Researcher
-    show_on: ["cv"]
+    show_on: ["cv", "resume"]
     company: IDEAS Lab
     location: West Lafayette, IN
     start_date: "Mar 2025"
