@@ -106,7 +106,7 @@ experience:
     company: Peraton Labs
     location: Silver Spring, MD
     start_date: "Jun 2025"
-    end_date: "May 2026"
+    end_date: "Aug 2026"
     bullets:
       - Developed a first-of-its-kind reinforcement learning agent for IoT malware detection in PyTorch, granting it low-level network traversal actions and full state observability to search device environments a brute-force scan cannot cover, cutting exploration latency 35% and raising detection coverage 25% across 500K+ daily device events.
       - Engineered the agent's feature set from binary signatures, file paths, filenames, and static analysis output, improving malware classification over single-signal baselines, delivered inside a classified defense research environment.
