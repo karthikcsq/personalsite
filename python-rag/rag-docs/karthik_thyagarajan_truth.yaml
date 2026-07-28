@@ -32,12 +32,14 @@ skills:
     bullets:
       - Python
       - Java
+      - Kotlin
       - C/C++
       - JavaScript
       - SQL
       - React
       - Flask
       - Next.js
+      - Android
     show_on: ["cv", "resume"]
 
   - category: "Cloud & DevOps"
@@ -82,7 +84,9 @@ experience:
     end_date: "Aug 2026"
     bullets:
       - Built an on-device signal router for always-on ambient AI on Bixby Edge AI, filtering device signals on-phone at 95% suppression and 90% intent-routing accuracy to reserve frontier models for events that need them.
-      - Built the developer SDK for Samsung's cross-device agent orchestrator, first deployed on XR glasses, for registering custom tools and skills, and unified several prototypes into one orchestrator.
+      - Co-architected Samsung's always-on cross-device agent orchestrator from scratch, owning half of a 25-module Kotlin runtime that ships on XR glasses and gives phone, glasses, and outside developers one platform to build agents on.
+      - Built the runtime's safety and control plane: capability-based permissions, user confirmation flows, policy-gated tool dispatch, token and cost budgets, and PII-redacted audit logging, so every action an agent takes is gated, bounded, and recorded.
+      - Built phone-control tooling that gives agents computer-use-style access to any app's UI under stale-screen and confirmation guards, plus native calendar, alarm, location, and health tools that reach apps with no exposed API.
 
   - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
