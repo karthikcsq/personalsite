@@ -76,17 +76,28 @@ skills:
     show_on: ["cv"]
 
 experience:
+  # NOTE: this role is split across two entries because the one-page resume fits
+  # exactly two bullets here. Edit BOTH when changing the shared bullets.
   - role: AI Research Intern
-    show_on: ["cv", "resume"]
+    show_on: ["resume"]
     company: Samsung Research America
     location: Mountain View, CA
     start_date: "May 2026"
     end_date: "Aug 2026"
     bullets:
       - Built an on-device signal router for always-on ambient AI on Bixby Edge AI, filtering device signals on-phone at 95% suppression and 90% intent-routing accuracy to reserve frontier models for events that need them.
-      - Co-architected Samsung's always-on cross-device agent orchestrator from scratch, owning half of a 25-module Kotlin runtime that ships on XR glasses and gives phone, glasses, and outside developers one platform to build agents on.
-      - Built the runtime's safety and control plane: capability-based permissions, user confirmation flows, policy-gated tool dispatch, token and cost budgets, and PII-redacted audit logging, so every action an agent takes is gated, bounded, and recorded.
-      - Built phone-control tooling that gives agents computer-use-style access to any app's UI under stale-screen and confirmation guards, plus native calendar, alarm, location, and health tools that reach apps with no exposed API.
+      - Co-architected Samsung's always-on cross-device agent orchestrator from scratch, owning half of a 25-module Kotlin runtime that ships on XR glasses as the agent platform for phone, glasses, and outside developers.
+
+  - role: AI Research Intern
+    show_on: ["cv"]
+    company: Samsung Research America
+    location: Mountain View, CA
+    start_date: "May 2026"
+    end_date: "Aug 2026"
+    bullets:
+      - Built an on-device signal router for always-on ambient AI on Bixby Edge AI, filtering device signals on-phone at 95% suppression and 90% intent-routing accuracy to reserve frontier models for events that need them.
+      - Co-architected Samsung's always-on cross-device agent orchestrator from scratch, owning half of a 25-module Kotlin runtime that ships on XR glasses as the agent platform for phone, glasses, and outside developers.
+      - Built its safety and control plane (capability-based permissions, policy-gated tool dispatch, cost budgets, PII-redacted audit logging) plus phone-control tooling giving agents computer-use-style access to any app's UI.
 
   - role: Machine Learning Engineering Intern
     show_on: ["cv", "resume"]
