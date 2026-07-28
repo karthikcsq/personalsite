@@ -162,7 +162,7 @@ projects:
     date: "Ongoing"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Founding engineer of a competitive fitness iOS app live on the App Store with 200+ active users; built the entire backend in FastAPI, PostgreSQL, and Supabase with Pydantic-validated schemas.
+      - Co-founder of a competitive fitness iOS app live on the App Store with 200+ active users; built the entire backend in FastAPI, PostgreSQL, and Supabase with Pydantic-validated schemas.
       - Built real-time synchronized multiplayer workout sessions, a custom ELO matchmaking algorithm pairing users by fitness level, and cron-driven point aggregation powering weekly team matchups, streaks, and leaderboards.
       - Shipped LLM-generated workout plans using OpenAI and Anthropic Claude that adapt to each user's logged performance metrics.
 
