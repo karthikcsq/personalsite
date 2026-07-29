@@ -8,6 +8,7 @@ import { resolveTopic } from "@/utils/topicsUtils";
 import { projects as projectsCatalog } from "@/data/projectsData";
 import { getCorpusForArtifact } from "@/utils/quotesUtils";
 import { checkChatRateLimit, getClientIdentifier } from "@/utils/rateLimit";
+import { composeA2UI } from "@/a2ui/compose";
 import {
   formatCanonicalWorkContext,
   selectCanonicalJobsForQuery,
@@ -276,15 +277,14 @@ function pruneMessages(
   return prunedMessages;
 }
 
-// HyDE (Hypothetical Document Embeddings): generate a 1-2 sentence hypothetical
-// answer to the user's question. The hypothetical is concatenated with the
-// original query before embedding/sparse-encoding, which bridges vocabulary
-// gaps between general questions and specifically-worded source chunks.
-async function buildHydeQuery(
+// Multi-query HyDE: generate three complementary hypothetical retrieval
+// passages in one nano-model call. On a weak baseline, each expansion is
+// embedded and queried in parallel, then merged by document id.
+async function buildHydeQueries(
   openai: OpenAI,
   currentQuery: string,
   conversationHistory?: ChatMessage[]
-): Promise<string> {
+): Promise<string[]> {
   const recentContext = conversationHistory
     ?.slice(-4)
     .map(m => `${m.role}: ${m.content}`)
@@ -293,29 +293,67 @@ async function buildHydeQuery(
   const response = await openai.chat.completions.create({
     model: "gpt-5.4-nano",
     temperature: 0,
-    max_completion_tokens: 80,
+    max_completion_tokens: 220,
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "retrieval_rewrites",
+        strict: true,
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["queries"],
+          properties: {
+            queries: {
+              type: "array",
+              minItems: 3,
+              maxItems: 3,
+              items: { type: "string" },
+            },
+          },
+        },
+      },
+    },
     messages: [
       {
         role: "system",
-        content: `You generate a 1-2 sentence hypothetical answer to a question about Karthik Thyagarajan, written as if you knew everything about him. The text is used only as a retrieval query (embedded against a vector store), never shown to the user.
+        content: `You generate three complementary hypothetical answers to a question about Karthik Thyagarajan. They are used only as retrieval queries against a portfolio vector store and are never shown to the user.
 
 Rules:
-- Write confident, plain-prose declarative sentences. No question marks, no hedging, no "I think".
+- Return exactly three queries as schema-compliant JSON.
+- Query 1 emphasizes likely roles, organizations, named work, and chronological evidence.
+- Query 2 emphasizes technical mechanisms, architectures, methods, and implementation vocabulary.
+- Query 3 emphasizes outcomes, themes, beliefs, constraints, and adjacent evidence that may answer the broader intent.
+- Each query is one or two confident plain-prose declarative sentences. No question marks, hedging, or "I think".
+- Make the three queries meaningfully different. Do not produce paraphrases.
 - Resolve pronouns ("that", "his latest") using recent conversation context.
 - When the question uses general or category-level wording, name specific entities, places, projects, or activities you can plausibly infer about Karthik. Bridging vocabulary from general to specific is the entire point.
 - Do NOT invent specific facts you'd be embarrassed to be wrong about — exact dates, company names you've never heard of, named partners. If unsure, stay topical but vague ("Karthik has worked on several research projects").
-- Output ONLY the hypothetical answer prose. No prefix, no quotes, no explanation.`
+- Output only the JSON object required by the schema.`
       },
       {
         role: "user",
         content: recentContext
-          ? `Conversation so far:\n${recentContext}\n\nLatest question: "${currentQuery}"\n\nWrite the hypothetical answer.`
-          : `Question: "${currentQuery}"\n\nWrite the hypothetical answer.`
+          ? `Conversation so far:\n${recentContext}\n\nLatest question: "${currentQuery}"\n\nWrite three complementary retrieval queries.`
+          : `Question: "${currentQuery}"\n\nWrite three complementary retrieval queries.`
       }
     ],
   });
 
-  return response.choices[0]?.message?.content?.trim() || "";
+  const raw = response.choices[0]?.message?.content;
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as { queries?: unknown };
+    return Array.isArray(parsed.queries)
+      ? parsed.queries
+          .filter((query): query is string => typeof query === "string")
+          .map((query) => query.trim())
+          .filter(Boolean)
+          .slice(0, 3)
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 // === BM25 SPARSE ENCODER (mirrors python-rag/bm25.py tokenization) ===
@@ -365,7 +403,7 @@ function encodeSparseQuery(text: string): { indices: number[]; values: number[] 
   return { indices, values };
 }
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -417,7 +455,7 @@ export async function POST(req: NextRequest) {
     const canonicalReceiptJobs = selectCanonicalReceiptJobs(currentQuery, allJobs);
     const canonicalWorkContext = formatCanonicalWorkContext(canonicalJobs);
 
-    // Step 1: Speculative-parallel HyDE.
+    // Step 1: Speculative-parallel multi-query HyDE.
     // HyDE adds ~2s of latency (one nano LLM call). Most queries are specific
     // enough that baseline retrieval on the raw query already returns strong
     // matches, in which case we want to skip HyDE entirely. So:
@@ -426,13 +464,13 @@ export async function POST(req: NextRequest) {
     //      query.
     //   3. If baseline produced enough matches above threshold → discard HyDE.
     //      Wall-time is back to pre-HyDE latency.
-    //   4. Else → await HyDE, run a second retrieval on
-    //      `original + hypothetical`, and merge by id (max score). Wall-time
-    //      is bounded by max(baseline, HyDE) + one extra retrieval.
+    //   4. Else → await three complementary rewrites, run the expanded
+    //      retrievals in parallel, and merge by id (max score). Wall-time is
+    //      bounded by max(baseline, HyDE) + one parallel retrieval round.
     // Cost: every query pays the HyDE API tokens, even when discarded. Worth
     // it on this volume.
     const tHydeStart = Date.now();
-    const hydePromise = buildHydeQuery(openai, currentQuery, conversationHistory);
+    const hydePromise = buildHydeQueries(openai, currentQuery, conversationHistory);
 
     console.log(`🔍 Original: "${currentQuery}"`);
 
@@ -477,38 +515,53 @@ export async function POST(req: NextRequest) {
       hydePromise.catch(() => {});
     } else {
       console.log(`⚠️  Baseline weak (${baselineRelevantCount} < ${HYDE_BYPASS_MIN_MATCHES}), awaiting HyDE`);
-      let hypothetical = "";
+      let hypotheticalQueries: string[] = [];
       try {
-        hypothetical = await hydePromise;
+        hypotheticalQueries = await hydePromise;
       } catch (err) {
         console.log(`⚠️  HyDE call failed: ${err}`);
       }
       hydeWaitMs = Date.now() - tHydeStart;
-      console.log(`💭 HyDE (${hydeWaitMs}ms): "${hypothetical}"`);
+      console.log(
+        `💭 HyDE (${hydeWaitMs}ms, ${hypotheticalQueries.length} rewrites): ${JSON.stringify(hypotheticalQueries)}`,
+      );
 
-      if (hypothetical) {
-        const expandedQuery = `${currentQuery} ${hypothetical}`;
+      if (hypotheticalQueries.length > 0) {
+        const expandedQueries = hypotheticalQueries.map(
+          (hypothetical) => `${currentQuery}\n${hypothetical}`,
+        );
         const tExpStart = Date.now();
         const expEmbResp = await openai.embeddings.create({
           model: "text-embedding-3-small",
-          input: expandedQuery,
+          input: expandedQueries,
         });
-        const expEmbedding = expEmbResp.data[0].embedding;
-        const expSparse = encodeSparseQuery(expandedQuery);
-        const expResponse = await index.query({
-          vector: expEmbedding,
-          sparseVector: expSparse.indices.length > 0 ? expSparse : undefined,
-          topK: 30,
-          includeMetadata: true,
-        });
+        const expResponses = await Promise.all(
+          expandedQueries.map((expandedQuery, indexInBatch) => {
+            const expSparse = encodeSparseQuery(expandedQuery);
+            return index.query({
+              vector: expEmbResp.data[indexInBatch].embedding,
+              sparseVector:
+                expSparse.indices.length > 0 ? expSparse : undefined,
+              topK: 30,
+              includeMetadata: true,
+            });
+          }),
+        );
         const expMs = Date.now() - tExpStart;
         retrievalMs += expMs;
-        console.log(`⏱️  HyDE retrieval: ${expMs}ms (${expResponse.matches.length} matches)`);
+        console.log(
+          `⏱️  HyDE retrievals: ${expMs}ms (${expResponses
+            .map((response) => response.matches.length)
+            .join(", ")} matches)`,
+        );
 
         // Merge: dedupe by id, keep max score, sort descending.
         type Match = (typeof baselineResponse.matches)[number];
         const byId = new Map<string, Match>();
-        for (const m of [...baselineResponse.matches, ...expResponse.matches]) {
+        const expandedMatches = expResponses.flatMap(
+          (response) => response.matches,
+        );
+        for (const m of [...baselineResponse.matches, ...expandedMatches]) {
           const existing = byId.get(m.id);
           if (!existing || (m.score || 0) > (existing.score || 0)) {
             byId.set(m.id, m);
@@ -534,7 +587,7 @@ export async function POST(req: NextRequest) {
     // The pool doubles as (a) the context the LLM sees and (b) the set of
     // sources it can cite — so we keep it bounded.
     const relevanceThreshold = 0.45;
-    const MAX_CANDIDATES = 12;
+    const MAX_CANDIDATES = baselineStrong ? 12 : 18;
     const relevantMatches = queryResponse.matches
       .filter((match) => match.score && match.score > relevanceThreshold)
       .slice(0, MAX_CANDIDATES);
@@ -803,7 +856,9 @@ USE THE CONTEXT AGGRESSIVELY. Before saying "no specific writeup", scan every ch
 
 REPLY STRUCTURE:
 - Factual question (one fact, one date, one name): 1 to 2 sentences plus the relevant link. Don't pad.
+- Named-item question ("favorite project", "what did he build at X", "tell me about Y"): answer the question in the first sentence, then explain what the item is, why it matters to Karthik, and the strongest concrete detail available. Naming the item alone is incomplete.
 - Opinion or "what does he think about X" question: lead with the stance using HIS framing from the KARTHIK'S OWN TAKE section. Then cover every distinct take in that section. Each thesis, each anecdote, each named example must appear, paraphrased to third person. Then enrich with relevant project, work, or blog evidence as proof points.
+- Career, journey, or "evolved over time" question: preserve research as the through-line. His focus moved from technical deep learning and domain-specific ML toward LLMs, agents, and tool infrastructure. Do not claim that he left research, progressed beyond research, or moved from research into product. Product building and community work may appear as parallel applications, not as the destination of the story. The final stage must be the newest role in the CANONICAL WORK RECORD, using its actual role and company. Never replace that endpoint with a side project, involvement, or open-source tool.
 - Length follows from coverage. A one-take topic stays short. A five-take topic gets five beats. Do not pad a one-take topic. Do not compress a five-take topic.
 
 THE TAKE SECTION ANCHORS THE REPLY (when present):
@@ -883,6 +938,7 @@ ${STYLE_RULES}`;
     const readableStream = new ReadableStream({
       async start(controller) {
         let replyText = "";
+        let finalArtifacts: Artifact[] = [];
         let tFirstToken = 0;
         const timings: Record<string, number> = {
           rewriter: hydeWaitMs,
@@ -1392,6 +1448,7 @@ ${topicDirectory}`,
                 emittedIds.add(artifact.id);
                 artifactsOut.push(artifact);
               }
+              finalArtifacts = artifactsOut;
               if (artifactsOut.length > 0) {
                 controller.enqueue(
                   encoder.encode(
@@ -1409,6 +1466,19 @@ ${topicDirectory}`,
               // Silent fallback: no artifacts, reply still delivered.
             }
           }
+
+          const tA2UIStart = Date.now();
+          const a2ui = await composeA2UI(
+            openai,
+            currentQuery,
+            replyText,
+            finalArtifacts,
+          );
+          timings.a2ui = Date.now() - tA2UIStart;
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ a2ui })}\n\n`),
+          );
+          console.log(`⏱️  A2UI composition: ${timings.a2ui}ms`);
 
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ timings })}\n\n`),

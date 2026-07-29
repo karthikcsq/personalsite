@@ -1,0 +1,931 @@
+.shell {
+  --draft-background: oklch(98% 0.009 78);
+  --draft-surface: oklch(99.1% 0.004 92);
+  --draft-border: oklch(80% 0.026 72);
+  --draft-green: oklch(39% 0.078 142);
+  --draft-green-soft: oklch(94% 0.025 145);
+  --draft-rail: 246px;
+  position: relative;
+  min-height: 100svh;
+  overflow-x: hidden;
+  background: var(--draft-background);
+  color: var(--color-ink);
+}
+
+.botanicalFrame {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.19;
+  pointer-events: none;
+}
+
+.historyRail {
+  position: fixed;
+  inset: 34px auto 36px 0;
+  z-index: 20;
+  width: var(--draft-rail);
+  border-right: 1px solid var(--color-hairline);
+}
+
+.historyList {
+  display: flex;
+  max-height: calc(100svh - 120px);
+  flex-direction: column;
+  gap: 46px;
+  overflow-y: auto;
+  padding: 74px 42px 24px 52px;
+  scrollbar-width: none;
+}
+
+.historyList::-webkit-scrollbar {
+  display: none;
+}
+
+.historyItem {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.historyItem > span,
+.mobileHistoryItem > span {
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--color-hairline);
+}
+
+.historyItem p {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.canvas {
+  position: relative;
+  z-index: 10;
+  width: min(1132px, calc(100vw - var(--draft-rail)));
+  min-height: 100svh;
+  margin-left: var(--draft-rail);
+  padding: clamp(84px, 11.6vh, 120px) 40px 154px 48px;
+}
+
+.answerScene {
+  width: min(1044px, 100%);
+  margin: 0 auto;
+  animation: answer-in 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.question {
+  max-width: 1040px;
+  margin: 0 0 36px;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: clamp(29px, 2.2vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.answerCard {
+  position: relative;
+  min-height: 668px;
+  padding: 42px 44px 38px;
+  border: 1px solid var(--draft-border);
+  border-radius: 19px;
+  background: var(--draft-surface);
+  box-shadow:
+    0 18px 40px oklch(31% 0.025 60 / 0.055),
+    0 2px 8px oklch(31% 0.025 60 / 0.035);
+}
+
+.introduction {
+  max-width: 790px;
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(17px, 1.45vw, 20px);
+  line-height: 1.62;
+}
+
+.actionSpace {
+  position: relative;
+  height: 240px;
+  margin: 42px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.actionTrack {
+  position: absolute;
+  top: 55px;
+  right: 7.5%;
+  left: 7.5%;
+  height: 2px;
+  background: var(--color-hairline-strong);
+}
+
+.actionOptions {
+  position: relative;
+  z-index: 3;
+  height: 67px;
+}
+
+.actionOption {
+  position: absolute;
+  top: 0;
+  display: grid;
+  width: 33.333%;
+  cursor: pointer;
+  place-items: center;
+  color: var(--color-ink);
+  font-size: 17px;
+  line-height: 1.2;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.actionOption:nth-child(1) {
+  left: 10%;
+}
+
+.actionOption:nth-child(2) {
+  left: 50%;
+}
+
+.actionOption:nth-child(3) {
+  left: 90%;
+}
+
+.actionOption > span {
+  min-height: 42px;
+}
+
+.actionOption input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.actionOption i {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  margin-top: 0;
+  border: 2px solid oklch(63% 0.012 80);
+  border-radius: 50%;
+  background: var(--draft-surface);
+  place-items: center;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.actionOption[data-active="true"] {
+  color: var(--draft-green);
+}
+
+.actionOption[data-active="true"] i {
+  border: 3px solid var(--draft-surface);
+  background: var(--draft-green);
+  box-shadow:
+    0 0 0 2px var(--draft-green),
+    0 0 0 6px var(--draft-surface);
+}
+
+.actionOption:focus-within i {
+  box-shadow:
+    0 0 0 2px var(--draft-green),
+    0 0 0 7px color-mix(in oklch, var(--draft-green) 20%, transparent);
+}
+
+.actionDetail {
+  position: absolute;
+  top: 88px;
+  z-index: 5;
+  display: grid;
+  width: min(420px, 48%);
+  min-height: 208px;
+  grid-template-columns: 42px 1fr;
+  gap: 18px;
+  padding: 30px 28px 24px 18px;
+  border: 1px solid var(--draft-green);
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--draft-green-soft) 80%, var(--draft-surface));
+  box-shadow: 0 10px 24px oklch(28% 0.03 80 / 0.045);
+  transition:
+    left 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    right 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.actionSpace[data-selected="0"] .actionDetail {
+  left: 0;
+}
+
+.actionSpace[data-selected="1"] .actionDetail {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.actionSpace[data-selected="2"] .actionDetail {
+  right: 10px;
+}
+
+.actionDetailPointer {
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-top: 1px solid var(--draft-green);
+  border-left: 1px solid var(--draft-green);
+  background: var(--draft-green-soft);
+  transform: rotate(45deg);
+}
+
+.actionSpace[data-selected="0"] .actionDetailPointer {
+  left: 15%;
+}
+
+.actionSpace[data-selected="1"] .actionDetailPointer {
+  left: calc(50% - 8px);
+}
+
+.actionSpace[data-selected="2"] .actionDetailPointer {
+  right: 24%;
+}
+
+.actionCheck {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--draft-green);
+  color: var(--draft-surface);
+  place-items: center;
+}
+
+.actionCheck svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.actionDetail strong {
+  display: block;
+  margin: 8px 0 10px;
+  color: var(--draft-green);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.actionDetail p {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.results {
+  position: relative;
+  padding-top: 27px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.results h2 {
+  margin: 0 0 20px;
+  color: var(--draft-green);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.resultList {
+  display: grid;
+  width: min(520px, 62%);
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.resultItem {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.resultItem + .resultItem {
+  padding-left: 12px;
+  border-left: 1px solid var(--color-hairline);
+}
+
+.resultIcon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--draft-green-soft);
+  color: var(--draft-green);
+  place-items: center;
+}
+
+.resultIcon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.6;
+}
+
+.resultItem strong {
+  display: block;
+  color: var(--draft-green);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.resultItem small {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-ink);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.workLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 42px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    gap 160ms ease;
+}
+
+.workLink:hover {
+  gap: 16px;
+  color: var(--color-accent-hover);
+}
+
+.workLink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 5px;
+}
+
+.workLink svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.6;
+}
+
+.quoteCard {
+  position: absolute;
+  right: -106px;
+  bottom: -24px;
+  z-index: 10;
+  width: min(396px, 41%);
+  min-height: 230px;
+  margin: 0;
+  padding: 31px 30px 28px;
+  border: 1px solid color-mix(in oklch, var(--color-accent) 55%, var(--draft-border));
+  border-radius: 16px;
+  background: var(--draft-surface);
+  box-shadow:
+    0 18px 36px oklch(31% 0.025 60 / 0.08),
+    0 2px 7px oklch(31% 0.025 60 / 0.045);
+}
+
+.quoteMark {
+  display: block;
+  height: 32px;
+  color: var(--color-accent);
+  font-family: var(--font-serif);
+  font-size: 68px;
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.quoteCard p {
+  max-width: 310px;
+  margin: 5px 0 31px 30px;
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(27px, 2.1vw, 32px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.16;
+}
+
+.quoteRule {
+  display: block;
+  width: 98px;
+  height: 2px;
+  margin-left: 30px;
+  background: var(--color-accent);
+}
+
+.composer {
+  position: fixed;
+  bottom: max(24px, 5.2vh, env(safe-area-inset-bottom));
+  left: calc(50% - 16px);
+  z-index: 50;
+  display: grid;
+  width: min(550px, calc(100vw - 40px));
+  min-height: 66px;
+  grid-template-columns: 28px 1px 1fr 48px;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 9px 8px 22px;
+  border: 1px solid var(--draft-border);
+  border-radius: 999px;
+  background: var(--draft-surface);
+  box-shadow:
+    0 13px 30px oklch(31% 0.025 60 / 0.09),
+    0 2px 6px oklch(31% 0.025 60 / 0.04);
+  transform: translateX(-50%);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.composer:focus-within {
+  border-color: var(--draft-green);
+  box-shadow:
+    0 13px 30px oklch(31% 0.025 60 / 0.09),
+    0 0 0 3px color-mix(in oklch, var(--draft-green) 13%, transparent);
+}
+
+.composerIcon {
+  width: 26px;
+  height: 26px;
+  color: var(--color-ink-muted);
+  stroke-width: 1.55;
+}
+
+.composerDivider {
+  width: 1px;
+  height: 30px;
+  background: var(--color-hairline);
+}
+
+.composer textarea {
+  width: 100%;
+  max-height: 82px;
+  min-height: 28px;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.composer textarea::placeholder {
+  color: var(--color-ink-subtle);
+}
+
+.composer textarea:focus {
+  outline: none;
+}
+
+.composer button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--draft-green);
+  color: var(--draft-surface);
+  cursor: pointer;
+  place-items: center;
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.composer button:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--draft-green) 84%, black);
+  transform: scale(1.03);
+}
+
+.composer button:focus-visible {
+  outline: 2px solid var(--draft-green);
+  outline-offset: 3px;
+}
+
+.composer button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.composer button svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 1.7;
+}
+
+.mobileHistoryButton,
+.mobileHistory {
+  display: none;
+}
+
+@keyframes answer-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    --draft-rail: 210px;
+  }
+
+  .historyList {
+    padding-right: 28px;
+    padding-left: 34px;
+  }
+
+  .canvas {
+    padding-right: 34px;
+    padding-left: 34px;
+  }
+
+  .answerCard {
+    min-height: 620px;
+    padding-right: 34px;
+    padding-left: 34px;
+  }
+
+  .quoteCard {
+    right: -24px;
+  }
+}
+
+@media (max-width: 1240px) and (min-width: 1101px) {
+  .quoteCard {
+    right: -56px;
+  }
+}
+
+@media (max-width: 860px) {
+  .shell {
+    --draft-rail: 0px;
+  }
+
+  .historyRail {
+    display: none;
+  }
+
+  .mobileHistoryButton {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 40;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--draft-border);
+    border-radius: 50%;
+    background: var(--draft-surface);
+    color: var(--color-ink-muted);
+    box-shadow: var(--shadow-soft);
+    place-items: center;
+  }
+
+  .mobileHistoryButton svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .mobileHistory {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: block;
+    padding: 78px 30px 40px;
+    background: var(--draft-background);
+  }
+
+  .mobileHistory > button {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--draft-border);
+    border-radius: 50%;
+    background: var(--draft-surface);
+    color: var(--color-ink);
+    place-items: center;
+  }
+
+  .mobileHistory > button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobileHistory > div {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .mobileHistoryItem {
+    display: grid;
+    grid-template-columns: 8px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .mobileHistoryItem p {
+    max-width: 300px;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  .canvas {
+    width: 100%;
+    margin-left: 0;
+    padding: 88px 24px 148px;
+  }
+
+  .answerScene {
+    width: min(720px, 100%);
+  }
+
+  .question {
+    margin-bottom: 28px;
+    padding-left: 48px;
+  }
+
+  .answerCard {
+    min-height: 0;
+    padding: 30px 26px 0;
+  }
+
+  .actionSpace {
+    height: 288px;
+    margin-top: 36px;
+  }
+
+  .actionOption {
+    font-size: 14px;
+  }
+
+  .actionDetail {
+    width: min(420px, 62%);
+  }
+
+  .resultList {
+    width: 100%;
+  }
+
+  .quoteCard {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: calc(100% + 52px);
+    min-height: 0;
+    margin: 34px -26px 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 0 0 18px 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .canvas {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .question {
+    padding-left: 42px;
+    font-size: 27px;
+    line-height: 1.12;
+  }
+
+  .answerCard {
+    padding: 25px 20px 0;
+    border-radius: 16px;
+  }
+
+  .introduction {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .actionSpace {
+    height: auto;
+    margin-top: 32px;
+    padding-bottom: 26px;
+  }
+
+  .actionTrack {
+    top: 67px;
+    right: 10%;
+    left: 10%;
+  }
+
+  .actionOption {
+    font-size: 12px;
+  }
+
+  .actionOption > span {
+    min-height: 38px;
+  }
+
+  .actionOption i {
+    width: 20px;
+    height: 20px;
+    margin-top: 15px;
+  }
+
+  .actionDetail,
+  .actionSpace[data-selected="0"] .actionDetail,
+  .actionSpace[data-selected="1"] .actionDetail,
+  .actionSpace[data-selected="2"] .actionDetail {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    min-height: 0;
+    margin-top: 34px;
+    padding: 20px 18px;
+    transform: none;
+  }
+
+  .actionDetailPointer {
+    display: none;
+  }
+
+  .actionCheck {
+    width: 38px;
+    height: 38px;
+  }
+
+  .results {
+    padding-top: 24px;
+  }
+
+  .resultList {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+  }
+
+  .resultItem {
+    grid-template-columns: 48px 1fr;
+    padding: 0;
+  }
+
+  .resultItem + .resultItem {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .resultIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .resultItem strong {
+    font-size: 24px;
+  }
+
+  .workLink {
+    margin-top: 26px;
+  }
+
+  .quoteCard {
+    width: calc(100% + 40px);
+    margin-right: -20px;
+    margin-left: -20px;
+    padding: 26px 24px 31px;
+  }
+
+  .quoteCard p {
+    margin-left: 18px;
+    font-size: 29px;
+  }
+
+  .quoteRule {
+    margin-left: 18px;
+  }
+
+  .composer {
+    width: calc(100vw - 24px);
+    min-height: 58px;
+    grid-template-columns: 23px 1px 1fr 42px;
+    gap: 10px;
+    padding-left: 16px;
+  }
+
+  .composerIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .composer button {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 861px) {
+  .canvas {
+    padding-top: 58px;
+  }
+
+  .question {
+    margin-bottom: 24px;
+    font-size: 31px;
+  }
+
+  .answerCard {
+    min-height: 582px;
+    padding-top: 30px;
+  }
+
+  .introduction {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  .actionSpace {
+    height: 240px;
+    margin-top: 27px;
+  }
+
+  .actionDetail {
+    min-height: 142px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .results {
+    padding-top: 20px;
+  }
+
+  .results h2 {
+    margin-bottom: 14px;
+  }
+
+  .workLink {
+    margin-top: 20px;
+  }
+
+  .quoteCard {
+    min-height: 206px;
+    padding-top: 22px;
+  }
+
+  .quoteCard p {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answerScene {
+    animation: none;
+  }
+
+  .actionDetail,
+  .actionOption i,
+  .composer,
+  .composer button,
+  .workLink {
+    transition: none;
+  }
+}

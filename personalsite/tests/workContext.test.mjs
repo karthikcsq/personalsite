@@ -26,6 +26,13 @@ const jobs = [
 
 test("selects every canonical job for a work-history question", () => {
   assert.equal(selectCanonicalJobsForQuery("Where has he worked?", jobs).length, 2);
+  assert.equal(
+    selectCanonicalJobsForQuery(
+      "How has Karthik's work evolved over time?",
+      jobs,
+    ).length,
+    2,
+  );
 });
 
 test("resolves a company by its full canonical name", () => {
@@ -43,6 +50,11 @@ test("marks date-bounded work current using the request date", () => {
     jobs,
     new Date("2026-06-29T12:00:00Z"),
   );
+  assert.match(
+    context,
+    /still doing AI research[\s\S]*technical deep learning[\s\S]*LLMs, agents, and tool infrastructure/,
+  );
+  assert.doesNotMatch(context, /leaving research for product work\.$/);
   assert.match(
     context,
     /Samsung Research America — Advanced Intelligence Lab[\s\S]*Status as of 2026-06-29: current/,

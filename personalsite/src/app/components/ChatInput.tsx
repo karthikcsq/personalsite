@@ -16,6 +16,7 @@ type ChatInputProps = {
   queueNavIndex: number;
   isProcessing?: boolean;
   onStop?: () => void;
+  elevated?: boolean;
 };
 
 export function ChatInput({
@@ -28,11 +29,14 @@ export function ChatInput({
   queueNavIndex,
   isProcessing = false,
   onStop,
+  elevated = false,
 }: ChatInputProps) {
   const isHero = variant === "hero";
   const formClass = isHero
     ? "relative"
-    : "relative mx-auto w-full max-w-[620px] shrink-0 pb-[env(safe-area-inset-bottom)] md:pb-8";
+    : elevated
+      ? "relative mx-auto w-full max-w-[620px] shrink-0"
+      : "relative mx-auto w-full max-w-[620px] shrink-0 pb-[env(safe-area-inset-bottom)] md:pb-8";
   const placeholder =
     queueNavIndex >= 0
       ? "Editing queued message…"
@@ -41,10 +45,18 @@ export function ChatInput({
         : "Ask a follow-up";
 
   return (
-    <form onSubmit={onSubmit} className={formClass}>
+    <form
+      onSubmit={onSubmit}
+      className={formClass}
+      data-a2ui-composer={elevated ? "true" : undefined}
+    >
       {!isHero && <DockedInputVine />}
       <div
-        className={`relative z-10 flex items-end gap-2 rounded-[14px] border bg-[var(--color-surface-raised)] px-4 py-3 shadow-[var(--shadow-soft)] transition-all focus-within:border-[var(--color-accent)] focus-within:shadow-[var(--shadow-lift)] ${
+        className={`relative z-10 flex items-end gap-2 border bg-[var(--color-surface-raised)] px-4 py-3 transition-all focus-within:border-[var(--color-accent)] ${
+          elevated
+            ? "rounded-full shadow-[var(--shadow-lift)]"
+            : "rounded-[14px] shadow-[var(--shadow-soft)] focus-within:shadow-[var(--shadow-lift)]"
+        } ${
           queueNavIndex >= 0
             ? "border-[var(--color-accent)]"
             : "border-[var(--color-hairline)]"

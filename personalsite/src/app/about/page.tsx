@@ -80,7 +80,7 @@ export default function AboutPage() {
       <section className="mt-10 mb-6 space-y-5 text-[16px] leading-[1.75] text-[var(--color-ink)]">
         <p>
           I grew up building things that were probably too ambitious for the week I
-          had. That habit followed me into college: I am a founding engineer at Repple,
+          had. That habit followed me into college: I co-founded Repple,
           co-founded buildpurdue (a campus accelerator), and spend the rest of my time
           in research labs and hackathons.
         </p>

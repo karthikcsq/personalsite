@@ -18,3 +18,6 @@ topics:
   - slug: "agents"
     title: "On agents"
     tagline: "When agents save time and money, not just effort."
+  - slug: "where-ai-doesnt-belong"
+    title: "On where AI doesn't belong"
+    tagline: "The duct tape test: when the whole point is for a human to do it."

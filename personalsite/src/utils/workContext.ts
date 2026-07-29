@@ -2,6 +2,9 @@ import type { JobEntry } from "./jobUtils";
 
 const GENERIC_WORK_PATTERNS = [
   /\bwhere\b.*\bwork(?:ed|ing|s)?\b/,
+  /\bwork\b.*\b(?:evolv\w*|journey|progress\w*|changed?|shift\w*)\b/,
+  /\b(?:evolv\w*|journey|progress\w*|changed?|shift\w*)\b.*\bwork\b/,
+  /\bwork\b.*\bover time\b/,
   /\bwork experience\b/,
   /\bemploy(?:ed|er|ers|ment)\b/,
   /\bcareer\b/,
@@ -118,6 +121,7 @@ export function formatCanonicalWorkContext(
     "=== CANONICAL WORK RECORD ===",
     "These records come directly from the source-of-truth work YAML used by the Work page.",
     "For employment history, company names, roles, dates, and current status, these records override retrieved prose.",
+    "Career framing: Karthik is still doing AI research. His focus has shifted from technical deep learning and domain-specific ML toward LLMs, agents, and tool infrastructure. Do not frame this as leaving research for product work. Product building and community work are parallel threads, not the endpoint of his research career.",
     records.join("\n\n"),
   ].join("\n");
 }

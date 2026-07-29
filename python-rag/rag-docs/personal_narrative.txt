@@ -22,7 +22,7 @@ AI/ML excites Karthik because it enables modeling of thinking and intelligence. 
 
 Karthik co-founded buildpurdue, where he serves as Co-President. buildpurdue is a founder-led, peer-to-peer community for student builders at Purdue. Its core identity is density and agency: the most progress happens when active founders are in the same room, building alongside each other. It's not a top-down accelerator with a curriculum, it's a dense group of people already shipping who give each other real feedback. Karthik shapes the operational framework, and led the build of the organization's internal platform in Next.js and TypeScript on Supabase and PostgreSQL, with RBAC pipelines for cohort, alumni, and mentor management, as the primary contributor on a small team.
 
-He is also a Founding Engineer at Repple, a gamified fitness app for iOS with 200+ active users.
+He is also a co-founder of Repple, a gamified fitness app for iOS with 200+ active users.
 
 Karthik believes deeply in the startup ecosystem. Through buildpurdue, he organizes events bringing VCs and industry mentors directly to campus so student founders get real operator feedback, not just academic advice. The deeper bet, though, is on density: a student founder two months ahead of you is often more useful than a curriculum and more honest than a lecture.
 
@@ -34,7 +34,7 @@ Startups draw Karthik in because all innovation comes from founders, whether tha
 - He attended TJHSST, one of the top STEM high schools in the country
 - Published on arXiv as an undergrad (quantum key distribution research)
 - Won Best Proof-of-Human Application at Catapult 2026 (Veritas) and 2nd place at HackGT (Caladrius)
-- Co-President of buildpurdue, Founding Engineer at Repple
+- Co-President of buildpurdue, co-founder of Repple
 - Built google-tools-mcp, an open source MCP server for Google Workspace with 169 tools
 - Active thought leader on LinkedIn with 1,358+ followers, writing about MCP, AI agents, and the future of agent-tool interaction
 - Certified in MCP Fundamentals and AI Agents Fundamentals (Hugging Face)

@@ -25,6 +25,11 @@ import { ChatThreadProvider, CitationChip } from "@/app/components/ChatThread";
 import { ArtifactOverlay } from "@/app/components/ArtifactOverlay";
 import { ChatInput } from "@/app/components/ChatInput";
 import { useChatMode } from "@/app/components/ChatModeContext";
+import {
+  A2UIExperience,
+  type A2UITurn,
+} from "@/app/components/a2ui/A2UIExperience";
+import type { A2UIDocument } from "@/a2ui/protocol";
 
 // Error markers stored in assistant content. Tag with a variant so the
 // renderer can show class-appropriate copy (network vs. generic 5xx).
@@ -46,6 +51,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   artifacts?: Artifact[];
+  a2ui?: A2UIDocument;
 }
 
 // Bank of suggested questions that rotate through the UI. The pre-chat hero
@@ -357,7 +363,16 @@ export default function HomeChatClient() {
           if (data === "[DONE]") continue;
           try {
             const parsed = JSON.parse(data);
-            if (parsed.artifacts) {
+            if (parsed.a2ui) {
+              setMessages((prev) => {
+                const next = [...prev];
+                next[assistantIndex] = {
+                  ...next[assistantIndex],
+                  a2ui: parsed.a2ui as A2UIDocument,
+                };
+                return next;
+              });
+            } else if (parsed.artifacts) {
               setMessages((prev) => {
                 const next = [...prev];
                 const current = next[assistantIndex].artifacts ?? [];
@@ -732,11 +747,29 @@ export default function HomeChatClient() {
 
   const heroChips = pickChips(3);
   const inChatChips = pickChips(3);
+  const a2uiTurns: A2UITurn[] = messages.flatMap((msg, index) => {
+    if (msg.role !== "assistant") return [];
+    let question = "";
+    for (let i = index - 1; i >= 0; i--) {
+      if (messages[i].role === "user") {
+        question = messages[i].content;
+        break;
+      }
+    }
+    return [{
+      id: `turn-${index}`,
+      question,
+      content: msg.content,
+      document: msg.a2ui,
+      artifacts: msg.artifacts ?? [],
+      isLoading: isProcessing && index === messages.length - 1,
+    }];
+  });
 
   return (
     <div
       className={`relative bg-[var(--color-surface)] text-[var(--color-ink)] ${
-        inChat ? "h-[calc(100dvh-69px)] overflow-hidden" : "h-[100dvh] overflow-hidden"
+        inChat ? "h-[100dvh] overflow-hidden" : "h-[100dvh] overflow-hidden"
       }`}
     >
       {/* PRE-CHAT HERO */}
@@ -852,8 +885,31 @@ export default function HomeChatClient() {
         </>
       )}
 
-      {/* IN-CHAT SPLIT */}
       {inChat && (
+        <A2UIExperience
+          turns={a2uiTurns}
+          onAsk={submit}
+          onNewConversation={resetChat}
+          suggestions={inChatChips}
+          footer={
+            <ChatInput
+              variant="docked"
+              elevated
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              inputRef={inputRef}
+              queueNavIndex={queueNavIndex}
+              isProcessing={isProcessing}
+              onStop={stopGeneration}
+            />
+          }
+        />
+      )}
+
+      {/* Legacy split renderer kept temporarily for rollback while A2UI settles. */}
+      {false && inChat && (
         <ChatThreadProvider>
         <ArtifactOverlay />
         <div className="mx-auto grid h-full min-h-0 max-w-[1400px] grid-cols-1 gap-0 overflow-hidden px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
