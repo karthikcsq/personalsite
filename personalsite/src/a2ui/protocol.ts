@@ -14,6 +14,8 @@ const SAFE_A2UI_VISUAL_ASSET_IDS = new Set<string>([
   "writing-marginalia",
   "caladrius-triage",
   "hackathon-sprint",
+  "veritas-verification",
+  "formulator-motion",
 ]);
 
 function isA2UIVisualAssetId(value: string): value is A2UIVisualAssetId {
@@ -102,6 +104,11 @@ export type A2UIDocument = {
   primary: A2UIComponent;
   supporting: A2UIComponent[];
   actions: A2UIAction[];
+  /**
+   * Host-owned entropy for presentation choices. The model schema never emits
+   * this field; the client adds it when a fresh A2UI response arrives.
+   */
+  presentationSeed?: number;
 };
 
 export type A2UIArtifactLike = {

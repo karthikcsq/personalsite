@@ -40,6 +40,7 @@ import {
   normalizeA2UIPath,
   type A2UIAction,
   type A2UIComponent,
+  type A2UIComponentType,
   type A2UIComposition,
   type A2UIDocument,
 } from "@/a2ui/protocol";
@@ -72,6 +73,45 @@ type Props = {
   onReorderQueued: (orderedIds: string[]) => void;
   footer: ReactNode;
 };
+
+type A2UIVisualVariant = "folio" | "diagram" | "margin";
+
+const A2UI_VISUAL_VARIANTS = [
+  "folio",
+  "diagram",
+  "margin",
+] as const satisfies readonly A2UIVisualVariant[];
+
+const WIDE_PRIMARY_TYPES = new Set<A2UIComponentType>([
+  "paper_dossier",
+  "research_map",
+  "fold_timeline",
+  "field_notebook",
+  "system_blueprint",
+  "evidence_stack",
+  "essay_margin",
+  "specimen_board",
+]);
+
+function visualVariantForSeed(seed: number): A2UIVisualVariant {
+  return A2UI_VISUAL_VARIANTS[(seed >>> 0) % A2UI_VISUAL_VARIANTS.length];
+}
+
+function compatibleCompositions(
+  component: A2UIComponent,
+  options: A2UIComposition[],
+): A2UIComposition[] {
+  const needsFullWidth =
+    WIDE_PRIMARY_TYPES.has(component.type) ||
+    component.items.length > 4 ||
+    component.options.length > 4;
+  if (!needsFullWidth) return options;
+  const compatible = options.filter(
+    (option) =>
+      option !== "split_primary_left" && option !== "split_primary_right",
+  );
+  return compatible.length > 0 ? compatible : ["stacked", "primary_top"];
+}
 
 export function A2UIExperience({
   turns,
@@ -297,6 +337,13 @@ function A2UICanvas({
     uiDocument.compositionOptions?.length > 0
       ? uiDocument.compositionOptions
       : (["stacked"] satisfies A2UIComposition[]);
+  const presentationSeed =
+    uiDocument.presentationSeed ?? compositionTurn;
+  const visualVariant = visualVariantForSeed(presentationSeed);
+  const safeCompositionOptions = compatibleCompositions(
+    uiDocument.primary,
+    compositionOptions,
+  );
   const embeddedQuote =
     uiDocument.primary.type === "essay_margin"
       ? uiDocument.supporting.find(
@@ -311,7 +358,9 @@ function A2UICanvas({
   const composition: A2UIComposition =
     supportingComponents.length > 0
       ? (
-          compositionOptions[compositionTurn % compositionOptions.length] ??
+          safeCompositionOptions[
+            (presentationSeed >>> 0) % safeCompositionOptions.length
+          ] ??
           "stacked"
         )
       : "stacked";
@@ -354,6 +403,7 @@ function A2UICanvas({
       <article
         className={styles.answerSurface}
         data-composition={composition}
+        data-visual={visualVariant}
       >
         <div className={styles.reveal} data-visible={revealStage >= 1}>
           <Markdown className={styles.lead}>{uiDocument.lead}</Markdown>
@@ -366,6 +416,7 @@ function A2UICanvas({
           <A2UIBlock
             component={uiDocument.primary}
             embeddedQuote={embeddedQuote}
+            visualVariant={visualVariant}
             navigationPath={componentNavigationPaths.get(uiDocument.primary.id)}
             artifactMap={artifactMap}
             onOpen={(id) => {
@@ -384,6 +435,7 @@ function A2UICanvas({
               <A2UIBlock
                 key={component.id}
                 component={component}
+                visualVariant={visualVariant}
                 navigationPath={componentNavigationPaths.get(component.id)}
                 artifactMap={artifactMap}
                 onOpen={(id) => {
@@ -424,12 +476,14 @@ function A2UICanvas({
 function A2UIBlock({
   component,
   embeddedQuote,
+  visualVariant,
   navigationPath,
   artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
   embeddedQuote?: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   navigationPath?: string;
   artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
@@ -449,6 +503,7 @@ function A2UIBlock({
         id={`a2ui-${component.id}`}
         href={navigationPath}
         className={styles.navigationComponent}
+        data-variant={visualVariant}
       >
         <span className={styles.navigationCopy}>
           {heading}
@@ -463,13 +518,20 @@ function A2UIBlock({
   }
 
   if (component.type === "quote_focus") {
-    return <QuotePaper component={component} quoteArtifacts={quoteArtifacts} />;
+    return (
+      <QuotePaper
+        component={component}
+        quoteArtifacts={quoteArtifacts}
+        visualVariant={visualVariant}
+      />
+    );
   }
 
   if (component.type === "research_map") {
     return (
       <ResearchMap
         component={component}
+        visualVariant={visualVariant}
         onOpen={onOpen}
       />
     );
@@ -479,6 +541,7 @@ function A2UIBlock({
     return (
       <FoldTimeline
         component={component}
+        visualVariant={visualVariant}
         onOpen={onOpen}
       />
     );
@@ -488,6 +551,7 @@ function A2UIBlock({
     return (
       <FieldNotebook
         component={component}
+        visualVariant={visualVariant}
         artifactMap={artifactMap}
         onOpen={onOpen}
       />
@@ -495,11 +559,23 @@ function A2UIBlock({
   }
 
   if (component.type === "system_blueprint") {
-    return <SystemBlueprint component={component} onOpen={onOpen} />;
+    return (
+      <SystemBlueprint
+        component={component}
+        visualVariant={visualVariant}
+        onOpen={onOpen}
+      />
+    );
   }
 
   if (component.type === "evidence_stack") {
-    return <EvidenceStack component={component} onOpen={onOpen} />;
+    return (
+      <EvidenceStack
+        component={component}
+        visualVariant={visualVariant}
+        onOpen={onOpen}
+      />
+    );
   }
 
   if (component.type === "essay_margin") {
@@ -507,6 +583,7 @@ function A2UIBlock({
       <EssayMargin
         component={component}
         embeddedQuote={embeddedQuote}
+        visualVariant={visualVariant}
         artifactMap={artifactMap}
         onOpen={onOpen}
       />
@@ -514,13 +591,20 @@ function A2UIBlock({
   }
 
   if (component.type === "specimen_board") {
-    return <SpecimenBoard component={component} onOpen={onOpen} />;
+    return (
+      <SpecimenBoard
+        component={component}
+        visualVariant={visualVariant}
+        onOpen={onOpen}
+      />
+    );
   }
 
   if (component.type === "manifesto_fold" && component.options.length > 0) {
     return (
       <ManifestoFold
         component={component}
+        visualVariant={visualVariant}
         selectedOption={selectedOption}
         onSelect={setSelectedOption}
       />
@@ -531,6 +615,7 @@ function A2UIBlock({
     return (
       <TopicCompass
         component={component}
+        visualVariant={visualVariant}
         selectedOption={selectedOption}
         onSelect={setSelectedOption}
       />
@@ -542,6 +627,7 @@ function A2UIBlock({
       <section
         id={`a2ui-${component.id}`}
         className={`${styles.component} ${styles.metricComponent}`}
+        data-variant={visualVariant}
       >
         {heading}
         {component.body ? <Markdown>{component.body}</Markdown> : null}
@@ -566,6 +652,7 @@ function A2UIBlock({
       <section
         id={`a2ui-${component.id}`}
         className={`${styles.component} ${styles.comparisonComponent}`}
+        data-variant={visualVariant}
       >
         {heading}
         {component.body ? <Markdown>{component.body}</Markdown> : null}
@@ -607,6 +694,7 @@ function A2UIBlock({
       <section
         id={`a2ui-${component.id}`}
         className={`${styles.component} ${styles.timelineComponent}`}
+        data-variant={visualVariant}
       >
         {heading}
         {component.body ? <Markdown>{component.body}</Markdown> : null}
@@ -655,6 +743,7 @@ function A2UIBlock({
           className={`${styles.component} ${styles.artifactComponent} ${styles.singleArtifact} ${
             component.type === "paper_dossier" ? styles.paperDossier : ""
           }`}
+          data-variant={visualVariant}
         >
           <ArtifactPaperOutline />
           <ArtifactCornerSprig />
@@ -699,6 +788,7 @@ function A2UIBlock({
       <section
         id={`a2ui-${component.id}`}
         className={`${styles.component} ${styles.artifactComponent} ${styles.multiArtifact}`}
+        data-variant={visualVariant}
       >
         <ArtifactPaperOutline />
         <ArtifactCornerSprig />
@@ -733,11 +823,15 @@ function A2UIBlock({
       className={`${styles.component} ${styles.narrativeComponent} ${
         component.title ? styles.narrativeWithTitle : styles.narrativeWithoutTitle
       }`}
+      data-variant={visualVariant}
     >
       {heading}
       {component.body ? <Markdown>{component.body}</Markdown> : null}
       {component.items.length > 0 ? (
-        <div className={styles.narrativeItems}>
+        <div
+          className={styles.narrativeItems}
+          data-count={Math.min(component.items.length, 4)}
+        >
           <NarrativeBotanicalMap />
           {component.items.map((item, index) => (
             <div key={`${item.label}-${index}`}>
@@ -757,16 +851,19 @@ function A2UIBlock({
 function QuotePaper({
   component,
   quoteArtifacts,
+  visualVariant,
   className = "",
 }: {
   component: A2UIComponent;
   quoteArtifacts: Artifact[];
+  visualVariant: A2UIVisualVariant;
   className?: string;
 }) {
   return (
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.quoteComponent} ${className}`}
+      data-variant={visualVariant}
     >
       <QuoteIcon aria-hidden="true" className={styles.quoteIcon} />
       {quoteArtifacts.length > 0 ? (
@@ -810,9 +907,11 @@ function A2UIAsset({
 
 function ResearchMap({
   component,
+  visualVariant,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   onOpen: (id: string) => void;
 }) {
   const artifactIds = [
@@ -825,6 +924,7 @@ function ResearchMap({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.researchMap}`}
+      data-variant={visualVariant}
     >
       <div className={styles.researchMapTape} aria-hidden="true" />
       {component.title ? <h2>{component.title}</h2> : null}
@@ -897,9 +997,11 @@ function ResearchMap({
 
 function FoldTimeline({
   component,
+  visualVariant,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   onOpen: (id: string) => void;
 }) {
   const count = Math.max(component.items.length, 1);
@@ -908,11 +1010,13 @@ function FoldTimeline({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.foldTimeline}`}
+      data-variant={visualVariant}
     >
       {component.title ? <h2>{component.title}</h2> : null}
       {component.body ? <Markdown>{component.body}</Markdown> : null}
       <div
         className={`${styles.foldStrip} ${isDense ? styles.foldStripDense : ""} ${count === 5 ? styles.foldStripFive : ""}`}
+        data-count={count}
         style={
           {
             "--fold-count": count,
@@ -960,10 +1064,12 @@ function FoldTimeline({
 
 function FieldNotebook({
   component,
+  visualVariant,
   artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
 }) {
@@ -983,6 +1089,7 @@ function FieldNotebook({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.fieldNotebook}`}
+      data-variant={visualVariant}
     >
       <div className={styles.notebookFold} aria-hidden="true" />
       <div className={styles.notebookPage}>
@@ -1031,15 +1138,18 @@ function FieldNotebook({
 
 function SystemBlueprint({
   component,
+  visualVariant,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   onOpen: (id: string) => void;
 }) {
   return (
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.systemBlueprint}`}
+      data-variant={visualVariant}
     >
       <div className={styles.blueprintHeading}>
         {component.title ? <h2>{component.title}</h2> : null}
@@ -1099,9 +1209,11 @@ function SystemBlueprint({
 
 function EvidenceStack({
   component,
+  visualVariant,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   onOpen: (id: string) => void;
 }) {
   return (
@@ -1110,6 +1222,7 @@ function EvidenceStack({
       className={`${styles.component} ${styles.evidenceStack} ${
         component.title || component.body ? "" : styles.evidenceStackWithoutIntro
       }`}
+      data-variant={visualVariant}
     >
       <div className={styles.evidenceStackIntro}>
         {component.title ? <h2>{component.title}</h2> : null}
@@ -1160,11 +1273,13 @@ function EvidenceStack({
 function EssayMargin({
   component,
   embeddedQuote,
+  visualVariant,
   artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
   embeddedQuote?: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
 }) {
@@ -1182,6 +1297,7 @@ function EssayMargin({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.essayMargin}`}
+      data-variant={visualVariant}
     >
       <div className={styles.essayMainColumn}>
         <div className={styles.essayPage}>
@@ -1201,6 +1317,7 @@ function EssayMargin({
           <QuotePaper
             component={embeddedQuote}
             quoteArtifacts={embeddedQuoteArtifacts}
+            visualVariant={visualVariant}
             className={styles.essayInlineQuote}
           />
         ) : null}
@@ -1225,15 +1342,18 @@ function EssayMargin({
 
 function SpecimenBoard({
   component,
+  visualVariant,
   onOpen,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   onOpen: (id: string) => void;
 }) {
   return (
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.specimenBoard}`}
+      data-variant={visualVariant}
     >
       <div className={styles.specimenHeading}>
         {component.title ? <h2>{component.title}</h2> : null}
@@ -1278,10 +1398,12 @@ function SpecimenBoard({
 
 function ManifestoFold({
   component,
+  visualVariant,
   selectedOption,
   onSelect,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   selectedOption: number;
   onSelect: (index: number) => void;
 }) {
@@ -1289,6 +1411,7 @@ function ManifestoFold({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.manifestoFold}`}
+      data-variant={visualVariant}
     >
       {component.title ? <h2>{component.title}</h2> : null}
       {component.body ? <Markdown>{component.body}</Markdown> : null}
@@ -1333,10 +1456,12 @@ function ManifestoFold({
 
 function TopicCompass({
   component,
+  visualVariant,
   selectedOption,
   onSelect,
 }: {
   component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
   selectedOption: number;
   onSelect: (index: number) => void;
 }) {
@@ -1345,6 +1470,7 @@ function TopicCompass({
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.topicCompass}`}
+      data-variant={visualVariant}
     >
       {component.title ? <h2>{component.title}</h2> : null}
       {component.body ? <Markdown>{component.body}</Markdown> : null}

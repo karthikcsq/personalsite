@@ -1809,6 +1809,37 @@ button.researchStage:hover .researchStageAsset {
   padding-top: 26px;
 }
 
+.foldStrip[data-count="4"] {
+  min-height: 540px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.foldStrip[data-count="4"] > button,
+.foldStrip[data-count="4"] > div {
+  min-height: 0;
+  border-right: 1px solid
+    color-mix(in oklch, var(--a2ui-green) 20%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklch, var(--a2ui-green) 20%, transparent);
+}
+
+.foldStrip[data-count="4"] > :nth-child(2n) {
+  border-right: 0;
+}
+
+.foldStrip[data-count="4"] > :nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.foldStrip[data-count="4"] > :last-child strong {
+  font-size: clamp(19px, 2vw, 27px);
+}
+
+.foldStrip[data-count="4"] > :last-child .foldAsset {
+  height: 145px;
+}
+
 .foldStripDense > button,
 .foldStripDense > div {
   padding-top: 10px;
@@ -3047,6 +3078,1051 @@ button.researchStage:hover .researchStageAsset {
   }
 }
 
+/* Presentation families
+ *
+ * The semantic component type owns the information structure. These host-owned
+ * families change the physical composition without changing any facts or
+ * interactions. Decorative strokes always occupy reserved space or sit behind
+ * an opaque surface, so they cannot cross readable copy.
+ */
+
+.component {
+  overflow-wrap: anywhere;
+}
+
+.component h2,
+.component strong,
+.component b {
+  max-width: 100%;
+  hyphens: auto;
+  word-break: normal;
+}
+
+.answerSurface[data-visual="diagram"] {
+  --a2ui-family-line: color-mix(
+    in oklch,
+    var(--a2ui-green) 46%,
+    var(--color-hairline)
+  );
+}
+
+.answerSurface[data-visual="margin"] {
+  --a2ui-family-line: color-mix(
+    in oklch,
+    var(--a2ui-rust) 36%,
+    var(--color-hairline)
+  );
+}
+
+/* Narrative: torn field sheet, instrument rail, or editorial margin notes. */
+
+.narrativeItems {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+  margin-top: 22px;
+  overflow: visible;
+}
+
+.narrativeItems > div:nth-of-type(n) {
+  position: relative;
+  inset: auto;
+  width: auto;
+  min-width: 0;
+  padding: 16px 18px 15px;
+}
+
+.narrativeBotanical {
+  display: none;
+}
+
+.narrativeComponent[data-variant="folio"] {
+  padding: 34px 38px 32px;
+  background:
+    linear-gradient(102deg, rgb(255 255 255 / 0.2), transparent 45%),
+    url("/a2ui-paper-stock.webp"),
+    var(--a2ui-paper);
+  background-blend-mode: soft-light, multiply, normal;
+  box-shadow:
+    0 5px 0 color-mix(in oklch, var(--a2ui-green) 7%, var(--a2ui-paper-edge)),
+    0 20px 34px rgb(61 46 29 / 0.12);
+  clip-path: polygon(
+    0.5% 1.8%,
+    19% 0.5%,
+    44% 1.4%,
+    67% 0.4%,
+    99.4% 1.3%,
+    98.8% 98.4%,
+    71% 99.2%,
+    42% 98.4%,
+    18% 99.3%,
+    0.4% 98%
+  );
+}
+
+.narrativeComponent[data-variant="folio"]::before {
+  top: 24px;
+  right: 22px;
+  left: 22px;
+  width: auto;
+  background: color-mix(in oklch, var(--a2ui-green) 25%, transparent);
+}
+
+.narrativeComponent[data-variant="folio"] .narrativeItems > div {
+  border-top: 1px solid
+    color-mix(in oklch, var(--a2ui-green) 24%, transparent);
+  background: rgb(255 255 255 / 0.16);
+}
+
+.narrativeComponent[data-variant="diagram"] {
+  padding: 12px 0 20px;
+  transform: none;
+}
+
+.narrativeComponent[data-variant="diagram"]::before {
+  top: auto;
+  bottom: 0;
+  width: 100%;
+  background: var(--a2ui-family-line);
+}
+
+.narrativeComponent[data-variant="diagram"] .narrativeItems {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(205px, 100%), 1fr)
+  );
+  gap: 0;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.narrativeComponent[data-variant="diagram"] .narrativeItems > div {
+  min-height: 174px;
+  padding: 27px 24px 18px;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.narrativeComponent[data-variant="diagram"]
+  .narrativeItems
+  > div:last-of-type {
+  border-right: 0;
+}
+
+.narrativeComponent[data-variant="diagram"]
+  .narrativeItems
+  > div::before {
+  position: absolute;
+  top: -5px;
+  left: 24px;
+  width: 9px;
+  height: 9px;
+  margin: 0;
+  border: 2px solid var(--a2ui-bg);
+  box-shadow: 0 0 0 1px var(--a2ui-green);
+}
+
+.narrativeComponent[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.6fr) minmax(0, 1.4fr);
+  gap: 12px 42px;
+  padding: 18px 0 22px;
+  transform: none;
+}
+
+.narrativeComponent[data-variant="margin"]::before {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: calc(30% + 18px);
+  width: 1px;
+  height: auto;
+  background: var(--a2ui-family-line);
+}
+
+.narrativeComponent[data-variant="margin"]::after {
+  content: none;
+}
+
+.narrativeComponent[data-variant="margin"] > h2,
+.narrativeComponent[data-variant="margin"] > div:not(.narrativeItems) {
+  grid-column: 1;
+}
+
+.narrativeComponent[data-variant="margin"] > h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 0.98;
+}
+
+.narrativeComponent[data-variant="margin"] .narrativeItems {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  gap: 0 24px;
+  margin: 0;
+}
+
+.narrativeComponent[data-variant="margin"] .narrativeItems > div {
+  padding: 14px 4px 18px 18px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+/* Single artifacts: reserve the botanical corner, then offer two non-paper
+ * arrangements that reuse the same facts. */
+
+.singleArtifactCopy h2 {
+  max-width: calc(100% - 176px);
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.singleArtifact[data-variant="diagram"],
+.singleArtifact[data-variant="margin"] {
+  min-height: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.singleArtifact[data-variant="diagram"] {
+  padding: 12px 0 28px;
+  border-top: 1px solid var(--a2ui-green);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.singleArtifact[data-variant="diagram"] .artifactPaperOutline,
+.singleArtifact[data-variant="diagram"] .artifactCornerSprig,
+.singleArtifact[data-variant="diagram"] .artifactBotanical,
+.singleArtifact[data-variant="margin"] .artifactPaperOutline,
+.singleArtifact[data-variant="margin"] .artifactCornerSprig,
+.singleArtifact[data-variant="margin"] .artifactBotanical {
+  display: none;
+}
+
+.singleArtifact[data-variant="diagram"] .singleArtifactCopy h2 {
+  max-width: 100%;
+  margin: 18px 0 12px;
+  border: 0;
+  font-size: clamp(38px, 4.1vw, 57px);
+}
+
+.singleArtifact[data-variant="diagram"] .dossierIllustration {
+  width: min(64%, 560px);
+  height: 118px;
+  margin: 8px auto 14px;
+}
+
+.singleArtifact[data-variant="diagram"] .artifactFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  gap: 0;
+  min-height: 0;
+  padding: 0;
+  border-top-color: var(--a2ui-green);
+}
+
+.singleArtifact[data-variant="diagram"]
+  .artifactFact:nth-of-type(n) {
+  grid-column: auto;
+  grid-row: auto;
+  align-self: stretch;
+  padding: 21px 22px 18px;
+  border-right: 1px solid var(--a2ui-family-line);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.singleArtifact[data-variant="diagram"]
+  .artifactFact:nth-of-type(2n) {
+  border-right: 0;
+}
+
+.singleArtifact[data-variant="diagram"] .artifactFact::before {
+  top: -5px;
+  right: auto;
+  left: 22px;
+  box-shadow: 0 0 0 3px var(--a2ui-bg);
+  transform: none;
+}
+
+.singleArtifact[data-variant="margin"] {
+  padding: 10px 0 26px;
+}
+
+.singleArtifact[data-variant="margin"] .singleArtifactCopy {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr);
+  gap: 10px 42px;
+  align-items: start;
+}
+
+.singleArtifact[data-variant="margin"] .singleArtifactCopy h2 {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  max-width: 100%;
+  margin: 0;
+  padding: 8px 36px 22px 0;
+  border: 0;
+  border-right: 1px solid var(--a2ui-family-line);
+  font-size: clamp(40px, 5.3vw, 70px);
+  line-height: 0.92;
+}
+
+.singleArtifact[data-variant="margin"]
+  .singleArtifactCopy
+  > div:not(.artifactFacts) {
+  grid-column: 2;
+  max-width: 680px;
+  padding-top: 9px;
+}
+
+.singleArtifact[data-variant="margin"] .dossierIllustration {
+  grid-column: 2;
+  width: min(78%, 540px);
+  height: 112px;
+  margin: 8px 0 0;
+}
+
+.singleArtifact[data-variant="margin"] .artifactFacts {
+  grid-column: 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  gap: 0 20px;
+  min-height: 0;
+  margin-top: 14px;
+}
+
+.singleArtifact[data-variant="margin"] .artifactFact:nth-of-type(n) {
+  grid-column: auto;
+  grid-row: auto;
+  padding: 15px 4px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.singleArtifact[data-variant="margin"] .artifactFact::before {
+  content: none;
+}
+
+.singleArtifact[data-variant="margin"] .singleArtifactAction {
+  margin-left: min(38%, 330px);
+}
+
+/* Structured types: each family changes the hierarchy, not just the fill. */
+
+.researchMap[data-variant="diagram"],
+.researchMap[data-variant="margin"],
+.systemBlueprint[data-variant="diagram"],
+.systemBlueprint[data-variant="margin"] {
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.researchMap[data-variant="diagram"] {
+  padding: 8px 0 28px;
+}
+
+.researchMap[data-variant="diagram"]::before {
+  inset: auto 0 0;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-variant="diagram"]::after,
+.researchMap[data-variant="diagram"] .researchMapTape,
+.researchMap[data-variant="margin"]::before,
+.researchMap[data-variant="margin"]::after,
+.researchMap[data-variant="margin"] .researchMapTape {
+  display: none;
+}
+
+.researchMap[data-variant="diagram"] .researchStages {
+  min-height: 0;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(180px, 100%), 1fr)
+  );
+  gap: 0;
+  padding-top: 30px;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.researchMap[data-variant="diagram"] .researchStage {
+  min-height: 230px;
+  padding: 18px 20px;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-variant="diagram"] .researchStage:last-child {
+  border-right: 0;
+}
+
+.researchMap[data-variant="diagram"]
+  .researchStage
+  + .researchStage::before {
+  display: none;
+}
+
+.researchMap[data-variant="diagram"] .researchSignal {
+  top: -15px;
+  height: 70px;
+  opacity: 0.65;
+}
+
+.researchMap[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.62fr) minmax(0, 1.38fr);
+  gap: 10px 42px;
+  padding: 8px 0 30px;
+}
+
+.researchMap[data-variant="margin"] > h2,
+.researchMap[data-variant="margin"]
+  > div:not(.researchStages, .researchMapTape) {
+  grid-column: 1;
+}
+
+.researchMap[data-variant="margin"] .researchStages {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 0;
+  padding: 0 0 0 28px;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-variant="margin"] .researchStage {
+  min-height: 0;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 18px;
+  padding: 14px 0 18px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-variant="margin"] .researchStageAsset {
+  width: 90px;
+  height: 76px;
+  grid-row: 1 / span 3;
+  margin: 0;
+}
+
+.researchMap[data-variant="margin"] .researchStageCopy,
+.researchMap[data-variant="margin"] .researchStageAction {
+  grid-column: 2;
+}
+
+.researchMap[data-variant="margin"] .researchStageNumber,
+.researchMap[data-variant="margin"] .researchSignal,
+.researchMap[data-variant="margin"]
+  .researchStage
+  + .researchStage::before {
+  display: none;
+}
+
+.systemBlueprint[data-variant="diagram"] {
+  padding: 14px 0 28px;
+}
+
+.systemBlueprint[data-variant="diagram"] .blueprintModules {
+  min-height: 0;
+  gap: 0 24px;
+  margin-top: 30px;
+  padding-top: 28px;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.systemBlueprint[data-variant="diagram"]
+  .blueprintModules
+  > button,
+.systemBlueprint[data-variant="diagram"] .blueprintModules > div {
+  min-height: 190px;
+  padding: 12px 18px 18px;
+  border-right: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.systemBlueprint[data-variant="diagram"]
+  .blueprintModules
+  > :nth-child(4n) {
+  border-right: 0;
+}
+
+.systemBlueprint[data-variant="diagram"] .blueprintModules > svg {
+  top: -20px;
+  height: 96px;
+  opacity: 0.72;
+}
+
+.systemBlueprint[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1.38fr);
+  gap: 40px;
+  padding: 10px 0 28px;
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintHeading {
+  display: block;
+  padding-right: 32px;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintHeading > div {
+  margin-top: 20px;
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintModules {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintModules > svg {
+  display: none;
+}
+
+.systemBlueprint[data-variant="margin"]
+  .blueprintModules
+  > button,
+.systemBlueprint[data-variant="margin"] .blueprintModules > div {
+  min-height: 0;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 4px 16px;
+  padding: 13px 0 17px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintGlyph,
+.systemBlueprint[data-variant="margin"] .blueprintAsset {
+  width: 42px;
+  height: 42px;
+  grid-row: 1 / span 3;
+}
+
+.systemBlueprint[data-variant="margin"] .blueprintModules strong,
+.systemBlueprint[data-variant="margin"] .blueprintModules b,
+.systemBlueprint[data-variant="margin"] .blueprintModules small {
+  grid-column: 2;
+}
+
+.fieldNotebook[data-variant="diagram"],
+.fieldNotebook[data-variant="margin"] {
+  min-height: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.fieldNotebook[data-variant="diagram"] {
+  padding: 14px 0 26px;
+  border-top: 1px solid var(--a2ui-green);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookFold {
+  inset: 10px auto 10px 48%;
+  background: var(--a2ui-family-line);
+  box-shadow: none;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookPage {
+  padding: 25px 44px 24px 8px;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations {
+  padding: 16px 0 24px 42px;
+}
+
+.fieldNotebook[data-variant="margin"] {
+  grid-template-columns: minmax(220px, 0.66fr) minmax(0, 1.34fr);
+  gap: 36px;
+  padding: 8px 0 28px;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookFold {
+  display: none;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookPage {
+  padding: 24px 30px 28px;
+  border-left: 4px solid var(--a2ui-green);
+  background: color-mix(in oklch, var(--a2ui-green-soft) 55%, transparent);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookPage h2 {
+  font-size: clamp(34px, 4.2vw, 56px);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations {
+  padding: 0;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAction {
+  right: 0;
+  bottom: 4px;
+}
+
+.evidenceStack[data-variant="diagram"],
+.evidenceStack[data-variant="margin"] {
+  min-height: 0;
+  align-items: start;
+  padding: 12px 0 30px;
+}
+
+.evidenceStack[data-variant="diagram"] {
+  grid-template-columns: minmax(190px, 0.5fr) minmax(0, 1.5fr);
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips,
+.evidenceStack[data-variant="margin"] .evidenceSlips {
+  gap: 0;
+  padding: 0;
+}
+
+.evidenceStack[data-variant="diagram"]
+  .evidenceSlips
+  > button,
+.evidenceStack[data-variant="diagram"] .evidenceSlips > div,
+.evidenceStack[data-variant="margin"] .evidenceSlips > button,
+.evidenceStack[data-variant="margin"] .evidenceSlips > div {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  min-height: 170px;
+  padding: 21px 22px;
+  border-top: 1px solid var(--a2ui-green);
+  border-right: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.evidenceStack[data-variant="diagram"]
+  .evidenceSlips
+  > :nth-child(2n),
+.evidenceStack[data-variant="margin"]
+  .evidenceSlips
+  > :last-child {
+  border-right: 0;
+}
+
+.evidenceStack[data-variant="margin"] {
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
+  gap: 36px;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips {
+  grid-template-columns: minmax(0, 1fr);
+  border-left: 1px solid var(--a2ui-family-line);
+  padding-left: 28px;
+}
+
+.evidenceStack[data-variant="margin"]
+  .evidenceSlips
+  > button,
+.evidenceStack[data-variant="margin"] .evidenceSlips > div {
+  min-height: 0;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip,
+.foldTimeline[data-variant="margin"] .foldStrip {
+  min-height: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip {
+  padding: 24px 0 18px;
+  border-color: var(--a2ui-green);
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip > button,
+.foldTimeline[data-variant="diagram"] .foldStrip > div {
+  min-height: 270px;
+  background: transparent;
+}
+
+.foldTimeline[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.58fr) minmax(0, 1.42fr);
+  gap: 38px;
+}
+
+.foldTimeline[data-variant="margin"] > h2,
+.foldTimeline[data-variant="margin"] > div:not(.foldStrip) {
+  grid-column: 1;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0 0 0 28px;
+  border: 0;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip > button,
+.foldTimeline[data-variant="margin"] .foldStrip > div {
+  min-height: 240px;
+  border-right: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Supporting and interactive components also participate in the family. */
+
+.quoteComponent[data-variant="diagram"],
+.quoteComponent[data-variant="margin"] {
+  min-height: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.quoteComponent[data-variant="diagram"] {
+  padding: 26px 28px 24px;
+  border: 0;
+  border-top: 1px solid var(--color-accent);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.quoteComponent[data-variant="diagram"]::after {
+  content: none;
+}
+
+.quoteComponent[data-variant="margin"] {
+  padding: 18px 10px 20px 32px;
+  border: 0;
+  border-left: 3px solid var(--color-accent);
+}
+
+.quoteComponent[data-variant="margin"]::after {
+  content: none;
+}
+
+.quoteComponent[data-variant="margin"] blockquote {
+  margin-left: 0;
+}
+
+.quoteComponent[data-variant="margin"] .quoteIcon {
+  position: absolute;
+  top: 16px;
+  left: -17px;
+  width: 27px;
+  height: 27px;
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--a2ui-bg);
+}
+
+.metricComponent[data-variant="folio"] {
+  padding: 28px 30px 24px;
+  background: url("/a2ui-paper-stock.webp"), var(--a2ui-paper);
+  background-blend-mode: multiply;
+  box-shadow: 0 5px 0 var(--a2ui-paper-edge), 0 18px 28px rgb(61 46 29 / 0.1);
+  clip-path: polygon(0.6% 2%, 35% 0.5%, 66% 1.5%, 99.5% 0.8%, 99% 98%, 64% 99.2%, 32% 98.3%, 0.4% 99%);
+}
+
+.metricComponent[data-variant="margin"] .metricGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 0;
+  border-left: 3px solid var(--a2ui-green);
+}
+
+.metricComponent[data-variant="margin"] .metric {
+  min-height: 118px;
+  border-right: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.timelineComponent[data-variant="folio"] {
+  padding: 30px 34px;
+  background: url("/a2ui-paper-stock.webp"), var(--a2ui-paper);
+  background-blend-mode: multiply;
+  box-shadow: 0 5px 0 var(--a2ui-paper-edge), 0 18px 28px rgb(61 46 29 / 0.1);
+}
+
+.timelineComponent[data-variant="diagram"] ol {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(190px, 100%), 1fr)
+  );
+  gap: 0;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.timelineComponent[data-variant="diagram"] li {
+  display: block;
+  padding: 28px 22px 20px;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.timelineComponent[data-variant="diagram"] li::after {
+  display: none;
+}
+
+.timelineComponent[data-variant="margin"] ol {
+  padding-left: 28px;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.specimenBoard[data-variant="folio"] .specimens > button,
+.specimenBoard[data-variant="folio"] .specimens > div {
+  padding: 22px;
+  background: url("/a2ui-paper-stock.webp"), var(--a2ui-paper);
+  background-blend-mode: multiply;
+  box-shadow: 0 4px 0 var(--a2ui-paper-edge), 0 13px 24px rgb(61 46 29 / 0.1);
+  clip-path: polygon(1% 2%, 48% 0.4%, 99% 2%, 98% 98%, 52% 99.3%, 1% 98%);
+}
+
+.specimenBoard[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.58fr) minmax(0, 1.42fr);
+  gap: 42px;
+}
+
+.specimenBoard[data-variant="margin"] .specimenHeading {
+  padding-right: 30px;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.specimenBoard[data-variant="margin"] .specimens {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.essayMargin[data-variant="diagram"] .essayPage,
+.essayMargin[data-variant="margin"] .essayPage {
+  min-height: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.essayMargin[data-variant="diagram"] .essayPage {
+  padding: 30px 28px;
+  border-top: 1px solid var(--a2ui-green);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.essayMargin[data-variant="margin"] {
+  grid-template-columns: minmax(0, 1.4fr) minmax(250px, 0.6fr);
+}
+
+.essayMargin[data-variant="margin"] .essayPage {
+  padding: 10px 34px 24px 0;
+  border-right: 1px solid var(--a2ui-family-line);
+}
+
+.navigationComponent[data-variant="folio"] {
+  padding: 22px 25px;
+  background: url("/a2ui-paper-stock.webp"), var(--a2ui-paper);
+  background-blend-mode: multiply;
+  box-shadow: 0 4px 0 var(--a2ui-paper-edge), 0 13px 22px rgb(61 46 29 / 0.09);
+}
+
+.navigationComponent[data-variant="margin"] {
+  padding-left: 24px;
+  border-left: 3px solid var(--a2ui-green);
+}
+
+.comparisonComponent[data-variant="folio"] {
+  padding: 30px 34px;
+  background: url("/a2ui-paper-stock.webp"), var(--a2ui-paper);
+  background-blend-mode: multiply;
+  box-shadow: 0 5px 0 var(--a2ui-paper-edge), 0 18px 28px rgb(61 46 29 / 0.1);
+  clip-path: polygon(0.6% 1.5%, 31% 0.4%, 68% 1.2%, 99.4% 0.7%, 99% 98.2%, 64% 99.3%, 28% 98.4%, 0.4% 99%);
+}
+
+.comparisonComponent[data-variant="diagram"] .optionTabs {
+  border-top: 1px solid var(--a2ui-green);
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.comparisonComponent[data-variant="diagram"] .optionTabs button {
+  border-right: 1px solid var(--a2ui-family-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.comparisonComponent[data-variant="margin"] {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.55fr) minmax(0, 1.45fr);
+  gap: 18px 36px;
+}
+
+.comparisonComponent[data-variant="margin"] .optionTabs,
+.comparisonComponent[data-variant="margin"] .optionDetail {
+  grid-column: 2;
+}
+
+.comparisonComponent[data-variant="margin"] .optionTabs {
+  grid-row: 1 / span 2;
+  grid-template-columns: minmax(0, 1fr);
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.manifestoFold[data-variant="diagram"] {
+  min-height: 0;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack {
+  display: grid;
+  width: 100%;
+  height: auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 26px;
+  transform: none;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoPin {
+  display: none;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack > button {
+  position: relative;
+  inset: auto;
+  min-height: 150px;
+  padding: 24px 26px;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--a2ui-green);
+  border-right: 1px solid var(--a2ui-family-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  filter: none;
+  transform: none;
+}
+
+.manifestoFold[data-variant="diagram"]
+  .manifestoStack
+  > button[data-active="true"] {
+  grid-column: 1 / -1;
+  min-height: 250px;
+  background: color-mix(
+    in oklch,
+    var(--a2ui-green-soft) 34%,
+    transparent
+  );
+  transform: none;
+}
+
+.manifestoFold[data-variant="margin"] {
+  min-height: 0;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoStack {
+  width: 100%;
+  height: 430px;
+  margin-top: 28px;
+  transform: none;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoStack > button {
+  border-radius: 0;
+  background: var(--a2ui-bg);
+  box-shadow: 0 12px 28px rgb(61 46 29 / 0.1);
+  clip-path: none;
+}
+
+.manifestoFold[data-variant="margin"]
+  .manifestoStack
+  > button[data-active="true"] {
+  border-left: 4px solid var(--a2ui-green);
+  transform: translate(0, 0);
+}
+
+.topicCompass[data-variant="diagram"] .compassDial,
+.topicCompass[data-variant="margin"] .compassDial {
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.topicCompass[data-variant="diagram"] .compassDial {
+  border-color: var(--a2ui-green);
+}
+
+.topicCompass[data-variant="diagram"] .compassDial > button {
+  background: transparent;
+}
+
+.topicCompass[data-variant="diagram"] .compassDial > button span,
+.topicCompass[data-variant="margin"] .compassDial > button span {
+  transform: none !important;
+}
+
+.topicCompass[data-variant="diagram"] .compassPin {
+  width: 20px;
+  height: 20px;
+  border-color: var(--a2ui-green);
+  background: var(--a2ui-bg);
+  box-shadow: 0 0 0 5px
+    color-mix(in oklch, var(--a2ui-green) 9%, transparent);
+}
+
+.topicCompass[data-variant="margin"] .compassLayout {
+  grid-template-columns: minmax(230px, 0.7fr) minmax(0, 1.3fr);
+}
+
+.topicCompass[data-variant="margin"] .compassDial {
+  aspect-ratio: auto;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  border: 0;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.topicCompass[data-variant="margin"] .compassDial > button {
+  min-height: 74px;
+  padding: 17px 22px;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  place-items: start;
+}
+
+.topicCompass[data-variant="margin"] .compassDial > button span {
+  max-width: 100%;
+  text-align: left;
+}
+
+.topicCompass[data-variant="margin"] .compassPin {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .shell {
     --a2ui-rail: 0px;
@@ -3658,6 +4734,81 @@ button.researchStage:hover .researchStageAsset {
 
   .compassAsset {
     height: 130px;
+  }
+
+  .narrativeComponent[data-variant="margin"],
+  .singleArtifact[data-variant="margin"] .singleArtifactCopy,
+  .researchMap[data-variant="margin"],
+  .systemBlueprint[data-variant="margin"],
+  .fieldNotebook[data-variant="margin"],
+  .foldTimeline[data-variant="margin"],
+  .specimenBoard[data-variant="margin"] {
+    display: block;
+  }
+
+  .narrativeComponent[data-variant="margin"]::before {
+    content: none;
+  }
+
+  .narrativeComponent[data-variant="margin"] .narrativeItems,
+  .singleArtifact[data-variant="diagram"] .artifactFacts,
+  .singleArtifact[data-variant="margin"] .artifactFacts,
+  .evidenceStack[data-variant="diagram"] .evidenceSlips,
+  .evidenceStack[data-variant="margin"] .evidenceSlips,
+  .specimenBoard[data-variant="margin"] .specimens {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .singleArtifact[data-variant="margin"] .singleArtifactCopy h2 {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .singleArtifact[data-variant="margin"]
+    .singleArtifactCopy
+    > div:not(.artifactFacts),
+  .singleArtifact[data-variant="margin"] .dossierIllustration,
+  .singleArtifact[data-variant="margin"] .artifactFacts {
+    grid-column: 1;
+  }
+
+  .singleArtifact[data-variant="margin"] .singleArtifactAction {
+    margin-left: 0;
+  }
+
+  .researchMap[data-variant="margin"] .researchStages,
+  .systemBlueprint[data-variant="margin"] .blueprintModules,
+  .foldTimeline[data-variant="margin"] .foldStrip {
+    margin-top: 24px;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .systemBlueprint[data-variant="margin"] .blueprintHeading {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .fieldNotebook[data-variant="margin"] .notebookPage {
+    margin-bottom: 24px;
+  }
+
+  .foldStrip[data-count="4"] {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .foldStrip[data-count="4"] > button,
+  .foldStrip[data-count="4"] > div {
+    border-right: 0;
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--a2ui-green) 20%, transparent);
+  }
+
+  .essayMargin[data-variant="margin"] .essayPage {
+    padding-right: 0;
+    border-right: 0;
   }
 }
 

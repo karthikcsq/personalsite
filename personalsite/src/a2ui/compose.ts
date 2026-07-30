@@ -285,6 +285,7 @@ NON-REDUNDANCY REQUIREMENTS
 - An evidence_stack uses items as independent proof slips. Each value must be meaningful without interaction.
 - An essay_margin uses body for the thesis and items for genuinely different annotations, examples, limits, or implications. Use writing-marginalia only when the answer is actually about writing or a point of view.
 - A specimen_board uses three to six items with valid artifactIds when the visitor asked for multiple concrete examples. It is not a generic list.
+- In a specimen_board, assign a listed visual asset whenever it directly depicts that exact item. Prefer project-specific assets such as veritas-verification, caladrius-triage, and formulator-motion over a generic hackathon asset. Never reuse one generic asset across every specimen.
 - Never use artifact_focus without at least one valid artifactId from EVIDENCE. Use narrative with items for structured facts that have no artifact reference.
 - Never manufacture comparison options just to create interactivity. Never put unrelated metrics or concepts on a shared control.
 - Avoid contrastive "not X, but Y" phrasing.

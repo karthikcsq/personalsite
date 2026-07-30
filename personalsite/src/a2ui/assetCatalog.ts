@@ -71,6 +71,18 @@ export const A2UI_VISUAL_ASSETS = {
     promptHint:
       "hackathon, overnight build, award, rapid prototype, system design, sprint",
   },
+  "veritas-verification": {
+    src: "/a2ui/assets/veritas-verification.png",
+    alt: "Flat pencil diagram of survey quality signals converging into a verified result",
+    promptHint:
+      "Veritas, clinical research, proof of personhood, response quality, contradiction checks, verification",
+  },
+  "formulator-motion": {
+    src: "/a2ui/assets/formulator-motion.png",
+    alt: "Flat pencil diagram of joint angles, motion paths, camera framing, and feedback",
+    promptHint:
+      "FORMulator, exercise form, pose tracking, joint angles, computer vision, realtime feedback",
+  },
 } as const;
 
 export type A2UIVisualAssetId = keyof typeof A2UI_VISUAL_ASSETS;

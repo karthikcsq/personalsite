@@ -327,11 +327,18 @@ export default function HomeChatClient() {
           try {
             const parsed = JSON.parse(data);
             if (parsed.a2ui) {
+              const presentationSeed =
+                typeof crypto !== "undefined" && crypto.getRandomValues
+                  ? crypto.getRandomValues(new Uint32Array(1))[0]
+                  : Date.now();
               setMessages((prev) => {
                 const next = [...prev];
                 next[assistantIndex] = {
                   ...next[assistantIndex],
-                  a2ui: parsed.a2ui as A2UIDocument,
+                  a2ui: {
+                    ...(parsed.a2ui as A2UIDocument),
+                    presentationSeed,
+                  },
                 };
                 return next;
               });
