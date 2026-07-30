@@ -8,6 +8,52 @@ import {
   type A2UIArtifactLike,
   type A2UIDocument,
 } from "@/a2ui/protocol";
+import {
+  getModelRoutingConfig,
+  toUsageRecord,
+  type ModelUsageRecord,
+} from "@/utils/modelRouting";
+
+const MODEL_CONFIG = getModelRoutingConfig();
+
+function asksAboutPersonalContribution(question: string): boolean {
+  return /\b(?:what (?:does|did|has) (?:he|karthik) (?:do|build|built|change|changed|contribute|contributed|handle|lead|own)|what(?:'s| is) (?:his|karthik'?s) role|role at|responsib(?:le|ility|ilities)|personally (?:build|built|change|changed|contribute|contributed)|(?:build|built|change|changed|contribute|contributed) at)\b/i.test(
+    question,
+  );
+}
+
+function hasCompleteContributionSurface(document: A2UIDocument): boolean {
+  const substantiveItems = document.primary.items.filter(
+    (item) => item.value.trim() && item.detail.trim(),
+  );
+  return (
+    ["field_notebook", "system_blueprint"].includes(document.primary.type) &&
+    substantiveItems.length >= 3
+  );
+}
+
+function asksForNamedOverview(question: string): boolean {
+  return /^(?:what(?:'s| is)|tell me about|explain|show me)\b/i.test(
+    question.trim(),
+  );
+}
+
+function hasCompleteNamedArtifactSurface(document: A2UIDocument): boolean {
+  const substantiveItems = document.primary.items.filter(
+    (item) => item.value.trim() || item.detail.trim(),
+  );
+  return (
+    [
+      "artifact_focus",
+      "paper_dossier",
+      "field_notebook",
+      "research_map",
+      "system_blueprint",
+      "evidence_stack",
+    ].includes(document.primary.type) &&
+    substantiveItems.length >= 3
+  );
+}
 
 function artifactLabel(artifact: A2UIArtifactLike): string {
   const data = artifact.data as Record<string, unknown>;
@@ -95,6 +141,7 @@ export async function composeA2UI(
   question: string,
   reply: string,
   artifacts: A2UIArtifactLike[],
+  onUsage?: (record: ModelUsageRecord) => void,
 ): Promise<A2UIDocument> {
   const fallback = buildFallbackA2UI(question, reply, artifacts);
   if (!reply.trim()) return fallback;
@@ -117,17 +164,35 @@ export async function composeA2UI(
     : "(none)";
   const visualAssetDirectory = a2uiVisualAssetPromptDirectory();
   const timelineOrder = timelineEvidenceOrder(artifacts);
+  const contributionQuestion = asksAboutPersonalContribution(question);
+  const namedArtifactOverview =
+    !contributionQuestion &&
+    artifacts.length === 1 &&
+    asksForNamedOverview(question);
+  const questionShapeDirective = contributionQuestion
+    ? `QUESTION-SHAPE OVERRIDE
+- This asks what Karthik personally does, built, changed, or owns within one role or organization.
+- The primary component MUST be field_notebook for a nuanced operating role, or system_blueprint when three or more connected technical modules are central.
+- artifact_focus, paper_dossier, narrative, and a generic source sheet are invalid primary choices.
+- The primary must contain three or four substantive items. Every item needs both a visible value and a concrete detail.
+- Allocate the story across the primary: one item owns his role or operating responsibility, one owns what he built or changed, one owns how it works, and one owns the result or real-world effect when evidence supports it.
+- Prefer the exact nouns, systems, features, decisions, and audiences named in ANSWER or EVIDENCE. Generic phrases such as "internal platform," "technical work," or "community leadership" are invalid when the source names what the platform manages, what he built, or whom he recruited.
+- The document lead may contain at most one short orienting sentence. It must not carry the facts that belong in the primary.
+- A source link or verified quote may support the answer, but neither may replace the explanation.`
+    : namedArtifactOverview
+      ? `QUESTION-SHAPE OVERRIDE
+- This asks for a complete overview of one named artifact.
+- The primary component MUST be artifact_focus, paper_dossier, field_notebook, research_map, or system_blueprint.
+- A plain narrative, empty source sheet, or navigation-only artifact card is invalid.
+- The primary must contain at least three substantive items that explain what it is, how it works, and a concrete result, constraint, award, or reason it matters.
+- Keep the document lead empty or to one short orienting sentence. The primary paper owns the explanation.
+- The verified quote may support the primary, but it cannot replace the explanation.`
+    : "";
 
   try {
-    const result = await openai.chat.completions.create({
-      model: "gpt-5.4-nano",
-      temperature: 0.2,
-      max_completion_tokens: 1500,
-      response_format: A2UI_RESPONSE_FORMAT,
-      messages: [
-        {
-          role: "system",
-          content: `You are the A2UI composer for Karthik's portfolio. Turn a grounded answer into one coherent, visual answer surface.
+    const systemPrompt = `You are the A2UI composer for Karthik's portfolio. Turn a grounded answer into one coherent, visual answer surface.
+
+${questionShapeDirective}
 
 The UI must answer the visitor's question from scratch. It replaces the chat response, so all necessary explanation belongs inside the document.
 
@@ -250,11 +315,8 @@ EM DASH GATE
 - The output is invalid if any generated string contains Unicode U+2014.
 - Rewrite each em-dash construction as two sentences, a comma, a colon, or a semicolon. Do not substitute another dash character.
 
-Return only the schema-compliant A2UI document.`,
-        },
-        {
-          role: "user",
-          content: `QUESTION
+Return only the schema-compliant A2UI document.`;
+    const userPrompt = `QUESTION
 ${question}
 
 ANSWER
@@ -267,13 +329,100 @@ DATED WORK ORDER
 ${timelineOrder}
 
 VISUAL ASSETS
-${visualAssetDirectory}`,
+${visualAssetDirectory}`;
+    const result = await openai.chat.completions.create({
+      model: MODEL_CONFIG.a2uiModel,
+      reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort,
+      service_tier: "default",
+      max_completion_tokens: 1500,
+      response_format: A2UI_RESPONSE_FORMAT,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: userPrompt,
         },
       ],
     });
+    const composeUsage = toUsageRecord(
+      "a2ui_compose",
+      MODEL_CONFIG.a2uiModel,
+      result.usage,
+    );
+    if (composeUsage) onUsage?.(composeUsage);
     const raw = result.choices[0]?.message?.content;
     if (!raw) return fallback;
-    return sanitizeA2UIDocument(JSON.parse(raw), question, reply, artifacts);
+    const document = sanitizeA2UIDocument(
+      JSON.parse(raw),
+      question,
+      reply,
+      artifacts,
+    );
+    const contributionIncomplete =
+      contributionQuestion && !hasCompleteContributionSurface(document);
+    const overviewIncomplete =
+      namedArtifactOverview && !hasCompleteNamedArtifactSurface(document);
+    if (!contributionIncomplete && !overviewIncomplete) {
+      return document;
+    }
+
+    try {
+      const repairInstructions = contributionIncomplete
+        ? `- Use field_notebook or system_blueprint as the primary.
+- Include three or four items with both value and detail.
+- Move the concrete role, operating decisions, technical work, and effect into those items.`
+        : `- Use artifact_focus, paper_dossier, field_notebook, research_map, or system_blueprint as the primary.
+- Include at least three substantive items covering what it is, how it works, and its strongest result, constraint, award, or significance.
+- Put the explanation inside the primary paper instead of an empty source card.`;
+      const repair = await openai.chat.completions.create({
+        model: MODEL_CONFIG.a2uiModel,
+        reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort,
+        service_tier: "default",
+        max_completion_tokens: 1500,
+        response_format: A2UI_RESPONSE_FORMAT,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+          { role: "assistant", content: raw },
+          {
+            role: "user",
+            content: `REPAIR REQUIRED
+The proposed primary does not completely answer the visitor's question. Rewrite the document.
+${repairInstructions}
+- Keep the lead to one short sentence or leave it empty.
+- Do not create a generic source card as the primary.
+- Do not repeat claims across the lead, body, and items.`,
+          },
+        ],
+      });
+      const repairUsage = toUsageRecord(
+        "a2ui_repair",
+        MODEL_CONFIG.a2uiModel,
+        repair.usage,
+      );
+      if (repairUsage) onUsage?.(repairUsage);
+      const repairedRaw = repair.choices[0]?.message?.content;
+      if (!repairedRaw) return document;
+      const repaired = sanitizeA2UIDocument(
+        JSON.parse(repairedRaw),
+        question,
+        reply,
+        artifacts,
+      );
+      const repairedContributionComplete =
+        !contributionQuestion || hasCompleteContributionSurface(repaired);
+      const repairedOverviewComplete =
+        !namedArtifactOverview || hasCompleteNamedArtifactSurface(repaired);
+      return repairedContributionComplete && repairedOverviewComplete
+        ? repaired
+        : document;
+    } catch (repairError) {
+      console.error("A2UI contribution repair failed:", repairError);
+      return document;
+    }
   } catch (error) {
     console.error("A2UI composition failed:", error);
     return fallback;

@@ -14,6 +14,24 @@ import {
   selectCanonicalJobsForQuery,
   selectCanonicalReceiptJobs,
 } from "@/utils/workContext";
+import {
+  getModelRoutingConfig,
+  selectAnswerRoute,
+  shouldRunHydeAfterBaseline,
+  shouldStartHydeBeforeBaseline,
+  summarizeUsage,
+  toUsageRecord,
+  type ModelUsageRecord,
+} from "@/utils/modelRouting";
+import {
+  getRewriteCache,
+  getSuggestedReplyCache,
+  setRewriteCache,
+  setSuggestedReplyCache,
+} from "@/utils/chatCache";
+import { isHostSuggestedQuestion } from "@/data/chatSuggestions";
+
+const MODEL_CONFIG = getModelRoutingConfig();
 
 // Type for chat messages
 interface ChatMessage {
@@ -283,15 +301,26 @@ function pruneMessages(
 async function buildHydeQueries(
   openai: OpenAI,
   currentQuery: string,
-  conversationHistory?: ChatMessage[]
+  conversationHistory?: ChatMessage[],
+  onUsage?: (record: ModelUsageRecord) => void,
+  onCacheHit?: () => void,
 ): Promise<string[]> {
+  const cacheable = !conversationHistory || conversationHistory.length <= 1;
+  if (cacheable) {
+    const cached = await getRewriteCache(currentQuery);
+    if (cached) {
+      onCacheHit?.();
+      return cached;
+    }
+  }
   const recentContext = conversationHistory
     ?.slice(-4)
     .map(m => `${m.role}: ${m.content}`)
     .join("\n") || "";
 
   const response = await openai.chat.completions.create({
-    model: "gpt-5.4-nano",
+    model: MODEL_CONFIG.rewriteModel,
+    service_tier: "default",
     temperature: 0,
     max_completion_tokens: 220,
     response_format: {
@@ -339,18 +368,28 @@ Rules:
       }
     ],
   });
+  const usage = toUsageRecord(
+    "retrieval_rewrite",
+    MODEL_CONFIG.rewriteModel,
+    response.usage,
+  );
+  if (usage) onUsage?.(usage);
 
   const raw = response.choices[0]?.message?.content;
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as { queries?: unknown };
-    return Array.isArray(parsed.queries)
+    const queries = Array.isArray(parsed.queries)
       ? parsed.queries
           .filter((query): query is string => typeof query === "string")
           .map((query) => query.trim())
           .filter(Boolean)
           .slice(0, 3)
       : [];
+    if (cacheable && queries.length === 3) {
+      await setRewriteCache(currentQuery, queries);
+    }
+    return queries;
   } catch {
     return [];
   }
@@ -405,10 +444,39 @@ function encodeSparseQuery(text: string): { indices: number[]; values: number[] 
 
 export const maxDuration = 60;
 
+type ChatRateLimitResult = Awaited<ReturnType<typeof checkChatRateLimit>>;
+
+function chatStreamHeaders(rl: ChatRateLimitResult): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  };
+  if (rl.scope !== "disabled") {
+    headers["X-RateLimit-Limit"] = String(rl.limit);
+    headers["X-RateLimit-Remaining"] = String(rl.remaining);
+    headers["X-RateLimit-Reset"] = String(rl.reset);
+  }
+  return headers;
+}
+
 export async function POST(req: NextRequest) {
+  const requestStart = Date.now();
   try {
     const clientId = getClientIdentifier(req);
-    const rl = await checkChatRateLimit(clientId);
+    const benchmarkKey = process.env.CHAT_BENCHMARK_KEY?.trim();
+    const benchmarkAuthorized =
+      Boolean(benchmarkKey) &&
+      req.headers.get("x-chat-benchmark-key") === benchmarkKey;
+    const rl: ChatRateLimitResult = benchmarkAuthorized
+      ? {
+          success: true,
+          limit: 0,
+          remaining: 0,
+          reset: 0,
+          scope: "disabled",
+        }
+      : await checkChatRateLimit(clientId);
     if (!rl.success) {
       const retryAfter = Math.max(1, Math.ceil((rl.reset - Date.now()) / 1000));
       const window = rl.scope === "minute" ? "a minute" : "an hour";
@@ -439,46 +507,140 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const pinecone = new Pinecone({
-      apiKey: process.env.PINECONE_API_KEY!,
-    });
-
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY!,
     });
 
+    const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
+    const hostSuggestedQuestion = isHostSuggestedQuestion(currentQuery);
+    const routingConversationHistory = hostSuggestedQuestion
+      ? undefined
+      : conversationHistory;
+    const usageRecords: ModelUsageRecord[] = [];
+    const recordUsage = (record: ModelUsageRecord) => {
+      usageRecords.push(record);
+    };
+    const cachedSuggestedReply = hostSuggestedQuestion
+      ? await getSuggestedReplyCache(currentQuery)
+      : null;
+    if (cachedSuggestedReply) {
+      const cachedArtifacts = cachedSuggestedReply.artifacts as Artifact[];
+      const encoder = new TextEncoder();
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  content: cachedSuggestedReply.reply,
+                  cache: { reply: "hit" },
+                })}\n\n`,
+              ),
+            );
+            if (cachedArtifacts.length > 0) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    artifacts: cachedArtifacts,
+                  })}\n\n`,
+                ),
+              );
+            }
+            const tA2UIStart = Date.now();
+            const a2ui = await composeA2UI(
+              openai,
+              currentQuery,
+              cachedSuggestedReply.reply,
+              cachedArtifacts,
+              recordUsage,
+            );
+            const a2uiMs = Date.now() - tA2UIStart;
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ a2ui })}\n\n`),
+            );
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  telemetry: {
+                    cache: {
+                      suggestedReply: "hit",
+                      rewrites: "skipped",
+                    },
+                    routing: {
+                      answerRoute: "cached",
+                      answerModel: "cache",
+                      a2uiModel: MODEL_CONFIG.a2uiModel,
+                    },
+                    usage: usageRecords,
+                    usageSummary: summarizeUsage(usageRecords),
+                  },
+                  timings: {
+                    rewriter: 0,
+                    retrieval: 0,
+                    ttft: 0,
+                    stream: 0,
+                    postStream: 0,
+                    a2ui: a2uiMs,
+                    total: Date.now() - requestStart,
+                  },
+                })}\n\n`,
+              ),
+            );
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+      return new Response(readableStream, {
+        headers: chatStreamHeaders(rl),
+      });
+    }
+
+    const pinecone = new Pinecone({
+      apiKey: process.env.PINECONE_API_KEY!,
+    });
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
 
-    const currentQuery = message || conversationHistory[conversationHistory.length - 1].content;
     const allJobs = getJobsFromYaml();
     const canonicalJobs = selectCanonicalJobsForQuery(currentQuery, allJobs);
     const canonicalReceiptJobs = selectCanonicalReceiptJobs(currentQuery, allJobs);
     const canonicalWorkContext = formatCanonicalWorkContext(canonicalJobs);
 
-    // Step 1: Speculative-parallel multi-query HyDE.
-    // HyDE adds ~2s of latency (one nano LLM call). Most queries are specific
-    // enough that baseline retrieval on the raw query already returns strong
-    // matches, in which case we want to skip HyDE entirely. So:
-    //   1. Kick off HyDE in the background (don't await).
-    //   2. Run baseline retrieval (embed + Pinecone hybrid query) on the raw
-    //      query.
-    //   3. If baseline produced enough matches above threshold → discard HyDE.
-    //      Wall-time is back to pre-HyDE latency.
-    //   4. Else → await three complementary rewrites, run the expanded
-    //      retrievals in parallel, and merge by id (max score). Wall-time is
-    //      bounded by max(baseline, HyDE) + one parallel retrieval round.
-    // Cost: every query pays the HyDE API tokens, even when discarded. Worth
-    // it on this volume.
-    const tHydeStart = Date.now();
-    const hydePromise = buildHydeQueries(openai, currentQuery, conversationHistory);
+    // Step 1: adaptive multi-query HyDE. Strong baseline queries skip the
+    // rewrite call. Weak queries still get all three complementary rewrites.
+    // OPENAI_HYDE_MODE=speculative restores the lower-latency, higher-cost
+    // parallel path, while OPENAI_HYDE_MODE=off disables rewrites.
+    let tHydeStart = 0;
+    let hydePromise: Promise<string[]> | null = null;
+    let rewriteCacheHit = false;
+    if (shouldStartHydeBeforeBaseline({ config: MODEL_CONFIG })) {
+      tHydeStart = Date.now();
+      hydePromise = buildHydeQueries(
+        openai,
+        currentQuery,
+        routingConversationHistory,
+        recordUsage,
+        () => {
+          rewriteCacheHit = true;
+        },
+      );
+    }
 
     console.log(`🔍 Original: "${currentQuery}"`);
 
     const tRetrievalStart = Date.now();
     const baselineEmbResp = await openai.embeddings.create({
-      model: "text-embedding-3-small",
+      model: MODEL_CONFIG.embeddingModel,
       input: currentQuery,
     });
+    const baselineEmbeddingUsage = toUsageRecord(
+      "baseline_embedding",
+      MODEL_CONFIG.embeddingModel,
+      baselineEmbResp.usage,
+    );
+    if (baselineEmbeddingUsage) recordUsage(baselineEmbeddingUsage);
     const baselineEmbedding = baselineEmbResp.data[0].embedding;
     const baselineSparse = encodeSparseQuery(currentQuery);
     const baselineResponse = await index.query({
@@ -512,11 +674,28 @@ export async function POST(req: NextRequest) {
     if (baselineStrong) {
       console.log(`⚡ Baseline strong (${baselineRelevantCount} ≥ ${HYDE_BYPASS_MIN_MATCHES}), HyDE discarded`);
       // Avoid unhandled rejection on the speculative call.
-      hydePromise.catch(() => {});
-    } else {
+      hydePromise?.catch(() => {});
+    } else if (
+      shouldRunHydeAfterBaseline({
+        config: MODEL_CONFIG,
+        baselineStrong,
+      })
+    ) {
       console.log(`⚠️  Baseline weak (${baselineRelevantCount} < ${HYDE_BYPASS_MIN_MATCHES}), awaiting HyDE`);
       let hypotheticalQueries: string[] = [];
       try {
+        if (!hydePromise) {
+          tHydeStart = Date.now();
+          hydePromise = buildHydeQueries(
+            openai,
+            currentQuery,
+            routingConversationHistory,
+            recordUsage,
+            () => {
+              rewriteCacheHit = true;
+            },
+          );
+        }
         hypotheticalQueries = await hydePromise;
       } catch (err) {
         console.log(`⚠️  HyDE call failed: ${err}`);
@@ -532,9 +711,15 @@ export async function POST(req: NextRequest) {
         );
         const tExpStart = Date.now();
         const expEmbResp = await openai.embeddings.create({
-          model: "text-embedding-3-small",
+          model: MODEL_CONFIG.embeddingModel,
           input: expandedQueries,
         });
+        const expandedEmbeddingUsage = toUsageRecord(
+          "expanded_embedding",
+          MODEL_CONFIG.embeddingModel,
+          expEmbResp.usage,
+        );
+        if (expandedEmbeddingUsage) recordUsage(expandedEmbeddingUsage);
         const expResponses = await Promise.all(
           expandedQueries.map((expandedQuery, indexInBatch) => {
             const expSparse = encodeSparseQuery(expandedQuery);
@@ -907,16 +1092,34 @@ ${STYLE_RULES}`;
     // Build messages array with conversation history
     let messagesToSend: ChatMessage[];
 
-    if (conversationHistory && conversationHistory.length > 0) {
+    if (hostSuggestedQuestion) {
+      messagesToSend = [{ role: "user", content: currentQuery }];
+    } else if (conversationHistory && conversationHistory.length > 0) {
       messagesToSend = pruneMessages(conversationHistory, systemPrompt);
     } else {
       messagesToSend = [{ role: "user", content: message }];
     }
 
+    const answerDecision = selectAnswerRoute({
+      config: MODEL_CONFIG,
+      query: currentQuery,
+      baselineStrong,
+      conversationMessageCount: routingConversationHistory?.length || 1,
+    });
+    console.log(
+      `🧭 Answer route: ${answerDecision.route} (${answerDecision.reason}) -> ${answerDecision.model}`,
+    );
+
     // Generate streaming response. Artifacts are emitted as citations are
     // detected in the stream, so nothing is pushed upfront.
     const stream = await openai.chat.completions.create({
-      model: "gpt-5.4",
+      model: answerDecision.model,
+      ...(answerDecision.model.startsWith("gpt-5")
+        ? { reasoning_effort: MODEL_CONFIG.answerReasoningEffort }
+        : {}),
+      service_tier: "default",
+      max_completion_tokens: 1800,
+      stream_options: { include_usage: true },
       messages: [
         { role: "system", content: systemPrompt },
         ...messagesToSend
@@ -949,6 +1152,12 @@ ${STYLE_RULES}`;
         };
         try {
           for await (const chunk of stream) {
+            const answerUsage = toUsageRecord(
+              "answer",
+              answerDecision.model,
+              chunk.usage,
+            );
+            if (answerUsage) recordUsage(answerUsage);
             const delta = chunk.choices[0]?.delta?.content || "";
             if (!delta) continue;
             if (tFirstToken === 0) {
@@ -1196,7 +1405,8 @@ ${STYLE_RULES}`;
                   let pickerJson = "{}";
                   try {
                     const picker = await openai.chat.completions.create({
-                      model: "gpt-5.4-nano",
+                      model: MODEL_CONFIG.quoteModel,
+                      service_tier: "default",
                       temperature: 0.9,
                       max_completion_tokens: 400,
                       response_format: { type: "json_object" },
@@ -1247,6 +1457,12 @@ ${corpus}`,
                         },
                       ],
                     });
+                    const pickerUsage = toUsageRecord(
+                      "quote_picker",
+                      MODEL_CONFIG.quoteModel,
+                      picker.usage,
+                    );
+                    if (pickerUsage) recordUsage(pickerUsage);
                     pickerJson = picker.choices[0]?.message?.content || "{}";
                   } catch (err) {
                     console.error(`Picker failed for ${id}:`, err);
@@ -1353,7 +1569,8 @@ ${corpus}`,
                 let raw = "{}";
                 try {
                   const res = await openai.chat.completions.create({
-                    model: "gpt-5.4-nano",
+                    model: MODEL_CONFIG.topicModel,
+                    service_tier: "default",
                     temperature: 0,
                     max_completion_tokens: 100,
                     response_format: { type: "json_object" },
@@ -1376,6 +1593,12 @@ ${topicDirectory}`,
                       { role: "user", content: `REPLY:\n${replyText}\n\nReturn JSON now.` },
                     ],
                   });
+                  const topicUsage = toUsageRecord(
+                    "topic_extractor",
+                    MODEL_CONFIG.topicModel,
+                    res.usage,
+                  );
+                  if (topicUsage) recordUsage(topicUsage);
                   raw = res.choices[0]?.message?.content || "{}";
                 } catch (err) {
                   console.error("Topic extractor failed:", err);
@@ -1467,21 +1690,61 @@ ${topicDirectory}`,
             }
           }
 
+          const suggestedReplyCacheWrite = hostSuggestedQuestion
+            ? setSuggestedReplyCache(currentQuery, {
+                reply: replyText,
+                artifacts: finalArtifacts,
+              })
+            : Promise.resolve();
           const tA2UIStart = Date.now();
           const a2ui = await composeA2UI(
             openai,
             currentQuery,
             replyText,
             finalArtifacts,
+            recordUsage,
           );
+          await suggestedReplyCacheWrite;
           timings.a2ui = Date.now() - tA2UIStart;
+          timings.total = Date.now() - requestStart;
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ a2ui })}\n\n`),
           );
           console.log(`⏱️  A2UI composition: ${timings.a2ui}ms`);
 
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ timings })}\n\n`),
+            encoder.encode(
+              `data: ${JSON.stringify({
+                telemetry: {
+                  cache: {
+                    suggestedReply: hostSuggestedQuestion
+                      ? "miss"
+                      : "ineligible",
+                    rewrites: rewriteCacheHit
+                      ? "hit"
+                      : usageRecords.some(
+                            (record) => record.stage === "retrieval_rewrite",
+                          )
+                        ? "miss"
+                        : "skipped",
+                  },
+                  routing: {
+                    mode: MODEL_CONFIG.answerRoutingMode,
+                    answerRoute: answerDecision.route,
+                    answerReason: answerDecision.reason,
+                    answerModel: answerDecision.model,
+                    rewriteModel: MODEL_CONFIG.rewriteModel,
+                    quoteModel: MODEL_CONFIG.quoteModel,
+                    topicModel: MODEL_CONFIG.topicModel,
+                    a2uiModel: MODEL_CONFIG.a2uiModel,
+                    hydeMode: MODEL_CONFIG.hydeMode,
+                  },
+                  usage: usageRecords,
+                  usageSummary: summarizeUsage(usageRecords),
+                },
+                timings,
+              })}\n\n`,
+            ),
           );
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
@@ -1491,17 +1754,9 @@ ${topicDirectory}`,
       },
     });
 
-    const streamHeaders: Record<string, string> = {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    };
-    if (rl.scope !== 'disabled') {
-      streamHeaders['X-RateLimit-Limit'] = String(rl.limit);
-      streamHeaders['X-RateLimit-Remaining'] = String(rl.remaining);
-      streamHeaders['X-RateLimit-Reset'] = String(rl.reset);
-    }
-    return new Response(readableStream, { headers: streamHeaders });
+    return new Response(readableStream, {
+      headers: chatStreamHeaders(rl),
+    });
 
   } catch (error) {
     console.error("Error in chat API:", error);

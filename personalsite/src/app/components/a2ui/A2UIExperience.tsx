@@ -11,14 +11,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  Reorder,
+  useReducedMotion,
+} from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
   Check,
   Clock3,
   Copy,
+  GripVertical,
   History,
+  Pencil,
   Quote as QuoteIcon,
   X,
 } from "lucide-react";
@@ -48,11 +55,21 @@ export type A2UITurn = {
   isLoading: boolean;
 };
 
+export type QueuedPrompt = {
+  id: string;
+  text: string;
+};
+
 type Props = {
   turns: A2UITurn[];
   onAsk: (prompt: string) => void;
   onNewConversation: () => void;
   suggestions: string[];
+  queuedPrompts: QueuedPrompt[];
+  editingQueueIndex: number;
+  onEditQueued: (index: number) => void;
+  onRemoveQueued: (index: number) => void;
+  onReorderQueued: (orderedIds: string[]) => void;
   footer: ReactNode;
 };
 
@@ -61,6 +78,11 @@ export function A2UIExperience({
   onAsk,
   onNewConversation,
   suggestions,
+  queuedPrompts,
+  editingQueueIndex,
+  onEditQueued,
+  onRemoveQueued,
+  onReorderQueued,
   footer,
 }: Props) {
   const [activeId, setActiveId] = useState(turns.at(-1)?.id ?? "");
@@ -92,6 +114,11 @@ export function A2UIExperience({
         onNewConversation={onNewConversation}
         suggestions={suggestions}
         onAsk={onAsk}
+        queuedPrompts={queuedPrompts}
+        editingQueueIndex={editingQueueIndex}
+        onEditQueued={onEditQueued}
+        onRemoveQueued={onRemoveQueued}
+        onReorderQueued={onReorderQueued}
       />
 
       <button
@@ -114,6 +141,11 @@ export function A2UIExperience({
           onClose={() => setHistoryOpen(false)}
           onNewConversation={onNewConversation}
           suggestions={suggestions}
+          queuedPrompts={queuedPrompts}
+          editingQueueIndex={editingQueueIndex}
+          onEditQueued={onEditQueued}
+          onRemoveQueued={onRemoveQueued}
+          onReorderQueued={onReorderQueued}
           onAsk={(prompt) => {
             setHistoryOpen(false);
             onAsk(prompt);
@@ -265,8 +297,19 @@ function A2UICanvas({
     uiDocument.compositionOptions?.length > 0
       ? uiDocument.compositionOptions
       : (["stacked"] satisfies A2UIComposition[]);
+  const embeddedQuote =
+    uiDocument.primary.type === "essay_margin"
+      ? uiDocument.supporting.find(
+          (component) => component.type === "quote_focus",
+        )
+      : undefined;
+  const supportingComponents = embeddedQuote
+    ? uiDocument.supporting.filter(
+        (component) => component.id !== embeddedQuote.id,
+      )
+    : uiDocument.supporting;
   const composition: A2UIComposition =
-    uiDocument.supporting.length > 0
+    supportingComponents.length > 0
       ? (
           compositionOptions[compositionTurn % compositionOptions.length] ??
           "stacked"
@@ -322,6 +365,7 @@ function A2UICanvas({
         >
           <A2UIBlock
             component={uiDocument.primary}
+            embeddedQuote={embeddedQuote}
             navigationPath={componentNavigationPaths.get(uiDocument.primary.id)}
             artifactMap={artifactMap}
             onOpen={(id) => {
@@ -331,12 +375,12 @@ function A2UICanvas({
           />
         </div>
 
-        {uiDocument.supporting.length > 0 ? (
+        {supportingComponents.length > 0 ? (
           <div
             className={`${styles.supporting} ${styles.reveal}`}
             data-visible={revealStage >= 3}
           >
-            {uiDocument.supporting.map((component) => (
+            {supportingComponents.map((component) => (
               <A2UIBlock
                 key={component.id}
                 component={component}
@@ -379,11 +423,13 @@ function A2UICanvas({
 
 function A2UIBlock({
   component,
+  embeddedQuote,
   navigationPath,
   artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
+  embeddedQuote?: A2UIComponent;
   navigationPath?: string;
   artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
@@ -417,27 +463,7 @@ function A2UIBlock({
   }
 
   if (component.type === "quote_focus") {
-    return (
-      <section
-        id={`a2ui-${component.id}`}
-        className={`${styles.component} ${styles.quoteComponent}`}
-      >
-        <QuoteIcon aria-hidden="true" className={styles.quoteIcon} />
-        {quoteArtifacts.length > 0 ? (
-          quoteArtifacts.map((artifact) => (
-            <blockquote key={artifact.id}>
-              <p>{stripWrappingQuotes(artifact.annotation!)}</p>
-              <footer>{artifactLabel(artifact)}</footer>
-            </blockquote>
-          ))
-        ) : (
-          <>
-            {heading}
-            <Markdown>{component.body}</Markdown>
-          </>
-        )}
-      </section>
-    );
+    return <QuotePaper component={component} quoteArtifacts={quoteArtifacts} />;
   }
 
   if (component.type === "research_map") {
@@ -459,7 +485,13 @@ function A2UIBlock({
   }
 
   if (component.type === "field_notebook") {
-    return <FieldNotebook component={component} onOpen={onOpen} />;
+    return (
+      <FieldNotebook
+        component={component}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
+      />
+    );
   }
 
   if (component.type === "system_blueprint") {
@@ -471,7 +503,14 @@ function A2UIBlock({
   }
 
   if (component.type === "essay_margin") {
-    return <EssayMargin component={component} onOpen={onOpen} />;
+    return (
+      <EssayMargin
+        component={component}
+        embeddedQuote={embeddedQuote}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
+      />
+    );
   }
 
   if (component.type === "specimen_board") {
@@ -715,6 +754,38 @@ function A2UIBlock({
   );
 }
 
+function QuotePaper({
+  component,
+  quoteArtifacts,
+  className = "",
+}: {
+  component: A2UIComponent;
+  quoteArtifacts: Artifact[];
+  className?: string;
+}) {
+  return (
+    <section
+      id={`a2ui-${component.id}`}
+      className={`${styles.component} ${styles.quoteComponent} ${className}`}
+    >
+      <QuoteIcon aria-hidden="true" className={styles.quoteIcon} />
+      {quoteArtifacts.length > 0 ? (
+        quoteArtifacts.map((artifact) => (
+          <blockquote key={artifact.id}>
+            <p>{stripWrappingQuotes(artifact.annotation!)}</p>
+            <footer>{artifactLabel(artifact)}</footer>
+          </blockquote>
+        ))
+      ) : (
+        <>
+          {component.title ? <h2>{component.title}</h2> : null}
+          <Markdown>{component.body}</Markdown>
+        </>
+      )}
+    </section>
+  );
+}
+
 function A2UIAsset({
   assetId,
   className,
@@ -889,9 +960,11 @@ function FoldTimeline({
 
 function FieldNotebook({
   component,
+  artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
+  artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
 }) {
   const artifactIds = [
@@ -900,6 +973,11 @@ function FieldNotebook({
   ].filter((id, index, all) => id && all.indexOf(id) === index);
   const sharedArtifactId = artifactIds.length === 1 ? artifactIds[0] : "";
   const heroAsset = component.items.find((item) => item.assetId)?.assetId ?? "";
+  const sharedArtifact = sharedArtifactId
+    ? artifactMap.get(sharedArtifactId)
+    : undefined;
+  const notebookTitle =
+    component.title || (sharedArtifact ? artifactLabel(sharedArtifact) : "");
 
   return (
     <section
@@ -908,7 +986,7 @@ function FieldNotebook({
     >
       <div className={styles.notebookFold} aria-hidden="true" />
       <div className={styles.notebookPage}>
-        {component.title ? <h2>{component.title}</h2> : null}
+        {notebookTitle ? <h2>{notebookTitle}</h2> : null}
         {component.body ? <Markdown>{component.body}</Markdown> : null}
         {heroAsset ? (
           <A2UIAsset assetId={heroAsset} className={styles.notebookAsset} />
@@ -1037,7 +1115,10 @@ function EvidenceStack({
         {component.title ? <h2>{component.title}</h2> : null}
         {component.body ? <Markdown>{component.body}</Markdown> : null}
       </div>
-      <div className={styles.evidenceSlips}>
+      <div
+        className={styles.evidenceSlips}
+        data-count={Math.min(component.items.length, 4)}
+      >
         {component.items.map((item, index) => {
           const content = (
             <>
@@ -1078,31 +1159,50 @@ function EvidenceStack({
 
 function EssayMargin({
   component,
+  embeddedQuote,
+  artifactMap,
   onOpen,
 }: {
   component: A2UIComponent;
+  embeddedQuote?: A2UIComponent;
+  artifactMap: Map<string, Artifact>;
   onOpen: (id: string) => void;
 }) {
   const heroAsset = component.items.find((item) => item.assetId)?.assetId ?? "";
   const sharedArtifactId =
     component.artifactIds.length === 1 ? component.artifactIds[0] : "";
+  const embeddedQuoteArtifacts = embeddedQuote
+    ? embeddedQuote.quoteIds.flatMap((quoteId) => {
+        const artifact = artifactMap.get(quoteId.replace(/^quote:/, ""));
+        return artifact?.annotation ? [artifact] : [];
+      })
+    : [];
 
   return (
     <section
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.essayMargin}`}
     >
-      <div className={styles.essayPage}>
-        {component.title ? <h2>{component.title}</h2> : null}
-        {component.body ? <Markdown>{component.body}</Markdown> : null}
-        {heroAsset ? (
-          <A2UIAsset assetId={heroAsset} className={styles.essayAsset} />
-        ) : null}
-        {sharedArtifactId ? (
-          <button type="button" onClick={() => onOpen(sharedArtifactId)}>
-            Read the source
-            <ArrowRight aria-hidden="true" />
-          </button>
+      <div className={styles.essayMainColumn}>
+        <div className={styles.essayPage}>
+          {component.title ? <h2>{component.title}</h2> : null}
+          {component.body ? <Markdown>{component.body}</Markdown> : null}
+          {heroAsset ? (
+            <A2UIAsset assetId={heroAsset} className={styles.essayAsset} />
+          ) : null}
+          {sharedArtifactId ? (
+            <button type="button" onClick={() => onOpen(sharedArtifactId)}>
+              Read the source
+              <ArrowRight aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
+        {embeddedQuote ? (
+          <QuotePaper
+            component={embeddedQuote}
+            quoteArtifacts={embeddedQuoteArtifacts}
+            className={styles.essayInlineQuote}
+          />
         ) : null}
       </div>
       <div className={styles.marginNotes}>
@@ -1510,6 +1610,11 @@ function HistoryRail({
   onNewConversation,
   suggestions,
   onAsk,
+  queuedPrompts,
+  editingQueueIndex,
+  onEditQueued,
+  onRemoveQueued,
+  onReorderQueued,
 }: {
   turns: A2UITurn[];
   activeId: string;
@@ -1517,6 +1622,11 @@ function HistoryRail({
   onNewConversation: () => void;
   suggestions: string[];
   onAsk: (prompt: string) => void;
+  queuedPrompts: QueuedPrompt[];
+  editingQueueIndex: number;
+  onEditQueued: (index: number) => void;
+  onRemoveQueued: (index: number) => void;
+  onReorderQueued: (orderedIds: string[]) => void;
 }) {
   return (
     <aside className={styles.historyRail} aria-label="Conversation">
@@ -1533,6 +1643,13 @@ function HistoryRail({
           </button>
         ))}
       </div>
+      <QueuedFollowUps
+        prompts={queuedPrompts}
+        editingIndex={editingQueueIndex}
+        onEdit={onEditQueued}
+        onRemove={onRemoveQueued}
+        onReorder={onReorderQueued}
+      />
       <SuggestionPills suggestions={suggestions} onAsk={onAsk} />
       <button
         type="button"
@@ -1553,6 +1670,11 @@ function MobileHistory({
   onNewConversation,
   suggestions,
   onAsk,
+  queuedPrompts,
+  editingQueueIndex,
+  onEditQueued,
+  onRemoveQueued,
+  onReorderQueued,
 }: {
   turns: A2UITurn[];
   activeId: string;
@@ -1561,6 +1683,11 @@ function MobileHistory({
   onNewConversation: () => void;
   suggestions: string[];
   onAsk: (prompt: string) => void;
+  queuedPrompts: QueuedPrompt[];
+  editingQueueIndex: number;
+  onEditQueued: (index: number) => void;
+  onRemoveQueued: (index: number) => void;
+  onReorderQueued: (orderedIds: string[]) => void;
 }) {
   return (
     <aside className={styles.mobileHistory} aria-label="Conversation">
@@ -1580,11 +1707,90 @@ function MobileHistory({
           </button>
         ))}
       </div>
+      <QueuedFollowUps
+        prompts={queuedPrompts}
+        editingIndex={editingQueueIndex}
+        onEdit={onEditQueued}
+        onRemove={onRemoveQueued}
+        onReorder={onReorderQueued}
+      />
       <SuggestionPills suggestions={suggestions} onAsk={onAsk} />
       <button type="button" onClick={onNewConversation}>
         New conversation
       </button>
     </aside>
+  );
+}
+
+function QueuedFollowUps({
+  prompts,
+  editingIndex,
+  onEdit,
+  onRemove,
+  onReorder,
+}: {
+  prompts: QueuedPrompt[];
+  editingIndex: number;
+  onEdit: (index: number) => void;
+  onRemove: (index: number) => void;
+  onReorder: (orderedIds: string[]) => void;
+}) {
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  if (prompts.length === 0) return null;
+
+  return (
+    <section className={styles.queuedFollowUps} aria-label="Queued follow-ups">
+      <div className={styles.queueLabel}>
+        <Clock3 aria-hidden="true" />
+        <span>Up next</span>
+        <small>{prompts.length}</small>
+      </div>
+      <Reorder.Group
+        axis="y"
+        values={prompts}
+        onReorder={(next) => onReorder(next.map((prompt) => prompt.id))}
+        className={styles.queueItems}
+        layoutScroll
+      >
+        {prompts.map((prompt, index) => (
+          <Reorder.Item
+            value={prompt}
+            className={styles.queueItem}
+            data-editing={editingIndex === index}
+            data-dragging={draggingId === prompt.id}
+            key={prompt.id}
+            onDragStart={() => setDraggingId(prompt.id)}
+            onDragEnd={() => setDraggingId(null)}
+            whileDrag={{
+              scale: 1.025,
+              zIndex: 40,
+              boxShadow: "0 14px 28px rgb(53 66 45 / 0.18)",
+            }}
+          >
+            <button
+              className={styles.queuePrompt}
+              type="button"
+              onClick={() => onEdit(index)}
+              aria-label={`Edit queued question: ${prompt.text}`}
+            >
+              <span aria-hidden="true">{index + 1}</span>
+              <p>{prompt.text}</p>
+              <Pencil aria-hidden="true" />
+            </button>
+            <div className={styles.queueControls}>
+              <GripVertical aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => onRemove(index)}
+                aria-label={`Remove queued question: ${prompt.text}`}
+              >
+                <X aria-hidden="true" />
+              </button>
+            </div>
+          </Reorder.Item>
+        ))}
+      </Reorder.Group>
+    </section>
   );
 }
 

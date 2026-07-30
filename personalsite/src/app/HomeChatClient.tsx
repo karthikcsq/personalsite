@@ -28,8 +28,15 @@ import { useChatMode } from "@/app/components/ChatModeContext";
 import {
   A2UIExperience,
   type A2UITurn,
+  type QueuedPrompt,
 } from "@/app/components/a2ui/A2UIExperience";
 import type { A2UIDocument } from "@/a2ui/protocol";
+import {
+  CHAT_SUGGESTIONS as QUESTION_BANK,
+  CHAT_SUGGESTION_CATEGORIES as CATEGORIES,
+  type ChatSuggestion as Question,
+  type ChatSuggestionCategory as Category,
+} from "@/data/chatSuggestions";
 
 // Error markers stored in assistant content. Tag with a variant so the
 // renderer can show class-appropriate copy (network vs. generic 5xx).
@@ -60,52 +67,6 @@ interface Message {
 // more categories so the rotation drifts toward a visitor's interest as they
 // click chips. Keep entries short (≤ ~50 chars) and conversational (third
 // person, no em dashes).
-type Category = "work" | "opinions" | "life";
-type Question = { text: string; tags: readonly Category[] };
-
-const QUESTION_BANK: readonly Question[] = [
-  // Work — what he's built, where he's worked, what he's researching.
-  { text: "What is Karthik building right now?", tags: ["work"] },
-  { text: "Where has he worked?", tags: ["work"] },
-  { text: "Show me his research.", tags: ["work"] },
-  { text: "Tell me about Repple.", tags: ["work"] },
-  { text: "What is google-tools-mcp?", tags: ["work"] },
-  { text: "Which hackathons has he won?", tags: ["work"] },
-  { text: "Tell me about buildpurdue.", tags: ["work"] },
-  { text: "What did he do at Peraton Labs?", tags: ["work"] },
-  { text: "What's Veritas?", tags: ["work"] },
-  { text: "What's Caladrius?", tags: ["work"] },
-  { text: "What did he build at the Naval Research Lab?", tags: ["work"] },
-  { text: "Has he done quantum computing research?", tags: ["work"] },
-  { text: "What tools does he use to build?", tags: ["work"] },
-  { text: "Show me his favorite project.", tags: ["work", "opinions"] },
-
-  // Opinions — takes, philosophy, why-he-thinks-what-he-thinks.
-  { text: "What's his take on MCP?", tags: ["opinions"] },
-  { text: "What does he write about?", tags: ["opinions"] },
-  { text: "What's his view on the future of AI work?", tags: ["opinions"] },
-  { text: "Does he think AGI is close?", tags: ["opinions"] },
-  { text: "What AI company would he start?", tags: ["opinions"] },
-  { text: "What makes a great engineer in his view?", tags: ["opinions"] },
-  { text: "What does he think about quantum computing?", tags: ["opinions"] },
-  { text: "Why did he co-found buildpurdue?", tags: ["opinions", "work"] },
-  { text: "What does he do at buildpurdue?", tags: ["opinions", "work"] },
-  { text: "Why can't agents book a restaurant yet?", tags: ["opinions"] },
-
-  // Life — story, background, what he's like outside the resume.
-  { text: "How did he get into AI?", tags: ["life"] },
-  { text: "Where did he grow up?", tags: ["life"] },
-  { text: "Tell me about his time at TJHSST.", tags: ["life"] },
-  { text: "What's he studying at Purdue?", tags: ["life"] },
-  { text: "Tell me something surprising about him.", tags: ["life"] },
-  { text: "Does he play any instruments?", tags: ["life"] },
-  { text: "Show me his photography.", tags: ["life"] },
-  { text: "What does he do outside of code?", tags: ["life"] },
-  { text: "Where is he based?", tags: ["life"] },
-];
-
-const CATEGORIES: readonly Category[] = ["work", "opinions", "life"];
-
 function shuffled<T>(arr: readonly T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -171,7 +132,7 @@ export default function HomeChatClient() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [queue, setQueue] = useState<string[]>([]);
+  const [queue, setQueue] = useState<QueuedPrompt[]>([]);
   const [queueNavIndex, setQueueNavIndex] = useState(-1);
   const [savedInput, setSavedInput] = useState("");
   // Per-category queues, frozen for the session so order stays stable as the
@@ -209,6 +170,7 @@ export default function HomeChatClient() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isProcessingRef = useRef(false);
+  const queueIdRef = useRef(0);
   const messagesRef = useRef(messages);
   const abortRef = useRef<AbortController | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +179,7 @@ export default function HomeChatClient() {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [resetSnapshot, setResetSnapshot] = useState<{
     messages: Message[];
-    queue: string[];
+    queue: QueuedPrompt[];
     weights: Record<Category, number>;
     cursor: number;
   } | null>(null);
@@ -301,22 +263,23 @@ export default function HomeChatClient() {
 
   const processMessage = useCallback(
     async (messageText: string, options?: { skipUserAppend?: boolean }) => {
-    setIsProcessing(true);
-    const skipUserAppend = options?.skipUserAppend === true;
-    const userMessage: Message = { role: "user", content: messageText };
-    if (!skipUserAppend) {
-      setMessages((prev) => [...prev, userMessage]);
-    }
-    const baseLength = skipUserAppend
-      ? messagesRef.current.length
-      : messagesRef.current.length + 1;
-    const assistantIndex = baseLength;
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      isProcessingRef.current = true;
+      setIsProcessing(true);
+      const skipUserAppend = options?.skipUserAppend === true;
+      const userMessage: Message = { role: "user", content: messageText };
+      if (!skipUserAppend) {
+        setMessages((prev) => [...prev, userMessage]);
+      }
+      const baseLength = skipUserAppend
+        ? messagesRef.current.length
+        : messagesRef.current.length + 1;
+      const assistantIndex = baseLength;
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-    // Abort any in-flight request and start a fresh controller for this turn.
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+      // Abort any in-flight request and start a fresh controller for this turn.
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
     try {
       const baseMessages = skipUserAppend
@@ -425,8 +388,9 @@ export default function HomeChatClient() {
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null;
+        isProcessingRef.current = false;
+        setIsProcessing(false);
       }
-      setIsProcessing(false);
     }
   },
   [],
@@ -435,6 +399,7 @@ export default function HomeChatClient() {
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    isProcessingRef.current = false;
     setIsProcessing(false);
   }, []);
 
@@ -462,6 +427,7 @@ export default function HomeChatClient() {
     if (!target || target.role !== "user") return;
     abortRef.current?.abort();
     abortRef.current = null;
+    isProcessingRef.current = false;
     setIsProcessing(false);
     const truncated = msgs.slice(0, index);
     setMessages(truncated);
@@ -480,7 +446,7 @@ export default function HomeChatClient() {
     if (!isProcessing && queue.length > 0 && queueNavIndex === -1) {
       const next = queue[0];
       setQueue((prev) => prev.slice(1));
-      processMessage(next);
+      processMessage(next.text);
     }
   }, [isProcessing, queue, queueNavIndex, processMessage]);
 
@@ -492,7 +458,10 @@ export default function HomeChatClient() {
       if (queueNavIndex >= 0) {
         setQueue((prev) => {
           const updated = [...prev];
-          updated[queueNavIndex] = trimmed;
+          updated[queueNavIndex] = {
+            ...updated[queueNavIndex],
+            text: trimmed,
+          };
           return updated;
         });
         setQueueNavIndex(-1);
@@ -502,7 +471,11 @@ export default function HomeChatClient() {
         return;
       }
       if (isProcessingRef.current) {
-        setQueue((prev) => [...prev, trimmed]);
+        const queuedPrompt: QueuedPrompt = {
+          id: `queued-${queueIdRef.current++}`,
+          text: trimmed,
+        };
+        setQueue((prev) => [...prev, queuedPrompt]);
         setInput("");
         setChipCursor((prev) => prev + 4);
         inputRef.current?.focus();
@@ -549,29 +522,35 @@ export default function HomeChatClient() {
         setSavedInput(input);
         const newIndex = queue.length - 1;
         setQueueNavIndex(newIndex);
-        setInput(queue[newIndex]);
+        setInput(queue[newIndex].text);
       } else if (queueNavIndex > 0) {
         setQueue((prev) => {
           const updated = [...prev];
-          updated[queueNavIndex] = input;
+          updated[queueNavIndex] = {
+            ...updated[queueNavIndex],
+            text: input,
+          };
           return updated;
         });
         const newIndex = queueNavIndex - 1;
         setQueueNavIndex(newIndex);
-        setInput(queue[newIndex]);
+        setInput(queue[newIndex].text);
       }
     } else if (e.key === "ArrowDown" && !e.shiftKey) {
       e.preventDefault();
       if (queueNavIndex === -1) return;
       setQueue((prev) => {
         const updated = [...prev];
-        updated[queueNavIndex] = input;
+        updated[queueNavIndex] = {
+          ...updated[queueNavIndex],
+          text: input,
+        };
         return updated;
       });
       if (queueNavIndex < queue.length - 1) {
         const newIndex = queueNavIndex + 1;
         setQueueNavIndex(newIndex);
-        setInput(queue[newIndex]);
+        setInput(queue[newIndex].text);
       } else {
         setQueueNavIndex(-1);
         setInput(savedInput);
@@ -581,7 +560,10 @@ export default function HomeChatClient() {
       e.preventDefault();
       setQueue((prev) => {
         const updated = [...prev];
-        updated[queueNavIndex] = input;
+        updated[queueNavIndex] = {
+          ...updated[queueNavIndex],
+          text: input,
+        };
         return updated;
       });
       setQueueNavIndex(-1);
@@ -594,14 +576,17 @@ export default function HomeChatClient() {
     if (queueNavIndex === index) return;
     if (queueNavIndex === -1) {
       setSavedInput(input);
-      setInput(queue[index]);
+      setInput(queue[index].text);
     } else {
       setQueue((prev) => {
         const updated = [...prev];
-        updated[queueNavIndex] = input;
+        updated[queueNavIndex] = {
+          ...updated[queueNavIndex],
+          text: input,
+        };
         return updated;
       });
-      setInput(queue[index]);
+      setInput(queue[index].text);
     }
     setQueueNavIndex(index);
     inputRef.current?.focus();
@@ -620,12 +605,29 @@ export default function HomeChatClient() {
     }
   };
 
+  const reorderQueue = (orderedIds: string[]) => {
+    const byId = new Map(queue.map((item) => [item.id, item]));
+    const reordered = orderedIds.flatMap((id) => {
+      const item = byId.get(id);
+      return item ? [item] : [];
+    });
+    if (reordered.length !== queue.length) return;
+
+    const editingId =
+      queueNavIndex >= 0 ? queue[queueNavIndex]?.id : undefined;
+    setQueue(reordered);
+    if (editingId) {
+      setQueueNavIndex(reordered.findIndex((item) => item.id === editingId));
+    }
+  };
+
   const resetChat = () => {
     if (messagesRef.current.length === 0) return;
     // Snapshot for the undo affordance. Aborting any in-flight stream first
     // so the snapshot reflects what the user actually saw.
     abortRef.current?.abort();
     abortRef.current = null;
+    isProcessingRef.current = false;
     setIsProcessing(false);
     setResetSnapshot({
       messages: messagesRef.current,
@@ -688,7 +690,7 @@ export default function HomeChatClient() {
   const askedSet = useMemo(() => {
     const s = new Set<string>();
     for (const m of messages) if (m.role === "user") s.add(m.content.trim());
-    for (const q of queue) s.add(q.trim());
+    for (const q of queue) s.add(q.text.trim());
     return s;
   }, [messages, queue]);
 
@@ -891,6 +893,11 @@ export default function HomeChatClient() {
           onAsk={submit}
           onNewConversation={resetChat}
           suggestions={inChatChips}
+          queuedPrompts={queue}
+          editingQueueIndex={queueNavIndex}
+          onEditQueued={startEditQueue}
+          onRemoveQueued={removeFromQueue}
+          onReorderQueued={reorderQueue}
           footer={
             <ChatInput
               variant="docked"
@@ -984,7 +991,7 @@ export default function HomeChatClient() {
                   </span>
                   {queue.map((item, index) => (
                     <div
-                      key={index}
+                      key={item.id}
                       className={`group flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] transition-colors ${
                         queueNavIndex === index
                           ? "border-[var(--color-accent)] bg-[var(--color-accent-tint)] text-[var(--color-accent-hover)]"
@@ -997,7 +1004,7 @@ export default function HomeChatClient() {
                         className="max-w-[160px] truncate text-left hover:text-[var(--color-ink)]"
                         aria-label="Edit queued message"
                       >
-                        {item}
+                        {item.text}
                       </button>
                       <button
                         onClick={(e) => {

@@ -136,6 +136,199 @@
   transform: translateX(2px);
 }
 
+.queuedFollowUps {
+  flex: none;
+  margin: 10px 25px 14px 34px;
+}
+
+.queueLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 5px 9px;
+  color: var(--a2ui-green);
+  font-size: 11px;
+}
+
+.queueLabel svg {
+  width: 13px;
+  height: 13px;
+}
+
+.queueLabel small {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--a2ui-green-soft);
+  font-size: 10px;
+  place-items: center;
+}
+
+.queueItems {
+  display: flex;
+  max-height: 154px;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  overflow-y: auto;
+  padding: 2px 5px 7px 1px;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.queueItem {
+  display: grid;
+  min-height: 46px;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  align-items: center;
+  border: 1px solid color-mix(in oklch, var(--a2ui-green) 22%, var(--color-hairline));
+  border-radius: 15px 15px 15px 5px;
+  background: color-mix(in oklch, var(--a2ui-green-soft) 58%, var(--a2ui-card));
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.7) inset,
+    0 4px 11px rgb(53 66 45 / 0.08);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+  animation: queue-bubble-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.queueItem:hover {
+  border-color: color-mix(in oklch, var(--a2ui-green) 42%, var(--color-hairline));
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.75) inset,
+    0 6px 15px rgb(53 66 45 / 0.11);
+}
+
+.queueItem[data-dragging="true"] {
+  border-color: color-mix(in oklch, var(--a2ui-green) 58%, var(--color-hairline));
+  cursor: grabbing;
+}
+
+.queueItem[data-editing="true"] {
+  border-color: color-mix(in oklch, var(--a2ui-rust) 56%, var(--color-hairline));
+  background: color-mix(in oklch, var(--a2ui-card) 90%, var(--a2ui-rust) 10%);
+}
+
+.queuePrompt {
+  display: grid;
+  min-width: 0;
+  align-self: stretch;
+  grid-template-columns: 19px minmax(0, 1fr) 12px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 2px 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-muted);
+  cursor: grab;
+  text-align: left;
+}
+
+.queuePrompt > span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--a2ui-green) 10%, transparent);
+  color: var(--a2ui-green);
+  font-family: var(--font-serif);
+  font-size: 10px;
+  place-items: center;
+}
+
+.queuePrompt > svg {
+  width: 11px;
+  height: 11px;
+  color: var(--a2ui-green);
+  opacity: 0.42;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.queuePrompt:hover > svg,
+.queuePrompt:focus-visible > svg {
+  opacity: 0.9;
+  transform: rotate(-8deg);
+}
+
+.queueItem p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.queueControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding-right: 5px;
+  opacity: 0.68;
+  transition: opacity 140ms ease;
+}
+
+.queueItem:hover .queueControls,
+.queueItem:focus-within .queueControls {
+  opacity: 1;
+}
+
+.queueControls button {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-subtle);
+  cursor: pointer;
+  opacity: 0.48;
+  place-items: center;
+  transition: opacity 140ms ease, color 140ms ease;
+}
+
+.queueControls > svg {
+  width: 12px;
+  height: 16px;
+  color: var(--a2ui-green);
+  opacity: 0.52;
+  pointer-events: none;
+}
+
+.queueControls > button {
+  width: 19px;
+  height: 24px;
+}
+
+.queueControls button:hover:not(:disabled) {
+  color: var(--a2ui-rust);
+  opacity: 1;
+}
+
+.queueControls button svg {
+  width: 12px;
+  height: 12px;
+}
+
+@keyframes queue-bubble-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .canvas {
   position: relative;
   z-index: 10;
@@ -2037,9 +2230,13 @@ button.researchStage:hover .researchStageAsset {
   position: relative;
   display: grid;
   min-height: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: 14px 12px;
   padding: 10px 4px 22px;
+}
+
+.evidenceSlips[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .evidenceSlips > button,
@@ -2129,10 +2326,17 @@ button.researchStage:hover .researchStageAsset {
 
 .essayMargin {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.55fr);
-  gap: 34px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 30px;
+  align-items: start;
   padding: 10px 0 30px;
+}
+
+.essayMainColumn {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+  align-content: start;
 }
 
 .essayPage {
@@ -2193,6 +2397,30 @@ button.researchStage:hover .researchStageAsset {
 
 .essayPage > button svg {
   width: 13px;
+}
+
+.essayInlineQuote {
+  min-height: 0;
+  padding: 21px 26px 20px;
+  transform: rotate(-0.22deg);
+}
+
+.essayInlineQuote .quoteIcon {
+  width: 25px;
+  height: 25px;
+}
+
+.essayInlineQuote blockquote {
+  margin: 5px 0 0 12px;
+}
+
+.essayInlineQuote blockquote p {
+  font-size: clamp(17px, 1.3vw, 21px);
+  line-height: 1.27;
+}
+
+.essayInlineQuote footer {
+  margin-top: 12px;
 }
 
 .marginNotes {
@@ -2884,6 +3112,14 @@ button.researchStage:hover .researchStageAsset {
     margin: 20px 0 6px;
   }
 
+  .mobileHistory .queuedFollowUps {
+    margin: 20px 0 0;
+  }
+
+  .mobileHistory .queueItems {
+    max-height: 180px;
+  }
+
   .mobileHistory > button:last-child {
     padding: 14px 0 0;
     border: 0;
@@ -3274,6 +3510,10 @@ button.researchStage:hover .researchStageAsset {
     min-height: 0;
     gap: 10px;
     margin-top: 22px;
+  }
+
+  .evidenceSlips[data-count="4"] {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .evidenceSlips > button,

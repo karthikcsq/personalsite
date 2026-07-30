@@ -724,8 +724,9 @@ export function buildFallbackA2UI(
   artifacts: A2UIArtifactLike[],
 ): A2UIDocument {
   const quoted = artifacts.filter((artifact) => artifact.annotation?.trim());
+  const singleArtifact = artifacts.length === 1 ? artifacts[0] : null;
   const supporting: A2UIComponent[] = [];
-  if (artifacts.length > 0) {
+  if (artifacts.length > 1) {
     supporting.push({
       id: "evidence",
       type: "artifact_focus",
@@ -762,16 +763,27 @@ export function buildFallbackA2UI(
     title: question,
     lead: "",
     compositionOptions: ["stacked", "primary_top"],
-    primary: {
-      id: "answer",
-      type: "narrative",
-      title: "",
-      body: reply,
-      items: [],
-      options: [],
-      artifactIds: artifacts.slice(0, 3).map((artifact) => artifact.id),
-      quoteIds: [],
-    },
+    primary: singleArtifact
+      ? {
+          id: "answer",
+          type: "artifact_focus",
+          title: "",
+          body: reply,
+          items: [],
+          options: [],
+          artifactIds: [singleArtifact.id],
+          quoteIds: [],
+        }
+      : {
+          id: "answer",
+          type: "narrative",
+          title: "",
+          body: reply,
+          items: [],
+          options: [],
+          artifactIds: artifacts.slice(0, 3).map((artifact) => artifact.id),
+          quoteIds: [],
+        },
     supporting: supporting.slice(0, 2),
     actions: [],
   };

@@ -415,6 +415,31 @@ test("fallback surfaces verified quotes without copying them into model fields",
   assert.equal(JSON.stringify(document).includes("future of agents"), false);
 });
 
+test("single-artifact fallback makes the paper own the answer", () => {
+  const document = buildFallbackA2UI(
+    "What's Caladrius?",
+    "Caladrius is a privacy-first hospital triage assistant.",
+    [artifacts[1]],
+  );
+
+  assert.equal(document.primary.type, "artifact_focus");
+  assert.equal(
+    document.primary.body,
+    "Caladrius is a privacy-first hospital triage assistant.",
+  );
+  assert.deepEqual(document.primary.artifactIds, ["project:caladrius"]);
+  assert.equal(
+    document.supporting.some((item) => item.type === "artifact_focus"),
+    false,
+  );
+  assert.equal(
+    JSON.stringify(document).includes(
+      "Open the source material behind this answer.",
+    ),
+    false,
+  );
+});
+
 test("artifact paths resolve through host-owned routing", () => {
   assert.equal(artifactPath("work:Peraton Labs"), "/work#peraton-labs");
   assert.equal(artifactPath("project:caladrius"), "/projects#caladrius");
