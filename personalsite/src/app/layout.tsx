@@ -36,7 +36,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Karthik Thyagarajan" }],
   creator: "Karthik Thyagarajan",
-  metadataBase: new URL("https://karthikthyagarajan.com"),
+  // Must match the host the site actually serves on, since every relative
+  // `alternates.canonical` below resolves against it. Apex here would have
+  // pointed all canonicals at a domain that redirects.
+  metadataBase: new URL("https://www.karthikthyagarajan.com"),
   openGraph: {
     type: "website",
     locale: "en_US",

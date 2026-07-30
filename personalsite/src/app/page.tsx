@@ -49,12 +49,65 @@ export async function generateMetadata({
   };
 }
 
+const SITE = "https://www.karthikthyagarajan.com";
+
+// Sitewide identity graph. Lives on the home page rather than the root
+// layout so it is declared exactly once per crawl rather than on every
+// route. Links out to the sections a crawler should follow.
+const identityJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${SITE}/#person`,
+      name: "Karthik Thyagarajan",
+      url: SITE,
+      jobTitle: "Founder-engineer",
+      alumniOf: { "@type": "CollegeOrUniversity", name: "Purdue University" },
+      knowsAbout: [
+        "AI agents",
+        "Machine learning",
+        "On-device AI",
+        "Robotics",
+        "Computer vision",
+        "Quantum key distribution",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      url: SITE,
+      name: "Karthik Thyagarajan",
+      publisher: { "@id": `${SITE}/#person` },
+      inLanguage: "en",
+    },
+  ],
+};
+
 // HomeChatClient calls useSearchParams() for the ?q auto-submit, which
 // forces a CSR bail-out and must live under a Suspense boundary.
 export default function Page() {
   return (
-    <Suspense fallback={null}>
-      <HomeChatClient />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd) }}
+      />
+      {/* Crawlable path into the rest of the site. The chat UI is the whole
+          home page, so without this the only outbound links are client-side
+          and a crawler that does not run the hero rail sees a dead end. */}
+      <nav aria-label="Sections" className="sr-only">
+        <a href="/work">Work</a>
+        <a href="/projects">Projects</a>
+        <a href="/involvement">Involvement</a>
+        <a href="/notes">Notes</a>
+        <a href="/blog">Writing</a>
+        <a href="/gallery">Photography</a>
+        <a href="/about">About</a>
+      </nav>
+      <Suspense fallback={null}>
+        <HomeChatClient />
+      </Suspense>
+    </>
   );
 }

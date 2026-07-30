@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       post.title,
     ],
     authors: [{ name: "Karthik Thyagarajan" }],
+    alternates: { canonical: `/blog/${resolvedParams.slug}` },
     openGraph: {
       title: post.title,
       description:
@@ -44,12 +45,31 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
+const SITE = "https://www.karthikthyagarajan.com";
+
 export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
   const post = await getPostBySlug(resolvedParams.slug);
+  const url = `${SITE}/blog/${resolvedParams.slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.summary || undefined,
+    datePublished: post.date,
+    inLanguage: "en",
+    author: { "@type": "Person", name: "Karthik Thyagarajan", url: SITE },
+    publisher: { "@type": "Person", name: "Karthik Thyagarajan", url: SITE },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  };
 
   return (
     <article className="mx-auto max-w-[720px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link
         href="/blog"
         className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)] transition-colors hover:text-[var(--color-accent)]"

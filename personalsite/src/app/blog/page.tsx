@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Writing",
   description:
     "Essays and notes by Karthik Thyagarajan on AI, research, and things worth thinking about.",
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogIndex() {
