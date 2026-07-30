@@ -2,12 +2,15 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { InvolvementEntry } from "@/utils/involvementUtils";
+import { NoteLink } from "@/app/components/NoteLink";
 
 interface Props {
   involvements: InvolvementEntry[];
+  // involvement slug -> /notes href, for the orgs that have a corpus file
+  noteLinks?: Record<string, string>;
 }
 
-export function InvolvementClient({ involvements }: Props) {
+export function InvolvementClient({ involvements, noteLinks = {} }: Props) {
   return (
     <article className="mx-auto max-w-[760px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
@@ -27,7 +30,11 @@ export function InvolvementClient({ involvements }: Props) {
       ) : (
         <div className="mt-14 space-y-16">
           {involvements.map((inv) => (
-            <InvolvementSection key={inv.slug} inv={inv} />
+            <InvolvementSection
+              key={inv.slug}
+              inv={inv}
+              noteHref={noteLinks[inv.slug]}
+            />
           ))}
         </div>
       )}
@@ -35,7 +42,13 @@ export function InvolvementClient({ involvements }: Props) {
   );
 }
 
-function InvolvementSection({ inv }: { inv: InvolvementEntry }) {
+function InvolvementSection({
+  inv,
+  noteHref,
+}: {
+  inv: InvolvementEntry;
+  noteHref?: string;
+}) {
   return (
     <section id={inv.slug} className="scroll-mt-[80px] border-t border-[var(--color-hairline)] pt-10">
       <header>
@@ -58,16 +71,21 @@ function InvolvementSection({ inv }: { inv: InvolvementEntry }) {
             {inv.tagline}
           </p>
         )}
-        {inv.link && (
-          <Link
-            href={inv.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1 border-b border-[var(--color-accent)] pb-0.5 text-sm text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
-          >
-            Visit site
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
+        {(inv.link || noteHref) && (
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            {noteHref && <NoteLink href={noteHref} />}
+            {inv.link && (
+              <Link
+                href={inv.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 border-b border-[var(--color-accent)] pb-0.5 text-sm text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
+              >
+                Visit site
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
+          </div>
         )}
       </header>
 

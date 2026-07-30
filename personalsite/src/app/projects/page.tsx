@@ -4,6 +4,8 @@ import { projects } from "@/data/projectsData";
 import type { Project, ProjectLink } from "@/data/projectsData";
 import type { Metadata } from "next";
 import { HashScroller } from "@/app/components/HashScroller";
+import { NoteLink } from "@/app/components/NoteLink";
+import { findNote, noteHref } from "@/utils/notesUtils";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -48,6 +50,7 @@ export default function ProjectsPage() {
 
 function ProjectBlock({ project }: { project: Project }) {
   const { display, links } = project;
+  const note = findNote("project", project.id);
   return (
     <li
       id={project.id}
@@ -75,8 +78,9 @@ function ProjectBlock({ project }: { project: Project }) {
         {project.tools}
       </p>
 
-      {links.length > 0 && (
+      {(links.length > 0 || note) && (
         <div className="mt-4 flex flex-wrap gap-2">
+          {note && <NoteLink href={noteHref("project", project.id)} />}
           {links.map((link) => (
             <a
               key={link.url}

@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { JobEntry } from "@/utils/jobUtils";
+import { NoteLink } from "@/app/components/NoteLink";
 
 function slugify(s: string) {
   return s
@@ -11,9 +12,11 @@ function slugify(s: string) {
 
 interface Props {
   jobs: JobEntry[];
+  // slugified company -> /notes href, for the roles that have a corpus file
+  noteLinks?: Record<string, string>;
 }
 
-export function WorkTimelineClient({ jobs }: Props) {
+export function WorkTimelineClient({ jobs, noteLinks = {} }: Props) {
   return (
     <article className="mx-auto max-w-[760px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)]">
@@ -71,6 +74,11 @@ export function WorkTimelineClient({ jobs }: Props) {
                     </li>
                   ))}
                 </ul>
+                {noteLinks[slugify(job.company)] && (
+                  <div className="mt-5">
+                    <NoteLink href={noteLinks[slugify(job.company)]} />
+                  </div>
+                )}
               </div>
             </div>
           </li>

@@ -204,6 +204,12 @@ def load_corpus_files():
     for filename in os.listdir(corpus_dir):
         if not filename.endswith('.md'):
             continue
+        # Corpus files are named `<kind>_<slug>.md`. Anything else in this
+        # directory is documentation about the corpus, not corpus content —
+        # indexing it would let the chatbot quote the authoring guide back at
+        # someone who asked about a project.
+        if '_' not in filename:
+            continue
         full_path = os.path.join(corpus_dir, filename)
         try:
             with open(full_path, 'r', encoding='utf-8') as f:
