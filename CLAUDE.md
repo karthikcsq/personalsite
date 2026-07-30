@@ -89,6 +89,21 @@ uv sync  # Installs all dependencies into .venv/
    - System prompt includes instruction to cite blog posts with markdown links
 7. **Client Render** → ReactMarkdown displays formatted response with clickable blog citations
 
+### Public Corpus (`/notes`)
+
+- Every file in `python-rag/rag-docs/corpus/` renders as a statically generated page at `/notes/<kind>/<slug>`, plus a raw markdown mirror at `/notes/<kind>/<slug>/raw`
+- `src/utils/notesUtils.ts` is the registry: it derives kind and slug from the filename (`<kind>_<slug>.md`), resolves the artifact's title from `projects.json` / `karthik_thyagarajan_truth.yaml` / `involvement.yaml` / `topics.yaml`, and links each note back to the artifact's anchor
+- The artifact pages render a "Read the notes" button whenever a corpus file exists for that id. `/work` and `/involvement` are client components, so their note hrefs are resolved server-side in `page.tsx` and passed down as props
+- `public: false` in a corpus file's frontmatter pulls it from the site while leaving it in the RAG index
+- Authoring rules live in `python-rag/rag-docs/corpus/README.md`
+
+### SEO
+
+- `src/app/sitemap.ts` and `src/app/robots.ts` generate `/sitemap.xml` and `/robots.txt` at build time. New route sections need adding to the sitemap by hand; blog posts and notes are enumerated automatically
+- `metadataBase` in `src/app/layout.tsx` is `https://www.karthikthyagarajan.com` and every relative `alternates.canonical` resolves against it. Keep it matching the host the site actually serves on
+- JSON-LD: `Person` + `WebSite` on the home page, `BlogPosting` on blog posts, `Article` on note pages, `CollectionPage` on `/notes`
+- The home page is server-rendered on demand rather than prerendered, because `generateMetadata` reads the `?q` search param for shareable chat links. Its only crawlable outbound links are the `sr-only` nav in `src/app/page.tsx` (the chat UI itself renders no static links)
+
 ### Blog System
 - Static generation at build time via `getSortedPosts()` in `blogUtils.ts`
 - Markdown files in `blog/posts/` with gray-matter frontmatter (title, date, summary)
