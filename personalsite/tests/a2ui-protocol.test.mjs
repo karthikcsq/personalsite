@@ -172,6 +172,59 @@ test("structured narrative items do not repeat a summary body", () => {
   assert.equal(document.primary.body, "");
 });
 
+test("repeated decorative assets collapse to one illustration", () => {
+  const document = sanitizeA2UIDocument(
+    {
+      version: "1.0",
+      question: "What makes Veritas work?",
+      title: "Veritas protects clinical research integrity",
+      lead: "",
+      primary: {
+        id: "veritas",
+        type: "specimen_board",
+        title: "",
+        body: "",
+        items: [
+          {
+            label: "Identity",
+            value: "Proof of personhood",
+            detail: "",
+            artifactId: "project:caladrius",
+            assetId: "veritas-verification",
+          },
+          {
+            label: "Integrity",
+            value: "Response checks",
+            detail: "",
+            artifactId: "",
+            assetId: "veritas-verification",
+          },
+          {
+            label: "Recognition",
+            value: "Catapult winner",
+            detail: "",
+            artifactId: "",
+            assetId: "veritas-verification",
+          },
+        ],
+        options: [],
+        artifactIds: [],
+        quoteIds: [],
+      },
+      supporting: [],
+      actions: [],
+    },
+    "What makes Veritas work?",
+    "A grounded answer.",
+    artifacts,
+  );
+
+  assert.deepEqual(
+    document.primary.items.map((item) => item.assetId),
+    ["veritas-verification", "", ""],
+  );
+});
+
 test("structured items keep their facts while a repetitive lead and body are removed", () => {
   const googleToolsArtifacts = [
     {
@@ -434,7 +487,7 @@ test("single-artifact fallback makes the paper own the answer", () => {
   );
   assert.equal(
     JSON.stringify(document).includes(
-      "Open the source material behind this answer.",
+      "Select an item to see its original page.",
     ),
     false,
   );
@@ -764,4 +817,123 @@ test("fold timelines preserve six model-authored stages", () => {
   assert.equal(document.primary.type, "fold_timeline");
   assert.equal(document.primary.items.length, 6);
   assert.equal(document.primary.items.at(-1).label, "Stage 6");
+});
+
+test("gallery questions recover the host category index when the model omits it", () => {
+  const document = sanitizeA2UIDocument(
+    {
+      version: "1.0",
+      question: "Show me Karthik's travel gallery.",
+      title: "Karthik has photographed four travel collections",
+      lead: "",
+      primary: {
+        id: "travel",
+        type: "narrative",
+        title: "His travel photography",
+        body: "His gallery includes trips across several regions.",
+        items: [],
+        options: [],
+        artifactIds: [],
+        quoteIds: [],
+      },
+      supporting: [],
+      actions: [],
+    },
+    "Show me Karthik's travel gallery.",
+    "",
+    [],
+    [
+      "Costa Rica",
+      "Hawaii",
+      "Kilimanjaro and Amsterdam",
+      "San Fransisco",
+    ],
+  );
+
+  assert.equal(document.primary.type, "visual_mosaic");
+  assert.equal(document.primary.items.length, 4);
+  assert.deepEqual(
+    document.primary.items.map((item) => item.assetId),
+    [
+      "gallery:Costa Rica",
+      "gallery:Hawaii",
+      "gallery:Kilimanjaro and Amsterdam",
+      "gallery:San Fransisco",
+    ],
+  );
+});
+
+test("a named gallery category adds its photo without inventing a URL", () => {
+  const document = sanitizeA2UIDocument(
+    {
+      version: "1.0",
+      question: "What did Karthik photograph in Hawaii?",
+      title: "Karthik photographed Hawaii",
+      lead: "",
+      primary: {
+        id: "hawaii",
+        type: "narrative",
+        title: "Hawaii",
+        body: "",
+        items: [
+          {
+            label: "Collection",
+            value: "Pacific islands",
+            detail: "A travel photography set.",
+            artifactId: "",
+            assetId: "",
+          },
+        ],
+        options: [],
+        artifactIds: [],
+        quoteIds: [],
+      },
+      supporting: [],
+      actions: [],
+    },
+    "What did Karthik photograph in Hawaii?",
+    "",
+    [],
+    ["Costa Rica", "Hawaii"],
+  );
+
+  assert.equal(document.primary.type, "visual_mosaic");
+  assert.equal(document.primary.items[0].assetId, "gallery:Hawaii");
+});
+
+test("a gallery category appears once even when the model repeats it", () => {
+  const repeatedItem = {
+    label: "Hawaii",
+    value: "5 photographs",
+    detail: "A travel collection.",
+    artifactId: "",
+    assetId: "gallery:Hawaii",
+  };
+  const document = sanitizeA2UIDocument(
+    {
+      version: "1.0",
+      question: "Show me Karthik's Hawaii gallery.",
+      title: "Karthik's Hawaii gallery contains five photographs",
+      lead: "",
+      primary: {
+        id: "hawaii",
+        type: "visual_mosaic",
+        title: "Hawaii",
+        body: "",
+        items: [repeatedItem, repeatedItem, repeatedItem],
+        options: [],
+        artifactIds: [],
+        quoteIds: [],
+      },
+      supporting: [],
+      actions: [],
+    },
+    "Show me Karthik's Hawaii gallery.",
+    "",
+    [],
+    ["Hawaii"],
+  );
+
+  assert.equal(document.primary.items.length, 1);
+  assert.equal(document.primary.items[0].assetId, "gallery:Hawaii");
 });

@@ -1,4 +1,9 @@
-import type { A2UIVisualAssetId } from "./assetCatalog";
+import {
+  galleryAssetId,
+  galleryCategoryFromAssetId,
+  type A2UIAssetId,
+  type A2UIVisualAssetId,
+} from "./assetCatalog.ts";
 
 const SAFE_A2UI_VISUAL_ASSET_IDS = new Set<string>([
   "nrl-bathymetry",
@@ -22,6 +27,14 @@ function isA2UIVisualAssetId(value: string): value is A2UIVisualAssetId {
   return SAFE_A2UI_VISUAL_ASSET_IDS.has(value);
 }
 
+function normalizeGalleryCategoryName(value: string): string {
+  return value
+    .toLocaleLowerCase()
+    .replace(/fransisco/g, "francisco")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 export const A2UI_COMPONENT_TYPES = [
   "narrative",
   "metric_grid",
@@ -40,6 +53,7 @@ export const A2UI_COMPONENT_TYPES = [
   "evidence_stack",
   "essay_margin",
   "specimen_board",
+  "visual_mosaic",
 ] as const;
 
 export type A2UIComponentType = (typeof A2UI_COMPONENT_TYPES)[number];
@@ -68,14 +82,14 @@ export type A2UIItem = {
   value: string;
   detail: string;
   artifactId: string;
-  assetId: A2UIVisualAssetId | "";
+  assetId: A2UIAssetId | "";
 };
 
 export type A2UIOption = {
   label: string;
   summary: string;
   detail: string;
-  assetId: A2UIVisualAssetId | "";
+  assetId: A2UIAssetId | "";
 };
 
 export type A2UIComponent = {
@@ -288,6 +302,7 @@ function sanitizeComponent(
   value: unknown,
   allowedArtifacts: Set<string>,
   allowedQuotes: Set<string>,
+  allowedGalleryCategories: Set<string>,
   fallbackId: string,
 ): A2UIComponent | null {
   if (!value || typeof value !== "object") return null;
@@ -306,9 +321,21 @@ function sanitizeComponent(
         if (!entry || typeof entry !== "object") return [];
         const item = entry as Record<string, unknown>;
         const artifactId = clean(item.artifactId, 160);
-        const assetId = clean(item.assetId, 80);
-        const safeAssetId: A2UIVisualAssetId | "" =
-          isA2UIVisualAssetId(assetId) ? assetId : "";
+        const assetId = clean(item.assetId, 160);
+        const requestedGalleryCategory =
+          galleryCategoryFromAssetId(assetId);
+        const galleryCategory = requestedGalleryCategory
+          ? [...allowedGalleryCategories].find(
+              (category) =>
+                normalizeGalleryCategoryName(category) ===
+                normalizeGalleryCategoryName(requestedGalleryCategory),
+            )
+          : undefined;
+        const safeAssetId: A2UIAssetId | "" = isA2UIVisualAssetId(assetId)
+          ? assetId
+          : galleryCategory
+            ? galleryAssetId(galleryCategory)
+            : "";
         return [{
           label: clean(item.label, 90),
           value: clean(item.value, 80),
@@ -499,9 +526,7 @@ function normalizeExpressiveComposition(
     let assetId = item.assetId;
     if (
       assetId &&
-      ["fold_timeline", "research_map", "system_blueprint"].includes(
-        component.type,
-      ) &&
+      component.type !== "visual_mosaic" &&
       usedAssets.has(assetId)
     ) {
       assetId = "";
@@ -516,6 +541,79 @@ function normalizeExpressiveComposition(
   return {
     ...component,
     items: composedItems,
+  };
+}
+
+const GALLERY_QUESTION =
+  /\b(gallery|photo(?:graph|graphs|graphy)?|travel(?:ed|s|ing)?|places? (?:he|karthik) (?:has )?(?:been|visited|photographed))\b/i;
+
+function normalizeGalleryComposition(
+  component: A2UIComponent,
+  question: string,
+  galleryCategories: string[],
+): A2UIComponent {
+  const normalizedQuestion = normalizeGalleryCategoryName(question);
+  const questionTokens = new Set(normalizedQuestion.split(" "));
+  const questionGalleryCategory = galleryCategories.find((category) => {
+    const normalizedCategory = normalizeGalleryCategoryName(category);
+    if (normalizedQuestion.includes(normalizedCategory)) return true;
+    return normalizedCategory
+      .split(" ")
+      .filter((token) => token.length >= 4)
+      .some((token) => questionTokens.has(token));
+  });
+  const hasGalleryItem = component.items.some(
+    (item) => Boolean(galleryCategoryFromAssetId(item.assetId)),
+  );
+  const asksForGallery = GALLERY_QUESTION.test(question);
+
+  if (!hasGalleryItem && !questionGalleryCategory && !asksForGallery) {
+    return component;
+  }
+
+  let items = component.items;
+  if (!hasGalleryItem && questionGalleryCategory) {
+    items =
+      items.length > 0
+        ? [
+            {
+              ...items[0],
+              assetId: galleryAssetId(questionGalleryCategory),
+            },
+            ...items.slice(1),
+          ]
+        : [
+            {
+              label: questionGalleryCategory,
+              value: "Photography collection",
+              detail: "",
+              artifactId: "",
+              assetId: galleryAssetId(questionGalleryCategory),
+            },
+          ];
+  } else if (!hasGalleryItem && asksForGallery) {
+    items = galleryCategories.map((category) => ({
+        label: category,
+        value: "Photography collection",
+        detail: "",
+        artifactId: "",
+        assetId: galleryAssetId(category),
+      }));
+  }
+
+  const usedGalleryCategories = new Set<string>();
+  items = items.filter((item) => {
+    const category = galleryCategoryFromAssetId(item.assetId);
+    if (!category) return true;
+    if (usedGalleryCategories.has(category)) return false;
+    usedGalleryCategories.add(category);
+    return true;
+  });
+
+  return {
+    ...component,
+    type: "visual_mosaic",
+    items,
   };
 }
 
@@ -580,6 +678,7 @@ export function sanitizeA2UIDocument(
   question: string,
   reply: string,
   artifacts: A2UIArtifactLike[],
+  galleryCategories: string[] = [],
 ): A2UIDocument {
   const fallback = buildFallbackA2UI(question, reply, artifacts);
   if (!value || typeof value !== "object") return fallback;
@@ -587,16 +686,23 @@ export function sanitizeA2UIDocument(
   const raw = value as Record<string, unknown>;
   const allowedArtifacts = new Set(artifacts.map((artifact) => artifact.id));
   const allowedQuotes = availableQuoteIds(artifacts);
+  const allowedGalleryCategories = new Set(galleryCategories);
   let primary = sanitizeComponent(
     raw.primary,
     allowedArtifacts,
     allowedQuotes,
+    allowedGalleryCategories,
     "answer",
   );
   if (!primary) return fallback;
   if (primary.type === "narrative" && primary.items.length > 0) {
     primary.body = "";
   }
+  primary = normalizeGalleryComposition(
+    primary,
+    question,
+    galleryCategories,
+  );
 
   let supporting = Array.isArray(raw.supporting)
     ? raw.supporting
@@ -606,6 +712,7 @@ export function sanitizeA2UIDocument(
             component,
             allowedArtifacts,
             allowedQuotes,
+            allowedGalleryCategories,
             `support-${index + 1}`,
           ),
         )
@@ -685,7 +792,7 @@ export function sanitizeA2UIDocument(
   }
 
   primary = normalizeExpressiveComposition(primary);
-  if (primary.type === "fold_timeline") primary.title = "";
+  if (["timeline", "fold_timeline"].includes(primary.type)) primary.title = "";
   const initialDocumentCopy = `${title} ${lead}`;
   if (
     ["fold_timeline", "manifesto_fold", "topic_compass"].includes(primary.type)
@@ -738,7 +845,7 @@ export function buildFallbackA2UI(
       id: "evidence",
       type: "artifact_focus",
       title: "Related work",
-      body: "Open the source material behind this answer.",
+      body: "Select an item to see its original page.",
       items: artifacts.slice(0, 4).map((artifact) => ({
         label: artifactLabel(artifact),
         value: "",

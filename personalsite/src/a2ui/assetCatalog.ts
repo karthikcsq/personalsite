@@ -86,13 +86,83 @@ export const A2UI_VISUAL_ASSETS = {
 } as const;
 
 export type A2UIVisualAssetId = keyof typeof A2UI_VISUAL_ASSETS;
+export type A2UIGalleryAssetId = `gallery:${string}`;
+export type A2UIAssetId = A2UIVisualAssetId | A2UIGalleryAssetId;
 
 export const A2UI_VISUAL_ASSET_IDS = Object.keys(
   A2UI_VISUAL_ASSETS,
 ) as A2UIVisualAssetId[];
 
+const A2UI_VISUAL_ASSET_MATCH_TERMS: Partial<
+  Record<A2UIVisualAssetId, readonly string[]>
+> = {
+  "nrl-bathymetry": ["underwater acoustics", "bathymetry"],
+  "nrl-image-model": ["transmission loss", "image-to-image"],
+  "nrl-local-retrieval": ["local retrieval", "classified documents"],
+  "repple-matchup": ["repple", "weekly matchup"],
+  "repple-consistency": [
+    "consistency loop",
+    "workout logging",
+    "habit formation",
+    "streaks",
+  ],
+  "buildpurdue-community": ["buildpurdue"],
+  "product-engineering": [
+    "product engineering",
+    "full-stack platform",
+    "application platform",
+  ],
+  "qkd-optical-path": [
+    "photonic implementation",
+    "photonic qkd",
+    "quantum key distribution",
+  ],
+  "workspace-orchestration": ["google-tools-mcp"],
+  "agent-control-plane": [
+    "agent control plane",
+    "agent orchestration",
+    "approval gate",
+    "tool routing",
+  ],
+  "hackathon-sprint": ["hackathon", "rapid prototype", "overnight build"],
+  "veritas-verification": ["veritas"],
+  "caladrius-triage": ["caladrius"],
+  "formulator-motion": ["formulator"],
+};
+
 export function isA2UIVisualAssetId(value: string): value is A2UIVisualAssetId {
   return value in A2UI_VISUAL_ASSETS;
+}
+
+export function galleryAssetId(category: string): A2UIGalleryAssetId {
+  return `gallery:${category}`;
+}
+
+export function galleryCategoryFromAssetId(value: string): string | null {
+  if (!value.startsWith("gallery:")) return null;
+  const category = value.slice("gallery:".length).trim();
+  return category || null;
+}
+
+export function matchA2UIVisualAsset(
+  sourceText: string,
+): A2UIVisualAssetId | undefined {
+  const normalized = sourceText.toLocaleLowerCase();
+  let bestMatch: A2UIVisualAssetId | undefined;
+  let bestScore = 0;
+
+  for (const id of A2UI_VISUAL_ASSET_IDS) {
+    for (const term of A2UI_VISUAL_ASSET_MATCH_TERMS[id] ?? []) {
+      if (!normalized.includes(term)) continue;
+      const score = term.split(/\s+/).length * 100 + term.length;
+      if (score > bestScore) {
+        bestMatch = id;
+        bestScore = score;
+      }
+    }
+  }
+
+  return bestMatch;
 }
 
 export function a2uiVisualAssetPromptDirectory(): string {

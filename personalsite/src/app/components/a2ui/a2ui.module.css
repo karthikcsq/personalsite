@@ -7,6 +7,9 @@
   --a2ui-paper: oklch(97.4% 0.014 83);
   --a2ui-paper-edge: oklch(83.5% 0.026 78);
   --a2ui-rail: 246px;
+  --a2ui-composer-clearance: calc(
+    clamp(236px, 26vh, 292px) + env(safe-area-inset-bottom)
+  );
   position: relative;
   height: 100%;
   min-height: 100%;
@@ -339,7 +342,8 @@
   padding:
     clamp(54px, 8vh, 94px)
     clamp(34px, 4vw, 60px)
-    clamp(176px, 20vh, 220px);
+    var(--a2ui-composer-clearance);
+  scroll-padding-bottom: var(--a2ui-composer-clearance);
   scrollbar-width: thin;
 }
 
@@ -476,7 +480,31 @@
 }
 
 .answerSurface[data-composition="primary_top"] > .supporting {
+  width: min(720px, 72%);
   margin-top: 28px;
+  margin-left: auto;
+}
+
+.answerSurface[data-composition="primary_top"]
+  > .supporting:has(> :only-child) {
+  width: min(560px, 62%);
+}
+
+.answerSurface[data-composition="primary_top"]
+  > .supporting:has(> .timelineComponent),
+.answerSurface[data-composition="primary_top"]
+  > .supporting:has(> .foldTimeline),
+.answerSurface[data-composition="stacked"]
+  > .supporting:has(> .timelineComponent),
+.answerSurface[data-composition="stacked"]
+  > .supporting:has(> .foldTimeline) {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+}
+
+.answerSurface[data-composition="stacked"] > .supporting {
+  width: min(880px, 100%);
 }
 
 .component {
@@ -1762,6 +1790,31 @@ button.researchStage:hover .researchStageAsset {
   width: 13px;
 }
 
+.sharedSourceAction {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 0 0 3px;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-rust);
+  background: transparent;
+  color: var(--a2ui-rust);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sharedSourceAction svg {
+  width: 13px;
+  transition: transform 160ms ease;
+}
+
+.sharedSourceAction:hover svg {
+  transform: translateX(3px);
+}
+
 .foldTimeline {
   padding: 4px 0 22px;
   transform: rotate(0.08deg);
@@ -1810,14 +1863,14 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .foldStrip[data-count="4"] {
-  min-height: 540px;
+  min-height: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(310px, auto));
 }
 
 .foldStrip[data-count="4"] > button,
 .foldStrip[data-count="4"] > div {
-  min-height: 0;
+  min-height: 310px;
   border-right: 1px solid
     color-mix(in oklch, var(--a2ui-green) 20%, transparent);
   border-bottom: 1px solid
@@ -1995,7 +2048,7 @@ button.researchStage:hover .researchStageAsset {
   position: relative;
   z-index: 1;
   min-width: 0;
-  padding: 10px 44px 30px 8px;
+  padding: 10px 44px 72px 8px;
 }
 
 .notebookPage h2,
@@ -2078,13 +2131,13 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .notebookAction {
-  position: absolute;
-  right: 40px;
-  bottom: 23px;
+  position: static;
   z-index: 3;
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   gap: 8px;
   align-items: center;
+  margin-top: 28px;
   padding: 7px 0 4px;
   border: 0;
   border-bottom: 1px solid var(--a2ui-rust);
@@ -2257,6 +2310,14 @@ button.researchStage:hover .researchStageAsset {
   grid-column: 1 / -1;
 }
 
+.evidenceStack > .sharedSourceAction {
+  grid-column: 2;
+}
+
+.evidenceStackWithoutIntro > .sharedSourceAction {
+  grid-column: 1;
+}
+
 .evidenceSlips {
   position: relative;
   display: grid;
@@ -2411,13 +2472,13 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .essayPage > button {
-  position: absolute;
-  bottom: 35px;
-  left: 54px;
+  position: relative;
   z-index: 3;
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   gap: 7px;
   align-items: center;
+  margin-top: 28px;
   padding: 6px 0;
   border: 0;
   border-bottom: 1px solid var(--a2ui-rust);
@@ -2536,6 +2597,10 @@ button.researchStage:hover .researchStageAsset {
   margin-top: 26px;
 }
 
+.specimenBoard[data-count="4"][data-arrangement="balanced"] .specimens {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .specimens > button,
 .specimens > div {
   position: relative;
@@ -2552,6 +2617,11 @@ button.researchStage:hover .researchStageAsset {
   font: inherit;
 }
 
+.specimens > [data-has-asset="false"] {
+  min-height: 190px;
+  padding-top: 24px;
+}
+
 .specimens > button {
   cursor: pointer;
 }
@@ -2562,19 +2632,11 @@ button.researchStage:hover .researchStageAsset {
   font-size: 12px;
 }
 
-.specimenAsset,
-.specimenMark {
+.specimenAsset {
   width: 100%;
   height: 125px;
   margin: 4px 0 10px;
   object-fit: contain;
-}
-
-.specimenMark {
-  display: block;
-  background:
-    radial-gradient(circle, var(--a2ui-green) 0 4px, transparent 5px),
-    linear-gradient(27deg, transparent 48%, color-mix(in oklch, var(--a2ui-green) 30%, transparent) 49% 51%, transparent 52%);
 }
 
 .specimens strong {
@@ -2595,6 +2657,232 @@ button.researchStage:hover .researchStageAsset {
   color: var(--color-ink-muted);
   font-size: 11px;
   line-height: 1.5;
+}
+
+.visualMosaic {
+  padding: 4px 0 28px;
+}
+
+.visualMosaicIntro {
+  display: grid;
+  max-width: 1040px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.58fr);
+  gap: 30px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.visualMosaicIntro h2 {
+  margin: 0;
+  color: var(--a2ui-green);
+  font-family: var(--font-serif);
+  font-size: clamp(31px, 4vw, 58px);
+  font-weight: 500;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.visualMosaicIntro > div {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.visualMosaicGrid {
+  display: grid;
+  grid-auto-rows: 210px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.visualMosaicGrid > figure,
+.visualMosaicGrid > button {
+  position: relative;
+  min-width: 0;
+  grid-column: span 5;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--a2ui-green);
+  color: white;
+  text-align: left;
+  font: inherit;
+}
+
+.visualMosaicGrid > :first-child {
+  grid-column: span 7;
+  grid-row: span 2;
+}
+
+.visualMosaicGrid > button {
+  cursor: pointer;
+}
+
+.visualMosaicImage,
+.visualMosaicPlaceholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    opacity 280ms ease,
+    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.visualMosaicImage {
+  opacity: 0;
+}
+
+.visualMosaicImage[data-loaded="true"] {
+  opacity: 1;
+}
+
+.visualMosaicGrid > button:hover .visualMosaicImage {
+  transform: scale(1.025);
+}
+
+.visualMosaicPlaceholder {
+  background:
+    radial-gradient(
+      circle at 32% 38%,
+      color-mix(in oklch, var(--a2ui-rust) 70%, white) 0 5px,
+      transparent 6px
+    ),
+    linear-gradient(
+      138deg,
+      var(--a2ui-green),
+      color-mix(in oklch, var(--a2ui-green) 55%, var(--a2ui-rust))
+    );
+}
+
+.visualMosaicCaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  padding: 48px 18px 15px;
+  background: linear-gradient(transparent, rgb(15 20 13 / 0.82));
+  color: white;
+}
+
+.visualMosaicCaption strong {
+  color: white;
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 500;
+}
+
+.visualMosaicCaption b {
+  color: rgb(255 255 255 / 0.82);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.visualMosaicCaption small {
+  max-width: 520px;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.visualMosaic[data-arrangement="balanced"] .visualMosaicGrid > *,
+.visualMosaic[data-arrangement="rail"] .visualMosaicGrid > * {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.visualMosaic[data-arrangement="balanced"] .visualMosaicGrid {
+  grid-auto-rows: 285px;
+}
+
+.visualMosaic[data-arrangement="rail"] .visualMosaicGrid {
+  grid-auto-rows: 230px;
+}
+
+.visualMosaic .visualMosaicGrid[data-count="1"] {
+  grid-auto-rows: clamp(330px, 48vw, 560px);
+}
+
+.visualMosaic .visualMosaicGrid[data-count="1"] > * {
+  grid-column: 1 / -1;
+  grid-row: span 1;
+}
+
+.visualMosaic .visualMosaicGrid[data-count="2"] {
+  grid-auto-rows: clamp(270px, 34vw, 410px);
+}
+
+.visualMosaic .visualMosaicGrid[data-count="2"] > * {
+  grid-column: span 6;
+  grid-row: span 1;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="2"]
+  > :first-child {
+  grid-column: span 7;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="2"]
+  > :last-child {
+  grid-column: span 5;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="4"] {
+  grid-auto-rows: 230px;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="4"]
+  > * {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="4"]
+  > :first-child {
+  grid-column: 1 / -1;
+}
+
+.visualMosaic[data-arrangement="balanced"]
+  .visualMosaicGrid[data-count="4"]
+  > *,
+.visualMosaic[data-arrangement="rail"]
+  .visualMosaicGrid[data-count="4"]
+  > * {
+  grid-column: span 6;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="5"]
+  > :first-child {
+  grid-column: span 8;
+  grid-row: span 2;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="5"]
+  > :nth-child(2),
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="5"]
+  > :nth-child(3) {
+  grid-column: span 4;
+}
+
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="5"]
+  > :nth-child(4),
+.visualMosaic[data-arrangement="lead"]
+  .visualMosaicGrid[data-count="5"]
+  > :nth-child(5) {
+  grid-column: span 6;
 }
 
 .manifestoFold {
@@ -2822,6 +3110,19 @@ button.researchStage:hover .researchStageAsset {
   border-bottom: 1px solid color-mix(in oklch, var(--a2ui-green) 35%, transparent);
 }
 
+.compassDial[data-count="3"] > button:nth-child(3) {
+  grid-column: 1 / -1;
+  border-right: 0;
+}
+
+.compassDial[data-count="2"] {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.compassDial[data-count="2"] > button {
+  border-bottom: 0;
+}
+
 .compassDial > button[data-active="true"] {
   z-index: 2;
   background:
@@ -2932,7 +3233,7 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .composerDock {
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: max(42px, env(safe-area-inset-bottom));
   left: var(--a2ui-rail);
@@ -3094,7 +3395,8 @@ button.researchStage:hover .researchStageAsset {
 .component strong,
 .component b {
   max-width: 100%;
-  hyphens: auto;
+  hyphens: none;
+  overflow-wrap: normal;
   word-break: normal;
 }
 
@@ -3909,12 +4211,119 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .specimenBoard[data-variant="margin"] .specimenHeading {
+  display: block;
+  max-width: none;
+  align-self: start;
   padding-right: 30px;
   border-right: 1px solid var(--a2ui-family-line);
 }
 
+.specimenBoard[data-variant="margin"] .specimenHeading h2 {
+  font-size: clamp(35px, 4vw, 54px);
+  line-height: 0.96;
+  text-wrap: balance;
+}
+
+.specimenBoard[data-variant="margin"] .specimenHeading > div {
+  margin-top: 22px;
+}
+
 .specimenBoard[data-variant="margin"] .specimens {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicGrid {
+  gap: 24px 20px;
+  padding: 24px 26px 30px;
+  background: color-mix(
+    in oklch,
+    var(--a2ui-green-soft) 34%,
+    var(--a2ui-bg)
+  );
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicGrid > figure,
+.visualMosaic[data-variant="folio"] .visualMosaicGrid > button {
+  padding: 9px 9px 66px;
+  overflow: visible;
+  background: #fffdf8;
+  box-shadow:
+    0 3px 0 rgb(61 46 29 / 0.08),
+    0 16px 30px rgb(61 46 29 / 0.14);
+  transform: rotate(-0.35deg);
+}
+
+.visualMosaic[data-variant="folio"]
+  .visualMosaicGrid
+  > :nth-child(even) {
+  transform: rotate(0.48deg);
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicCaption {
+  top: auto;
+  padding: 8px 13px 11px;
+  background: #fffdf8;
+  color: var(--color-ink);
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicCaption strong {
+  color: var(--color-ink);
+  font-size: 21px;
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicCaption b {
+  color: var(--a2ui-green);
+}
+
+.visualMosaic[data-variant="folio"] .visualMosaicCaption small {
+  display: none;
+}
+
+.visualMosaic[data-variant="diagram"] .visualMosaicGrid {
+  gap: 3px;
+  padding: 3px;
+  background: var(--a2ui-green);
+}
+
+.visualMosaic[data-variant="diagram"] .visualMosaicGrid > figure,
+.visualMosaic[data-variant="diagram"] .visualMosaicGrid > button {
+  clip-path: polygon(0.5% 0.6%, 99.5% 0, 100% 99.3%, 0 100%);
+}
+
+.visualMosaic[data-variant="margin"] {
+  padding: 24px;
+  background: #1c211b;
+  color: white;
+}
+
+.visualMosaic[data-variant="margin"] .visualMosaicIntro {
+  grid-template-columns: minmax(350px, 0.92fr) minmax(260px, 1.08fr);
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.26);
+}
+
+.visualMosaic[data-variant="margin"] .visualMosaicIntro h2 {
+  color: #f6f0e5;
+  font-size: clamp(30px, 3.5vw, 50px);
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+.visualMosaic[data-variant="margin"] .visualMosaicIntro > div {
+  color: rgb(255 255 255 / 0.68);
+}
+
+.visualMosaic[data-variant="margin"] .visualMosaicGrid {
+  grid-auto-rows: 300px;
+  gap: 16px;
+}
+
+.visualMosaic[data-variant="margin"] .visualMosaicGrid > figure,
+.visualMosaic[data-variant="margin"] .visualMosaicGrid > button {
+  border-radius: 48% 2px 48% 2px / 2px 42% 2px 42%;
 }
 
 .essayMargin[data-variant="diagram"] .essayPage,
@@ -4123,9 +4532,1588 @@ button.researchStage:hover .researchStageAsset {
   display: none;
 }
 
+/* Item arrangements are a separate axis from the presentation family. A
+ * family decides the material language; an arrangement decides where the eye
+ * lands first. These rules work for model-authored items without naming a
+ * project, employer, or suggested prompt. */
+
+.narrativeComponent[data-arrangement="lead"] .narrativeItems {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.narrativeComponent[data-arrangement="lead"]
+  .narrativeItems
+  > div:first-of-type {
+  grid-column: span 2;
+  min-height: 150px;
+  padding: 23px 26px;
+  background: color-mix(
+    in oklch,
+    var(--a2ui-green-soft) 42%,
+    transparent
+  );
+}
+
+.narrativeComponent[data-arrangement="rail"] .narrativeItems {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding-left: 26px;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.narrativeComponent[data-arrangement="rail"] .narrativeItems > div {
+  min-height: 0;
+  padding: 16px 6px 18px;
+  border-top: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+}
+
+.metricComponent[data-arrangement="lead"] .metricGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metricComponent[data-arrangement="lead"] .metric:first-child {
+  grid-column: span 2;
+  padding-left: 30px;
+}
+
+.metricComponent[data-arrangement="lead"] .metric:first-child strong {
+  font-size: clamp(40px, 6vw, 72px);
+}
+
+.metricComponent[data-arrangement="rail"] .metricGrid {
+  grid-template-columns: minmax(0, 1fr);
+  border-left: 3px solid var(--a2ui-green);
+}
+
+.metricComponent[data-arrangement="rail"] .metric {
+  min-height: 108px;
+  grid-template-columns: auto minmax(100px, 0.35fr) minmax(0, 1fr);
+  gap: 10px 22px;
+  align-items: center;
+  border-right: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.evidenceStack[data-arrangement="lead"] .evidenceSlips {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.evidenceStack[data-arrangement="lead"]
+  .evidenceSlips
+  > :first-child {
+  grid-column: 1 / -1;
+  min-height: 230px;
+  padding: 32px 36px;
+}
+
+.evidenceStack[data-arrangement="lead"]
+  .evidenceSlips
+  > :first-child
+  strong {
+  max-width: 680px;
+  font-size: clamp(29px, 3.5vw, 48px);
+}
+
+.evidenceStack[data-arrangement="rail"] .evidenceSlips {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0 0 0 26px;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.evidenceStack[data-arrangement="rail"] .evidenceSlips > button,
+.evidenceStack[data-arrangement="rail"] .evidenceSlips > div {
+  inset: auto;
+  min-height: 0;
+  grid-template-columns: minmax(140px, 0.4fr) minmax(0, 1fr);
+  padding: 18px 8px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.evidenceStack[data-arrangement="rail"] .evidenceSlips span,
+.evidenceStack[data-arrangement="rail"] .evidenceSlips strong {
+  grid-column: 1;
+}
+
+.evidenceStack[data-arrangement="rail"] .evidenceSlips small,
+.evidenceStack[data-arrangement="rail"] .evidenceSlips i {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  margin: 0;
+  align-self: center;
+}
+
+.evidenceStack[data-arrangement="rail"] .evidenceAsset {
+  display: none;
+}
+
+.specimenBoard[data-arrangement="lead"] .specimens {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.specimenBoard[data-arrangement="lead"] .specimens > :first-child {
+  grid-column: 1 / -1;
+  min-height: 330px;
+  padding: 26px 30px;
+}
+
+.specimenBoard[data-arrangement="lead"] .specimens > :first-child .specimenAsset {
+  height: 175px;
+}
+
+.specimenBoard[data-arrangement="rail"] .specimens {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.specimenBoard[data-arrangement="rail"] .specimens > button,
+.specimenBoard[data-arrangement="rail"] .specimens > div {
+  min-height: 0;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 2px 18px;
+  padding: 20px 6px;
+  border-left: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.specimenBoard[data-arrangement="rail"] .specimenNumber {
+  grid-column: 1;
+}
+
+.specimenBoard[data-arrangement="rail"] .specimenAsset {
+  width: 78px;
+  height: 72px;
+  grid-column: 1;
+  grid-row: 2 / span 3;
+  margin: 0;
+}
+
+.specimenBoard[data-arrangement="rail"] .specimens strong,
+.specimenBoard[data-arrangement="rail"] .specimens b,
+.specimenBoard[data-arrangement="rail"] .specimens small {
+  grid-column: 2;
+}
+
+.researchMap[data-arrangement="lead"] .researchStages {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.researchMap[data-arrangement="lead"] .researchStage:first-of-type {
+  grid-column: span 2;
+}
+
+.researchMap[data-arrangement="rail"] .researchStages {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding-left: 30px;
+  border-left: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-arrangement="rail"] .researchSignal,
+.researchMap[data-arrangement="rail"]
+  .researchStage
+  + .researchStage::before {
+  display: none;
+}
+
+.researchMap[data-arrangement="rail"] .researchStage {
+  min-height: 0;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 16px;
+  padding: 17px 0 20px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.researchMap[data-arrangement="rail"] .researchStageAsset {
+  width: 86px;
+  height: 76px;
+  grid-row: 1 / span 3;
+  margin: 0;
+}
+
+.researchMap[data-arrangement="rail"] .researchStageCopy,
+.researchMap[data-arrangement="rail"] .researchStageAction {
+  grid-column: 2;
+}
+
+.systemBlueprint[data-arrangement="lead"] .blueprintModules > :nth-child(2) {
+  grid-column: span 2;
+  min-height: 260px;
+}
+
+.systemBlueprint[data-arrangement="rail"] .blueprintModules {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.systemBlueprint[data-arrangement="rail"] .blueprintModules > svg {
+  display: none;
+}
+
+.systemBlueprint[data-arrangement="rail"] .blueprintModules > button,
+.systemBlueprint[data-arrangement="rail"] .blueprintModules > div {
+  min-height: 0;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 3px 18px;
+  padding: 17px 8px 20px;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+.systemBlueprint[data-arrangement="rail"] .blueprintGlyph,
+.systemBlueprint[data-arrangement="rail"] .blueprintAsset {
+  width: 54px;
+  height: 54px;
+  grid-row: 1 / span 3;
+}
+
+.systemBlueprint[data-arrangement="rail"] .blueprintModules strong,
+.systemBlueprint[data-arrangement="rail"] .blueprintModules b,
+.systemBlueprint[data-arrangement="rail"] .blueprintModules small {
+  grid-column: 2;
+}
+
+.foldTimeline[data-arrangement="lead"] .foldStrip[data-count="4"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.foldTimeline[data-arrangement="lead"]
+  .foldStrip[data-count="4"]
+  > :first-child {
+  grid-column: 1 / -1;
+  min-height: 250px;
+}
+
+.foldTimeline[data-arrangement="lead"]
+  .foldStrip[data-count="4"]
+  > :first-child
+  .foldAsset {
+  height: 112px;
+}
+
+.foldTimeline[data-arrangement="rail"] .foldStrip {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.foldTimeline[data-arrangement="rail"] .foldStrip > button,
+.foldTimeline[data-arrangement="rail"] .foldStrip > div {
+  min-height: 0;
+  grid-template-columns: 100px minmax(0, 0.4fr) minmax(0, 1fr);
+  gap: 3px 20px;
+  padding: 20px 22px;
+  border-right: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.foldTimeline[data-arrangement="rail"] .foldAsset {
+  width: 92px;
+  height: 76px;
+  grid-row: 1 / span 4;
+  margin: 0;
+}
+
+.foldTimeline[data-arrangement="rail"] .foldStrip span,
+.foldTimeline[data-arrangement="rail"] .foldStrip strong,
+.foldTimeline[data-arrangement="rail"] .foldStrip small,
+.foldTimeline[data-arrangement="rail"] .foldStrip i {
+  grid-column: auto;
+}
+
+/* The remaining structured families each get a visual grammar of their own.
+ * Folio keeps the tactile paper reference. Diagram reads as an explanatory
+ * drawing. Margin reads as an editorial or archival object. */
+
+.fieldNotebook[data-variant="diagram"] {
+  position: relative;
+  display: grid;
+  min-height: 510px;
+  grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(28px, 5vw, 76px);
+  padding: 34px 18px 34px 0;
+  overflow: hidden;
+  border: 0;
+  background:
+    radial-gradient(
+      ellipse at 18% 54%,
+      color-mix(in oklch, var(--a2ui-green-soft) 76%, transparent) 0 25%,
+      transparent 26%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0 43%,
+      color-mix(in oklch, var(--a2ui-green) 12%, transparent) 43% 43.12%,
+      transparent 43.12%
+    );
+}
+
+.fieldNotebook[data-variant="diagram"]::before,
+.fieldNotebook[data-variant="diagram"]::after {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid color-mix(in oklch, var(--a2ui-green) 25%, transparent);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.fieldNotebook[data-variant="diagram"]::before {
+  top: 13%;
+  left: 2%;
+  width: 36%;
+  aspect-ratio: 1.4;
+  transform: rotate(-8deg);
+}
+
+.fieldNotebook[data-variant="diagram"]::after {
+  bottom: 11%;
+  left: 11%;
+  width: 25%;
+  aspect-ratio: 1.8;
+  border-color: color-mix(in oklch, var(--a2ui-rust) 24%, transparent);
+  transform: rotate(12deg);
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookFold {
+  display: none;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookPage {
+  z-index: 1;
+  display: grid;
+  min-height: 420px;
+  align-content: center;
+  padding: 34px 16px 34px 34px;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookPage h2 {
+  max-width: 560px;
+  font-size: clamp(39px, 4.45vw, 64px);
+  line-height: 0.91;
+  text-wrap: balance;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookPage > div:not(.notebookAsset) {
+  max-width: 480px;
+  margin-top: 26px;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAsset {
+  width: min(330px, 82%);
+  height: 132px;
+  margin: 24px 0 0;
+  object-position: left center;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations {
+  position: relative;
+  align-content: center;
+  padding: 16px 0;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations::before {
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: 16px;
+  width: 1px;
+  background: linear-gradient(
+    transparent,
+    var(--a2ui-green) 12% 88%,
+    transparent
+  );
+  content: "";
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations > button,
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations > div {
+  position: relative;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 4px 18px;
+  padding: 18px 8px 20px 54px;
+  border-bottom: 0;
+}
+
+.fieldNotebook[data-variant="diagram"]
+  .notebookAnnotations
+  > :nth-child(even) {
+  margin-left: clamp(14px, 4vw, 58px);
+}
+
+.fieldNotebook[data-variant="diagram"]
+  .notebookAnnotations
+  > *
+  ::before {
+  content: none;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations > *::before {
+  position: absolute;
+  top: 27px;
+  left: 11px;
+  width: 31px;
+  height: 1px;
+  background: var(--a2ui-green);
+  content: "";
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations > *::after {
+  position: absolute;
+  top: 23px;
+  left: 7px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--a2ui-bg);
+  border-radius: 50%;
+  background: var(--a2ui-green);
+  box-shadow: 0 0 0 1px var(--a2ui-green);
+  content: "";
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations span {
+  color: var(--a2ui-rust);
+  font-size: 12px;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAnnotations strong {
+  font-size: clamp(21px, 2.3vw, 31px);
+  line-height: 1.05;
+}
+
+.fieldNotebook[data-variant="diagram"] .notebookAction {
+  right: 18px;
+  bottom: 7px;
+}
+
+.fieldNotebook[data-variant="margin"] {
+  position: relative;
+  display: grid;
+  min-height: 500px;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  color: #f7f0e3;
+  background:
+    radial-gradient(circle at 18% 24%, rgb(255 255 255 / 0.055), transparent 25%),
+    linear-gradient(135deg, #203c28, #172d1e 72%);
+  box-shadow:
+    0 5px 0 #102318,
+    0 24px 48px rgb(35 49 31 / 0.18);
+  clip-path: polygon(
+    0.4% 1.2%,
+    27% 0.3%,
+    55% 1.1%,
+    99.5% 0.5%,
+    99% 98.8%,
+    72% 99.5%,
+    39% 98.6%,
+    0.3% 99.2%
+  );
+}
+
+.fieldNotebook[data-variant="margin"] .notebookFold {
+  display: block;
+  inset: 36px auto 36px 36%;
+  background: rgb(248 239 222 / 0.26);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookPage {
+  display: grid;
+  min-height: 500px;
+  align-content: center;
+  padding: 48px 42px 52px 48px;
+  border: 0;
+  background: transparent;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookPage h2 {
+  color: #f7f0e3;
+  font-size: clamp(36px, 4.15vw, 58px);
+  line-height: 0.92;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookPage > div:not(.notebookAsset) {
+  color: rgb(247 240 227 / 0.7);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAsset {
+  width: min(290px, 90%);
+  height: 135px;
+  margin: 26px 0 0;
+  opacity: 0.82;
+  filter: sepia(0.2) brightness(1.22);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations {
+  align-content: stretch;
+  padding: 28px 38px 54px 48px;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations > button,
+.fieldNotebook[data-variant="margin"] .notebookAnnotations > div {
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-content: center;
+  padding: 19px 4px;
+  border-bottom-color: rgb(247 240 227 / 0.19);
+  color: #f7f0e3;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations span {
+  color: #e4a27d;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations strong {
+  color: #f7f0e3;
+  font-size: clamp(20px, 2vw, 28px);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations b {
+  color: #bad0b4;
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAnnotations small {
+  color: rgb(247 240 227 / 0.66);
+}
+
+.fieldNotebook[data-variant="margin"] .notebookAction {
+  right: 38px;
+  bottom: 20px;
+  border-color: #e4a27d;
+  color: #e4a27d;
+}
+
+.evidenceStack[data-variant="diagram"] {
+  position: relative;
+  min-height: 520px;
+  grid-template-columns: minmax(230px, 0.52fr) minmax(0, 1.48fr);
+  gap: clamp(28px, 5vw, 72px);
+  padding: 18px 0 34px;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceStackIntro {
+  position: sticky;
+  top: 26px;
+  padding: 26px 0 26px 32px;
+  border-left: 5px solid var(--a2ui-rust);
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceStackIntro h2 {
+  font-size: clamp(38px, 4.7vw, 64px);
+  line-height: 0.92;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips,
+.evidenceStack[data-variant="diagram"]
+  .evidenceSlips[data-count="4"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  counter-reset: evidence;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips > button,
+.evidenceStack[data-variant="diagram"] .evidenceSlips > div {
+  counter-increment: evidence;
+  min-height: 0;
+  grid-template-columns: 64px minmax(160px, 0.42fr) minmax(0, 1fr) auto;
+  gap: 4px 22px;
+  align-items: center;
+  padding: 24px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips > *::before {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  color: color-mix(in oklch, var(--a2ui-green) 68%, transparent);
+  font-family: var(--font-serif);
+  font-size: 35px;
+  content: counter(evidence, decimal-leading-zero);
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips span {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips strong {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  font-size: clamp(21px, 2.2vw, 30px);
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips small {
+  grid-column: 3;
+  grid-row: 1 / span 3;
+  margin: 0;
+  font-size: 13px;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceSlips i {
+  grid-column: 4;
+  grid-row: 1 / span 3;
+  margin: 0;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceAsset {
+  width: 82px;
+  height: 74px;
+  grid-column: 4;
+  grid-row: 1 / span 3;
+}
+
+.evidenceStack[data-variant="diagram"] .evidenceAsset + span,
+.evidenceStack[data-variant="diagram"] .evidenceAsset ~ strong {
+  grid-column: 2;
+}
+
+.evidenceStack[data-variant="margin"] {
+  position: relative;
+  min-height: 500px;
+  grid-template-columns: minmax(270px, 0.68fr) minmax(0, 1.32fr);
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+  color: #f7f0e3;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.045), transparent 38%),
+    #1d3424;
+  box-shadow:
+    0 5px 0 #13271a,
+    0 24px 46px rgb(42 50 34 / 0.16);
+  clip-path: polygon(0.5% 1%, 34% 0.2%, 66% 1.1%, 99.5% 0.4%, 99% 99%, 68% 98.7%, 31% 99.5%, 0.3% 98.5%);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro {
+  display: grid;
+  align-content: end;
+  padding: 46px 42px;
+  border-right: 1px solid rgb(247 240 227 / 0.22);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro h2 {
+  color: #f7f0e3;
+  font-size: clamp(40px, 5.2vw, 72px);
+  line-height: 0.9;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro > div {
+  color: rgb(247 240 227 / 0.67);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips,
+.evidenceStack[data-variant="margin"]
+  .evidenceSlips[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 28px;
+  border: 0;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > button,
+.evidenceStack[data-variant="margin"] .evidenceSlips > div {
+  min-height: 205px;
+  align-content: end;
+  padding: 24px;
+  border: 0;
+  border-right: 1px solid rgb(247 240 227 / 0.18);
+  border-bottom: 1px solid rgb(247 240 227 / 0.18);
+  color: #f7f0e3;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > :nth-child(2n) {
+  border-right: 0;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips span {
+  color: #bad0b4;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips strong {
+  color: #f7f0e3;
+  font-size: clamp(23px, 2.5vw, 34px);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips small {
+  color: rgb(247 240 227 / 0.64);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips i {
+  color: #e4a27d;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceAsset {
+  opacity: 0.72;
+  filter: brightness(1.25) sepia(0.18);
+}
+
+.manifestoFold[data-variant="diagram"] {
+  min-height: 560px;
+  padding: 16px 0 28px;
+}
+
+.manifestoFold[data-variant="diagram"] > h2 {
+  max-width: 720px;
+  font-size: clamp(34px, 4.3vw, 58px);
+  line-height: 0.94;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack {
+  display: grid;
+  width: 100%;
+  min-height: 430px;
+  height: auto;
+  grid-auto-rows: minmax(94px, auto);
+  grid-template-columns: minmax(0, 1.55fr) minmax(220px, 0.45fr);
+  gap: 0 32px;
+  margin-top: 32px;
+  border-top: 1px solid var(--a2ui-green);
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack > button {
+  position: relative;
+  inset: auto;
+  grid-column: 2;
+  min-height: 94px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-content: center;
+  padding: 17px 4px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  filter: none;
+  transform: none;
+}
+
+.manifestoFold[data-variant="diagram"]
+  .manifestoStack
+  > button[data-active="true"] {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  min-height: 430px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-content: start;
+  padding: 42px 44px 38px 0;
+  border-right: 1px solid var(--a2ui-family-line);
+  border-bottom: 0;
+  background:
+    radial-gradient(
+      circle at 68% 50%,
+      color-mix(in oklch, var(--a2ui-green-soft) 74%, transparent),
+      transparent 46%
+    );
+}
+
+.manifestoFold[data-variant="diagram"]
+  .manifestoStack
+  > button[data-active="true"]
+  > strong {
+  font-size: clamp(36px, 5vw, 68px);
+  line-height: 0.92;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack > button > div {
+  grid-column: 2;
+  grid-template-columns: minmax(160px, 0.62fr) minmax(220px, 1fr);
+  margin-top: 32px;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoAsset {
+  height: 180px;
+}
+
+.manifestoFold[data-variant="margin"] {
+  min-height: 550px;
+  padding: 12px 0 30px;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoStack {
+  display: flex;
+  width: 100%;
+  height: 430px;
+  gap: 8px;
+  margin-top: 30px;
+  transform: none;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoStack > button {
+  position: relative;
+  inset: auto;
+  flex: 0 0 86px;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 32px minmax(0, 1fr);
+  gap: 10px;
+  padding: 24px 18px;
+  overflow: hidden;
+  border: 1px solid var(--a2ui-family-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  filter: none;
+  transform: none;
+  transition:
+    flex-basis 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 220ms ease;
+}
+
+.manifestoFold[data-variant="margin"]
+  .manifestoStack
+  > button:not([data-active="true"])
+  > strong {
+  width: max-content;
+  font-size: 19px;
+  writing-mode: vertical-rl;
+}
+
+.manifestoFold[data-variant="margin"]
+  .manifestoStack
+  > button[data-active="true"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  padding: 32px 38px;
+  border-left: 5px solid var(--a2ui-green);
+  background:
+    linear-gradient(
+      110deg,
+      color-mix(in oklch, var(--a2ui-green-soft) 52%, transparent),
+      transparent 72%
+    );
+}
+
+.manifestoFold[data-variant="margin"]
+  .manifestoStack
+  > button[data-active="true"]
+  > strong {
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 0.92;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoStack > button > div {
+  grid-column: 2;
+  grid-template-columns: minmax(150px, 0.55fr) minmax(190px, 1fr);
+  gap: 12px 28px;
+  margin-top: 22px;
+}
+
+.manifestoFold[data-variant="margin"] .manifestoAsset {
+  height: 185px;
+}
+
+.timelineComponent[data-variant="diagram"] {
+  position: relative;
+  padding: 16px 0 28px;
+}
+
+.timelineComponent[data-variant="diagram"] ol {
+  position: relative;
+  display: grid;
+  min-height: 360px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(170px, 100%), 1fr)
+  );
+  gap: 0;
+  align-items: stretch;
+  margin-top: 30px;
+  overflow: hidden;
+  border: 0;
+}
+
+.timelineComponent[data-variant="diagram"] ol::before {
+  position: absolute;
+  top: 50%;
+  right: 2%;
+  left: 2%;
+  height: 34px;
+  border-top: 2px solid var(--a2ui-green);
+  border-radius: 50%;
+  content: "";
+  opacity: 0.54;
+  transform: translateY(-4px) rotate(-1deg);
+}
+
+.timelineComponent[data-variant="diagram"] li {
+  position: relative;
+  display: grid;
+  min-height: 360px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  padding: 22px 18px 190px;
+  border: 0;
+}
+
+.timelineComponent[data-variant="diagram"] li:nth-child(even) {
+  align-content: end;
+  padding: 190px 18px 22px;
+}
+
+.timelineComponent[data-variant="diagram"] li::after {
+  display: block;
+  top: calc(50% - 52px);
+  bottom: auto;
+  left: 34px;
+  width: 1px;
+  height: 50px;
+  background: var(--a2ui-green);
+}
+
+.timelineComponent[data-variant="diagram"] li:nth-child(even)::after {
+  top: 50%;
+}
+
+.timelineComponent[data-variant="diagram"] .timelineMarker {
+  position: absolute;
+  z-index: 2;
+  top: calc(50% - 18px);
+  left: 18px;
+  border-color: var(--a2ui-green);
+  background: var(--a2ui-bg);
+  box-shadow: 0 0 0 6px var(--a2ui-bg);
+}
+
+.timelineComponent[data-variant="diagram"] li > div {
+  max-width: 240px;
+}
+
+.timelineComponent[data-variant="diagram"] li:nth-child(even) > div {
+  align-self: end;
+}
+
+.timelineComponent[data-variant="diagram"] strong {
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.1vw, 29px);
+  font-weight: 500;
+  line-height: 1.04;
+}
+
+.timelineComponent[data-variant="margin"] {
+  padding: 34px 38px;
+  color: #f7f0e3;
+  background: #1e3524;
+  box-shadow:
+    0 5px 0 #13261a,
+    0 22px 42px rgb(42 51 34 / 0.15);
+  clip-path: polygon(0.4% 1.2%, 33% 0.3%, 68% 1%, 99.5% 0.4%, 99% 99%, 67% 98.5%, 30% 99.4%, 0.3% 98.7%);
+}
+
+.timelineComponent[data-variant="margin"] h2 {
+  color: #f7f0e3;
+}
+
+.timelineComponent[data-variant="margin"] > div {
+  color: rgb(247 240 227 / 0.68);
+}
+
+.timelineComponent[data-variant="margin"] ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 38px;
+  margin-top: 30px;
+  padding: 0;
+  border: 0;
+}
+
+.timelineComponent[data-variant="margin"] li {
+  min-height: 150px;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 18px;
+  padding: 22px 0;
+  border-top: 1px solid rgb(247 240 227 / 0.2);
+}
+
+.timelineComponent[data-variant="margin"] li::after {
+  display: none;
+}
+
+.timelineComponent[data-variant="margin"] .timelineMarker {
+  width: 48px;
+  height: 48px;
+  border-color: rgb(247 240 227 / 0.3);
+  background: transparent;
+  color: #e4a27d;
+  box-shadow: none;
+}
+
+.timelineComponent[data-variant="margin"] strong {
+  color: #f7f0e3;
+  font-family: var(--font-serif);
+  font-size: clamp(21px, 2.2vw, 31px);
+  font-weight: 500;
+}
+
+.timelineComponent[data-variant="margin"] small {
+  color: #bad0b4;
+}
+
+.timelineComponent[data-variant="margin"] li p {
+  color: rgb(247 240 227 / 0.65);
+}
+
+.foldTimeline[data-variant="diagram"] {
+  position: relative;
+  padding: 12px 0 30px;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip {
+  position: relative;
+  display: grid;
+  min-height: 390px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(170px, 100%), 1fr)
+  ) !important;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 24px;
+  padding: 28px 0;
+  overflow: hidden;
+  border: 0;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip::before {
+  position: absolute;
+  top: 340px;
+  right: 2%;
+  left: 2%;
+  height: 52px;
+  border-top: 2px solid var(--a2ui-green);
+  border-radius: 50%;
+  content: "";
+  opacity: 0.48;
+  transform: rotate(1deg);
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip > button,
+.foldTimeline[data-variant="diagram"] .foldStrip > div {
+  position: relative;
+  display: grid;
+  min-height: 330px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  padding: 10px 18px 260px;
+  border: 0;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip > :nth-child(even) {
+  align-content: end;
+  padding: 380px 18px 10px;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip > *::after {
+  position: absolute;
+  top: 335px;
+  left: 22px;
+  width: 11px;
+  height: 11px;
+  border: 3px solid var(--a2ui-bg);
+  border-radius: 50%;
+  background: var(--a2ui-green);
+  box-shadow: 0 0 0 1px var(--a2ui-green);
+  content: "";
+}
+
+.foldTimeline[data-variant="diagram"] .foldAsset {
+  width: 100%;
+  height: 92px;
+  grid-column: 1;
+  grid-row: auto;
+  object-position: left center;
+}
+
+.foldTimeline[data-variant="diagram"][data-arrangement]
+  .foldStrip
+  span,
+.foldTimeline[data-variant="diagram"][data-arrangement]
+  .foldStrip
+  strong,
+.foldTimeline[data-variant="diagram"][data-arrangement]
+  .foldStrip
+  small,
+.foldTimeline[data-variant="diagram"][data-arrangement]
+  .foldStrip
+  i {
+  grid-column: 1;
+  grid-row: auto;
+}
+
+.foldTimeline[data-variant="diagram"] .foldStrip > :last-child strong {
+  font-size: clamp(20px, 2.15vw, 29px);
+}
+
+.foldTimeline[data-variant="margin"] {
+  grid-template-columns: minmax(230px, 0.56fr) minmax(0, 1.44fr);
+  gap: 0;
+}
+
+.foldTimeline[data-variant="margin"] > h2,
+.foldTimeline[data-variant="margin"] > div:not(.foldStrip) {
+  align-self: start;
+  padding-right: 38px;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  gap: 0;
+  padding: 24px 34px;
+  border: 0;
+  color: #f7f0e3;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.04), transparent 38%),
+    #1d3424;
+  box-shadow:
+    0 5px 0 #13271a,
+    0 22px 42px rgb(42 50 34 / 0.15);
+  clip-path: polygon(0.5% 1%, 34% 0.2%, 68% 1.1%, 99.5% 0.4%, 99% 99%, 62% 98.5%, 0.3% 99.2%);
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip > button,
+.foldTimeline[data-variant="margin"] .foldStrip > div {
+  min-height: 130px;
+  grid-template-columns: 92px minmax(130px, 0.38fr) minmax(0, 1fr);
+  gap: 5px 22px;
+  align-items: center;
+  padding: 19px 6px;
+  border: 0;
+  border-bottom: 1px solid rgb(247 240 227 / 0.18);
+  color: #f7f0e3;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip > :last-child {
+  border-bottom: 0;
+}
+
+.foldTimeline[data-variant="margin"] .foldAsset {
+  width: 84px;
+  height: 78px;
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  margin: 0;
+  filter: brightness(1.22) sepia(0.16);
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip span,
+.foldTimeline[data-variant="margin"] .foldStrip strong {
+  grid-column: 2;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip small,
+.foldTimeline[data-variant="margin"] .foldStrip i {
+  grid-column: 3;
+  grid-row: 1 / span 4;
+  align-self: center;
+  margin: 0;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip span {
+  color: #bad0b4;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip strong {
+  color: #f7f0e3;
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip small {
+  color: rgb(247 240 227 / 0.65);
+}
+
+.foldTimeline[data-variant="margin"] .foldStrip i {
+  color: #e4a27d;
+}
+
+/* Open-canvas variants. These avoid turning the same facts into another set
+ * of panels. The paths belong to the information geometry and terminate in
+ * reserved gaps, never across the copy. */
+
+.evidenceRoute,
+.manifestoRoute {
+  display: none;
+}
+
+.evidenceStack[data-variant="margin"] {
+  display: block;
+  min-height: 690px;
+  padding: 30px 0 24px;
+  overflow: visible;
+  color: var(--color-ink);
+  background:
+    radial-gradient(
+      ellipse at 52% 61%,
+      color-mix(in oklch, var(--a2ui-green-soft) 64%, transparent),
+      transparent 40%
+    ),
+    transparent;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro {
+  display: block;
+  max-width: 690px;
+  padding: 0 0 0 30px;
+  border: 0;
+  border-left: 5px solid var(--a2ui-rust);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro h2 {
+  color: var(--a2ui-green);
+  font-size: clamp(34px, 3.8vw, 54px);
+  line-height: 0.92;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceStackIntro > div {
+  color: var(--color-ink-muted);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips,
+.evidenceStack[data-variant="margin"]
+  .evidenceSlips[data-count="4"] {
+  position: relative;
+  display: block;
+  min-height: 520px;
+  margin-top: 18px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceRoute {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: var(--a2ui-bg);
+  stroke: color-mix(in oklch, var(--a2ui-green) 52%, transparent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceRoute circle {
+  fill: var(--a2ui-green);
+  stroke: var(--a2ui-bg);
+  stroke-width: 9;
+  vector-effect: non-scaling-stroke;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > button,
+.evidenceStack[data-variant="margin"] .evidenceSlips > div {
+  position: absolute;
+  inset: auto;
+  z-index: 1;
+  display: block;
+  width: min(36%, 380px);
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  padding: 8px 12px;
+  border: 0;
+  background: color-mix(in oklch, var(--a2ui-bg) 92%, transparent);
+  color: var(--color-ink);
+  box-shadow: 0 0 22px 14px color-mix(in oklch, var(--a2ui-bg) 82%, transparent);
+}
+
+.evidenceStack[data-variant="margin"][data-arrangement]
+  .evidenceSlips
+  span,
+.evidenceStack[data-variant="margin"][data-arrangement]
+  .evidenceSlips
+  strong,
+.evidenceStack[data-variant="margin"][data-arrangement]
+  .evidenceSlips
+  small,
+.evidenceStack[data-variant="margin"][data-arrangement]
+  .evidenceSlips
+  i {
+  display: block;
+  grid-column: auto;
+  grid-row: auto;
+  align-self: auto;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > :nth-child(2) {
+  top: 5%;
+  left: 4%;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > :nth-child(3) {
+  top: 18%;
+  right: 3%;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > :nth-child(4) {
+  bottom: 10%;
+  left: 7%;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips > :nth-child(5) {
+  right: 4%;
+  bottom: 1%;
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips span {
+  color: var(--a2ui-green);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips strong {
+  margin-top: 8px;
+  color: var(--color-ink);
+  font-size: clamp(23px, 2.5vw, 34px);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips small {
+  margin-top: 8px;
+  color: var(--color-ink-muted);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceSlips i {
+  margin-top: 10px;
+  color: var(--a2ui-rust);
+}
+
+.evidenceStack[data-variant="margin"] .evidenceAsset {
+  float: right;
+  width: 82px;
+  height: 76px;
+  margin: 0 0 8px 14px;
+  opacity: 0.86;
+  filter: none;
+}
+
+.manifestoFold[data-variant="diagram"] {
+  min-height: 650px;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 520px;
+  height: 520px;
+  margin-top: 24px;
+  overflow: hidden;
+  border: 0;
+  background:
+    radial-gradient(
+      ellipse at 31% 52%,
+      color-mix(in oklch, var(--a2ui-green-soft) 78%, transparent),
+      transparent 38%
+    );
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoRoute {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: var(--a2ui-green);
+  stroke: color-mix(in oklch, var(--a2ui-green) 52%, transparent);
+  stroke-linecap: round;
+  stroke-width: 1.15;
+  pointer-events: none;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoRoute circle {
+  stroke: var(--a2ui-bg);
+  stroke-width: 10;
+  vector-effect: non-scaling-stroke;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack > button {
+  position: absolute;
+  top: calc(44px + var(--sheet-index) * 164px);
+  right: 3%;
+  left: auto;
+  z-index: 2;
+  display: grid;
+  width: min(31%, 330px);
+  min-height: 90px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-content: center;
+  padding: 14px 0 14px 22px;
+  border: 0;
+  border-bottom: 1px solid var(--a2ui-family-line);
+  background: color-mix(in oklch, var(--a2ui-bg) 92%, transparent);
+  box-shadow: 0 0 18px 10px color-mix(in oklch, var(--a2ui-bg) 86%, transparent);
+  transform: none;
+}
+
+.manifestoFold[data-variant="diagram"]
+  .manifestoStack
+  > button[data-active="true"] {
+  top: 50%;
+  right: auto;
+  left: 0;
+  width: min(56%, 650px);
+  min-height: 420px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-content: center;
+  padding: 36px 40px 36px 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+
+.manifestoFold[data-variant="diagram"]
+  .manifestoStack
+  > button[data-active="true"]
+  > strong {
+  font-size: clamp(38px, 5.1vw, 68px);
+  line-height: 0.9;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoStack > button > div {
+  grid-column: 2;
+  grid-template-columns: minmax(145px, 0.52fr) minmax(190px, 1fr);
+  gap: 12px 24px;
+  margin-top: 25px;
+}
+
+.manifestoFold[data-variant="diagram"] .manifestoAsset {
+  height: 155px;
+}
+
+.timelineComponent[data-variant="margin"] {
+  padding: 22px 0 30px;
+  color: var(--color-ink);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.timelineComponent[data-variant="margin"] h2 {
+  color: var(--a2ui-green);
+}
+
+.timelineComponent[data-variant="margin"] > div {
+  color: var(--color-ink-muted);
+}
+
+.timelineComponent[data-variant="margin"] ol {
+  position: relative;
+  display: grid;
+  min-height: 430px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 28px;
+  padding: 12px 0;
+}
+
+.timelineComponent[data-variant="margin"] ol::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 38px;
+  border-left: 2px solid var(--a2ui-green);
+  border-radius: 50%;
+  content: "";
+  opacity: 0.46;
+  transform: translateX(-1px) rotate(0.7deg);
+}
+
+.timelineComponent[data-variant="margin"] li {
+  position: relative;
+  min-height: 180px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  align-content: center;
+  padding: 30px 72px 30px 18px;
+  border: 0;
+  text-align: right;
+}
+
+.timelineComponent[data-variant="margin"] li:nth-child(even) {
+  grid-column: 2;
+  padding: 30px 18px 30px 72px;
+  text-align: left;
+}
+
+.timelineComponent[data-variant="margin"] li:nth-child(odd) {
+  grid-column: 1;
+}
+
+.timelineComponent[data-variant="margin"] li::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: block;
+  width: 54px;
+  height: 1px;
+  background: var(--a2ui-green);
+  content: "";
+}
+
+.timelineComponent[data-variant="margin"] li:nth-child(even)::after {
+  right: auto;
+  left: 0;
+}
+
+.timelineComponent[data-variant="margin"] .timelineMarker {
+  position: absolute;
+  z-index: 2;
+  top: calc(50% - 18px);
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  border-color: var(--a2ui-green);
+  background: var(--a2ui-bg);
+  color: var(--a2ui-rust);
+  box-shadow: 0 0 0 6px var(--a2ui-bg);
+}
+
+.timelineComponent[data-variant="margin"]
+  li:nth-child(even)
+  .timelineMarker {
+  right: auto;
+  left: -18px;
+}
+
+.timelineComponent[data-variant="margin"] strong {
+  color: var(--color-ink);
+  font-size: clamp(22px, 2.3vw, 32px);
+}
+
+.timelineComponent[data-variant="margin"] small {
+  color: var(--a2ui-green);
+}
+
+.timelineComponent[data-variant="margin"] li p {
+  color: var(--color-ink-muted);
+}
+
 @media (max-width: 900px) {
   .shell {
     --a2ui-rail: 0px;
+    --a2ui-composer-clearance: calc(
+      228px + env(safe-area-inset-bottom)
+    );
   }
 
   .historyRail {
@@ -4209,7 +6197,7 @@ button.researchStage:hover .researchStageAsset {
     width: 100%;
     height: 100%;
     margin-left: 0;
-    padding: 78px 20px 160px;
+    padding: 78px 20px var(--a2ui-composer-clearance);
   }
 
   .question {
@@ -4236,6 +6224,15 @@ button.researchStage:hover .researchStageAsset {
     margin: 18px 0 0;
   }
 
+  .answerSurface[data-composition="primary_top"] > .supporting,
+  .answerSurface[data-composition="primary_top"]
+    > .supporting:has(> :only-child),
+  .answerSurface[data-composition="stacked"] > .supporting {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
   .composerDock {
     bottom: max(28px, env(safe-area-inset-bottom));
     left: 0;
@@ -4243,6 +6240,12 @@ button.researchStage:hover .researchStageAsset {
 }
 
 @media (max-width: 560px) {
+  .shell {
+    --a2ui-composer-clearance: calc(
+      210px + env(safe-area-inset-bottom)
+    );
+  }
+
   .canvas {
     padding-right: 13px;
     padding-left: 13px;
@@ -4510,7 +6513,7 @@ button.researchStage:hover .researchStageAsset {
   }
 
   .notebookPage {
-    padding: 4px 0 20px;
+    padding: 4px 0 58px;
   }
 
   .notebookPage h2,
@@ -4654,8 +6657,7 @@ button.researchStage:hover .researchStageAsset {
     grid-column: 2;
   }
 
-  .specimenAsset,
-  .specimenMark {
+  .specimenAsset {
     width: 104px;
     height: 96px;
     grid-column: 1;
@@ -4666,6 +6668,40 @@ button.researchStage:hover .researchStageAsset {
   .specimens b,
   .specimens small {
     grid-column: 2;
+  }
+
+  .visualMosaicIntro,
+  .visualMosaic[data-variant="margin"] .visualMosaicIntro {
+    display: block;
+  }
+
+  .visualMosaicIntro > div {
+    margin-top: 12px;
+  }
+
+  .visualMosaicGrid,
+  .visualMosaic[data-arrangement="balanced"] .visualMosaicGrid,
+  .visualMosaic[data-arrangement="rail"] .visualMosaicGrid,
+  .visualMosaic[data-variant="margin"] .visualMosaicGrid {
+    grid-auto-rows: 250px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .visualMosaicGrid > figure,
+  .visualMosaicGrid > button,
+  .visualMosaicGrid > :first-child,
+  .visualMosaic[data-arrangement="balanced"] .visualMosaicGrid > *,
+  .visualMosaic[data-arrangement="rail"] .visualMosaicGrid > * {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .visualMosaic[data-variant="folio"] .visualMosaicGrid {
+    padding: 18px 14px 24px;
+  }
+
+  .visualMosaic[data-variant="margin"] {
+    padding: 20px 16px;
   }
 
   .manifestoFold {
@@ -4801,6 +6837,7 @@ button.researchStage:hover .researchStageAsset {
 
   .foldStrip[data-count="4"] > button,
   .foldStrip[data-count="4"] > div {
+    min-height: 0;
     border-right: 0;
     border-bottom: 1px solid
       color-mix(in oklch, var(--a2ui-green) 20%, transparent);
@@ -4809,6 +6846,929 @@ button.researchStage:hover .researchStageAsset {
   .essayMargin[data-variant="margin"] .essayPage {
     padding-right: 0;
     border-right: 0;
+  }
+
+  .narrativeComponent[data-arrangement="lead"] .narrativeItems,
+  .narrativeComponent[data-arrangement="rail"] .narrativeItems,
+  .metricComponent[data-arrangement="lead"] .metricGrid,
+  .metricComponent[data-arrangement="rail"] .metricGrid,
+  .evidenceStack[data-arrangement="lead"] .evidenceSlips,
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips,
+  .specimenBoard[data-arrangement="lead"] .specimens,
+  .specimenBoard[data-arrangement="rail"] .specimens,
+  .researchMap[data-arrangement="lead"] .researchStages,
+  .researchMap[data-arrangement="rail"] .researchStages,
+  .systemBlueprint[data-arrangement="rail"] .blueprintModules,
+  .foldTimeline[data-arrangement="lead"] .foldStrip[data-count="4"],
+  .foldTimeline[data-arrangement="rail"] .foldStrip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .narrativeComponent[data-arrangement="lead"]
+    .narrativeItems
+    > div:first-of-type,
+  .metricComponent[data-arrangement="lead"] .metric:first-child,
+  .evidenceStack[data-arrangement="lead"]
+    .evidenceSlips
+    > :first-child,
+  .specimenBoard[data-arrangement="lead"] .specimens > :first-child,
+  .researchMap[data-arrangement="lead"] .researchStage:first-of-type,
+  .systemBlueprint[data-arrangement="lead"]
+    .blueprintModules
+    > :nth-child(2),
+  .foldTimeline[data-arrangement="lead"]
+    .foldStrip[data-count="4"]
+    > :first-child {
+    min-height: 0;
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips,
+  .researchMap[data-arrangement="rail"] .researchStages {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips > button,
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips small,
+  .evidenceStack[data-arrangement="rail"] .evidenceSlips i {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 8px;
+  }
+
+  .foldTimeline[data-arrangement="rail"] .foldStrip > button,
+  .foldTimeline[data-arrangement="rail"] .foldStrip > div {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .fieldNotebook[data-variant="diagram"],
+  .fieldNotebook[data-variant="margin"] {
+    display: block;
+    min-height: 0;
+    padding: 30px 24px 32px;
+  }
+
+  .fieldNotebook[data-variant="diagram"]::before,
+  .fieldNotebook[data-variant="diagram"]::after,
+  .fieldNotebook[data-variant="diagram"] .notebookAnnotations::before,
+  .fieldNotebook[data-variant="diagram"]
+    .notebookAnnotations
+    > *::before,
+  .fieldNotebook[data-variant="diagram"]
+    .notebookAnnotations
+    > *::after,
+  .fieldNotebook[data-variant="margin"] .notebookFold {
+    display: none;
+  }
+
+  .fieldNotebook[data-variant="diagram"] .notebookPage,
+  .fieldNotebook[data-variant="margin"] .notebookPage {
+    min-height: 0;
+    padding: 4px 0 24px;
+  }
+
+  .fieldNotebook[data-variant="diagram"] .notebookPage h2,
+  .fieldNotebook[data-variant="margin"] .notebookPage h2 {
+    font-size: clamp(34px, 9vw, 54px);
+  }
+
+  .fieldNotebook[data-variant="diagram"] .notebookAnnotations,
+  .fieldNotebook[data-variant="margin"] .notebookAnnotations {
+    padding: 0 0 40px;
+  }
+
+  .fieldNotebook[data-variant="diagram"] .notebookAnnotations > button,
+  .fieldNotebook[data-variant="diagram"] .notebookAnnotations > div,
+  .fieldNotebook[data-variant="margin"] .notebookAnnotations > button,
+  .fieldNotebook[data-variant="margin"] .notebookAnnotations > div {
+    margin-left: 0;
+    padding: 16px 2px;
+  }
+
+  .evidenceStack[data-variant="margin"] {
+    min-height: 0;
+    padding: 18px 0 28px;
+  }
+
+  .evidenceStack[data-variant="margin"] .evidenceStackIntro {
+    padding-left: 20px;
+  }
+
+  .evidenceStack[data-variant="margin"] .evidenceSlips,
+  .evidenceStack[data-variant="margin"]
+    .evidenceSlips[data-count="4"] {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow: visible;
+  }
+
+  .evidenceStack[data-variant="margin"] .evidenceRoute {
+    display: none;
+  }
+
+  .evidenceStack[data-variant="margin"] .evidenceSlips > button,
+  .evidenceStack[data-variant="margin"] .evidenceSlips > div {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding: 20px 6px;
+    border-bottom: 1px solid var(--a2ui-family-line);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .manifestoFold[data-variant="diagram"],
+  .manifestoFold[data-variant="margin"] {
+    min-height: 0;
+  }
+
+  .manifestoFold[data-variant="diagram"] .manifestoStack,
+  .manifestoFold[data-variant="margin"] .manifestoStack {
+    display: grid;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .manifestoFold[data-variant="diagram"] .manifestoRoute {
+    display: none;
+  }
+
+  .manifestoFold[data-variant="diagram"] .manifestoStack > button,
+  .manifestoFold[data-variant="margin"] .manifestoStack > button,
+  .manifestoFold[data-variant="diagram"]
+    .manifestoStack
+    > button[data-active="true"],
+  .manifestoFold[data-variant="margin"]
+    .manifestoStack
+    > button[data-active="true"] {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    min-height: 88px;
+    grid-column: 1;
+    grid-row: auto;
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding: 18px 4px;
+    border: 0;
+    border-bottom: 1px solid var(--a2ui-family-line);
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .manifestoFold[data-variant="diagram"]
+    .manifestoStack
+    > button[data-active="true"],
+  .manifestoFold[data-variant="margin"]
+    .manifestoStack
+    > button[data-active="true"] {
+    min-height: 0;
+    padding: 26px 4px;
+    border-left: 0;
+    border-bottom: 2px solid var(--a2ui-green);
+  }
+
+  .manifestoFold[data-variant="margin"]
+    .manifestoStack
+    > button:not([data-active="true"])
+    > strong {
+    width: auto;
+    writing-mode: horizontal-tb;
+  }
+
+  .manifestoFold[data-variant="diagram"] .manifestoStack > button > div,
+  .manifestoFold[data-variant="margin"] .manifestoStack > button > div {
+    display: block;
+    grid-column: 2;
+  }
+
+  .manifestoFold[data-variant="diagram"] .manifestoAsset,
+  .manifestoFold[data-variant="margin"] .manifestoAsset {
+    height: 120px;
+    margin-bottom: 12px;
+  }
+
+  .timelineComponent[data-variant="diagram"] ol,
+  .timelineComponent[data-variant="margin"] ol {
+    display: block;
+    min-height: 0;
+    margin-top: 24px;
+    padding: 0 0 0 28px;
+    overflow: visible;
+    border-left: 1px solid var(--a2ui-green);
+  }
+
+  .timelineComponent[data-variant="diagram"] ol::before,
+  .timelineComponent[data-variant="margin"] ol::before {
+    display: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] li,
+  .timelineComponent[data-variant="diagram"] li:nth-child(even),
+  .timelineComponent[data-variant="margin"] li,
+  .timelineComponent[data-variant="margin"] li:nth-child(even),
+  .timelineComponent[data-variant="margin"] li:nth-child(odd) {
+    display: block;
+    min-height: 0;
+    padding: 20px 8px 22px 30px;
+    text-align: left;
+  }
+
+  .timelineComponent[data-variant="diagram"] li::after,
+  .timelineComponent[data-variant="margin"] li::after,
+  .timelineComponent[data-variant="margin"] li:nth-child(even)::after {
+    top: 36px;
+    right: auto;
+    left: 0;
+    display: block;
+    width: 21px;
+    height: 1px;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineMarker,
+  .timelineComponent[data-variant="margin"] .timelineMarker,
+  .timelineComponent[data-variant="margin"]
+    li:nth-child(even)
+    .timelineMarker {
+    top: 18px;
+    right: auto;
+    left: -46px;
+  }
+
+  .foldTimeline[data-variant="diagram"] .foldStrip,
+  .foldTimeline[data-variant="margin"] .foldStrip {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    padding: 20px;
+  }
+
+  .foldTimeline[data-variant="diagram"] .foldStrip::before,
+  .foldTimeline[data-variant="diagram"] .foldStrip > *::after {
+    display: none;
+  }
+
+  .foldTimeline[data-variant="diagram"] .foldStrip > button,
+  .foldTimeline[data-variant="diagram"] .foldStrip > div,
+  .foldTimeline[data-variant="diagram"] .foldStrip > :nth-child(even),
+  .foldTimeline[data-variant="margin"] .foldStrip > button,
+  .foldTimeline[data-variant="margin"] .foldStrip > div {
+    min-height: 0;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 5px 16px;
+    align-content: center;
+    padding: 18px 4px;
+  }
+
+  .foldTimeline[data-variant="diagram"] .foldAsset,
+  .foldTimeline[data-variant="margin"] .foldAsset {
+    width: 82px;
+    height: 76px;
+    grid-column: 1;
+    grid-row: 1 / span 4;
+  }
+
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip
+    span,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip
+    strong,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip
+    small,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip
+    i,
+  .foldTimeline[data-variant="margin"] .foldStrip span,
+  .foldTimeline[data-variant="margin"] .foldStrip strong,
+  .foldTimeline[data-variant="margin"] .foldStrip small,
+  .foldTimeline[data-variant="margin"] .foldStrip i {
+    grid-column: 2;
+    grid-row: auto;
+    align-self: auto;
+    margin-top: 0;
+  }
+}
+
+/* A folio evidence answer is one authored sheet. The facts share a page and
+ * reading order instead of becoming a row of narrow, independent cards. */
+@media (min-width: 901px) {
+  .evidenceStack[data-variant="folio"] {
+    display: block;
+    min-height: 0;
+    padding: 14px 10px 42px;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceStackIntro {
+    display: grid;
+    max-width: none;
+    grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+    gap: 28px 56px;
+    align-items: end;
+    padding: 0 28px 28px;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceStackIntro h2 {
+    max-width: 540px;
+    margin: 0;
+    font-size: clamp(35px, 4vw, 58px);
+    line-height: 0.96;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceStackIntro > div {
+    max-width: 760px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips,
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="4"] {
+    position: relative;
+    display: grid;
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 34px 38px;
+    border: 1px solid color-mix(in oklch, var(--a2ui-green) 38%, transparent);
+    background:
+      linear-gradient(
+        90deg,
+        transparent calc(50% - 0.5px),
+        color-mix(in oklch, var(--a2ui-green) 18%, transparent) 50%,
+        transparent calc(50% + 0.5px)
+      ),
+      url("/a2ui-paper-stock.webp"),
+      var(--a2ui-paper);
+    background-blend-mode: normal, multiply, normal;
+    box-shadow:
+      0 5px 0 rgb(72 54 34 / 0.1),
+      0 22px 38px rgb(61 44 26 / 0.13);
+    clip-path: polygon(
+      0.5% 1.2%,
+      24% 0.3%,
+      51% 1%,
+      76% 0.4%,
+      99.5% 1.1%,
+      99% 98.8%,
+      74% 99.5%,
+      49% 98.9%,
+      23% 99.6%,
+      0.4% 98.7%
+    );
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceRoute {
+    display: none;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > button,
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > div {
+    position: relative;
+    inset: auto;
+    display: grid;
+    min-width: 0;
+    min-height: 218px;
+    grid-template-columns: minmax(0, 1fr) minmax(72px, 104px);
+    align-content: center;
+    gap: 0 20px;
+    padding: 28px 34px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    clip-path: none;
+    transform: none;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > :nth-child(2),
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > :nth-child(3) {
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--a2ui-green) 22%, transparent);
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > :nth-child(2),
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    > :nth-child(4) {
+    border-right: 1px solid
+      color-mix(in oklch, var(--a2ui-green) 22%, transparent);
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="3"]
+    > :last-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="2"]
+    > :nth-child(2),
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="2"]
+    > :nth-child(3) {
+    border-bottom: 0;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="1"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips[data-count="1"]
+    > :nth-child(2) {
+    border: 0;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    span,
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    strong,
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    small,
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    i {
+    min-width: 0;
+    grid-column: 1;
+    grid-row: auto;
+    align-self: auto;
+    margin-right: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    strong {
+    margin-top: 9px;
+    font-size: clamp(25px, 2.45vw, 38px);
+    line-height: 1.04;
+  }
+
+  .evidenceStack[data-variant="folio"][data-arrangement]
+    .evidenceSlips
+    small {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceAsset {
+    width: 100%;
+    height: 96px;
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    object-fit: contain;
+  }
+}
+
+@media (max-width: 900px) {
+  .evidenceStack[data-variant="folio"] .evidenceStackIntro {
+    padding: 0 8px;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceSlips,
+  .evidenceStack[data-variant="folio"]
+    .evidenceSlips[data-count="4"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 18px;
+    border: 1px solid color-mix(in oklch, var(--a2ui-green) 30%, transparent);
+    background:
+      url("/a2ui-paper-stock.webp"),
+      var(--a2ui-paper);
+    background-blend-mode: multiply;
+    box-shadow:
+      0 4px 0 rgb(72 54 34 / 0.09),
+      0 16px 28px rgb(61 44 26 / 0.11);
+    clip-path: polygon(0.8% 0.5%, 99% 1%, 99.5% 99%, 0.5% 98.6%);
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceSlips > button,
+  .evidenceStack[data-variant="folio"] .evidenceSlips > div {
+    grid-template-columns: minmax(0, 1fr) 70px;
+    padding: 22px 10px;
+    border: 0;
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--a2ui-green) 20%, transparent);
+    background: transparent;
+    box-shadow: none;
+    clip-path: none;
+    transform: none;
+  }
+
+  .evidenceStack[data-variant="folio"] .evidenceSlips > :last-child {
+    border-bottom: 0;
+  }
+}
+
+/* The diagram timeline is one chronological drawing. Its annotations occupy
+ * generous stations around a continuous route rather than equal-width cells. */
+.timelineCanvas {
+  position: relative;
+}
+
+.timelineRoute {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  .timelineComponent[data-variant="diagram"] {
+    padding: 10px 0 30px;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineCanvas {
+    min-height: 620px;
+    margin-top: 24px;
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    .timelineCanvas[data-count="1"],
+  .timelineComponent[data-variant="diagram"]
+    .timelineCanvas[data-count="2"],
+  .timelineComponent[data-variant="diagram"]
+    .timelineCanvas[data-count="3"] {
+    min-height: 310px;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineRoute {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: var(--a2ui-bg);
+    stroke: color-mix(in oklch, var(--a2ui-green) 70%, transparent);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+    pointer-events: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineRouteGhost {
+    opacity: 0.28;
+    stroke-width: 0.8;
+    transform: translateY(4px);
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineRoute circle {
+    fill: var(--a2ui-green);
+    stroke: var(--a2ui-bg);
+    stroke-width: 9;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .timelineComponent[data-variant="diagram"] ol {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    min-height: 620px;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+    grid-template-rows: repeat(2, 310px);
+    gap: 0;
+    align-items: stretch;
+    margin: 0;
+    overflow: visible;
+    border: 0;
+  }
+
+  .timelineComponent[data-variant="diagram"] ol[data-count="1"],
+  .timelineComponent[data-variant="diagram"] ol[data-count="2"],
+  .timelineComponent[data-variant="diagram"] ol[data-count="3"] {
+    min-height: 310px;
+    grid-template-rows: 310px;
+  }
+
+  .timelineComponent[data-variant="diagram"] ol::before {
+    display: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] li,
+  .timelineComponent[data-variant="diagram"] li:nth-child(even) {
+    position: relative;
+    display: block;
+    min-width: 250px;
+    min-height: 310px;
+    padding: 20px 40px 126px 44px;
+    border: 0;
+    text-align: left;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(4) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(6) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    ol[data-count="4"]
+    li:nth-child(4) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    ol[data-count="4"]
+    li:nth-child(4)
+    > div {
+    max-width: 430px;
+    margin-left: auto;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(n + 4) {
+    padding: 158px 40px 16px 44px;
+  }
+
+  .timelineComponent[data-variant="diagram"] li::after,
+  .timelineComponent[data-variant="diagram"] li:nth-child(even)::after {
+    position: absolute;
+    top: 134px;
+    bottom: auto;
+    left: 64px;
+    display: block;
+    width: 28px;
+    height: 46px;
+    border: 0;
+    border-left: 1px solid
+      color-mix(in oklch, var(--a2ui-green) 58%, transparent);
+    border-radius: 50%;
+    background: transparent;
+    content: "";
+    transform: rotate(-8deg);
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(n + 4)::after {
+    top: 128px;
+    height: 34px;
+    transform: rotate(8deg);
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineMarker {
+    position: absolute;
+    z-index: 2;
+    top: 172px;
+    left: 50px;
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--a2ui-green);
+    border-radius: 50%;
+    background: var(--a2ui-bg);
+    box-shadow: 0 0 0 5px var(--a2ui-bg);
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(2)
+    .timelineMarker,
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(5)
+    .timelineMarker {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(3)
+    .timelineMarker,
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(4)
+    .timelineMarker {
+    right: 50px;
+    left: auto;
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(2)::after,
+  .timelineComponent[data-variant="diagram"] li:nth-child(5)::after {
+    left: 50%;
+    transform: translateX(-50%) rotate(-4deg);
+  }
+
+  .timelineComponent[data-variant="diagram"] li:nth-child(3)::after,
+  .timelineComponent[data-variant="diagram"] li:nth-child(4)::after {
+    right: 64px;
+    left: auto;
+    transform: rotate(7deg);
+  }
+
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(n + 4)
+    .timelineMarker {
+    top: 112px;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineMarker > span,
+  .timelineComponent[data-variant="diagram"] .timelineMarker svg {
+    display: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] li > div,
+  .timelineComponent[data-variant="diagram"]
+    li:nth-child(even)
+    > div {
+    width: 100%;
+    max-width: 360px;
+    min-width: 0;
+    align-self: auto;
+  }
+
+  .timelineComponent[data-variant="diagram"] strong,
+  .timelineComponent[data-variant="diagram"] small,
+  .timelineComponent[data-variant="diagram"] li p {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] strong {
+    font-family: var(--font-serif);
+    font-size: clamp(23px, 2.25vw, 34px);
+    font-weight: 500;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .timelineComponent[data-variant="diagram"] small {
+    margin-top: 8px;
+    color: var(--a2ui-green);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .timelineComponent[data-variant="diagram"] li p {
+    margin-top: 8px;
+    color: var(--color-ink-muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"] {
+    min-height: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: minmax(330px, auto) minmax(210px, auto);
+  }
+
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip[data-count="4"]
+    > :first-child {
+    grid-column: 1;
+    min-height: 330px;
+  }
+
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > button,
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > div,
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > :nth-child(even) {
+    min-height: 330px;
+    align-content: start;
+    padding: 10px 20px 190px;
+  }
+
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > :last-child {
+    min-height: 210px;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(130px, 0.34fr) minmax(0, 1fr);
+    gap: 5px 28px;
+    align-content: center;
+    padding: 32px 36px 24px;
+    border-top: 1px solid var(--a2ui-family-line);
+  }
+
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > :last-child::after {
+    top: -6px;
+    right: 28px;
+    left: auto;
+  }
+
+  .foldTimeline[data-variant="diagram"]
+    .foldStrip[data-count="4"]
+    > :last-child
+    .foldAsset {
+    width: 100%;
+    height: 112px;
+    grid-column: 1;
+    grid-row: 1 / span 4;
+  }
+
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip[data-count="4"]
+    > :last-child
+    span,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip[data-count="4"]
+    > :last-child
+    strong,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip[data-count="4"]
+    > :last-child
+    small,
+  .foldTimeline[data-variant="diagram"][data-arrangement]
+    .foldStrip[data-count="4"]
+    > :last-child
+    i {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .timelineComponent[data-variant="diagram"] .timelineCanvas,
+  .timelineComponent[data-variant="diagram"]
+    .timelineCanvas[data-count] {
+    min-height: 0;
+  }
+
+  .timelineComponent[data-variant="diagram"] .timelineRoute {
+    display: none;
+  }
+
+  .timelineComponent[data-variant="diagram"] li > div {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .timelineComponent[data-variant="diagram"] strong,
+  .timelineComponent[data-variant="diagram"] small,
+  .timelineComponent[data-variant="diagram"] li p {
+    width: 100%;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
 }
 
