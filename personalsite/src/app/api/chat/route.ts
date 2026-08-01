@@ -29,9 +29,112 @@ import {
   setRewriteCache,
   setSuggestedReplyCache,
 } from "@/utils/chatCache";
+// Cache keys are contract-versioned in chatCache so prompt and retrieval
+// changes cannot replay an answer authored under an older evidence policy.
 import { isHostSuggestedQuestion } from "@/data/chatSuggestions";
+import {
+  galleryCategoryPromptDirectory,
+  loadGalleryCategoryDirectory,
+} from "@/utils/galleryIndex";
+import {
+  findLocalEvidence,
+  formatLocalEvidenceContext,
+} from "@/utils/localEvidence";
 
 const MODEL_CONFIG = getModelRoutingConfig();
+
+type RetrievalMatchLike = {
+  metadata?: Record<string, unknown>;
+};
+
+const RETRIEVAL_QUERY_STOP_WORDS = new Set([
+  "about",
+  "build",
+  "built",
+  "does",
+  "from",
+  "have",
+  "karthik",
+  "project",
+  "projects",
+  "research",
+  "show",
+  "tell",
+  "that",
+  "their",
+  "there",
+  "these",
+  "this",
+  "what",
+  "when",
+  "where",
+  "which",
+  "with",
+  "work",
+]);
+
+function meaningfulQueryTerms(query: string): string[] {
+  return [
+    ...new Set(
+      query
+        .toLocaleLowerCase()
+        .match(/[a-z0-9]+/g)
+        ?.filter(
+          (term) =>
+            term.length >= 3 && !RETRIEVAL_QUERY_STOP_WORDS.has(term),
+        ) ?? [],
+    ),
+  ];
+}
+
+function searchableMatchText(match: RetrievalMatchLike): string {
+  const metadata = match.metadata ?? {};
+  return [
+    metadata.text,
+    metadata.title,
+    metadata.company,
+    metadata.project_title,
+    metadata.file_path,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
+    .toLocaleLowerCase();
+}
+
+function sparseResultsLookMisaligned(
+  query: string,
+  matches: RetrievalMatchLike[],
+): boolean {
+  const terms = meaningfulQueryTerms(query);
+  if (terms.length === 0 || matches.length === 0) return false;
+
+  const inspected = matches.slice(0, 8);
+  const aligned = inspected.filter((match) => {
+    const text = searchableMatchText(match);
+    return terms.some((term) => text.includes(term));
+  }).length;
+
+  return aligned === 0;
+}
+
+function relevanceThresholdForMode(
+  retrievalMode: "hybrid" | "dense",
+): number {
+  return retrievalMode === "dense" ? 0.35 : 0.45;
+}
+
+function canonicalEntryRelevance(
+  query: string,
+  entry: { id: string; label: string },
+): number {
+  const terms = meaningfulQueryTerms(query);
+  if (terms.length === 0) return 0;
+  const haystack = `${entry.id} ${entry.label}`.toLocaleLowerCase();
+  return terms.reduce(
+    (score, term) => score + (haystack.includes(term) ? 1 : 0),
+    0,
+  );
+}
 
 // Type for chat messages
 interface ChatMessage {
@@ -643,12 +746,27 @@ export async function POST(req: NextRequest) {
     if (baselineEmbeddingUsage) recordUsage(baselineEmbeddingUsage);
     const baselineEmbedding = baselineEmbResp.data[0].embedding;
     const baselineSparse = encodeSparseQuery(currentQuery);
-    const baselineResponse = await index.query({
+    let retrievalMode: "hybrid" | "dense" = "hybrid";
+    let baselineResponse = await index.query({
       vector: baselineEmbedding,
       sparseVector: baselineSparse.indices.length > 0 ? baselineSparse : undefined,
       topK: 30,
       includeMetadata: true,
     });
+    if (
+      baselineSparse.indices.length > 0 &&
+      sparseResultsLookMisaligned(currentQuery, baselineResponse.matches)
+    ) {
+      console.warn(
+        "Sparse retrieval results look misaligned with their metadata; retrying with dense retrieval",
+      );
+      retrievalMode = "dense";
+      baselineResponse = await index.query({
+        vector: baselineEmbedding,
+        topK: 30,
+        includeMetadata: true,
+      });
+    }
     const baselineMs = Date.now() - tRetrievalStart;
     console.log(`⏱️  Baseline retrieval: ${baselineMs}ms (${baselineResponse.matches.length} matches)`);
     if (baselineResponse.matches.length > 0) {
@@ -662,8 +780,9 @@ export async function POST(req: NextRequest) {
     // "does he play an instrument?" typically returns very few matches above
     // the 0.45 threshold; a specific query returns many.
     const HYDE_BYPASS_MIN_MATCHES = 3;
+    const relevanceThreshold = relevanceThresholdForMode(retrievalMode);
     const baselineRelevantCount = baselineResponse.matches.filter(
-      (m) => m.score && m.score > 0.45,
+      (m) => m.score && m.score > relevanceThreshold,
     ).length;
     const baselineStrong = baselineRelevantCount >= HYDE_BYPASS_MIN_MATCHES;
 
@@ -726,7 +845,9 @@ export async function POST(req: NextRequest) {
             return index.query({
               vector: expEmbResp.data[indexInBatch].embedding,
               sparseVector:
-                expSparse.indices.length > 0 ? expSparse : undefined,
+                retrievalMode === "hybrid" && expSparse.indices.length > 0
+                  ? expSparse
+                  : undefined,
               topK: 30,
               includeMetadata: true,
             });
@@ -771,7 +892,6 @@ export async function POST(req: NextRequest) {
     // Step 4: Filter by relevance threshold and cap the candidate pool.
     // The pool doubles as (a) the context the LLM sees and (b) the set of
     // sources it can cite — so we keep it bounded.
-    const relevanceThreshold = 0.45;
     const MAX_CANDIDATES = baselineStrong ? 12 : 18;
     const relevantMatches = queryResponse.matches
       .filter((match) => match.score && match.score > relevanceThreshold)
@@ -881,7 +1001,13 @@ export async function POST(req: NextRequest) {
         `=== SUPPORTING EVIDENCE (projects, work, involvement, blog posts. Proof points and examples to back the take above.) ===\n${otherParts.join("\n\n---\n\n")}`,
       );
     }
-    const contexts = sections.join("\n\n");
+    let contexts = sections.join("\n\n");
+    const localEvidenceContext = formatLocalEvidenceContext(
+      findLocalEvidence(currentQuery),
+    );
+    if (localEvidenceContext) {
+      contexts = [localEvidenceContext, contexts].filter(Boolean).join("\n\n");
+    }
 
     console.log(`🎨 Candidate pool: ${relevantMatches.length} chunks`);
 
@@ -996,6 +1122,53 @@ export async function POST(req: NextRequest) {
       artifactDirectory.map((e) => [e.id, e.index]),
     );
 
+    const canonicalMatches = rawEntries
+      .map((entry) => ({
+        entry,
+        relevance: canonicalEntryRelevance(currentQuery, entry),
+      }))
+      .filter(({ relevance }) => relevance > 0)
+      .sort((left, right) => right.relevance - left.relevance)
+      .slice(0, 4)
+      .map(({ entry }) => `- ${entry.id}: ${entry.label}`);
+    if (canonicalMatches.length > 0) {
+      contexts = [
+        contexts,
+        `=== MATCHING CANONICAL PORTFOLIO RECORDS ===
+These records are authoritative and may supply details missed by vector retrieval.
+${canonicalMatches.join("\n")}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+    }
+
+    let galleryDirectory = "";
+    try {
+      const categories = await loadGalleryCategoryDirectory();
+      const normalizedQuery = currentQuery.toLocaleLowerCase();
+      const namesRelevant = categories.some((category) =>
+        normalizedQuery.includes(category.name.toLocaleLowerCase()),
+      );
+      const galleryQuestion =
+        namesRelevant ||
+        /\b(?:gallery|galleries|photo|photograph|photography|travel|trip|visited|visit|place|places)\b/i.test(
+          currentQuery,
+        );
+      if (galleryQuestion && categories.length > 0) {
+        galleryDirectory = galleryCategoryPromptDirectory(categories);
+        contexts = [
+          contexts,
+          `=== LIVE GALLERY DIRECTORY ===
+This is authoritative for collection names and photo counts. It does not describe the contents of individual photographs.
+${galleryDirectory}`,
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+      }
+    } catch (error) {
+      console.error("Gallery category context unavailable to answer model:", error);
+    }
+
     const hasRelevantContext = contexts.trim().length > 0;
 
     // Step 5: Build system prompt with personality.
@@ -1026,7 +1199,7 @@ When someone asks for a resume, link to Projects or Work Experience. When someon
 
     const STYLE_RULES = `STYLE RULES (follow strictly):
 - Never use em dashes. Replace with commas or parentheses.
-- Never use contrastive parallelism ("not X, but Y"; "less about X, more about Y"; "it's not just X, it's Y").
+- Never use contrastive parallelism. This includes "not X, but Y," "less about X, more about Y," "not just X," "X rather than Y," and "from X to Y" thesis frames. State the intended claim directly in one positive sentence.
 - Never say "and honestly," or "honestly," as filler.
 - Avoid rhetorical groups of three ("A, B, and C") when two carry the meaning. Enumerated lists of facts are fine.
 - Avoid flowery or inflated language. Be direct and plain.`;
@@ -1039,12 +1212,20 @@ ${HARD_CONSTRAINTS}
 
 USE THE CONTEXT AGGRESSIVELY. Before saying "no specific writeup", scan every chunk for anything addressing the topic. A project description, a blog paragraph, a role bullet, an opinion section all count as his take. If Context has a dedicated section on the topic, surface its thrust. If only indirect evidence exists (projects he chose, problems he picked), describe those concretely and say that's what his stance amounts to. Only say "no info" when truly nothing in Context touches the question. Be specific: cite project names, company names, and numbers that appear in the Context.
 
+ONE ANSWER CONTRACT:
+- This reply becomes the factual brief for an A2UI document. State every necessary fact once, in compact prose, so the composer can allocate it across the title and components.
+- Never claim that details, photos, or a named item are unavailable when any context section contains a matching record or gallery category.
+- A live gallery directory proves that a collection exists and gives its photo count. It does not prove what any individual photograph depicts.
+- Do not add a generic invitation to browse another page when the available evidence already answers the question.
+- Award placements are wins. For questions that use "won" or "wins", introduce every qualifying result as a win, including second place, then preserve the exact placement the evidence gives.
+
 REPLY STRUCTURE:
 - Factual question (one fact, one date, one name): 1 to 2 sentences plus the relevant link. Don't pad.
 - Named-item question ("favorite project", "what did he build at X", "tell me about Y"): answer the question in the first sentence, then explain what the item is, why it matters to Karthik, and the strongest concrete detail available. Naming the item alone is incomplete.
 - Opinion or "what does he think about X" question: lead with the stance using HIS framing from the KARTHIK'S OWN TAKE section. Then cover every distinct take in that section. Each thesis, each anecdote, each named example must appear, paraphrased to third person. Then enrich with relevant project, work, or blog evidence as proof points.
-- Career, journey, or "evolved over time" question: preserve research as the through-line. His focus moved from technical deep learning and domain-specific ML toward LLMs, agents, and tool infrastructure. Do not claim that he left research, progressed beyond research, or moved from research into product. Product building and community work may appear as parallel applications, not as the destination of the story. The final stage must be the newest role in the CANONICAL WORK RECORD, using its actual role and company. Never replace that endpoint with a side project, involvement, or open-source tool.
+- Career, journey, or "evolved over time" question: preserve research as the through-line. Earlier work covers technical deep learning and domain-specific ML. Recent work covers LLMs, agents, and tool infrastructure. Product building and community work may appear as parallel applications. Do not claim that he left research or that product work replaced it. The final stage must be the newest role in the CANONICAL WORK RECORD, using its actual role and company. Never replace that endpoint with a side project, involvement, or open-source tool.
 - Length follows from coverage. A one-take topic stays short. A five-take topic gets five beats. Do not pad a one-take topic. Do not compress a five-take topic.
+- Keep the reply as a factual source brief. The A2UI owns the storytelling and visual hierarchy, so avoid a polished paragraph that merely previews the same component facts.
 
 THE TAKE SECTION ANCHORS THE REPLY (when present):
 - Lead with the take, not the projects. The first sentence states his stance using his vocabulary, his angle, his sharpness. No hedge ("Karthik is opinionated on X"), no project intro, no definition.

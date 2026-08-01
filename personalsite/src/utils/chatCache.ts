@@ -24,6 +24,10 @@ type MemoryEntry = {
 const REWRITE_TTL_SECONDS = 7 * 24 * 60 * 60;
 const SUGGESTED_REPLY_TTL_SECONDS = 30 * 24 * 60 * 60;
 const MEMORY_CACHE_LIMIT = 250;
+// Keep local development from serving an old answer after the retrieval or
+// display contract changes. Production still adds the deploy SHA separately.
+const REWRITE_CACHE_SCHEMA = "v3";
+const SUGGESTED_REPLY_CACHE_SCHEMA = "v3";
 const memoryCache = new Map<string, MemoryEntry>();
 
 let redis: Redis | null | undefined;
@@ -55,11 +59,13 @@ function compactKey(value: string): string {
 }
 
 function rewriteKey(query: string): string {
-  return `chat:rewrite:v2:${compactKey(normalizeSuggestedQuestion(query))}`;
+  return `chat:rewrite:${REWRITE_CACHE_SCHEMA}:${compactKey(
+    normalizeSuggestedQuestion(query),
+  )}`;
 }
 
 function suggestedReplyKey(query: string): string {
-  return `chat:suggested:${contentVersion()}:${compactKey(
+  return `chat:suggested:${SUGGESTED_REPLY_CACHE_SCHEMA}:${contentVersion()}:${compactKey(
     normalizeSuggestedQuestion(query),
   )}`;
 }

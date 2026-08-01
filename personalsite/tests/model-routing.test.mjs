@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   getModelRoutingConfig,
@@ -17,6 +18,11 @@ import {
   isHostSuggestedQuestion,
   normalizeSuggestedQuestion,
 } from "../src/data/chatSuggestions.ts";
+
+const chatCacheSource = readFileSync(
+  new URL("../src/utils/chatCache.ts", import.meta.url),
+  "utf8",
+);
 
 test("routing defaults keep visual work on Luna and narrow facts on Mini", () => {
   const config = getModelRoutingConfig({});
@@ -145,6 +151,8 @@ test("host-authored suggestions normalize safely and gate reply caching", () => 
 });
 
 test("rewrite and suggested reply caches round-trip without freezing A2UI", async () => {
+  assert.match(chatCacheSource, /REWRITE_CACHE_SCHEMA = "v3"/);
+  assert.match(chatCacheSource, /SUGGESTED_REPLY_CACHE_SCHEMA = "v3"/);
   const rewriteQuestion = `Where did he work ${Date.now()}?`;
   const rewrites = ["one", "two", "three"];
   await setRewriteCache(rewriteQuestion, rewrites);
