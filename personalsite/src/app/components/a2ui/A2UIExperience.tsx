@@ -51,7 +51,9 @@ import {
   compositionCandidates,
   mixPresentationSeed,
   presentA2UIComponent,
+  surfaceFamilyForComponent,
   type A2UIItemArrangement,
+  type A2UISurfaceFamily,
 } from "@/a2ui/presentation";
 import { InteriorBotanicalFrame } from "@/app/components/BotanicalDetails";
 import styles from "@/app/components/a2ui/a2ui.module.css";
@@ -91,8 +93,77 @@ const A2UI_VISUAL_VARIANTS = [
   "margin",
 ] as const satisfies readonly A2UIVisualVariant[];
 
-function visualVariantForSeed(seed: number): A2UIVisualVariant {
-  return A2UI_VISUAL_VARIANTS[(seed >>> 0) % A2UI_VISUAL_VARIANTS.length];
+function visualVariantForSeed(
+  seed: number,
+  avoided: readonly A2UIVisualVariant[] = [],
+): A2UIVisualVariant {
+  const available = A2UI_VISUAL_VARIANTS.filter(
+    (variant) => !avoided.includes(variant),
+  );
+  const pool = available.length > 0 ? available : A2UI_VISUAL_VARIANTS;
+  return pool[(seed >>> 0) % pool.length] ?? "folio";
+}
+
+function recentVisualVariantsForTurns(
+  turns: A2UITurn[],
+  activeTurnIndex: number,
+): A2UIVisualVariant[] {
+  const variants: A2UIVisualVariant[] = [];
+
+  for (let turnIndex = 0; turnIndex < activeTurnIndex; turnIndex += 1) {
+    const document = turns[turnIndex]?.document;
+    if (!document) continue;
+    const seed = document.presentationSeed ?? turnIndex;
+    const previous = variants.at(-1);
+    variants.push(
+      visualVariantForSeed(
+        mixPresentationSeed(seed, "document:visual"),
+        previous ? [previous] : [],
+      ),
+    );
+  }
+
+  return variants.slice(-1);
+}
+
+function recentSurfaceFamiliesForTurns(
+  turns: A2UITurn[],
+  activeTurnIndex: number,
+): A2UISurfaceFamily[] {
+  const surfacesByTurn: A2UISurfaceFamily[][] = [];
+
+  for (let turnIndex = 0; turnIndex < activeTurnIndex; turnIndex += 1) {
+    const document = turns[turnIndex]?.document;
+    if (!document) {
+      surfacesByTurn.push([]);
+      continue;
+    }
+
+    const recent = surfacesByTurn
+      .slice(Math.max(0, turnIndex - 2), turnIndex)
+      .flat();
+    const seed = document.presentationSeed ?? turnIndex;
+    const presented = [document.primary, ...document.supporting].map(
+      (component, index) => {
+        const slot = index === 0 ? "primary" : `supporting-${index - 1}`;
+        return {
+          component: presentA2UIComponent(component, seed, slot),
+          slot,
+        };
+      },
+    );
+    const used = [...recent];
+    const surfaces = presented.map(({ component, slot }) => {
+      const surface = surfaceFamilyForComponent(component, seed, slot, used);
+      used.push(surface);
+      return surface;
+    });
+    surfacesByTurn.push(surfaces);
+  }
+
+  return surfacesByTurn
+    .slice(Math.max(0, activeTurnIndex - 2), activeTurnIndex)
+    .flat();
 }
 
 export function A2UIExperience({
@@ -121,6 +192,14 @@ export function A2UIExperience({
   const activeTurnIndex = Math.max(
     0,
     turns.findIndex((turn) => turn.id === active.id),
+  );
+  const recentSurfaceFamilies = recentSurfaceFamiliesForTurns(
+    turns,
+    activeTurnIndex,
+  );
+  const recentVisualVariants = recentVisualVariantsForTurns(
+    turns,
+    activeTurnIndex,
   );
 
   return (
@@ -195,6 +274,8 @@ export function A2UIExperience({
                 document={active.document}
                 artifacts={active.artifacts}
                 compositionTurn={activeTurnIndex}
+                recentSurfaceFamilies={recentSurfaceFamilies}
+                recentVisualVariants={recentVisualVariants}
                 onAsk={onAsk}
               />
             )}
@@ -213,6 +294,8 @@ function A2UICanvas({
   document: uiDocument,
   artifacts,
   compositionTurn,
+  recentSurfaceFamilies,
+  recentVisualVariants,
   onAsk,
 }: {
   question: string;
@@ -220,6 +303,8 @@ function A2UICanvas({
   document?: A2UIDocument;
   artifacts: Artifact[];
   compositionTurn: number;
+  recentSurfaceFamilies: A2UISurfaceFamily[];
+  recentVisualVariants: A2UIVisualVariant[];
   onAsk: (prompt: string) => void;
 }) {
   const router = useRouter();
@@ -296,6 +381,26 @@ function A2UICanvas({
     ),
   );
   const presentedComponents = [presentedPrimary, ...presentedSupporting];
+  const primarySurface = surfaceFamilyForComponent(
+    presentedPrimary,
+    presentationSeed,
+    "primary",
+    recentSurfaceFamilies,
+  );
+  const usedSurfaceFamilies: A2UISurfaceFamily[] = [
+    ...recentSurfaceFamilies,
+    primarySurface,
+  ];
+  const supportingSurfaces = presentedSupporting.map((component, index) => {
+    const surface = surfaceFamilyForComponent(
+      component,
+      presentationSeed,
+      `supporting-${index}`,
+      usedSurfaceFamilies,
+    );
+    usedSurfaceFamilies.push(surface);
+    return surface;
+  });
   const componentNavigationPaths = new Map(
     presentedComponents.flatMap((component) => {
       const path = componentNavigationPath(component, uiDocument.actions);
@@ -336,6 +441,7 @@ function A2UICanvas({
       : (["stacked"] satisfies A2UIComposition[]);
   const visualVariant = visualVariantForSeed(
     mixPresentationSeed(presentationSeed, "document:visual"),
+    recentVisualVariants,
   );
   const embeddedQuote =
     presentedPrimary.type === "essay_margin"
@@ -348,11 +454,21 @@ function A2UICanvas({
         (component) => component.id !== embeddedQuote.id,
       )
     : presentedSupporting;
-  const safeCompositionOptions = compositionCandidates(
+  const baseCompositionOptions = compositionCandidates(
     presentedPrimary,
     modelCompositionOptions,
     supportingComponents,
   );
+  const hasAuthoredSurface = [primarySurface, ...supportingSurfaces].some(
+    (surface) => surface !== "default",
+  );
+  const authoredCompositionOptions = baseCompositionOptions.filter(
+    (option) => option === "primary_top" || option === "stacked",
+  );
+  const safeCompositionOptions =
+    hasAuthoredSurface && authoredCompositionOptions.length > 0
+      ? authoredCompositionOptions
+      : baseCompositionOptions;
   const composition: A2UIComposition =
     supportingComponents.length > 0
       ? (
@@ -416,6 +532,7 @@ function A2UICanvas({
           <A2UIBlock
             component={presentedPrimary}
             embeddedQuote={embeddedQuote}
+            surfaceFamily={primarySurface}
             visualVariant={visualVariant}
             arrangement={arrangementForComponent(
               presentedPrimary,
@@ -441,6 +558,7 @@ function A2UICanvas({
               <A2UIBlock
                 key={component.id}
                 component={component}
+                surfaceFamily={supportingSurfaces[index] ?? "default"}
                 visualVariant={visualVariant}
                 arrangement={arrangementForComponent(
                   component,
@@ -488,6 +606,7 @@ function A2UICanvas({
 function A2UIBlock({
   component,
   embeddedQuote,
+  surfaceFamily,
   visualVariant,
   arrangement,
   presentationSeed,
@@ -497,6 +616,7 @@ function A2UIBlock({
 }: {
   component: A2UIComponent;
   embeddedQuote?: A2UIComponent;
+  surfaceFamily: A2UISurfaceFamily;
   visualVariant: A2UIVisualVariant;
   arrangement: A2UIItemArrangement;
   presentationSeed: number;
@@ -552,6 +672,52 @@ function A2UIBlock({
         quoteArtifacts={quoteArtifacts}
         visualVariant={visualVariant}
         arrangement={arrangement}
+      />
+    );
+  }
+
+  if (surfaceFamily === "field_map") {
+    return (
+      <ConnectedFieldMap
+        component={component}
+        visualVariant={visualVariant}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
+      />
+    );
+  }
+
+  if (surfaceFamily === "archive_index") {
+    return (
+      <ArchiveIndex
+        component={component}
+        visualVariant={visualVariant}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
+      />
+    );
+  }
+
+  if (surfaceFamily === "essay_constellation") {
+    return (
+      <EssayConstellation
+        component={component}
+        embeddedQuote={embeddedQuote}
+        visualVariant={visualVariant}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
+      />
+    );
+  }
+
+  if (surfaceFamily === "project_workbench") {
+    return (
+      <ProjectWorkbench
+        component={component}
+        visualVariant={visualVariant}
+        presentationSeed={presentationSeed}
+        artifactMap={artifactMap}
+        onOpen={onOpen}
       />
     );
   }
@@ -645,6 +811,7 @@ function A2UIBlock({
     return (
       <VisualMosaic
         component={component}
+        surfaceFamily={surfaceFamily}
         visualVariant={visualVariant}
         arrangement={arrangement}
         presentationSeed={presentationSeed}
@@ -668,7 +835,7 @@ function A2UIBlock({
 
   if (component.type === "topic_compass" && component.options.length > 0) {
     return (
-      <TopicCompass
+      <ManifestoFold
         component={component}
         visualVariant={visualVariant}
         arrangement={arrangement}
@@ -1052,6 +1219,283 @@ function itemOwnsArtifactAction(
   return (
     component.items.findIndex((item) => item.artifactId === artifactId) ===
     itemIndex
+  );
+}
+
+function ConnectedFieldMap({
+  component,
+  visualVariant,
+  artifactMap,
+  onOpen,
+}: {
+  component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
+  artifactMap: Map<string, Artifact>;
+  onOpen: (id: string) => void;
+}) {
+  const sharedArtifactId = sharedArtifactIdFor(component);
+  const visualAssets = uniqueVisualAssetsForItems(component.items);
+
+  return (
+    <section
+      id={`a2ui-${component.id}`}
+      className={`${styles.component} ${styles.connectedFieldMap}`}
+      data-variant={visualVariant}
+      data-count={Math.min(component.items.length, 6)}
+      data-surface="field-map"
+    >
+      <header className={styles.fieldMapHeading}>
+        {component.title ? <h2>{component.title}</h2> : null}
+        {component.body ? <Markdown>{component.body}</Markdown> : null}
+      </header>
+      <div className={styles.fieldMapCanvas}>
+        <svg
+          className={styles.fieldMapRoute}
+          viewBox="0 0 1200 520"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M48 295C147 155 250 160 338 281C423 397 525 386 610 248C706 94 807 126 884 279C952 414 1052 414 1152 236" />
+          <path d="M48 302C147 162 250 167 338 288C423 404 525 393 610 255C706 101 807 133 884 286C952 421 1052 421 1152 243" />
+        </svg>
+        <ol>
+          {component.items.map((item, index) => {
+            const assetId = visualAssets[index];
+            return (
+              <li key={`${item.label}-${index}`}>
+                <span className={styles.fieldMapNode} aria-hidden="true" />
+                {assetId ? (
+                  <A2UIAsset assetId={assetId} className={styles.fieldMapAsset} />
+                ) : (
+                  <span className={styles.fieldMapIndex}>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                )}
+                <div>
+                  <strong>{item.label}</strong>
+                  {item.value ? <b>{item.value}</b> : null}
+                  {item.detail ? <small>{item.detail}</small> : null}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      {sharedArtifactId && artifactMap.has(sharedArtifactId) ? (
+        <button
+          type="button"
+          className={styles.authoredSourceAction}
+          onClick={() => onOpen(sharedArtifactId)}
+        >
+          {sourceActionLabel(sharedArtifactId, artifactMap)}
+          <ArrowRight aria-hidden="true" />
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function ArchiveIndex({
+  component,
+  visualVariant,
+  artifactMap,
+  onOpen,
+}: {
+  component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
+  artifactMap: Map<string, Artifact>;
+  onOpen: (id: string) => void;
+}) {
+  const sharedArtifactId = sharedArtifactIdFor(component);
+  const visualAssets = uniqueVisualAssetsForItems(component.items);
+
+  return (
+    <section
+      id={`a2ui-${component.id}`}
+      className={`${styles.component} ${styles.archiveIndex}`}
+      data-variant={visualVariant}
+      data-count={Math.min(component.items.length, 6)}
+      data-surface="archive-index"
+    >
+      <header className={styles.archiveHeading}>
+        {component.title ? <h2>{component.title}</h2> : null}
+        {component.body ? <Markdown>{component.body}</Markdown> : null}
+      </header>
+      <ol>
+        {component.items.map((item, index) => {
+          const assetId = visualAssets[index];
+          return (
+            <li
+              key={`${item.label}-${index}`}
+              data-current={index === component.items.length - 1}
+            >
+              <span className={styles.archiveNumber}>
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className={styles.archiveMark}>
+                {assetId ? (
+                  <A2UIAsset assetId={assetId} />
+                ) : (
+                  <i aria-hidden="true" />
+                )}
+              </span>
+              <span className={styles.archiveIdentity}>
+                <strong>{item.label}</strong>
+                {item.value ? <b>{item.value}</b> : null}
+              </span>
+              {item.detail ? <small>{item.detail}</small> : null}
+            </li>
+          );
+        })}
+      </ol>
+      {sharedArtifactId ? (
+        <button
+          type="button"
+          className={styles.authoredSourceAction}
+          onClick={() => onOpen(sharedArtifactId)}
+        >
+          {sourceActionLabel(sharedArtifactId, artifactMap)}
+          <ArrowRight aria-hidden="true" />
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function EssayConstellation({
+  component,
+  embeddedQuote,
+  visualVariant,
+  artifactMap,
+  onOpen,
+}: {
+  component: A2UIComponent;
+  embeddedQuote?: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
+  artifactMap: Map<string, Artifact>;
+  onOpen: (id: string) => void;
+}) {
+  const sharedArtifactId = sharedArtifactIdFor(component);
+  const quoteIds = [
+    ...component.quoteIds,
+    ...(embeddedQuote?.quoteIds ?? []),
+  ];
+  const quoteArtifact = quoteIds.flatMap((quoteId) => {
+    const artifact = artifactMap.get(quoteId.replace(/^quote:/, ""));
+    return artifact?.annotation ? [artifact] : [];
+  })[0];
+
+  return (
+    <section
+      id={`a2ui-${component.id}`}
+      className={`${styles.component} ${styles.essayConstellation}`}
+      data-variant={visualVariant}
+      data-surface="essay-constellation"
+    >
+      <div className={styles.constellationThesis}>
+        {component.title ? <h2>{component.title}</h2> : null}
+        {component.body ? <Markdown>{component.body}</Markdown> : null}
+      </div>
+      <div
+        className={styles.constellationNotes}
+        data-count={Math.min(component.items.length, 4)}
+      >
+        <svg viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M466 310C380 174 281 124 145 105" />
+          <path d="M466 310C606 194 704 146 852 118" />
+          <path d="M466 310C347 414 251 474 116 505" />
+          <path d="M466 310C617 399 719 466 882 507" />
+          <circle cx="466" cy="310" r="9" />
+        </svg>
+        {component.items.map((item, index) => (
+          <div key={`${item.label}-${index}`}>
+            <span>{item.label}</span>
+            {item.value ? <strong>{item.value}</strong> : null}
+            {item.detail ? <small>{item.detail}</small> : null}
+          </div>
+        ))}
+      </div>
+      {quoteArtifact ? (
+        <blockquote className={styles.constellationQuote}>
+          <QuoteIcon aria-hidden="true" />
+          <p>{stripWrappingQuotes(quoteArtifact.annotation!)}</p>
+          <footer>{artifactLabel(quoteArtifact)}</footer>
+        </blockquote>
+      ) : null}
+      {sharedArtifactId ? (
+        <button
+          type="button"
+          className={styles.authoredSourceAction}
+          onClick={() => onOpen(sharedArtifactId)}
+        >
+          {sourceActionLabel(sharedArtifactId, artifactMap)}
+          <ArrowRight aria-hidden="true" />
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function ProjectWorkbench({
+  component,
+  visualVariant,
+  presentationSeed,
+  artifactMap,
+  onOpen,
+}: {
+  component: A2UIComponent;
+  visualVariant: A2UIVisualVariant;
+  presentationSeed: number;
+  artifactMap: Map<string, Artifact>;
+  onOpen: (id: string) => void;
+}) {
+  const sharedArtifactId = sharedArtifactIdFor(component);
+  const visualAssets = uniqueVisualAssetsForItems(component.items);
+  const layout = mixPresentationSeed(
+    presentationSeed,
+    `${component.id}:workbench-layout`,
+  ) % 3;
+
+  return (
+    <section
+      id={`a2ui-${component.id}`}
+      className={`${styles.component} ${styles.projectWorkbench}`}
+      data-variant={visualVariant}
+      data-layout={layout}
+      data-count={Math.min(component.items.length, 5)}
+      data-surface="project-workbench"
+    >
+      <header className={styles.workbenchHeading}>
+        {component.title ? <h2>{component.title}</h2> : null}
+        {component.body ? <Markdown>{component.body}</Markdown> : null}
+      </header>
+      <div className={styles.workbenchFragments}>
+        {component.items.map((item, index) => {
+          const assetId = visualAssets[index];
+          return (
+            <article
+              key={`${item.label}-${index}`}
+              data-fragment={index % 4}
+            >
+              {assetId ? <A2UIAsset assetId={assetId} /> : null}
+              <span>{item.label}</span>
+              {item.value ? <strong>{item.value}</strong> : null}
+              {item.detail ? <small>{item.detail}</small> : null}
+            </article>
+          );
+        })}
+      </div>
+      {sharedArtifactId && artifactMap.has(sharedArtifactId) ? (
+        <button
+          type="button"
+          className={styles.authoredSourceAction}
+          onClick={() => onOpen(sharedArtifactId)}
+        >
+          {sourceActionLabel(sharedArtifactId, artifactMap)}
+          <ArrowRight aria-hidden="true" />
+        </button>
+      ) : null}
+    </section>
   );
 }
 
@@ -1687,6 +2131,7 @@ function SpecimenBoard({
 
 function VisualMosaic({
   component,
+  surfaceFamily,
   visualVariant,
   arrangement,
   presentationSeed,
@@ -1694,6 +2139,7 @@ function VisualMosaic({
   onOpen,
 }: {
   component: A2UIComponent;
+  surfaceFamily: A2UISurfaceFamily;
   visualVariant: A2UIVisualVariant;
   arrangement: A2UIItemArrangement;
   presentationSeed: number;
@@ -1753,6 +2199,107 @@ function VisualMosaic({
       return galleryImages[selectedIndex];
     });
   })();
+
+  const letterImages = (() => {
+    const selected = selectedGalleryImages.filter(
+      (image): image is string => Boolean(image),
+    );
+    if (selected.length !== 1) return selected.slice(0, 3);
+    const firstCategory = component.items
+      .map((item) => galleryCategoryFromAssetId(item.assetId) ?? "")
+      .find(Boolean);
+    const pool = firstCategory ? galleryIndex[firstCategory] ?? [] : [];
+    if (pool.length < 2) return selected;
+    const chosen: string[] = [];
+    let index =
+      mixPresentationSeed(
+        presentationSeed,
+        `${component.id}:${firstCategory}:letter`,
+      ) % pool.length;
+    while (chosen.length < Math.min(3, pool.length)) {
+      const image = pool[index];
+      if (!chosen.includes(image)) chosen.push(image);
+      index = (index + 1) % pool.length;
+    }
+    return chosen;
+  })();
+
+  if (surfaceFamily === "photo_letter") {
+    const firstItem = component.items[0];
+    return (
+      <section
+        id={`a2ui-${component.id}`}
+        className={`${styles.component} ${styles.photoLetter}`}
+        data-variant={visualVariant}
+        data-surface="photo-letter"
+      >
+        <header className={styles.photoLetterHeading}>
+          {component.title ? <h2>{component.title}</h2> : null}
+          {component.body ? <Markdown>{component.body}</Markdown> : null}
+        </header>
+        <div className={styles.photoLetterSpread}>
+          <figure className={styles.photoLetterHero}>
+            {letterImages[0] ? (
+              <Image
+                src={letterImages[0]}
+                alt={`Karthik's photograph from ${galleryCategoryFromAssetId(firstItem?.assetId ?? "") ?? "the trip"}`}
+                width={1600}
+                height={1100}
+                sizes="(max-width: 720px) 94vw, 64vw"
+                loading="eager"
+                fetchPriority="high"
+                unoptimized
+              />
+            ) : (
+              <span className={styles.visualMosaicPlaceholder} />
+            )}
+            {firstItem ? (
+              <figcaption>
+                <strong>{firstItem.label}</strong>
+                {firstItem.value ? <b>{firstItem.value}</b> : null}
+              </figcaption>
+            ) : null}
+          </figure>
+          <div className={styles.photoLetterDetails}>
+            {letterImages.slice(1, 3).map((image, index) => (
+              <figure key={image}>
+                <Image
+                  src={image}
+                  alt="A second view from the same gallery collection"
+                  width={900}
+                  height={700}
+                  sizes="(max-width: 720px) 44vw, 22vw"
+                  loading="lazy"
+                  unoptimized
+                />
+                <span aria-hidden="true">{String(index + 2).padStart(2, "0")}</span>
+              </figure>
+            ))}
+          </div>
+        </div>
+        <div className={styles.photoLetterNotes}>
+          {component.items.map((item, index) => (
+            <div key={`${item.label}-${index}`}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{item.label}</strong>
+              {item.value ? <b>{item.value}</b> : null}
+              {item.detail ? <small>{item.detail}</small> : null}
+            </div>
+          ))}
+        </div>
+        {sharedArtifactId ? (
+          <button
+            type="button"
+            className={styles.authoredSourceAction}
+            onClick={() => onOpen(sharedArtifactId)}
+          >
+            {sourceActionLabel(sharedArtifactId, artifactMap)}
+            <ArrowRight aria-hidden="true" />
+          </button>
+        ) : null}
+      </section>
+    );
+  }
 
   return (
     <section
@@ -1919,69 +2466,6 @@ function ManifestoFold({
             </button>
           );
         })}
-      </div>
-    </section>
-  );
-}
-
-function TopicCompass({
-  component,
-  visualVariant,
-  arrangement,
-  selectedOption,
-  onSelect,
-}: {
-  component: A2UIComponent;
-  visualVariant: A2UIVisualVariant;
-  arrangement: A2UIItemArrangement;
-  selectedOption: number;
-  onSelect: (index: number) => void;
-}) {
-  const selected = component.options[selectedOption] ?? component.options[0];
-  return (
-    <section
-      id={`a2ui-${component.id}`}
-      className={`${styles.component} ${styles.topicCompass}`}
-      data-variant={visualVariant}
-      data-arrangement={arrangement}
-    >
-      {component.title ? <h2>{component.title}</h2> : null}
-      {component.body ? <Markdown>{component.body}</Markdown> : null}
-      <div className={styles.compassLayout}>
-        <div
-          className={styles.compassDial}
-          data-count={Math.min(component.options.length, 4)}
-          style={
-            {
-              "--compass-turn": `${selectedOption * 90}deg`,
-              "--compass-counter-turn": `${selectedOption * -90}deg`,
-            } as CSSProperties
-          }
-        >
-          {component.options.slice(0, 4).map((option, index) => (
-            <button
-              type="button"
-              key={option.label}
-              data-active={selectedOption === index}
-              data-sector={index}
-              onClick={() => onSelect(index)}
-            >
-              <span>{option.label}</span>
-            </button>
-          ))}
-          <span className={styles.compassPin} aria-hidden="true" />
-        </div>
-        <div className={styles.compassSelection} aria-live="polite">
-          <strong>{selected?.label}</strong>
-          {selected?.assetId ? (
-            <A2UIAsset
-              assetId={selected.assetId}
-              className={styles.compassAsset}
-            />
-          ) : null}
-          <p>{selected?.summary}</p>
-          <small>{selected?.detail}</small>
-        </div>
       </div>
     </section>
   );

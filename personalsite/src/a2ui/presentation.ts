@@ -6,6 +6,14 @@ import type {
 
 export type A2UIItemArrangement = "balanced" | "lead" | "rail";
 
+export type A2UISurfaceFamily =
+  | "default"
+  | "field_map"
+  | "archive_index"
+  | "photo_letter"
+  | "essay_constellation"
+  | "project_workbench";
+
 const ITEM_COLLECTION_TYPES = new Set<A2UIComponentType>([
   "narrative",
   "metric_grid",
@@ -56,6 +64,87 @@ function uniqueTypes(types: A2UIComponentType[]): A2UIComponentType[] {
   return types.filter((type, index) => types.indexOf(type) === index);
 }
 
+function distinctArtifactCount(component: A2UIComponent): number {
+  return new Set(
+    [
+      ...component.artifactIds,
+      ...component.items.map((item) => item.artifactId),
+    ].filter(Boolean),
+  ).size;
+}
+
+export function surfaceCandidatesForComponent(
+  component: A2UIComponent,
+): A2UISurfaceFamily[] {
+  const itemCount = component.items.length;
+  const isCompactCollection = itemCount >= 2 && itemCount <= 4;
+  const isSequence = itemCount >= 3 && itemCount <= 6;
+  const hasGalleryImage = component.items.some((item) =>
+    item.assetId.startsWith("gallery:"),
+  );
+  const ownsOneArtifact = distinctArtifactCount(component) === 1;
+
+  if (component.type === "visual_mosaic" && hasGalleryImage) {
+    return ["photo_letter", "default"];
+  }
+
+  if (
+    isSequence &&
+    (component.type === "timeline" || component.type === "fold_timeline")
+  ) {
+    return ["archive_index", "default"];
+  }
+
+  if (
+    isSequence &&
+    ["research_map", "system_blueprint", "steps"].includes(component.type)
+  ) {
+    return ["field_map", "default"];
+  }
+
+  if (
+    ownsOneArtifact &&
+    itemCount >= 2 &&
+    itemCount <= 5 &&
+    [
+      "artifact_focus",
+      "paper_dossier",
+      "field_notebook",
+      "evidence_stack",
+      "essay_margin",
+    ].includes(component.type)
+  ) {
+    return isCompactCollection
+      ? ["project_workbench", "essay_constellation", "default"]
+      : ["project_workbench", "default"];
+  }
+
+  if (
+    isCompactCollection &&
+    ["essay_margin", "narrative", "evidence_stack"].includes(component.type)
+  ) {
+    return ["essay_constellation", "default"];
+  }
+
+  return ["default"];
+}
+
+export function surfaceFamilyForComponent(
+  component: A2UIComponent,
+  seed: number,
+  slot: string,
+  avoided: readonly A2UISurfaceFamily[] = [],
+): A2UISurfaceFamily {
+  const candidates = surfaceCandidatesForComponent(component);
+  const available = candidates.filter((candidate) => !avoided.includes(candidate));
+  const pool = available.length > 0 ? available : candidates;
+  const surfaceSeed = mixPresentationSeed(
+    seed,
+    `${slot}:${component.id}:surface`,
+  );
+  return pool[surfaceSeed % pool.length] ?? "default";
+}
+
 export function presentationTypeCandidates(
   component: A2UIComponent,
 ): A2UIComponentType[] {
@@ -93,15 +182,17 @@ export function presentationTypeCandidates(
       return uniqueTypes([component.type, "fold_timeline", "timeline"]);
     case "comparison":
     case "manifesto_fold":
-    case "topic_compass":
       return hasOptions
         ? uniqueTypes([
             component.type,
             "comparison",
             "manifesto_fold",
-            "topic_compass",
           ])
         : [component.type];
+    case "topic_compass":
+      return hasOptions
+        ? ["manifesto_fold", "comparison"]
+        : ["narrative"];
     case "artifact_focus":
     case "paper_dossier":
     case "field_notebook":

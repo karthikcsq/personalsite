@@ -8,6 +8,8 @@ import {
   mixPresentationSeed,
   presentA2UIComponent,
   presentationTypeCandidates,
+  surfaceCandidatesForComponent,
+  surfaceFamilyForComponent,
 } from "../src/a2ui/presentation.ts";
 
 const styles = readFileSync(
@@ -142,6 +144,25 @@ test("specimen boards are reserved for several distinct artifacts", () => {
   );
 });
 
+test("the retired topic compass resolves to a non-chart presentation", () => {
+  const compass = component("topic_compass", 0);
+  compass.options = [
+    { label: "Education", summary: "Teach the concept", detail: "" },
+    { label: "Applications", summary: "Use the concept", detail: "" },
+  ];
+
+  assert.deepEqual(
+    presentationTypeCandidates(compass),
+    ["manifesto_fold", "comparison"],
+  );
+  assert.equal(
+    Array.from({ length: 32 }, (_, seed) =>
+      presentA2UIComponent(compass, seed, "primary").type,
+    ).includes("topic_compass"),
+    false,
+  );
+});
+
 test("item arrangement is stable for a cached seed and varied across fresh seeds", () => {
   const narrative = component("narrative", 4);
   assert.equal(
@@ -173,5 +194,71 @@ test("responsive styles reserve the dock and protect dense stage layouts", () =>
   assert.match(
     styles,
     /\.foldStrip\[data-count="4"\][\s\S]*grid-template-columns: repeat\(3,[\s\S]*> :last-child[\s\S]*grid-column: 1 \/ -1/,
+  );
+});
+
+test("authored surface families stay semantic and reusable", () => {
+  const route = component("system_blueprint", 4);
+  assert.deepEqual(surfaceCandidatesForComponent(route), ["field_map", "default"]);
+
+  const history = component("timeline", 6);
+  assert.deepEqual(surfaceCandidatesForComponent(history), ["archive_index", "default"]);
+
+  const gallery = component("visual_mosaic", 1);
+  gallery.items[0].assetId = "gallery:Kilimanjaro";
+  assert.deepEqual(surfaceCandidatesForComponent(gallery), ["photo_letter", "default"]);
+
+  const project = component("field_notebook", 4);
+  assert.deepEqual(surfaceCandidatesForComponent(project), [
+    "project_workbench",
+    "essay_constellation",
+    "default",
+  ]);
+
+  const multiSource = component("field_notebook", 4);
+  multiSource.artifactIds = [];
+  multiSource.items = multiSource.items.map((item, index) => ({
+    ...item,
+    artifactId: `project:${index}`,
+  }));
+  assert.equal(
+    surfaceCandidatesForComponent(multiSource).includes("project_workbench"),
+    false,
+  );
+});
+
+test("surface selection avoids recently used families when alternatives exist", () => {
+  const project = component("field_notebook", 4);
+  for (let seed = 0; seed < 48; seed += 1) {
+    assert.notEqual(
+      surfaceFamilyForComponent(project, seed, "primary", ["project_workbench"]),
+      "project_workbench",
+    );
+  }
+
+  const onlyDefault = component("quote_focus", 0);
+  assert.equal(
+    surfaceFamilyForComponent(onlyDefault, 17, "primary", ["default"]),
+    "default",
+  );
+});
+
+test("authored surfaces are full width and protect text from clipping", () => {
+  for (const className of [
+    "connectedFieldMap",
+    "archiveIndex",
+    "photoLetter",
+    "essayConstellation",
+    "projectWorkbench",
+  ]) {
+    assert.match(styles, new RegExp(`\\.${className}`));
+  }
+  assert.match(
+    styles,
+    /\.archiveIdentity strong,[\s\S]*?word-break: normal;[\s\S]*?overflow-wrap: break-word;/,
+  );
+  assert.match(
+    styles,
+    /> \.supporting:has\([\s\S]*?\.projectWorkbench[\s\S]*?width: 100%;/,
   );
 });

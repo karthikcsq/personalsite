@@ -160,13 +160,22 @@ test("fresh A2UI responses choose a host-owned visual family and safe compositio
   assert.match(a2uiExperience, /mixPresentationSeed\(presentationSeed, "document:visual"\)/);
   assert.match(a2uiExperience, /compositionCandidates\(/);
   assert.match(a2uiExperience, /data-visual=\{visualVariant\}/);
+  assert.match(a2uiExperience, /function recentVisualVariantsForTurns/);
+  assert.match(
+    a2uiExperience,
+    /visualVariantForSeed\([\s\S]*?previous \? \[previous\] : \[\]/,
+  );
+  assert.match(
+    a2uiExperience,
+    /mixPresentationSeed\(presentationSeed, "document:visual"\),\s*recentVisualVariants/,
+  );
 });
 
 test("semantic type, composition, and item arrangement rotate independently", () => {
   assert.match(a2uiPresentation, /export function mixPresentationSeed/);
   assert.match(a2uiPresentation, /presentationTypeCandidates/);
   assert.match(a2uiPresentation, /"research_map",\s*"system_blueprint",\s*"steps"/s);
-  assert.match(a2uiPresentation, /"comparison",\s*"manifesto_fold",\s*"topic_compass"/s);
+  assert.match(a2uiPresentation, /case "topic_compass":[\s\S]*\["manifesto_fold", "comparison"\]/);
   assert.match(a2uiPresentation, /export function arrangementForComponent/);
   assert.match(a2uiPresentation, /\["balanced", "lead", "rail"\]/);
   assert.match(a2uiExperience, /data-arrangement=\{arrangement\}/);

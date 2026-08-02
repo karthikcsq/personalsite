@@ -454,7 +454,7 @@ const FAVORITE_PROJECT_FIXTURE: A2UIDocument = {
       },
     ],
     options: [],
-    artifactIds: [],
+    artifactIds: ["projects/repple"],
     quoteIds: [],
   },
   supporting: [

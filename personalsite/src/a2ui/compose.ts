@@ -437,7 +437,6 @@ NON-REDUNDANCY REQUIREMENTS
   - research_map: one technical effort has two to four causal stages, methods, or results that form a connected system
   - fold_timeline: three to six chronological stages explain how Karthik's work or thinking changed
   - manifesto_fold: two to four distinct principles or lenses explain a belief, judgment, or point of view
-  - topic_compass: the visitor asks what to explore, compare, or choose next and each option can lead to a useful follow-up
   - field_notebook: one project or role needs a nuanced working-note spread with a central explanation and three or four distinct annotations
   - system_blueprint: the visitor asks how a technical system works and three to six items can form modules, stages, safeguards, or data flows
   - evidence_stack: the answer rests on three or four different proof points, constraints, results, awards, or receipts that should feel accumulated rather than tabulated
@@ -457,7 +456,8 @@ NON-REDUNDANCY REQUIREMENTS
 - When a visitor asks consecutive questions about the same subject, a different question shape should produce a different component form. Never preserve the previous form out of visual consistency alone.
 - A research_map item is one system stage. Use label for the stage name, value for its result or method, detail for one sentence of explanation, artifactId when it maps to evidence, and assetId when a listed visual asset directly matches.
 - A fold_timeline item is one chronological stage. Keep the date or period in value, the stage name in label, and its distinct change in detail.
-- A manifesto_fold or topic_compass uses options. Each option must advance a different principle or direction. Keep every option label to one to four short words; put all explanation in summary and detail.
+- A manifesto_fold uses options. Each option must advance a different principle or direction. Keep every option label to one to four short words; put all explanation in summary and detail.
+- topic_compass is retired. Never emit it. Use manifesto_fold for distinct selectable lenses, comparison for genuinely comparable positions, or essay_margin for a qualitative point of view.
 - A paper_dossier requires a valid artifact reference and should use an asset only when it depicts that exact work.
 - paper_dossier item details are visible without interaction. Use three or four facets that carry the explanation themselves, and leave the body empty when those facets already tell the complete story.
 - paper_dossier is invalid for a blog post, essay, opinion, belief, or topic artifact. Those belong in essay_margin, manifesto_fold, narrative, or quote_focus.
