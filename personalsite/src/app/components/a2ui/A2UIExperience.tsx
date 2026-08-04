@@ -1561,6 +1561,7 @@ function EssayConstellation({
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
   const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
+  const visualAssets = uniqueVisualAssetsForItems(component.items);
   const quoteIds = [
     ...component.quoteIds,
     ...(embeddedQuote?.quoteIds ?? []),
@@ -1576,6 +1577,7 @@ function EssayConstellation({
       className={`${styles.component} ${styles.essayConstellation}`}
       data-variant={visualVariant}
       data-count={Math.min(component.items.length, 4)}
+      data-has-thesis={component.title || component.body ? "true" : "false"}
       data-surface="essay-constellation"
     >
       <div className={styles.constellationThesis}>
@@ -1595,8 +1597,15 @@ function EssayConstellation({
         </svg>
         {component.items.map((item, index) => {
           const artifactId = itemArtifactIds[index] ?? "";
+          const assetId = visualAssets[index];
           const content = (
             <>
+              {assetId ? (
+                <A2UIAsset
+                  assetId={assetId}
+                  className={styles.constellationNoteAsset}
+                />
+              ) : null}
               <span>{item.label}</span>
               {item.value ? <strong>{item.value}</strong> : null}
               {item.detail ? <small>{item.detail}</small> : null}
@@ -1698,6 +1707,7 @@ function ProjectWorkbench({
             <article
               key={`${item.label}-${index}`}
               data-fragment={index % 4}
+              data-has-asset={assetId ? "true" : "false"}
             >
               {artifactId ? (
                 <button type="button" onClick={() => onOpen(artifactId)}>

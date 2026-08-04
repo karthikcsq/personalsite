@@ -180,6 +180,37 @@ test("sparse authored surfaces collapse around their actual item count", () => {
     a2uiExperience,
     /const layoutCandidates =[\s\S]*component\.items\.length <= 1[\s\S]*component\.items\.length === 2[\s\S]*component\.items\.length === 3/,
   );
+  assert.match(
+    a2uiExperience,
+    /data-has-thesis=\{component\.title \|\| component\.body \? "true" : "false"\}/,
+  );
+  assert.match(
+    a2uiExperience,
+    /function EssayConstellation\([\s\S]*uniqueVisualAssetsForItems\(component\.items\)[\s\S]*className=\{styles\.constellationNoteAsset\}/,
+  );
+  assert.match(
+    a2uiStyles,
+    /\.essayConstellation\[data-count="2"\]\[data-has-thesis="false"\][\s\S]*\.constellationNotes\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
+  );
+});
+
+test("project workbench assets reserve a stable column without splitting headings", () => {
+  assert.match(
+    a2uiExperience,
+    /data-has-asset=\{assetId \? "true" : "false"\}/,
+  );
+  assert.match(
+    a2uiStyles,
+    /\.workbenchFragments article\[data-has-asset="true"\][\s\S]*grid-template-columns: minmax\(96px, 0\.34fr\) minmax\(0, 1fr\)/,
+  );
+  assert.match(
+    a2uiStyles,
+    /\.workbenchFragments strong \{[\s\S]*overflow-wrap: normal;[\s\S]*hyphens: none;/,
+  );
+  assert.doesNotMatch(
+    a2uiStyles,
+    /\.workbenchFragments strong \{[\s\S]{0,260}overflow-wrap: break-word;/,
+  );
 });
 
 test("the chat route falls back when sparse vector ids drift from the index", () => {
