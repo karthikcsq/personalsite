@@ -401,6 +401,52 @@ function A2UICanvas({
     usedSurfaceFamilies.push(surface);
     return surface;
   });
+  const surfaceByComponentId = new Map<string, A2UISurfaceFamily>([
+    [presentedPrimary.id, primarySurface],
+    ...presentedSupporting.map(
+      (component, index) =>
+        [component.id, supportingSurfaces[index] ?? "default"] as const,
+    ),
+  ]);
+  const sourceOwningComponentTypes = new Set<A2UIComponentType>([
+    "artifact_focus",
+    "paper_dossier",
+    "research_map",
+    "timeline",
+    "steps",
+    "fold_timeline",
+    "field_notebook",
+    "system_blueprint",
+    "evidence_stack",
+    "essay_margin",
+    "specimen_board",
+    "visual_mosaic",
+  ]);
+  const referencedSourceArtifactIds = Array.from(
+    new Set(
+      presentedComponents.flatMap((component) =>
+        componentSourceArtifactIds(component, artifactMap),
+      ),
+    ),
+  );
+  const componentOwnedSourceArtifactIds = new Set(
+    presentedComponents.flatMap((component) => {
+      const surface = surfaceByComponentId.get(component.id) ?? "default";
+      if (surface === "default" && !sourceOwningComponentTypes.has(component.type)) {
+        return [];
+      }
+      return componentSourceArtifactIds(component, artifactMap);
+    }),
+  );
+  const fallbackSourceArtifactIds = referencedSourceArtifactIds.filter(
+    (artifactId) => !componentOwnedSourceArtifactIds.has(artifactId),
+  );
+  const automaticallyBacklinkedPaths = new Set(
+    referencedSourceArtifactIds.flatMap((artifactId) => {
+      const path = artifactPath(artifactId);
+      return path ? [path] : [];
+    }),
+  );
   const componentNavigationPaths = new Map(
     presentedComponents.flatMap((component) => {
       const path = componentNavigationPath(component, uiDocument.actions);
@@ -408,33 +454,6 @@ function A2UICanvas({
     }),
   );
   const consumedNavigationPaths = new Set(componentNavigationPaths.values());
-  const directlyRenderedArtifactPaths = new Set(
-    presentedComponents.flatMap((component) => {
-      if (
-        ![
-          "artifact_focus",
-          "paper_dossier",
-          "research_map",
-          "fold_timeline",
-          "field_notebook",
-          "system_blueprint",
-          "evidence_stack",
-          "essay_margin",
-          "specimen_board",
-          "visual_mosaic",
-        ].includes(component.type)
-      ) {
-        return [];
-      }
-      return [
-        ...component.artifactIds,
-        ...component.items.map((item) => item.artifactId),
-      ].flatMap((id) => {
-        const path = artifactPath(id);
-        return path ? [path] : [];
-      });
-    }),
-  );
   const modelCompositionOptions =
     uiDocument.compositionOptions?.length > 0
       ? uiDocument.compositionOptions
@@ -487,28 +506,11 @@ function A2UICanvas({
           : null;
       return (
         !(actionPath && consumedNavigationPaths.has(actionPath)) &&
-      !(actionPath && directlyRenderedArtifactPaths.has(actionPath)) &&
-      !(
-        action.intent === "open_artifact" &&
-        [
-          "artifact_focus",
-          "paper_dossier",
-          "research_map",
-          "fold_timeline",
-          "field_notebook",
-          "system_blueprint",
-          "evidence_stack",
-          "essay_margin",
-          "specimen_board",
-          "visual_mosaic",
-        ].includes(uiDocument.primary.type) &&
-        (
-          presentedPrimary.artifactIds.includes(action.payload) ||
-          presentedPrimary.items.some(
-            (item) => item.artifactId === action.payload,
-          )
+        !(actionPath && automaticallyBacklinkedPaths.has(actionPath)) &&
+        !(
+          action.intent === "open_artifact" &&
+          referencedSourceArtifactIds.includes(action.payload)
         )
-          )
       );
     },
   );
@@ -574,6 +576,19 @@ function A2UICanvas({
                 }}
               />
             ))}
+          </div>
+        ) : null}
+
+        {fallbackSourceArtifactIds.length > 0 ? (
+          <div className={styles.reveal} data-visible={revealStage >= 3}>
+            <ArtifactSourceStrip
+              artifactIds={fallbackSourceArtifactIds}
+              artifactMap={artifactMap}
+              onOpen={(id) => {
+                const path = artifactPath(id);
+                if (path) router.push(path);
+              }}
+            />
           </div>
         ) : null}
 
@@ -916,6 +931,8 @@ function A2UIBlock({
 
   if (component.type === "timeline" || component.type === "steps") {
     const timelineCount = Math.min(component.items.length, 6);
+    const sharedArtifactId = sharedArtifactIdFor(component);
+    const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
     const timelineRoute =
       [
         "",
@@ -957,26 +974,48 @@ function A2UIBlock({
             ))}
           </svg>
           <ol data-count={timelineCount}>
-            {component.items.map((item, index) => (
-              <li key={`${item.label}-${index}`}>
-                <span className={styles.timelineMarker}>
-                  {component.type === "steps" ? (
-                    index + 1
-                  ) : visualVariant === "diagram" ? (
-                    <span aria-hidden="true" />
-                  ) : (
-                    <Clock3 aria-hidden="true" />
-                  )}
-                </span>
-                <div>
-                  <strong>{item.label}</strong>
-                  {item.value ? <small>{item.value}</small> : null}
-                  <p>{item.detail}</p>
-                </div>
-              </li>
-            ))}
+            {component.items.map((item, index) => {
+              const artifactId = itemArtifactIds[index] ?? "";
+              return (
+                <li key={`${item.label}-${index}`}>
+                  {artifactId ? (
+                    <button
+                      type="button"
+                      className={styles.timelineStageHit}
+                      aria-label={sourceActionLabel(artifactId, artifactMap)}
+                      onClick={() => onOpen(artifactId)}
+                    />
+                  ) : null}
+                  <span className={styles.timelineMarker}>
+                    {component.type === "steps" ? (
+                      index + 1
+                    ) : visualVariant === "diagram" ? (
+                      <span aria-hidden="true" />
+                    ) : (
+                      <Clock3 aria-hidden="true" />
+                    )}
+                  </span>
+                  <div>
+                    <strong>{item.label}</strong>
+                    {item.value ? <small>{item.value}</small> : null}
+                    <p>{item.detail}</p>
+                    <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
+        {sharedArtifactId ? (
+          <button
+            type="button"
+            className={styles.sharedSourceAction}
+            onClick={() => onOpen(sharedArtifactId)}
+          >
+            {sourceActionLabel(sharedArtifactId, artifactMap)}
+            <ArrowRight aria-hidden="true" />
+          </button>
+        ) : null}
       </section>
     );
   }
@@ -1204,6 +1243,125 @@ function componentArtifactIds(component: A2UIComponent): string[] {
   );
 }
 
+function componentSourceArtifactIds(
+  component: A2UIComponent,
+  artifactMap: Map<string, Artifact>,
+): string[] {
+  const seenPaths = new Set<string>();
+  return [
+    ...componentArtifactIds(component),
+    ...component.quoteIds.map((quoteId) => quoteId.replace(/^quote:/, "")),
+  ].filter((artifactId) => {
+    if (!artifactMap.has(artifactId)) return false;
+    const path = artifactPath(artifactId);
+    if (!path || seenPaths.has(path)) return false;
+    seenPaths.add(path);
+    return true;
+  });
+}
+
+function normalizedSourceMatchText(value: string): string {
+  return value
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Sources are host-owned. Prefer an explicit item reference, then recover a
+ * missing reference from the artifact label, and finally use positional
+ * alignment when the model produced one source per item. A source is assigned
+ * only once so repeated cards never repeat the same backlink.
+ */
+function itemSourceArtifactIds(
+  component: A2UIComponent,
+  artifactMap: Map<string, Artifact>,
+): string[] {
+  const sourceArtifactIds = componentSourceArtifactIds(component, artifactMap);
+  if (sourceArtifactIds.length <= 1) {
+    return component.items.map(() => "");
+  }
+
+  const available = new Set(sourceArtifactIds);
+  const assignments = component.items.map((item) => {
+    if (!item.artifactId || !available.has(item.artifactId)) return "";
+    available.delete(item.artifactId);
+    return item.artifactId;
+  });
+
+  assignments.forEach((artifactId, index) => {
+    if (artifactId) return;
+    const item = component.items[index];
+    const itemText = normalizedSourceMatchText(
+      `${item.label} ${item.value} ${item.detail}`,
+    );
+    const matchingArtifactIds = [...available].filter((candidateId) => {
+      const artifact = artifactMap.get(candidateId);
+      if (!artifact) return false;
+      const label = normalizedSourceMatchText(artifactLabel(artifact));
+      return label.length >= 4 && itemText.includes(label);
+    });
+    if (matchingArtifactIds.length !== 1) return;
+    assignments[index] = matchingArtifactIds[0];
+    available.delete(matchingArtifactIds[0]);
+  });
+
+  const emptyIndexes = assignments.flatMap((artifactId, index) =>
+    artifactId ? [] : [index],
+  );
+  if (emptyIndexes.length === available.size) {
+    const remainingArtifactIds = [...available];
+    emptyIndexes.forEach((itemIndex, index) => {
+      assignments[itemIndex] = remainingArtifactIds[index] ?? "";
+    });
+  }
+
+  return assignments;
+}
+
+function ItemSourceCue({
+  artifactId,
+  artifactMap,
+}: {
+  artifactId: string;
+  artifactMap: Map<string, Artifact>;
+}) {
+  if (!artifactId) return null;
+  return (
+    <span className={styles.itemSourceCue}>
+      {sourceActionLabel(artifactId, artifactMap)}
+      <ArrowRight aria-hidden="true" />
+    </span>
+  );
+}
+
+function ArtifactSourceStrip({
+  artifactIds,
+  artifactMap,
+  onOpen,
+}: {
+  artifactIds: string[];
+  artifactMap: Map<string, Artifact>;
+  onOpen: (id: string) => void;
+}) {
+  if (artifactIds.length === 0) return null;
+
+  return (
+    <nav className={styles.artifactSourceStrip} aria-label="Sources">
+      {artifactIds.map((artifactId) => (
+        <button
+          type="button"
+          key={artifactId}
+          onClick={() => onOpen(artifactId)}
+        >
+          {sourceActionLabel(artifactId, artifactMap)}
+          <ArrowRight aria-hidden="true" />
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 function sharedArtifactIdFor(component: A2UIComponent): string {
   const artifactIds = componentArtifactIds(component);
   return artifactIds.length === 1 ? artifactIds[0] : "";
@@ -1234,6 +1392,7 @@ function ConnectedFieldMap({
   onOpen: (id: string) => void;
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   const visualAssets = uniqueVisualAssetsForItems(component.items);
 
   return (
@@ -1261,8 +1420,9 @@ function ConnectedFieldMap({
         <ol>
           {component.items.map((item, index) => {
             const assetId = visualAssets[index];
-            return (
-              <li key={`${item.label}-${index}`}>
+            const artifactId = itemArtifactIds[index] ?? "";
+            const content = (
+              <>
                 <span className={styles.fieldMapNode} aria-hidden="true" />
                 {assetId ? (
                   <A2UIAsset assetId={assetId} className={styles.fieldMapAsset} />
@@ -1271,20 +1431,32 @@ function ConnectedFieldMap({
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 )}
-                <div>
+                <span className={styles.fieldMapCopy}>
                   <strong>{item.label}</strong>
                   {item.value ? <b>{item.value}</b> : null}
                   {item.detail ? <small>{item.detail}</small> : null}
-                </div>
+                  <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
+                </span>
+              </>
+            );
+            return (
+              <li key={`${item.label}-${index}`}>
+                {artifactId ? (
+                  <button type="button" onClick={() => onOpen(artifactId)}>
+                    {content}
+                  </button>
+                ) : (
+                  <div>{content}</div>
+                )}
               </li>
             );
           })}
         </ol>
       </div>
-      {sharedArtifactId && artifactMap.has(sharedArtifactId) ? (
+      {sharedArtifactId ? (
         <button
           type="button"
-          className={styles.authoredSourceAction}
+          className={styles.sharedSourceAction}
           onClick={() => onOpen(sharedArtifactId)}
         >
           {sourceActionLabel(sharedArtifactId, artifactMap)}
@@ -1307,6 +1479,7 @@ function ArchiveIndex({
   onOpen: (id: string) => void;
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   const visualAssets = uniqueVisualAssetsForItems(component.items);
 
   return (
@@ -1324,26 +1497,37 @@ function ArchiveIndex({
       <ol>
         {component.items.map((item, index) => {
           const assetId = visualAssets[index];
-          return (
-            <li
-              key={`${item.label}-${index}`}
-              data-current={index === component.items.length - 1}
-            >
+          const artifactId = itemArtifactIds[index] ?? "";
+          const content = (
+            <>
               <span className={styles.archiveNumber}>
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className={styles.archiveMark}>
-                {assetId ? (
-                  <A2UIAsset assetId={assetId} />
-                ) : (
-                  <i aria-hidden="true" />
-                )}
+                {assetId ? <A2UIAsset assetId={assetId} /> : <i aria-hidden="true" />}
               </span>
               <span className={styles.archiveIdentity}>
                 <strong>{item.label}</strong>
                 {item.value ? <b>{item.value}</b> : null}
               </span>
-              {item.detail ? <small>{item.detail}</small> : null}
+              <span className={styles.archiveDetail}>
+                {item.detail ? <small>{item.detail}</small> : null}
+                <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
+              </span>
+            </>
+          );
+          return (
+            <li
+              key={`${item.label}-${index}`}
+              data-current={index === component.items.length - 1}
+            >
+              {artifactId ? (
+                <button type="button" onClick={() => onOpen(artifactId)}>
+                  {content}
+                </button>
+              ) : (
+                <div>{content}</div>
+              )}
             </li>
           );
         })}
@@ -1351,7 +1535,7 @@ function ArchiveIndex({
       {sharedArtifactId ? (
         <button
           type="button"
-          className={styles.authoredSourceAction}
+          className={styles.sharedSourceAction}
           onClick={() => onOpen(sharedArtifactId)}
         >
           {sourceActionLabel(sharedArtifactId, artifactMap)}
@@ -1376,6 +1560,7 @@ function EssayConstellation({
   onOpen: (id: string) => void;
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   const quoteIds = [
     ...component.quoteIds,
     ...(embeddedQuote?.quoteIds ?? []),
@@ -1390,6 +1575,7 @@ function EssayConstellation({
       id={`a2ui-${component.id}`}
       className={`${styles.component} ${styles.essayConstellation}`}
       data-variant={visualVariant}
+      data-count={Math.min(component.items.length, 4)}
       data-surface="essay-constellation"
     >
       <div className={styles.constellationThesis}>
@@ -1407,13 +1593,28 @@ function EssayConstellation({
           <path d="M466 310C617 399 719 466 882 507" />
           <circle cx="466" cy="310" r="9" />
         </svg>
-        {component.items.map((item, index) => (
-          <div key={`${item.label}-${index}`}>
-            <span>{item.label}</span>
-            {item.value ? <strong>{item.value}</strong> : null}
-            {item.detail ? <small>{item.detail}</small> : null}
-          </div>
-        ))}
+        {component.items.map((item, index) => {
+          const artifactId = itemArtifactIds[index] ?? "";
+          const content = (
+            <>
+              <span>{item.label}</span>
+              {item.value ? <strong>{item.value}</strong> : null}
+              {item.detail ? <small>{item.detail}</small> : null}
+              <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
+            </>
+          );
+          return artifactId ? (
+            <button
+              type="button"
+              key={`${item.label}-${index}`}
+              onClick={() => onOpen(artifactId)}
+            >
+              {content}
+            </button>
+          ) : (
+            <div key={`${item.label}-${index}`}>{content}</div>
+          );
+        })}
       </div>
       {quoteArtifact ? (
         <blockquote className={styles.constellationQuote}>
@@ -1425,7 +1626,7 @@ function EssayConstellation({
       {sharedArtifactId ? (
         <button
           type="button"
-          className={styles.authoredSourceAction}
+          className={styles.sharedSourceAction}
           onClick={() => onOpen(sharedArtifactId)}
         >
           {sourceActionLabel(sharedArtifactId, artifactMap)}
@@ -1450,11 +1651,22 @@ function ProjectWorkbench({
   onOpen: (id: string) => void;
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   const visualAssets = uniqueVisualAssetsForItems(component.items);
-  const layout = mixPresentationSeed(
+  const layoutSeed = mixPresentationSeed(
     presentationSeed,
     `${component.id}:workbench-layout`,
-  ) % 3;
+  );
+  const layoutCandidates =
+    component.items.length <= 1
+      ? [2]
+      : component.items.length === 2
+        ? [0, 2]
+        : component.items.length === 3
+          ? [0, 1]
+          : [0, 1, 2];
+  const layout =
+    layoutCandidates[layoutSeed % layoutCandidates.length] ?? 0;
 
   return (
     <section
@@ -1472,23 +1684,36 @@ function ProjectWorkbench({
       <div className={styles.workbenchFragments}>
         {component.items.map((item, index) => {
           const assetId = visualAssets[index];
+          const artifactId = itemArtifactIds[index] ?? "";
+          const content = (
+            <>
+              {assetId ? <A2UIAsset assetId={assetId} /> : null}
+              <span>{item.label}</span>
+              {item.value ? <strong>{item.value}</strong> : null}
+              {item.detail ? <small>{item.detail}</small> : null}
+              <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
+            </>
+          );
           return (
             <article
               key={`${item.label}-${index}`}
               data-fragment={index % 4}
             >
-              {assetId ? <A2UIAsset assetId={assetId} /> : null}
-              <span>{item.label}</span>
-              {item.value ? <strong>{item.value}</strong> : null}
-              {item.detail ? <small>{item.detail}</small> : null}
+              {artifactId ? (
+                <button type="button" onClick={() => onOpen(artifactId)}>
+                  {content}
+                </button>
+              ) : (
+                <div>{content}</div>
+              )}
             </article>
           );
         })}
       </div>
-      {sharedArtifactId && artifactMap.has(sharedArtifactId) ? (
+      {sharedArtifactId ? (
         <button
           type="button"
-          className={styles.authoredSourceAction}
+          className={styles.sharedSourceAction}
           onClick={() => onOpen(sharedArtifactId)}
         >
           {sourceActionLabel(sharedArtifactId, artifactMap)}
@@ -1611,6 +1836,7 @@ function FoldTimeline({
   const count = Math.max(component.items.length, 1);
   const isDense = count > 4;
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   return (
     <section
       id={`a2ui-${component.id}`}
@@ -1634,11 +1860,7 @@ function FoldTimeline({
         }
       >
         {component.items.map((item, index) => {
-          const ownsArtifactAction = itemOwnsArtifactAction(
-            component,
-            index,
-            sharedArtifactId,
-          );
+          const artifactId = itemArtifactIds[index] ?? "";
           const content = (
             <>
               <A2UIAsset
@@ -1648,19 +1870,19 @@ function FoldTimeline({
               {item.value ? <span>{item.value}</span> : null}
               <strong>{item.label}</strong>
               {item.detail ? <small>{item.detail}</small> : null}
-              {item.artifactId && ownsArtifactAction ? (
+              {artifactId ? (
                 <i>
-                  {sourceActionLabel(item.artifactId, artifactMap)}
+                  {sourceActionLabel(artifactId, artifactMap)}
                   <ArrowRight aria-hidden="true" />
                 </i>
               ) : null}
             </>
           );
-          return item.artifactId && ownsArtifactAction ? (
+          return artifactId ? (
             <button
               type="button"
               key={`${item.label}-${index}`}
-              onClick={() => onOpen(item.artifactId)}
+              onClick={() => onOpen(artifactId)}
             >
               {content}
             </button>
@@ -2059,6 +2281,7 @@ function SpecimenBoard({
   onOpen: (id: string) => void;
 }) {
   const sharedArtifactId = sharedArtifactIdFor(component);
+  const itemArtifactIds = itemSourceArtifactIds(component, artifactMap);
   const visualAssets = uniqueVisualAssetsForItems(component.items);
   return (
     <section
@@ -2074,11 +2297,7 @@ function SpecimenBoard({
       </div>
       <div className={styles.specimens}>
         {component.items.map((item, index) => {
-          const ownsArtifactAction = itemOwnsArtifactAction(
-            component,
-            index,
-            sharedArtifactId,
-          );
+          const artifactId = itemArtifactIds[index] ?? "";
           const assetId = visualAssets[index];
           const content = (
             <>
@@ -2094,14 +2313,15 @@ function SpecimenBoard({
               <strong>{item.label}</strong>
               {item.value ? <b>{item.value}</b> : null}
               {item.detail ? <small>{item.detail}</small> : null}
+              <ItemSourceCue artifactId={artifactId} artifactMap={artifactMap} />
             </>
           );
-          return item.artifactId && ownsArtifactAction ? (
+          return artifactId ? (
             <button
               type="button"
               key={`${item.label}-${index}`}
               data-has-asset={assetId ? "true" : "false"}
-              onClick={() => onOpen(item.artifactId)}
+              onClick={() => onOpen(artifactId)}
             >
               {content}
             </button>
@@ -2226,6 +2446,7 @@ function VisualMosaic({
 
   if (surfaceFamily === "photo_letter") {
     const firstItem = component.items[0];
+    const sourceArtifactIds = componentSourceArtifactIds(component, artifactMap);
     return (
       <section
         id={`a2ui-${component.id}`}
@@ -2287,16 +2508,11 @@ function VisualMosaic({
             </div>
           ))}
         </div>
-        {sharedArtifactId ? (
-          <button
-            type="button"
-            className={styles.authoredSourceAction}
-            onClick={() => onOpen(sharedArtifactId)}
-          >
-            {sourceActionLabel(sharedArtifactId, artifactMap)}
-            <ArrowRight aria-hidden="true" />
-          </button>
-        ) : null}
+        <ArtifactSourceStrip
+          artifactIds={sourceArtifactIds}
+          artifactMap={artifactMap}
+          onOpen={onOpen}
+        />
       </section>
     );
   }

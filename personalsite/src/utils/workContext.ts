@@ -6,6 +6,7 @@ const GENERIC_WORK_PATTERNS = [
   /\b(?:evolv\w*|journey|progress\w*|changed?|shift\w*)\b.*\bwork\b/,
   /\bwork\b.*\bover time\b/,
   /\bwork experience\b/,
+  /\bwork history\b/,
   /\bemploy(?:ed|er|ers|ment)\b/,
   /\bcareer\b/,
   /\bcurrent(?:ly)?\b.*\b(?:job|role|work|intern)\b/,

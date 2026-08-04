@@ -28,6 +28,13 @@ test("selects every canonical job for a work-history question", () => {
   assert.equal(selectCanonicalJobsForQuery("Where has he worked?", jobs).length, 2);
   assert.equal(
     selectCanonicalJobsForQuery(
+      "Walk me through Karthik's work history.",
+      jobs,
+    ).length,
+    2,
+  );
+  assert.equal(
+    selectCanonicalJobsForQuery(
       "How has Karthik's work evolved over time?",
       jobs,
     ).length,

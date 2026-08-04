@@ -782,11 +782,20 @@ test("career timelines keep model-authored stages and suppress a nested title", 
 });
 
 test("fold timelines preserve six model-authored stages", () => {
-  const sixStages = Array.from({ length: 6 }, (_, index) => ({
+  const sixArtifacts = Array.from({ length: 6 }, (_, index) => ({
+    id: `work:Stage ${index + 1}`,
+    data: {
+      role: `Role ${index + 1}`,
+      company: `Stage ${index + 1}`,
+      year: `${2021 + index}`,
+      description: [`Contribution ${index + 1}`],
+    },
+  }));
+  const sixStages = sixArtifacts.map((artifact, index) => ({
     label: `Stage ${index + 1}`,
     value: `${2021 + index}`,
     detail: `A distinct step in the model-authored story: ${index + 1}.`,
-    artifactId: "",
+    artifactId: artifact.id,
     assetId: "",
   }));
 
@@ -803,7 +812,7 @@ test("fold timelines preserve six model-authored stages", () => {
         body: "",
         items: sixStages,
         options: [],
-        artifactIds: [],
+        artifactIds: sixArtifacts.slice(0, 5).map((artifact) => artifact.id),
         quoteIds: [],
       },
       supporting: [],
@@ -811,12 +820,16 @@ test("fold timelines preserve six model-authored stages", () => {
     },
     "Show the full progression.",
     "",
-    [],
+    sixArtifacts,
   );
 
   assert.equal(document.primary.type, "fold_timeline");
   assert.equal(document.primary.items.length, 6);
   assert.equal(document.primary.items.at(-1).label, "Stage 6");
+  assert.deepEqual(
+    document.primary.artifactIds,
+    sixArtifacts.map((artifact) => artifact.id),
+  );
 });
 
 test("gallery questions recover the host category index when the model omits it", () => {

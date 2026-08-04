@@ -132,6 +132,56 @@ test("essay source actions stay in document flow", () => {
   );
 });
 
+test("every referenced artifact receives a host-authored backlink", () => {
+  assert.match(
+    a2uiExperience,
+    /function componentSourceArtifactIds\([\s\S]*component\.quoteIds\.map\([\s\S]*seenPaths\.has\(path\)/,
+  );
+  assert.match(
+    a2uiExperience,
+    /const referencedSourceArtifactIds = Array\.from\([\s\S]*const fallbackSourceArtifactIds/,
+  );
+  assert.match(
+    a2uiExperience,
+    /<ArtifactSourceStrip[\s\S]*artifactIds=\{fallbackSourceArtifactIds\}/,
+  );
+  assert.match(
+    a2uiExperience,
+    /action\.intent === "open_artifact"[\s\S]*referencedSourceArtifactIds\.includes\(action\.payload\)/,
+  );
+  assert.match(
+    a2uiExperience,
+    /function itemSourceArtifactIds\([\s\S]*artifactLabel\(artifact\)[\s\S]*emptyIndexes\.length === available\.size/,
+  );
+  assert.match(
+    a2uiExperience,
+    /function SpecimenBoard\([\s\S]*const itemArtifactIds = itemSourceArtifactIds\(component, artifactMap\)[\s\S]*<ItemSourceCue artifactId=\{artifactId\}[\s\S]*onClick=\{\(\) => onOpen\(artifactId\)\}/,
+  );
+  assert.doesNotMatch(
+    a2uiExperience,
+    /function SpecimenBoard\([\s\S]*?<ArtifactSourceStrip[\s\S]*?function VisualMosaic\(/,
+  );
+});
+
+test("sparse authored surfaces collapse around their actual item count", () => {
+  assert.doesNotMatch(
+    a2uiStyles,
+    /\.essayConstellation\s*\{[^}]*min-height:\s*580px/s,
+  );
+  assert.doesNotMatch(
+    a2uiStyles,
+    /\.constellationNotes\s*\{[^}]*gap:\s*120px 90px/s,
+  );
+  assert.match(
+    a2uiStyles,
+    /\.essayConstellation:is\(\[data-count="1"\], \[data-count="2"\], \[data-count="3"\]\)[\s\S]*\.constellationNotes > svg[\s\S]*display:\s*none/,
+  );
+  assert.match(
+    a2uiExperience,
+    /const layoutCandidates =[\s\S]*component\.items\.length <= 1[\s\S]*component\.items\.length === 2[\s\S]*component\.items\.length === 3/,
+  );
+});
+
 test("the chat route falls back when sparse vector ids drift from the index", () => {
   assert.match(chatRoute, /sparseResultsLookMisaligned/);
   assert.match(

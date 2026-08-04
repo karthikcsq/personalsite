@@ -364,7 +364,7 @@ function sanitizeComponent(
     ? raw.artifactIds
         .map((id) => clean(id, 160))
         .filter((id) => allowedArtifacts.has(id))
-        .slice(0, 5)
+        .slice(0, maxItems)
     : [];
   const quoteIds = Array.isArray(raw.quoteIds)
     ? raw.quoteIds
@@ -703,6 +703,24 @@ export function sanitizeA2UIDocument(
     question,
     galleryCategories,
   );
+  if (["timeline", "fold_timeline"].includes(primary.type)) {
+    const canonicalWorkArtifactIds = artifacts
+      .map((artifact) => artifact.id)
+      .filter((artifactId) => artifactId.startsWith("work:"))
+      .slice(0, 6);
+    if (canonicalWorkArtifactIds.length >= 3) {
+      const stagedArtifactIds = primary.items
+        .map((item) => item.artifactId)
+        .filter(Boolean);
+      primary.artifactIds = [
+        ...new Set([
+          ...stagedArtifactIds,
+          ...canonicalWorkArtifactIds,
+          ...primary.artifactIds,
+        ]),
+      ].slice(0, 6);
+    }
+  }
 
   let supporting = Array.isArray(raw.supporting)
     ? raw.supporting

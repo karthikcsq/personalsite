@@ -8,7 +8,7 @@
   --a2ui-paper-edge: oklch(83.5% 0.026 78);
   --a2ui-rail: 246px;
   --a2ui-composer-clearance: calc(
-    clamp(236px, 26vh, 292px) + env(safe-area-inset-bottom)
+    clamp(164px, 18vh, 190px) + env(safe-area-inset-bottom)
   );
   position: relative;
   height: 100%;
@@ -1017,6 +1017,25 @@
   color: var(--color-ink-muted);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.timelineStageHit {
+  position: absolute;
+  inset: -8px -10px;
+  z-index: 5;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.timelineStageHit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.timelineStageHit:hover ~ div .itemSourceCue svg {
+  transform: translateX(3px);
 }
 
 .artifactList {
@@ -6112,7 +6131,7 @@ button.researchStage:hover .researchStageAsset {
   .shell {
     --a2ui-rail: 0px;
     --a2ui-composer-clearance: calc(
-      228px + env(safe-area-inset-bottom)
+      156px + env(safe-area-inset-bottom)
     );
   }
 
@@ -6242,7 +6261,7 @@ button.researchStage:hover .researchStageAsset {
 @media (max-width: 560px) {
   .shell {
     --a2ui-composer-clearance: calc(
-      210px + env(safe-area-inset-bottom)
+      148px + env(safe-area-inset-bottom)
     );
   }
 
@@ -7792,12 +7811,22 @@ button.researchStage:hover .researchStageAsset {
 }
 
 /* Authored surfaces: host-selected visual grammars over the same semantic JSON. */
-.authoredSourceAction {
+.artifactSourceStrip {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  width: 100%;
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in oklch, var(--a2ui-border) 72%, transparent);
+}
+
+.artifactSourceStrip button {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   width: fit-content;
-  margin: 20px 0 0;
   padding: 6px 0 4px;
   border: 0;
   border-bottom: 1px solid currentColor;
@@ -7807,9 +7836,41 @@ button.researchStage:hover .researchStageAsset {
   cursor: pointer;
 }
 
-.authoredSourceAction svg {
+.artifactSourceStrip button:hover {
+  color: var(--a2ui-green);
+}
+
+.artifactSourceStrip svg {
   width: 16px;
   height: 16px;
+}
+
+.itemSourceCue {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin-top: 12px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+  color: var(--color-accent) !important;
+  font-family: var(--font-sans);
+  font-size: 11px !important;
+  font-weight: 500;
+  letter-spacing: 0.02em !important;
+  line-height: 1.35;
+  text-transform: none !important;
+}
+
+.itemSourceCue svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 180ms ease;
+}
+
+button:hover > .itemSourceCue svg,
+button:hover .itemSourceCue svg {
+  transform: translateX(3px);
 }
 
 .connectedFieldMap,
@@ -7839,7 +7900,7 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .connectedFieldMap {
-  min-height: 610px;
+  min-height: 0;
   padding: clamp(32px, 5vw, 68px);
   clip-path: polygon(0.6% 2%, 33% 0, 67% 1.2%, 99.4% 0, 100% 97.5%, 62% 100%, 25% 98.6%, 0 100%);
   background:
@@ -7878,7 +7939,7 @@ button.researchStage:hover .researchStageAsset {
 
 .fieldMapCanvas {
   position: relative;
-  min-height: 385px;
+  min-height: 290px;
   margin-top: 28px;
 }
 
@@ -7906,7 +7967,7 @@ button.researchStage:hover .researchStageAsset {
   display: grid;
   grid-template-columns: repeat(var(--field-count, 3), minmax(0, 1fr));
   gap: 24px;
-  min-height: 360px;
+  min-height: 270px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -7917,11 +7978,36 @@ button.researchStage:hover .researchStageAsset {
 .connectedFieldMap[data-count="5"] .fieldMapCanvas ol,
 .connectedFieldMap[data-count="6"] .fieldMapCanvas ol { --field-count: 3; }
 
+.connectedFieldMap:is([data-count="5"], [data-count="6"]) .fieldMapCanvas,
+.connectedFieldMap:is([data-count="5"], [data-count="6"]) .fieldMapCanvas ol {
+  min-height: 360px;
+}
+
 .fieldMapCanvas li {
   position: relative;
   align-self: start;
   min-width: 0;
   padding: 0 14px;
+}
+
+.fieldMapCanvas li > button,
+.fieldMapCanvas li > div {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+
+.fieldMapCanvas li > button {
+  cursor: pointer;
+}
+
+.fieldMapCopy {
+  display: block;
 }
 
 .fieldMapCanvas li:nth-child(even) {
@@ -7988,7 +8074,7 @@ button.researchStage:hover .researchStageAsset {
   line-height: 1.5;
 }
 
-.connectedFieldMap .authoredSourceAction {
+.connectedFieldMap .artifactSourceStrip button {
   color: #d7c594;
 }
 
@@ -8031,13 +8117,30 @@ button.researchStage:hover .researchStageAsset {
 }
 
 .archiveIndex li {
+  display: block;
+  min-height: 132px;
+  padding: 0;
+  border-bottom: 1px solid #d8d1bf;
+}
+
+.archiveIndex li > button,
+.archiveIndex li > div {
   display: grid;
   grid-template-columns: 54px 116px minmax(190px, 0.8fr) minmax(260px, 1.2fr);
   gap: clamp(14px, 2.2vw, 34px);
   align-items: center;
+  width: 100%;
   min-height: 132px;
   padding: 18px clamp(20px, 3vw, 44px);
-  border-bottom: 1px solid #d8d1bf;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+
+.archiveIndex li > button {
+  cursor: pointer;
 }
 
 .archiveIndex li[data-current="true"] {
@@ -8101,8 +8204,14 @@ button.researchStage:hover .researchStageAsset {
   line-height: 1.55;
 }
 
-.archiveIndex .authoredSourceAction {
+.archiveDetail {
+  display: block;
+  min-width: 0;
+}
+
+.archiveIndex .artifactSourceStrip {
   margin: 19px clamp(20px, 3vw, 44px) 16px;
+  width: auto;
 }
 
 .photoLetter {
@@ -8318,7 +8427,7 @@ button.researchStage:hover .researchStageAsset {
   grid-template-columns: minmax(240px, 0.72fr) minmax(420px, 1.28fr);
   gap: clamp(28px, 5vw, 72px);
   align-items: center;
-  min-height: 580px;
+  min-height: 0;
   padding: clamp(28px, 5vw, 70px) clamp(20px, 4vw, 54px);
   border-top: 1px solid #b7ad94;
   border-bottom: 1px solid #b7ad94;
@@ -8351,9 +8460,28 @@ button.researchStage:hover .researchStageAsset {
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 120px 90px;
-  min-height: 430px;
+  gap: clamp(28px, 4vw, 54px) clamp(28px, 5vw, 70px);
+  min-height: 0;
   padding: 20px 0;
+}
+
+.essayConstellation[data-count="4"] .constellationNotes {
+  min-height: 350px;
+}
+
+.essayConstellation:is([data-count="1"], [data-count="2"], [data-count="3"])
+  .constellationNotes > svg {
+  display: none;
+}
+
+.essayConstellation[data-count="1"] .constellationNotes {
+  grid-template-columns: 1fr;
+}
+
+.essayConstellation[data-count="3"] .constellationNotes > :is(div, button):last-child {
+  grid-column: 1 / -1;
+  width: min(70%, 430px);
+  margin-inline: auto;
 }
 
 .constellationNotes > svg {
@@ -8367,15 +8495,23 @@ button.researchStage:hover .researchStageAsset {
   stroke-width: 1.4;
 }
 
-.constellationNotes > div {
+.constellationNotes > :is(div, button) {
   position: relative;
   z-index: 1;
   min-width: 0;
   padding: 14px 16px;
+  border: 0;
   background: #faf8f2;
+  color: inherit;
+  text-align: left;
+  font: inherit;
 }
 
-.constellationNotes > div:nth-of-type(even) {
+.constellationNotes > button {
+  cursor: pointer;
+}
+
+.constellationNotes > :is(div, button):nth-child(odd) {
   align-self: end;
 }
 
@@ -8436,14 +8572,13 @@ button.researchStage:hover .researchStageAsset {
   font-size: 12px;
 }
 
-.essayConstellation .authoredSourceAction {
-  grid-column: 1 / -1;
+.essayConstellation .artifactSourceStrip {
   margin-top: 0;
 }
 
 .projectWorkbench {
   position: relative;
-  min-height: 620px;
+  min-height: 0;
   padding: clamp(30px, 5vw, 70px);
   background:
     linear-gradient(rgb(68 82 57 / 0.055) 1px, transparent 1px) 0 0 / 100% 30px,
@@ -8489,7 +8624,7 @@ button.researchStage:hover .researchStageAsset {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 18px;
   align-items: center;
-  min-height: 390px;
+  min-height: 0;
   padding: 30px 0 10px;
 }
 
@@ -8497,6 +8632,22 @@ button.researchStage:hover .researchStageAsset {
   min-width: 0;
   padding: 18px 20px;
   color: var(--color-ink);
+}
+
+.workbenchFragments article > button,
+.workbenchFragments article > div {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+
+.workbenchFragments article > button {
+  cursor: pointer;
 }
 
 .workbenchFragments article:nth-child(4n + 1) {
@@ -8538,6 +8689,21 @@ button.researchStage:hover .researchStageAsset {
   display: grid;
   grid-template-columns: minmax(180px, 0.7fr) minmax(260px, 1.3fr);
   gap: 28px;
+}
+
+.projectWorkbench[data-layout="2"] .workbenchFragments article:first-child > button,
+.projectWorkbench[data-layout="2"] .workbenchFragments article:first-child > div {
+  display: grid;
+  grid-template-columns: inherit;
+  gap: inherit;
+}
+
+.projectWorkbench[data-count="1"] .workbenchFragments article:first-child {
+  grid-column: 1 / -1;
+}
+
+.projectWorkbench[data-count="2"] .workbenchFragments article {
+  grid-column: span 6;
 }
 
 .workbenchFragments img {
@@ -8609,7 +8775,8 @@ button.researchStage:hover .researchStageAsset {
     align-self: start;
   }
 
-  .archiveIndex li {
+  .archiveIndex li > button,
+  .archiveIndex li > div {
     grid-template-columns: 42px 84px minmax(180px, 0.8fr) minmax(200px, 1.2fr);
   }
 
@@ -8624,7 +8791,7 @@ button.researchStage:hover .researchStageAsset {
   }
 
   .constellationNotes {
-    min-height: 380px;
+    min-height: 0;
   }
 }
 
@@ -8647,7 +8814,8 @@ button.researchStage:hover .researchStageAsset {
     width: 105px;
   }
 
-  .archiveIndex li {
+  .archiveIndex li > button,
+  .archiveIndex li > div {
     grid-template-columns: 34px 64px minmax(0, 1fr);
     min-height: 110px;
     padding-inline: 14px;
@@ -8658,7 +8826,7 @@ button.researchStage:hover .researchStageAsset {
     height: 54px;
   }
 
-  .archiveIndex li small {
+  .archiveDetail {
     grid-column: 3;
   }
 
@@ -8685,8 +8853,8 @@ button.researchStage:hover .researchStageAsset {
     display: none;
   }
 
-  .constellationNotes > div,
-  .constellationNotes > div:nth-of-type(even) {
+  .constellationNotes > :is(div, button),
+  .constellationNotes > :is(div, button):nth-child(odd) {
     padding: 14px 0;
     border-top: 1px solid #bdbaa9;
   }
