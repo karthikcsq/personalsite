@@ -40,6 +40,10 @@ export const metadata: Metadata = {
   // `alternates.canonical` below resolves against it. Apex here would have
   // pointed all canonicals at a domain that redirects.
   metadataBase: new URL("https://www.karthikthyagarajan.com"),
+  // Make the preferred root explicit. Without this, the home page was the
+  // only public route without a canonical URL, leaving Google to infer it
+  // across the apex → www redirect chain.
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
