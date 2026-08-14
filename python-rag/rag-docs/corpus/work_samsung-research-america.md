@@ -1,6 +1,6 @@
 ---
 applies_to: [work:Samsung Research America]
-topics: [ambient-ai, on-device, routing, model-selection, agents, xr, orchestration, sdk, platform, permissions, trust, voice, safety]
+topics: [ambient-ai, on-device, routing, model-selection, agents, xr, orchestration, sdk, platform, permissions, trust, voice, safety, modes, extensibility, host-devices, proactive-triggers, platform-engineering]
 ---
 
 # Project one: on-device signal router for ambient AI
@@ -78,3 +78,41 @@ It's all about scoping how much difference there is between the user intent and 
 ## Consumer permissions versus coding-agent permissions
 
 Building permission systems for consumer use is completely different from building permission systems for coding agents. We have good documentation on how dangerous commands are, and it's fairly easy to train classifiers on them. Permission systems for your average consumer depend on their preferences, and need to learn from them over time. For now, we err on the side of caution and only act with approval.
+
+## Use-case-specific modes
+
+Aurora can support modes on top of the skills and tools available to a traditional agent. This makes Aurora extensible to museum and tourist experiences, golf, running, logistics, and more. The best XR experiences can be specific to their use cases, and the way we constructed Aurora makes those experiences easy to build.
+
+Purpose-built modes allow you to do things that a generic agent probably doesn't need to always be doing. No agent needs always-on access to exhibit explainers except when it's at a museum. It doesn't need golf assistance except at a golf course. This helps the agent focus and allows the integrated device ecosystem to remain specific without defining a new custom agent runtime.
+
+Modes make the agent more reliable and reduce context pollution. In terms of the system prompt, a mode allows the agent's PROFILE to be better suited to guiding the user in that specific scenario. Modes give agents access to specific skills, tools, and always-on behaviors. The device environment for the mode is important too. The XR environment for a museum experience has to be completely different from the environment for golf.
+
+## The boundary between Aurora and host devices
+
+Aurora can run on any Android device. A smart home, robot, or smart warehouse can all run Aurora. It is device and environment agnostic. That's what allowed us to wire it into XR glasses so easily.
+
+Aurora is the agent runtime. It defines tools, skills, personas, and more. The operation of the device itself, including image analysis, computer vision, and video intelligence, is owned by the host device. Aurora gives experience creators an easy plug-in experience to make something specific without building their own agent runtime.
+
+Trying to be everything for everybody makes you bad at everything. Staying focused on generalizability is essential. It allows Aurora to remain future-proof and evolve safely as new things are added.
+
+If something belongs to the agent, such as memory, action gating, or native Android tools, then it can ship with Aurora. If it is specific to XR glasses, a smartwatch, a smart home, or a particular mode experience, then it can't be ours. That defeats the purpose.
+
+## Host-defined proactive triggers
+
+Aurora ships proactive triggers as a developer-side integration. The host app chooses which cues it wants Aurora to use for proactive behavior. For example, golf mode can be activated when you enter a golf course.
+
+Devices are the core theme here. An XR-glasses proactive trigger will never be present on the phone because it clearly requires glasses. If I want to trigger an action based on the glasses seeing something, then that trigger needs to ship only with the XR-glasses app. If you try to ship everything to everyone as built-in functionality, then you fail as a backbone.
+
+## The plug-in model
+
+Consider a smart-home provider that needs to control lights. All the provider needs to do is make a light on/off toolset, describe the action policy, and it will just work. No new agent runtime is needed.
+
+An agent loop is a lot of work. Building the loop alone doesn't give you native containerization, memory, action policy, skills, or integration with other applications.
+
+## Why orchestration talent should be centralized
+
+I think every large technology organization can benefit from creating an extensible harness that meets the needs of its own product. Central development of a well-generalized runtime is almost always better than having every team create its own. Features and development compound as a result.
+
+Not everyone knows or needs to know how to create a really good agentic orchestrator. Repeating that work every time wastes talent and time. If a use case is extremely different, then a team can make its own runtime. Otherwise, an agentic runtime can be shared pretty easily.
+
+Agent-runtime engineering talent shouldn't be scattered, and in practice it isn't. Domain-specific talent isn't scattered either. There is a dedicated XR-glasses team. Why should people with no experience or window into a specific subdomain try to ship something that needs that expertise? Asking them to do that ignores the domain expertise already inside the company.
