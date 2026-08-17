@@ -72,6 +72,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${karla.variable} ${sourceSerif.variable} h-full`}
     >
+      <head>
+        {/* Discovery hint for agents that read the document but do not sniff
+            well-known paths. /llms.txt is the full machine-readable index. */}
+        <link
+          rel="alternate"
+          type="text/markdown"
+          href="/llms.txt"
+          title="Machine-readable index of everything on this site"
+        />
+      </head>
       <body className="h-full m-0 p-0 bg-surface text-ink antialiased">
         <ConditionalChrome>{children}</ConditionalChrome>
         <Analytics />

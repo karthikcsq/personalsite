@@ -1,6 +1,14 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import HomeChatClient from "@/app/HomeChatClient";
+import { buildLlmsIndex } from "@/utils/llmsIndex";
+
+// Only `</script` can terminate the block early; the rest of the markdown is
+// inert inside an unhandled script type and must survive byte-for-byte so an
+// agent reading it gets valid markdown.
+function escapeForScript(s: string): string {
+  return s.replace(/<\/(script)/gi, "<\\/$1");
+}
 
 // Cap the prompt length for metadata + image so a crafted URL can't blow
 // up the title or break the OG renderer's layout. Browsers truncate well
@@ -92,6 +100,18 @@ export default function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd) }}
+      />
+      {/* The full site index, inline. Middleware already swaps this page for
+          /llms.txt when the requester identifies as an agent, but plenty of
+          fetchers send a browser user-agent and get the HTML. A script block
+          of an unhandled MIME type is never parsed, executed, rendered, or
+          read aloud, so this costs a human reader nothing while putting the
+          whole inventory in the raw response of a bare fetch("/"). */}
+      <script
+        type="text/markdown"
+        id="site-index"
+        data-canonical="/llms.txt"
+        dangerouslySetInnerHTML={{ __html: escapeForScript(buildLlmsIndex()) }}
       />
       {/* Crawlable path into the rest of the site. The chat UI is the whole
           home page, so without this the only outbound links are client-side
