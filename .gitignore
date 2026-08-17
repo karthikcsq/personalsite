@@ -157,3 +157,6 @@ all_linkedin_data
 
 # Scratch
 tmp/
+
+# Generated PDFs and board mockups. Regenerate rather than version them.
+output/
