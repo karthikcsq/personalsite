@@ -58,3 +58,4 @@
 - Cards include title, company, dates, bullet-point achievements, icons, and color themes  
 - Fade-in animations on scroll (Framer Motion)  
 - Animated radial-gradient background & vertical timeline line 
+
