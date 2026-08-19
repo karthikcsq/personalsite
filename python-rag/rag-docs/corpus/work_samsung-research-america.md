@@ -1,6 +1,6 @@
 ---
 applies_to: [work:Samsung Research America]
-topics: [ambient-ai, on-device, routing, model-selection, agents, xr, orchestration, sdk, platform, permissions, trust, voice, safety, modes, extensibility, host-devices, proactive-triggers, platform-engineering]
+topics: [ambient-ai, on-device, routing, model-selection, agents, xr, orchestration, sdk, platform, permissions, trust, voice, safety, modes, extensibility, host-devices, proactive-triggers, platform-engineering, mcp, tool-discovery, prompt-caching, computer-use, a2ui]
 ---
 
 # Project one: on-device signal router for ambient AI
@@ -55,7 +55,11 @@ The other hard part is to figure out how to show the agent everything it can do 
 
 ## My piece of the orchestrator
 
-My specific piece is building out the SDK for any developer to register tools, skills, and A2UI. I'm also helping rewrite a number of prototypes into a single unified orchestrator that takes the best from all of them.
+I shipped the permission system, tools, skills, modes, A2UI, MCP integration, dynamic tool and skill discovery, prompt caching, the XR integrations, and computer-use style phone use. I also helped rewrite a number of prototypes into a single unified orchestrator that takes the best from all of them.
+
+A lot of this is the same problem in different forms. Someone registers a tool, a skill, a mode, or an A2UI surface, and Aurora has to make it usable by the agent without that person needing to know anything about the agent loop. MCP integration means the same path works for tools we didn't write. Dynamic discovery matters because the catalog keeps growing and you can't hold all of it in context. The agent should find what it needs when it needs it.
+
+Permissions and phone use are where mistakes actually hurt someone, so that's where I spent the most time. Prompt caching is boring compared to the rest of it, but an always-on agent re-sends the same context constantly. Paying full price for that every time doesn't work.
 
 ## Driving the phone directly
 
