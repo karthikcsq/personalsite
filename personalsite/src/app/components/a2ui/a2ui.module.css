@@ -52,7 +52,7 @@
 }
 
 .historyList button,
-.mobileHistory > div button {
+.mobileHistoryList button {
   display: grid;
   grid-template-columns: 9px 1fr;
   gap: 14px;
@@ -68,12 +68,12 @@
 
 .historyList button:hover,
 .historyList button[data-active="true"],
-.mobileHistory > div button[data-active="true"] {
+.mobileHistoryList button[data-active="true"] {
   color: var(--color-ink);
 }
 
 .historyList button > span,
-.mobileHistory > div button > span {
+.mobileHistoryList button > span {
   width: 7px;
   height: 7px;
   margin-top: 7px;
@@ -83,13 +83,13 @@
 }
 
 .historyList button[data-active="true"] > span,
-.mobileHistory > div button[data-active="true"] > span {
+.mobileHistoryList button[data-active="true"] > span {
   background: var(--a2ui-green);
   box-shadow: 0 0 0 4px var(--a2ui-green-soft);
 }
 
 .historyList p,
-.mobileHistory p {
+.mobileHistoryList p {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
