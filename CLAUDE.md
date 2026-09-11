@@ -134,7 +134,8 @@ uv sync  # Installs all dependencies into .venv/
 Required in `.env.local` (not tracked in git):
 - `PINECONE_API_KEY` - Pinecone vector database
 - `PINECONE_INDEX_NAME` - Name of Pinecone index
-- `OPENAI_API_KEY` - OpenAI API for embeddings and chat completions
+- `OPENAI_API_KEY` - OpenAI API for query embeddings (the Pinecone index is built on them)
+- `GEMINI_API_KEY` - Gemini API (via its OpenAI-compatible endpoint) for A2UI answer generation and HyDE rewrites. Defaults to `gemini-3.5-flash-lite` at `minimal` thinking; override with `GEMINI_A2UI_MODEL` / `GEMINI_REWRITE_MODEL` and `GEMINI_A2UI_REASONING_EFFORT` / `GEMINI_REWRITE_REASONING_EFFORT`
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - S3 gallery images (if needed server-side)
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL` / `KV_REST_API_TOKEN` from the Vercel/Upstash integration) - Upstash Redis for `/api/chat` rate limiting (10/min, 60/hr per IP). If unset, rate limiting is skipped with a console warning.
 - `NEXT_PUBLIC_*` - Any client-side env vars

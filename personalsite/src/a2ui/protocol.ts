@@ -123,6 +123,8 @@ export type A2UIDocument = {
    * this field; the client adds it when a fresh A2UI response arrives.
    */
   presentationSeed?: number;
+  /** Host metadata: keep streamed layouts stable as supporting content arrives. */
+  progressive?: boolean;
 };
 
 export type A2UIArtifactLike = {
@@ -249,6 +251,57 @@ export const A2UI_RESPONSE_FORMAT = {
             payload: { type: "string" },
           },
         },
+      },
+    },
+  },
+};
+
+// One-call generation schema. Same document as A2UI_RESPONSE_FORMAT plus a
+// `quotes` array the model fills from Karthik's own corpus, which removes the
+// separate post-answer quote picker. Field order is load-bearing: structured
+// output emits keys in schema order, so `quotes` lands before `primary` and is
+// already validated by the time the first component streams in.
+const generationSchema = A2UI_RESPONSE_FORMAT.json_schema.schema;
+export const A2UI_GENERATION_RESPONSE_FORMAT = {
+  type: "json_schema" as const,
+  json_schema: {
+    name: "portfolio_a2ui_generation",
+    strict: true,
+    schema: {
+      ...generationSchema,
+      required: [
+        "version",
+        "question",
+        "title",
+        "lead",
+        "compositionOptions",
+        "quotes",
+        "primary",
+        "supporting",
+        "actions",
+      ],
+      properties: {
+        version: generationSchema.properties.version,
+        question: generationSchema.properties.question,
+        title: generationSchema.properties.title,
+        lead: generationSchema.properties.lead,
+        compositionOptions: generationSchema.properties.compositionOptions,
+        quotes: {
+          type: "array",
+          maxItems: 3,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["artifactId", "text"],
+            properties: {
+              artifactId: { type: "string" },
+              text: { type: "string" },
+            },
+          },
+        },
+        primary: generationSchema.properties.primary,
+        supporting: generationSchema.properties.supporting,
+        actions: generationSchema.properties.actions,
       },
     },
   },
@@ -679,6 +732,7 @@ export function sanitizeA2UIDocument(
   reply: string,
   artifacts: A2UIArtifactLike[],
   galleryCategories: string[] = [],
+  options: { autoQuote?: boolean } = {},
 ): A2UIDocument {
   const fallback = buildFallbackA2UI(question, reply, artifacts);
   if (!value || typeof value !== "object") return fallback;
@@ -738,7 +792,7 @@ export function sanitizeA2UIDocument(
     : [];
 
   const firstQuoteId = allowedQuotes.values().next().value as string | undefined;
-  if (firstQuoteId) {
+  if (firstQuoteId && options.autoQuote !== false) {
     const existingQuote = [primary, ...supporting].find(
       (component) =>
         component.type === "quote_focus" &&

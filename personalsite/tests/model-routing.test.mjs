@@ -24,12 +24,14 @@ const chatCacheSource = readFileSync(
   "utf8",
 );
 
-test("routing defaults keep visual work on Luna and narrow facts on Mini", () => {
+test("routing defaults send generation to Gemini Flash-Lite and narrow facts to Mini", () => {
   const config = getModelRoutingConfig({});
   assert.equal(config.answerFastModel, "gpt-5-mini");
   assert.equal(config.answerQualityModel, "gpt-5.6-luna");
-  assert.equal(config.a2uiModel, "gpt-5.6-luna");
-  assert.equal(config.rewriteModel, "gpt-5.4-nano");
+  assert.equal(config.a2uiModel, "gemini-3.5-flash-lite");
+  assert.equal(config.a2uiReasoningEffort, "minimal");
+  assert.equal(config.rewriteModel, "gemini-3.5-flash-lite");
+  assert.equal(config.rewriteReasoningEffort, "minimal");
   assert.equal(config.quoteModel, "gpt-5.4-nano");
   assert.equal(config.hydeMode, "adaptive");
 });

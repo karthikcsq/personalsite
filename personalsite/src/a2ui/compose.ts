@@ -1,4 +1,5 @@
 import type OpenAI from "openai";
+import { readCompletedA2UI } from "./streaming";
 import { a2uiVisualAssetPromptDirectory } from "@/a2ui/assetCatalog";
 import {
   A2UI_RESPONSE_FORMAT,
@@ -17,12 +18,19 @@ import {
   galleryCategoryPromptDirectory,
   loadGalleryCategoryDirectory,
 } from "@/utils/galleryIndex";
+import {
+  artifactDetails,
+  artifactLabel,
+  asksAboutGallery,
+  hasAnswerBearingPrimary,
+  hasCompleteGallerySurface,
+  hasSourceAccess,
+  timelineEvidenceOrder,
+  withGuaranteedSourceAccess,
+  wordCount,
+} from "./surface";
 
 const MODEL_CONFIG = getModelRoutingConfig();
-
-function wordCount(value: string): number {
-  return value.trim().split(/\s+/).filter(Boolean).length;
-}
 
 function asksAboutPersonalContribution(question: string): boolean {
   return /\b(?:what (?:does|did|has) (?:he|karthik) (?:do|build|built|change|changed|contribute|contributed|handle|lead|own)|what(?:'s| is) (?:his|karthik'?s) role|role at|responsib(?:le|ility|ilities)|personally (?:build|built|change|changed|contribute|contributed)|(?:build|built|change|changed|contribute|contributed) at)\b/i.test(
@@ -69,231 +77,19 @@ function hasCompleteNamedArtifactSurface(document: A2UIDocument): boolean {
   );
 }
 
-function asksAboutGallery(question: string, categoryNames: string[]): boolean {
-  const normalizedQuestion = question.toLocaleLowerCase();
-  return (
-    /\b(?:gallery|galleries|photo|photograph|photography|travel|trip|visited|visit|place|places)\b/i.test(
-      question,
-    ) ||
-    categoryNames.some((name) =>
-      normalizedQuestion.includes(name.toLocaleLowerCase()),
-    )
-  );
-}
-
-function hasAnswerBearingPrimary(document: A2UIDocument): boolean {
-  const substantiveItems = document.primary.items.filter(
-    (item) => wordCount(`${item.value} ${item.detail}`) >= 3 || item.assetId,
-  );
-  const substantiveOptions = document.primary.options.filter(
-    (option) => wordCount(`${option.summary} ${option.detail}`) >= 4,
-  );
-  const minimumItems = 1;
-
-  return (
-    wordCount(document.title) >= 3 &&
-    (wordCount(document.primary.body) >= 8 ||
-      substantiveItems.length >= minimumItems ||
-      substantiveOptions.length >= 2)
-  );
-}
-
-function hasCompleteGallerySurface(document: A2UIDocument): boolean {
-  return (
-    document.primary.type === "visual_mosaic" &&
-    document.primary.items.length >= 1 &&
-    document.primary.items.every(
-      (item) =>
-        item.assetId.startsWith("gallery:") &&
-        Boolean(item.value.trim() || item.detail.trim()),
-    )
-  );
-}
-
-function componentArtifactReferences(document: A2UIDocument): Set<string> {
-  const references = new Set<string>();
-  for (const component of [document.primary, ...document.supporting]) {
-    for (const artifactId of component.artifactIds) references.add(artifactId);
-    for (const item of component.items) {
-      if (item.artifactId) references.add(item.artifactId);
-    }
-    for (const quoteId of component.quoteIds) {
-      if (quoteId.startsWith("quote:")) references.add(quoteId.slice(6));
-    }
-  }
-  return references;
-}
-
-function hasSourceAccess(
-  document: A2UIDocument,
-  artifacts: A2UIArtifactLike[],
-  galleryQuestion: boolean,
-): boolean {
-  const referencedArtifacts = componentArtifactReferences(document);
-  const hasArtifactAction = document.actions.some(
-    (action) =>
-      action.intent === "open_artifact" &&
-      artifacts.some((artifact) => artifact.id === action.payload),
-  );
-  const artifactAccess =
-    artifacts.length === 0 ||
-    hasArtifactAction ||
-    artifacts.some((artifact) => referencedArtifacts.has(artifact.id));
-  const galleryAccess =
-    !galleryQuestion ||
-    document.actions.some(
-      (action) =>
-        action.intent === "open_path" && action.payload.startsWith("/gallery"),
-    ) ||
-    JSON.stringify(document).includes("](/gallery");
-  return artifactAccess && galleryAccess;
-}
-
-function withGuaranteedSourceAccess(
-  document: A2UIDocument,
-  artifacts: A2UIArtifactLike[],
-  galleryQuestion: boolean,
-): A2UIDocument {
-  const referencedArtifacts = componentArtifactReferences(document);
-  const seenActions = new Set<string>();
-  const actions = document.actions.filter((action) => {
-    const key = `${action.intent}:${action.payload}`;
-    if (seenActions.has(key)) return false;
-    seenActions.add(key);
-    return !(
-      action.intent === "open_artifact" &&
-      referencedArtifacts.has(action.payload)
-    );
-  });
-
-  const hasArtifactSource =
-    artifacts.length === 0 ||
-    artifacts.some((artifact) => referencedArtifacts.has(artifact.id)) ||
-    actions.some(
-      (action) =>
-        action.intent === "open_artifact" &&
-        artifacts.some((artifact) => artifact.id === action.payload),
-    );
-  if (!hasArtifactSource) {
-    const artifact = artifacts[0];
-    if (artifact) {
-      if (actions.length >= 3) actions.pop();
-      actions.push({
-        label: `See ${artifactLabel(artifact)}`,
-        intent: "open_artifact",
-        payload: artifact.id,
-      });
-    }
-  }
-
-  const hasGallerySource =
-    !galleryQuestion ||
-    actions.some(
-      (action) =>
-        action.intent === "open_path" && action.payload.startsWith("/gallery"),
-    ) ||
-    JSON.stringify(document).includes("](/gallery");
-  if (!hasGallerySource) {
-    if (actions.length >= 3) actions.pop();
-    actions.push({
-      label: "See gallery",
-      intent: "open_path",
-      payload: "/gallery",
-    });
-  }
-
-  return { ...document, actions };
-}
-
-function artifactLabel(artifact: A2UIArtifactLike): string {
-  const data = artifact.data as Record<string, unknown>;
-  for (const key of ["title", "company", "role"]) {
-    const value = data[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-  }
-  return artifact.id;
-}
-
-function artifactDetails(artifact: A2UIArtifactLike): string {
-  const data = artifact.data as Record<string, unknown>;
-  const allowed = [
-    "title",
-    "role",
-    "company",
-    "year",
-    "date",
-    "tools",
-    "description",
-    "excerpt",
-    "tagline",
-    "bullets",
-  ];
-  const details: Record<string, unknown> = {};
-  for (const key of allowed) {
-    const value = data[key];
-    if (
-      typeof value === "string" ||
-      (Array.isArray(value) && value.every((entry) => typeof entry === "string"))
-    ) {
-      details[key] = value;
-    }
-  }
-  return JSON.stringify(details).slice(0, 2200);
-}
-
-function artifactDateRank(artifact: A2UIArtifactLike): number {
-  const data = artifact.data as Record<string, unknown>;
-  const range = String(data.year ?? data.date ?? "");
-  if (/\bpresent\b/i.test(range)) return Number.MAX_SAFE_INTEGER;
-  const months: Record<string, number> = {
-    jan: 1,
-    feb: 2,
-    mar: 3,
-    apr: 4,
-    may: 5,
-    jun: 6,
-    jul: 7,
-    aug: 8,
-    sep: 9,
-    oct: 10,
-    nov: 11,
-    dec: 12,
-  };
-  const dates = [
-    ...range.matchAll(
-      /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(20\d{2})\b/gi,
-    ),
-  ];
-  const latest = dates.at(-1);
-  if (latest) {
-    return Number(latest[2]) * 12 + (months[latest[1].slice(0, 3).toLowerCase()] ?? 0);
-  }
-  const years = [...range.matchAll(/\b(20\d{2})\b/g)];
-  return Number(years.at(-1)?.[1] ?? 0) * 12;
-}
-
-function timelineEvidenceOrder(artifacts: A2UIArtifactLike[]): string {
-  const work = artifacts
-    .filter((artifact) => artifact.id.startsWith("work:"))
-    .sort((left, right) => artifactDateRank(left) - artifactDateRank(right));
-  if (work.length === 0) return "(no dated work artifacts)";
-  return [
-    ...work.map((artifact) => {
-      const data = artifact.data as Record<string, unknown>;
-      return `- ${artifact.id}: ${String(data.year ?? data.date ?? "date unknown")}`;
-    }),
-    `- newest work artifact (feature as the final and most prominent stage): ${work.at(-1)?.id}`,
-  ].join("\n");
-}
-
+// The cached-suggested-answer path still runs this composer: it replays a
+// stored reply string, so it needs the old answer-then-compose shape. The live
+// uncached path uses generate.ts instead and never calls this.
 export async function composeA2UI(
   openai: OpenAI,
   question: string,
   reply: string,
   artifacts: A2UIArtifactLike[],
   onUsage?: (record: ModelUsageRecord) => void,
+  onComponent?: (document: A2UIDocument) => void,
 ): Promise<A2UIDocument> {
   const fallback = buildFallbackA2UI(question, reply, artifacts);
+  let lastPartial: A2UIDocument | undefined;
   if (!reply.trim()) return fallback;
 
   let galleryCategories: Awaited<
@@ -351,7 +147,7 @@ export async function composeA2UI(
 - The primary component MUST be artifact_focus, paper_dossier, field_notebook, research_map, or system_blueprint.
 - A plain narrative, empty source sheet, or navigation-only artifact card is invalid.
 - Use two or three substantive items that explain what it is, how it works, and the strongest result, constraint, award, or reason it matters. Four items are invalid for this focused overview. A concise body may own one of those facts.
-- Keep the document lead empty or to one short orienting sentence. The primary paper owns the explanation.
+- Keep the document lead empty or to one short orienting sentence. The primary component owns the explanation.
 - The verified quote may support the primary, but it cannot replace the explanation.`
     : "";
 
@@ -505,6 +301,13 @@ EM DASH GATE
 - The output is invalid if any generated string contains Unicode U+2014.
 - Rewrite each em-dash construction as two sentences, a comma, a colon, or a semicolon. Do not substitute another dash character.
 
+PROGRESSIVE COMPOSITION
+- Emit the schema fields in their declared order. Finish primary completely before starting supporting. Finish each supporting component before the next.
+- Visitors see each completed component immediately. Each component must make sense on its own, with stable, unique IDs and no forward references to unfinished components.
+- Prefer one focused primary plus one or two small supporting components when they add distinct evidence or a new angle. Do not split a simple answer artificially or repeat facts.
+- Component type describes content structure. The host chooses the visual aesthetic; do not assume every answer is paper-themed.
+- For personal life, travel, or photography, use exact gallery category asset IDs from GALLERY CATEGORIES. Never invent realistic pictures of Karthik or his experiences.
+
 Return only the schema-compliant A2UI document.`;
     const userPrompt = `QUESTION
 ${question}
@@ -523,11 +326,13 @@ ${visualAssetDirectory}
 
 GALLERY CATEGORIES
 ${galleryCategoryDirectory}`;
-    const result = await openai.chat.completions.create({
+    const stream = await openai.chat.completions.create({
       model: MODEL_CONFIG.a2uiModel,
-      reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort,
+      reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort as OpenAI.ReasoningEffort,
       service_tier: "default",
-      max_completion_tokens: 1500,
+      max_completion_tokens: 2400,
+      stream: true,
+      stream_options: { include_usage: true },
       response_format: A2UI_RESPONSE_FORMAT,
       messages: [
         {
@@ -540,14 +345,32 @@ ${galleryCategoryDirectory}`;
         },
       ],
     });
-    const composeUsage = toUsageRecord(
-      "a2ui_compose",
-      MODEL_CONFIG.a2uiModel,
-      result.usage,
-    );
-    if (composeUsage) onUsage?.(composeUsage);
-    const raw = result.choices[0]?.message?.content;
-    if (!raw) return fallback;
+    let raw = "";
+    let emittedSignature = "";
+    for await (const chunk of stream) {
+      const usage = toUsageRecord("a2ui_compose", MODEL_CONFIG.a2uiModel, chunk.usage);
+      if (usage) onUsage?.(usage);
+      raw += chunk.choices[0]?.delta?.content ?? "";
+      if (!onComponent) continue;
+      const completed = readCompletedA2UI(raw);
+      if (!completed) continue;
+      const partial = withGuaranteedSourceAccess(
+        sanitizeA2UIDocument(completed, question, reply, artifacts, galleryCategoryNames),
+        artifacts,
+        galleryQuestion,
+      );
+      // A deficient primary may need repair. Never flash a known-bad layout.
+      if (!hasAnswerBearingPrimary(partial) ||
+          (contributionQuestion && !hasCompleteContributionSurface(partial)) ||
+          (namedArtifactOverview && !hasCompleteNamedArtifactSurface(partial)) ||
+          (galleryQuestion && !hasCompleteGallerySurface(partial))) continue;
+      const signature = JSON.stringify([partial.primary, partial.supporting]);
+      if (signature === emittedSignature) continue;
+      emittedSignature = signature;
+      lastPartial = partial;
+      onComponent(partial);
+    }
+    if (!raw) return lastPartial ?? fallback;
     const document = sanitizeA2UIDocument(
       JSON.parse(raw),
       question,
@@ -595,7 +418,7 @@ ${galleryCategoryDirectory}`;
           ? `- Use artifact_focus, paper_dossier, field_notebook, research_map, or system_blueprint as the primary.
 - Include two or three substantive items covering what it is, how it works, and its strongest result, constraint, award, or significance.
 - Four items are invalid. Keep every detail under sixteen words.
-- Put the explanation inside the primary paper instead of an empty source card.`
+- Put the explanation inside the primary component instead of an empty source card.`
           : "",
         answerIncomplete
           ? `- Make the primary answer-bearing. Add a concise connective body or at least one substantive item whose visible value explains the answer.`
@@ -611,7 +434,7 @@ ${galleryCategoryDirectory}`;
         .join("\n");
       const repair = await openai.chat.completions.create({
         model: MODEL_CONFIG.a2uiModel,
-        reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort,
+        reasoning_effort: MODEL_CONFIG.a2uiReasoningEffort as OpenAI.ReasoningEffort,
         service_tier: "default",
         max_completion_tokens: 1500,
         response_format: A2UI_RESPONSE_FORMAT,
@@ -676,6 +499,6 @@ ${repairInstructions}
     }
   } catch (error) {
     console.error("A2UI composition failed:", error);
-    return fallback;
+    return lastPartial ?? fallback;
   }
 }

@@ -1,7 +1,11 @@
 export type AnswerRoute = "fast" | "quality";
 export type AnswerRoutingMode = "hybrid" | "fast_only" | "quality_only";
 export type HydeMode = "adaptive" | "speculative" | "off";
-export type ReasoningEffort = "low" | "medium" | "high";
+export type ReasoningEffort = "minimal" | "low" | "medium" | "high";
+
+/** Gemini's OpenAI-compatible endpoint, so generation keeps using the OpenAI SDK. */
+export const GEMINI_OPENAI_BASE_URL =
+  "https://generativelanguage.googleapis.com/v1beta/openai/";
 
 export interface ModelRoutingConfig {
   answerFastModel: string;
@@ -9,6 +13,7 @@ export interface ModelRoutingConfig {
   answerReasoningEffort: ReasoningEffort;
   answerRoutingMode: AnswerRoutingMode;
   rewriteModel: string;
+  rewriteReasoningEffort: ReasoningEffort;
   embeddingModel: string;
   quoteModel: string;
   topicModel: string;
@@ -38,6 +43,7 @@ export interface ModelUsageRecord {
     | "answer"
     | "quote_picker"
     | "topic_extractor"
+    | "a2ui_generate"
     | "a2ui_compose"
     | "a2ui_repair";
   model: string;
@@ -68,9 +74,14 @@ function parseReasoningEffort(
   fallback: ReasoningEffort,
 ): ReasoningEffort {
   if (value === "medium" || value === "high") return value;
-  if (value === "low") return value;
+  if (value === "minimal" || value === "low") return value;
   return fallback;
 }
+
+// gemini-3.5-flash-lite at minimal thinking had the lowest median latency on
+// the real A2UI prompt (~2.9s end to end). It showed occasional multi-second
+// stalls; gemini-3.1-flash-lite was steadier at ~3.2s if that becomes a problem.
+const GEMINI_FAST_MODEL = "gemini-3.5-flash-lite";
 
 export function getModelRoutingConfig(
   env: Environment = process.env,
@@ -92,10 +103,10 @@ export function getModelRoutingConfig(
       "low",
     ),
     answerRoutingMode: parseRoutingMode(env.OPENAI_ANSWER_ROUTING_MODE),
-    rewriteModel: valueOr(
-      env,
-      "OPENAI_REWRITE_MODEL",
-      "gpt-5.4-nano",
+    rewriteModel: valueOr(env, "GEMINI_REWRITE_MODEL", GEMINI_FAST_MODEL),
+    rewriteReasoningEffort: parseReasoningEffort(
+      env.GEMINI_REWRITE_REASONING_EFFORT,
+      "minimal",
     ),
     embeddingModel: valueOr(
       env,
@@ -104,10 +115,10 @@ export function getModelRoutingConfig(
     ),
     quoteModel: valueOr(env, "OPENAI_QUOTE_MODEL", "gpt-5.4-nano"),
     topicModel: valueOr(env, "OPENAI_TOPIC_MODEL", "gpt-5.4-nano"),
-    a2uiModel: valueOr(env, "OPENAI_A2UI_MODEL", "gpt-5.6-luna"),
+    a2uiModel: valueOr(env, "GEMINI_A2UI_MODEL", GEMINI_FAST_MODEL),
     a2uiReasoningEffort: parseReasoningEffort(
-      env.OPENAI_A2UI_REASONING_EFFORT,
-      "low",
+      env.GEMINI_A2UI_REASONING_EFFORT,
+      "minimal",
     ),
     hydeMode: parseHydeMode(env.OPENAI_HYDE_MODE),
   };
