@@ -2,9 +2,10 @@
 .board { position:relative; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:24px; align-items:start; padding:14px 10px 28px; isolation:isolate; }
 .board::before { content:""; position:absolute; z-index:-1; inset:-8px -10px; background-image:radial-gradient(#75816b35 .75px,transparent .75px); background-size:22px 22px; mask-image:linear-gradient(black,black 85%,transparent); pointer-events:none; }
 .piece { position:relative; display:flex; min-width:0; flex-direction:column; gap:10px; margin-top:var(--board-drop,0px); padding:24px 22px 16px; border:1px solid #d8d0bc; border-radius:3px 3px 8px 3px; --piece-paper:#faf7ed; background:var(--piece-paper); color:#302b22; box-shadow:0 2px 1px #9a8c681a,0 10px 20px -14px #44351c77; overflow-wrap:anywhere; rotate:var(--board-tilt,0deg); animation:boardSettle 720ms cubic-bezier(.16,1,.3,1) var(--board-delay,0ms) backwards; transition:box-shadow 200ms ease; }
-.piece[data-span="wide"] { grid-column:span 8; }
-.piece[data-span="standard"],.piece[data-span="slim"] { grid-column:span 4; }
-.piece[data-kind="photo"],.piece[data-kind="quote"] { grid-column:span 6; }
+.piece[data-span="hero"] { grid-column:span 8; }
+.piece[data-span="wide"] { grid-column:span 6; }
+.piece[data-span="standard"] { grid-column:span 4; }
+.piece[data-span="narrow"] { grid-column:span 3; }
 .piece[data-kind="lead"] { grid-column:1/-1; margin:0 0 8px; padding:0 0 0 18px; border:0; border-left:2px solid #769164; border-radius:0; background:none; box-shadow:none; rotate:0deg; }
 .piece[data-kind="lead"]::before,.piece[data-kind="lead"] .sourceSlot { display:none; }
 .piece[data-tone="forest"] { --piece-paper:#203f32; background:var(--piece-paper); border-color:#163526; color:#f5f0de; padding:28px 30px 18px; box-shadow:0 3px 0 #183127,0 15px 26px -18px #18312799; }
@@ -54,7 +55,7 @@ a.piece:hover,.piece:focus-within { box-shadow:0 14px 24px -15px #3e452977; }
 @keyframes boardDrift { to { translate:0 -2px; } }
 .board .piece[data-kind="photo"],.board .piece[data-kind="quote"] { animation:boardSettle 720ms cubic-bezier(.16,1,.3,1) var(--board-delay,0ms) backwards,boardDrift 8s ease-in-out 1s infinite alternate; }
 .board[data-motion="paused"] .piece[data-kind="photo"],.board[data-motion="paused"] .piece[data-kind="quote"] { animation-play-state:running,paused; }
-@media(max-width:1100px) { .board { grid-template-columns:repeat(4,minmax(0,1fr));gap:22px; } .piece[data-span="wide"] {grid-column:span 4;} .piece[data-span="standard"],.piece[data-span="slim"],.piece[data-kind="quote"],.piece[data-kind="photo"] {grid-column:span 2;} }
+@media(max-width:1100px) { .board { grid-template-columns:repeat(4,minmax(0,1fr));gap:22px; } .piece[data-span="hero"] {grid-column:span 4;} .piece[data-span="wide"],.piece[data-span="standard"],.piece[data-span="narrow"] {grid-column:span 2;} }
 @media(max-width:680px) { .boardWrap {margin-top:14px;}      .board {grid-template-columns:minmax(0,1fr);gap:22px;padding:14px 5px 28px;} .board .piece,.board .piece[data-span] {grid-column:1/-1;margin-top:0;rotate:calc(var(--board-tilt, 0deg) * .65);} .piece {padding:22px 22px 14px;} .piece[data-tone="forest"] {padding:26px 24px 18px;} .piece h2 {font-size:27px;} .pieceFact strong {font-size:23px;} .pieceAsset {height:135px;} .pieceFigure img {aspect-ratio:3/2;} .pieceQuote p {font-size:25px;} }
 @media(prefers-reduced-motion:reduce) { .boardWrap *, .board .piece,.board .piece[data-kind="photo"],.board .piece[data-kind="quote"] {animation:none!important;transition:none!important;} }
 
@@ -488,3 +489,40 @@ a.piece:hover,.piece:focus-within { box-shadow:0 14px 24px -15px #3e452977; }
 .pieceQuote p { color: #1e3425; }
 .pieceFigure b { color: #475240; }
 .pieceFigure small { color: #575246; }
+
+/*
+ * useBoardPacking places pieces itself once it can measure them, so a note
+ * settles into the lowest open space instead of waiting for its row to end.
+ * The grid above stays the layout before that and on narrow screens.
+ */
+.board[data-packed="true"] > .piece {
+  position: absolute;
+  margin: 0;
+  transition:
+    box-shadow 200ms ease,
+    left 460ms cubic-bezier(.16, 1, .3, 1),
+    top 460ms cubic-bezier(.16, 1, .3, 1);
+}
+/* A note without a source does not hold empty room for one. */
+.sourceSlot:empty { display: none; }
+
+/*
+ * Card lettering scales with the card, so a narrow card shrinks its heading
+ * instead of splitting a word mid-letter. A word that still cannot fit breaks
+ * at a real hyphenation point. Body copy keeps wrapping anywhere for long URLs.
+ */
+.piece { container-type: inline-size; }
+.piece h2,
+.pieceFact strong,
+.pieceQuote p,
+.pieceFigure strong {
+  overflow-wrap: normal;
+  hyphens: auto;
+}
+.piece h2 { font-size: clamp(19px, 13cqi, 31px); }
+.pieceFact strong { font-size: clamp(17px, 10.5cqi, 23px); }
+.pieceQuote p { font-size: clamp(18px, 11cqi, 28px); }
+@media (max-width: 680px) {
+  .piece h2 { font-size: clamp(19px, 13cqi, 27px); }
+  .pieceQuote p { font-size: clamp(18px, 11cqi, 25px); }
+}

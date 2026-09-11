@@ -38,7 +38,8 @@ export type BoardPieceKind =
   | "photo"
   | "diagram";
 
-export type BoardPieceSpan = "wide" | "standard" | "slim";
+/** Card shapes, widest first: 8, 6, 4 and 3 of the board's 12 columns. */
+export type BoardPieceSpan = "hero" | "wide" | "standard" | "narrow";
 
 export type BoardPin = "pin" | "tape" | "clip";
 
@@ -154,13 +155,17 @@ function spanForDraft(draft: BoardPieceDraft, hash: number): BoardPieceSpan {
   const weight = wordCount(
     `${draft.heading} ${draft.value} ${draft.detail} ${draft.body} ${draft.quote}`,
   );
-  if (draft.kind === "lead") return "wide";
-  if (draft.kind === "link") return "slim";
-  if (draft.kind === "quote") return weight >= 22 ? "wide" : "standard";
-  if (draft.kind === "photo") return hash % 4 === 0 ? "wide" : "standard";
-  if (draft.kind === "note") return weight >= 26 ? "wide" : "standard";
-  if (draft.kind === "diagram") return "standard";
-  return weight >= 12 ? "standard" : "slim";
+  if (draft.kind === "lead") return "hero";
+  if (draft.kind === "link") return hash % 2 ? "narrow" : "standard";
+  if (draft.kind === "quote") return weight >= 22 ? (hash % 2 ? "hero" : "wide") : "standard";
+  if (draft.kind === "photo") return (["hero", "wide", "standard"] as const)[hash % 3];
+  if (draft.kind === "note") return weight >= 26 ? "hero" : "wide";
+  if (draft.kind === "diagram") return hash % 2 ? "wide" : "standard";
+  // Short facts are small notes. Long ones become a landscape strip or a tall
+  // column, so neighbouring cards differ in shape instead of tiling as squares.
+  if (weight <= 6) return "narrow";
+  if (weight >= 22) return hash % 2 ? "wide" : "narrow";
+  return "standard";
 }
 
 function pinForDraft(draft: BoardPieceDraft, hash: number): BoardPin {

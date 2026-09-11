@@ -131,7 +131,7 @@ test("pieces are individually placed, never one enclosing panel", () => {
 
   assert.equal(board.pieces.length, 3);
   for (const piece of board.pieces) {
-    assert.ok(["wide", "standard", "slim"].includes(piece.span));
+    assert.ok(["hero", "wide", "standard", "narrow"].includes(piece.span));
     assert.ok(["pin", "tape", "clip"].includes(piece.pin));
     assert.ok(Math.abs(piece.tilt) > 0 && Math.abs(piece.tilt) <= 2.1, `tilt is visible but readable: ${piece.tilt}`);
     assert.ok([0, 10, 18].includes(piece.drop));

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { mixPresentationSeed } from "@/a2ui/presentation";
 import type { Board } from "@/a2ui/board";
 import { BoardPiece } from "./BoardPiece";
+import { useBoardPacking } from "./useBoardPacking";
 import styles from "./board.module.css";
 
 /**
@@ -52,7 +53,12 @@ export function BoardScene({
     const timer = window.setTimeout(() => setVisibleCount(count => count + 1), visibleCount === 0 ? 0 : 240);
     return () => window.clearTimeout(timer);
   }, [visibleCount, board.pieces.length, reduceMotion]);
-  const visiblePieces = board.pieces.slice(0, visibleCount);
+  const visiblePieces = useMemo(
+    () => board.pieces.slice(0, visibleCount),
+    [board.pieces, visibleCount],
+  );
+  const boardRef = useRef<HTMLDivElement>(null);
+  useBoardPacking(boardRef, visiblePieces);
   const assembling = isLoading || visibleCount < board.pieces.length;
   const [galleryIndex, setGalleryIndex] = useState<Record<string, string[]>>({});
   const hasGallery = board.pieces.some(piece => Boolean(piece.galleryCategory));
@@ -105,6 +111,7 @@ export function BoardScene({
     <div className={styles.boardWrap} data-theme={theme} data-assembling={assembling} data-motion={motionPaused ? "paused" : "active"}>
       {isLoading && !visiblePieces.length ? <p className={styles.boardWaiting} role="status"><span className={styles.boardWaitingLabel}>Putting your answer together<span className={styles.boardWaitingDots} aria-hidden="true">…</span></span></p> : null}
       <div
+        ref={boardRef}
         className={styles.board}
         data-motion={motionPaused ? "paused" : "active"}
       >
