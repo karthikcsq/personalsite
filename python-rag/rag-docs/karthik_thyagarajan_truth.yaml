@@ -19,7 +19,7 @@ education:
     location: "West Lafayette, Indiana"
     degree: "B.S. of Computer Science & Artificial Intelligence (Double Major)"
     gpa: "3.93"
-    dates: "May 2028"
+    dates: "May 2027"
     coursework:
       - "Data Structures & Algorithms"
       - "Computer Architecture"
@@ -159,10 +159,10 @@ projects:
   - title: "Repple"
     show_on: ["cv", "resume"]
     tools: "Python (FastAPI), PostgreSQL, Supabase, Pydantic, OpenAI API, Anthropic Claude, TypeScript"
-    date: "Ongoing"
+    date: "Nov 2025 - Jun 2026"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
-      - Co-founder of a competitive fitness iOS app live on the App Store with 200+ active users; built the entire backend in FastAPI, PostgreSQL, and Supabase with Pydantic-validated schemas.
+      - Co-founded a competitive fitness iOS app live on the App Store; built the entire backend in FastAPI, PostgreSQL, and Supabase with Pydantic-validated schemas.
       - Built real-time synchronized multiplayer workout sessions, a custom ELO matchmaking algorithm pairing users by fitness level, and cron-driven point aggregation powering weekly team matchups, streaks, and leaderboards.
       - Shipped LLM-generated workout plans using OpenAI and Anthropic Claude that adapt to each user's logged performance metrics.
 
