@@ -5,7 +5,7 @@ topics: [fitness, competition, co-founding, mobile, gamification, motivation, EL
 
 ## Why it's fun
 
-Working on Repple has been the most fun I've had working on an app. Together with Arjun Chadha, Rishab Chakravarty, and Ayush Guhan, we shipped fast and turned the gym into a game.
+Working on Repple was the most fun I've had working on an app. Together with Arjun Chadha, Rishab Chakravarty, and Ayush Guhan, we shipped fast and turned the gym into a game.
 
 ## Why fitness apps fail non-disciplined users
 
@@ -35,11 +35,11 @@ The AI-generated workout plans help with onboarding. That's about it. But onboar
 
 ## The business thesis: a data moat
 
-Our goal is to make money off of it. Once we have enough users and enough data, our goal is to sell an algorithm that helps with optimization, recommendation on improvements, plan generation, and data aggregation across users. Future plans include working with gyms to boost foot traffic as well. The entire benefit of a data moat comes from consistent, large-scale data, and by gamifying the app, we make that offering higher quality.
+Our goal was to make money off of it. Once we had enough users and enough data, our goal was to sell an algorithm that helps with optimization, recommendation on improvements, plan generation, and data aggregation across users. Future plans included working with gyms to boost foot traffic as well. The entire benefit of a data moat comes from consistent, large-scale data, and by gamifying the app, we made that offering higher quality.
 
 The reason gamification produces better data, not just more data, is that it creates consistency and improvement. This in turn creates more consistent data, as well as more data per user. The more data we have per user, the better the recommendations will be.
 
-Right now we're vulnerable to fast followers. The defense we're building is the community itself: users locked into the competition and progress they've already accumulated, which a clone can't replicate.
+We were vulnerable to fast followers. The defense we were building was the community itself: users locked into the competition and progress they had already accumulated, which a clone can't replicate.
 
 ## Marketing before we had a UI
 
@@ -49,7 +49,7 @@ We landed because we made genuinely funny content. People knew our name, and the
 
 ## Stickers and campus density
 
-Stickers on every building on campus marketed toward our ICP directly. Since most of our audience is on campus, and we wanted a tightly knit Repple community, we wanted those in the same location to use Repple together. That's why the stickers worked.
+Stickers on every building on campus marketed toward our ICP directly. Since most of our audience was on campus, and we wanted a tightly knit Repple community, we wanted those in the same location to use Repple together. That's why the stickers worked.
 
 Repple does work without local density, but it works best when friends work out together. Local density at a college is the best way to have that become likely.
 
@@ -63,7 +63,7 @@ Our highest performing reel was a Snapchat video recreation: our founder walking
 
 ## Distribution is everything for B2C
 
-For Repple, since we are B2C, distribution channels are the most important part. We didn't have budget for Instagram ads, so instead we opted for something that would get high ROI for little cost.
+For Repple, since we were B2C, distribution channels were the most important part. We didn't have budget for Instagram ads, so instead we opted for something that would get high ROI for little cost.
 
 For B2C, that's a universal claim. Without distribution, you will fall flat, especially for something like Repple which needs the network effect to grow.
 
