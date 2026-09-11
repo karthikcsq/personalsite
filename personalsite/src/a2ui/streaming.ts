@@ -90,7 +90,7 @@ function readOpenObject(
   return value;
 }
 
-const fields = new Set(["version", "question", "title", "lead", "compositionOptions", "quotes", "primary", "supporting", "actions"]);
+const fields = new Set(["version", "question", "points", "title", "titlePointId", "lead", "leadPointId", "compositionOptions", "quotes", "primary", "supporting", "actions"]);
 const componentArrays = new Set(["items", "options"]);
 
 /**

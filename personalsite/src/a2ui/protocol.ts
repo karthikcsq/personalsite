@@ -256,24 +256,101 @@ export const A2UI_RESPONSE_FORMAT = {
   },
 };
 
-// One-call generation schema. Same document as A2UI_RESPONSE_FORMAT plus a
-// `quotes` array the model fills from Karthik's own corpus, which removes the
-// separate post-answer quote picker. Field order is load-bearing: structured
-// output emits keys in schema order, so `quotes` lands before `primary` and is
-// already validated by the time the first component streams in.
+// One-call generation schema. Same document as A2UI_RESPONSE_FORMAT plus:
+// - `quotes`, filled from Karthik's own corpus, which removes the separate
+//   post-answer quote picker;
+// - `points`, the distinct claims the answer makes, planned before any visible
+//   copy, with every visible slot tagged by the point it expresses so
+//   `enforcePointOwnership` can keep each claim in exactly one place.
+// Field order is load-bearing: structured output emits keys in schema order, so
+// `points` is planned before the title and `quotes` is validated before the
+// first component streams in.
 const generationSchema = A2UI_RESPONSE_FORMAT.json_schema.schema;
+const baseDefs = generationSchema.$defs;
+const pointIdField = { type: "string" };
+const generationDefs = {
+  ...baseDefs,
+  item: {
+    ...baseDefs.item,
+    required: ["label", "value", "detail", "pointId", "artifactId", "assetId"],
+    properties: {
+      label: baseDefs.item.properties.label,
+      value: baseDefs.item.properties.value,
+      detail: baseDefs.item.properties.detail,
+      pointId: pointIdField,
+      artifactId: baseDefs.item.properties.artifactId,
+      assetId: baseDefs.item.properties.assetId,
+    },
+  },
+  option: {
+    ...baseDefs.option,
+    required: ["label", "summary", "detail", "pointId", "assetId"],
+    properties: {
+      label: baseDefs.option.properties.label,
+      summary: baseDefs.option.properties.summary,
+      detail: baseDefs.option.properties.detail,
+      pointId: pointIdField,
+      assetId: baseDefs.option.properties.assetId,
+    },
+  },
+  component: {
+    ...baseDefs.component,
+    required: [
+      "id",
+      "type",
+      "title",
+      "titlePointId",
+      "body",
+      "bodyPointId",
+      "items",
+      "options",
+      "artifactIds",
+      "quoteIds",
+    ],
+    properties: {
+      id: baseDefs.component.properties.id,
+      type: baseDefs.component.properties.type,
+      title: baseDefs.component.properties.title,
+      titlePointId: pointIdField,
+      body: baseDefs.component.properties.body,
+      bodyPointId: pointIdField,
+      items: baseDefs.component.properties.items,
+      options: baseDefs.component.properties.options,
+      artifactIds: baseDefs.component.properties.artifactIds,
+      quoteIds: baseDefs.component.properties.quoteIds,
+    },
+  },
+};
+// Gemini rejects this schema with a bare 400 once the point fields and array
+// bounds are both present: together they grow its constrained-decoding grammar
+// past the limit. The generation schema therefore carries no minItems/maxItems.
+// The prompt states every count, and sanitizeA2UIDocument enforces them.
+function withoutArrayBounds<T>(schema: T): T {
+  if (Array.isArray(schema)) return schema.map(withoutArrayBounds) as T;
+  if (!schema || typeof schema !== "object") return schema;
+  return Object.fromEntries(
+    Object.entries(schema)
+      .filter(([key]) => key !== "minItems" && key !== "maxItems")
+      .map(([key, value]) => [key, withoutArrayBounds(value)]),
+  ) as T;
+}
+
 export const A2UI_GENERATION_RESPONSE_FORMAT = {
   type: "json_schema" as const,
   json_schema: {
     name: "portfolio_a2ui_generation",
     strict: true,
-    schema: {
+    schema: withoutArrayBounds({
       ...generationSchema,
+      $defs: generationDefs,
       required: [
         "version",
         "question",
+        "points",
         "title",
+        "titlePointId",
         "lead",
+        "leadPointId",
         "compositionOptions",
         "quotes",
         "primary",
@@ -283,8 +360,24 @@ export const A2UI_GENERATION_RESPONSE_FORMAT = {
       properties: {
         version: generationSchema.properties.version,
         question: generationSchema.properties.question,
+        points: {
+          type: "array",
+          minItems: 1,
+          maxItems: 6,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["id", "text"],
+            properties: {
+              id: { type: "string" },
+              text: { type: "string" },
+            },
+          },
+        },
         title: generationSchema.properties.title,
+        titlePointId: pointIdField,
         lead: generationSchema.properties.lead,
+        leadPointId: pointIdField,
         compositionOptions: generationSchema.properties.compositionOptions,
         quotes: {
           type: "array",
@@ -303,7 +396,7 @@ export const A2UI_GENERATION_RESPONSE_FORMAT = {
         supporting: generationSchema.properties.supporting,
         actions: generationSchema.properties.actions,
       },
-    },
+    }),
   },
 };
 

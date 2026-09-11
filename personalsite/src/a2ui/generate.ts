@@ -9,6 +9,7 @@ import {
 } from "./protocol";
 import { validateA2UIQuotes } from "./quotes";
 import { a2uiHistoryText } from "./history";
+import { enforcePointOwnership } from "./points";
 import {
   asksAboutGallery,
   hasAnswerBearingPrimary,
@@ -129,6 +130,15 @@ const QUOTE_RULES = `QUOTES
 - Pick a quote that speaks to the specific point this answer makes about that artifact. Return no quote rather than a weak fit.
 - Reference an accepted quote from a component with quoteIds: ["quote:<artifactId>"]. Never write the quotation text into a body, item, or option.
 - A mid-quote "…" is allowed only when both halves are individually verbatim and the result reads coherently.`;
+
+const POINT_RULES = `POINTS: PLAN EACH CLAIM ONCE
+- Before any visible copy, fill "points" with the distinct claims the answer needs, most important first, with ids "p1", "p2", and so on. A point is one specific claim a reader could check, never a topic or theme. Each item and option is normally its own point, so plan two to six. Two claims a reader would call the same idea are one point, however differently they are worded.
+- Tag every visible slot with the one point it expresses: titlePointId, leadPointId, each component's titlePointId and bodyPointId, and pointId on every item and option. A slot that adds new specifics under a broader claim states a new point and gets its own id.
+- Each point id belongs to exactly one slot across the whole surface. When prose repeats a point a higher slot already owns, the server deletes that prose. The priority is: title, primary items and options, primary body, primary title, supporting components, lead.
+- The title carries the answer point. Items and options carry specific points. A body carries a point only when it explains something no item states.
+- A component title is a short label. Tag it only when it states a claim. If it would restate a point that is already placed, leave it empty.
+- When no unplaced point is left for the lead, a body, or a component title, leave that slot and its point id empty. An empty slot is better than a reworded one.
+- Add a supporting component only for an unplaced point, a verified quote, or a new source.`;
 
 const SITEMAP = `WEBSITE SITEMAP (use these paths when directing visitors):
 - About: /about
@@ -262,7 +272,7 @@ EM DASH GATE
 - Rewrite each em-dash construction as two sentences, a comma, a colon, or a semicolon. Do not substitute another dash character.
 
 PROGRESSIVE COMPOSITION
-- Emit the schema fields in their declared order. Finish quotes, then finish primary completely before starting supporting. Finish each supporting component before the next.
+- Emit the schema fields in their declared order. Finish points first, then quotes, then finish primary completely before starting supporting. Finish each supporting component before the next.
 - Visitors see each completed component the moment it closes. Each component must make sense on its own, with stable, unique IDs and no forward references to unfinished components.
 - Prefer one focused primary plus one or two small supporting components when they add distinct evidence or a new angle. Do not split a simple answer artificially or repeat facts.
 - Component type describes content structure. The host chooses the visual aesthetic; do not assume every answer is paper-themed.
@@ -278,7 +288,7 @@ ${HARD_CONSTRAINTS}
 
 DEFAULT BEHAVIOR. Decline off-topic questions per Rule 1 with a narrative primary: a short body, no items, no artifact references, empty quotes. If the question is plainly about Karthik but happened to miss the index, say you do not have specifics on that topic and name related areas you can help with (education and background, work experience and research roles, projects and technical work, leadership and community involvement, writing and views). Do not invent details to fill the gap.
 
-Keep the title short and literal. Keep compositionOptions to ["stacked","primary_top"].
+Keep the title short and literal. Keep compositionOptions to ["stacked","primary_top"]. Fill "points" with the single point of the reply as "p1", tag the title with it, and leave every other point id empty.
 
 ${SITEMAP}
 
@@ -298,6 +308,8 @@ USE THE SOURCES AGGRESSIVELY. Before saying "no specific writeup", scan every se
 - Never claim that details, photos, or a named item are unavailable when any source section contains a matching record or gallery category.
 
 ${TAKE_RULES}
+
+${POINT_RULES}
 
 ${COMPOSITION_RULES}
 
@@ -445,8 +457,10 @@ export async function generateA2UI(
   };
 
   const build = (
-    raw: Record<string, unknown>,
+    output: Record<string, unknown>,
   ): { document: A2UIDocument; artifacts: A2UIArtifactLike[] } => {
+    // Settle claim ownership first, so a dropped repeat never hydrates a card.
+    const raw = enforcePointOwnership(output);
     const quotes = validateA2UIQuotes(raw.quotes, corpusFor, allowedIds);
     const artifacts = resolve(
       [...new Set([...referencedArtifactIds(raw), ...quotes.keys()])],
