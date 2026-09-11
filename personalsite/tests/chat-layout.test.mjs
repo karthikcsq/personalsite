@@ -18,6 +18,9 @@ const a2uiStyles = readFileSync(
   new URL("../src/app/components/a2ui/a2ui.module.css", import.meta.url),
   "utf8",
 );
+const a2uiGenerator = readFileSync(
+  new URL("../src/a2ui/generate.ts", import.meta.url), "utf8",
+);
 const a2uiComposer = readFileSync(
   new URL("../src/a2ui/compose.ts", import.meta.url),
   "utf8",
@@ -364,14 +367,15 @@ test("focused A2UI answers use adaptive density instead of mandatory grids", () 
   );
 });
 
-test("guarded routing keeps A2UI on Luna and uses Mini only for narrow facts", () => {
+test("unified route uses the A2UI model without a separate answer call", () => {
   assert.match(modelRouting, /"OPENAI_ANSWER_FAST_MODEL"/);
   assert.match(modelRouting, /legacyAnswerModel \|\| "gpt-5-mini"/);
   assert.match(modelRouting, /legacyAnswerModel \|\| "gpt-5\.6-luna"/);
-  assert.match(modelRouting, /"OPENAI_A2UI_MODEL", "gpt-5\.6-luna"/);
+  assert.match(modelRouting, /"GEMINI_A2UI_MODEL", GEMINI_FAST_MODEL/);
   assert.match(modelRouting, /const SIMPLE_FACT/);
   assert.match(modelRouting, /const COMPLEX_QUESTION/);
-  assert.match(chatRoute, /selectAnswerRoute\(/);
+  assert.match(chatRoute, /generateA2UI\(/);
+  assert.doesNotMatch(chatRoute, /selectAnswerRoute\(|composeA2UI\(/);
   assert.match(a2uiComposer, /MODEL_CONFIG\.a2uiModel/);
 });
 
@@ -386,7 +390,7 @@ test("role questions cannot ship an empty source sheet as the primary", () => {
 });
 
 test("answer and A2UI prompts reject contrastive parallelism broadly", () => {
-  for (const prompt of [chatRoute, a2uiComposer]) {
+  for (const prompt of [a2uiGenerator, a2uiComposer]) {
     assert.match(prompt, /Never use contrastive parallelism/);
     assert.match(prompt, /"from X to Y" thesis frames/);
     assert.match(prompt, /State the intended claim directly/);
@@ -395,8 +399,8 @@ test("answer and A2UI prompts reject contrastive parallelism broadly", () => {
 
 test("answer and A2UI prompts count exact award placements as wins", () => {
   assert.match(
-    chatRoute,
-    /introduce every qualifying result as a win, including second place/,
+    a2uiGenerator,
+    /frame every qualifying result as a win, including second place/,
   );
   assert.match(
     a2uiComposer,
@@ -405,10 +409,10 @@ test("answer and A2UI prompts count exact award placements as wins", () => {
 });
 
 test("answer generation and A2UI composition share one evidence contract", () => {
-  assert.match(chatRoute, /ONE ANSWER CONTRACT/);
+  assert.match(a2uiGenerator, /GROUNDING/);
   assert.match(chatRoute, /MATCHING CANONICAL PORTFOLIO RECORDS/);
   assert.match(chatRoute, /LIVE GALLERY DIRECTORY/);
-  assert.match(chatRoute, /Award placements are wins/);
+  assert.match(a2uiGenerator, /Award placements are wins/);
   assert.match(a2uiComposer, /ANSWER AND EVIDENCE CONTRACT/);
   assert.match(a2uiComposer, /withGuaranteedSourceAccess/);
   assert.match(a2uiComposer, /hasAnswerBearingPrimary/);

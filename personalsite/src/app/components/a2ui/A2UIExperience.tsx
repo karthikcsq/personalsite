@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -10,7 +11,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 import {
   AnimatePresence,
   motion,
@@ -26,6 +26,8 @@ import {
   GripVertical,
   History,
   Pencil,
+  Pause,
+  Play,
   Quote as QuoteIcon,
   X,
 } from "lucide-react";
@@ -55,8 +57,16 @@ import {
   type A2UIItemArrangement,
   type A2UISurfaceFamily,
 } from "@/a2ui/presentation";
+import { buildBoard, type BoardArtifact } from "@/a2ui/board";
 import { InteriorBotanicalFrame } from "@/app/components/BotanicalDetails";
 import styles from "@/app/components/a2ui/a2ui.module.css";
+import { useSceneChoreography } from "./useSceneChoreography";
+import { BoardScene } from "./BoardScene";
+import { Markdown } from "./Markdown";
+
+/** The board is the answer surface. `legacy` renders the previous
+ * per-component panels and exists so the draft page can compare them. */
+export type A2UIRenderer = "board" | "legacy";
 
 export type A2UITurn = {
   id: string;
@@ -83,6 +93,7 @@ type Props = {
   onRemoveQueued: (index: number) => void;
   onReorderQueued: (orderedIds: string[]) => void;
   footer: ReactNode;
+  renderer?: A2UIRenderer;
 };
 
 type A2UIVisualVariant = "folio" | "diagram" | "margin";
@@ -177,9 +188,11 @@ export function A2UIExperience({
   onRemoveQueued,
   onReorderQueued,
   footer,
+  renderer = "board",
 }: Props) {
   const [activeId, setActiveId] = useState(turns.at(-1)?.id ?? "");
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [motionPaused, setMotionPaused] = useState(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -204,9 +217,9 @@ export function A2UIExperience({
 
   return (
     <div className={styles.shell}>
-      <div className={styles.botanicalFrame} aria-hidden="true">
+      {renderer === "legacy" ? <div className={styles.botanicalFrame} aria-hidden="true">
         <InteriorBotanicalFrame />
-      </div>
+      </div> : null}
 
       <HistoryRail
         turns={turns}
@@ -230,6 +243,18 @@ export function A2UIExperience({
       >
         <History aria-hidden="true" />
       </button>
+
+      {!reduceMotion ? (
+        <button
+          type="button"
+          className={styles.motionToggle}
+          aria-label={motionPaused ? "Resume ambient motion" : "Pause ambient motion"}
+          aria-pressed={motionPaused}
+          onClick={() => setMotionPaused((paused) => !paused)}
+        >
+          {motionPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+        </button>
+      ) : null}
 
       {historyOpen ? (
         <MobileHistory
@@ -257,25 +282,28 @@ export function A2UIExperience({
       <main className={styles.canvas}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.section
-            key={`${active.id}:${active.isLoading && !active.document ? "loading" : "ready"}`}
+            key={renderer === "board" ? active.id : `${active.id}:${active.isLoading && !active.document ? "loading" : "ready"}`}
             className={styles.scene}
             aria-live="polite"
-            initial={reduceMotion ? false : { opacity: 0, y: 14, scale: 0.992 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.994 }}
-            transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
+            initial={false}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.14, ease: [0.16, 1, 0.3, 1] }}
           >
-            {active.isLoading && !active.document ? (
+            {renderer !== "board" && active.isLoading && !active.document ? (
               <A2UILoading question={active.question} />
             ) : (
               <A2UICanvas
                 question={active.question}
+                isLoading={active.isLoading}
                 content={active.content}
                 document={active.document}
                 artifacts={active.artifacts}
                 compositionTurn={activeTurnIndex}
+                motionPaused={motionPaused}
                 recentSurfaceFamilies={recentSurfaceFamilies}
                 recentVisualVariants={recentVisualVariants}
+                renderer={renderer}
                 onAsk={onAsk}
               />
             )}
@@ -288,52 +316,74 @@ export function A2UIExperience({
   );
 }
 
+// Stable DOM nodes let streaming updates leave existing entrance animations alone.
+function SceneTitle({ children }: { children: string }) {
+  return (
+    <h1 className={styles.question} aria-label={children}>
+      {children.split(/\s+/).map((word, index) => (
+        <span
+          key={`${index}-${word}`}
+          className={styles.titleWord}
+          aria-hidden="true"
+          style={{ animationDelay: `${Math.min(index, 10) * 24}ms` }}
+        >
+          {word}{"\u00a0"}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 function A2UICanvas({
   question,
+  isLoading,
   content,
   document: uiDocument,
   artifacts,
   compositionTurn,
+  motionPaused,
   recentSurfaceFamilies,
   recentVisualVariants,
+  renderer,
   onAsk,
 }: {
   question: string;
+  isLoading: boolean;
   content: string;
   document?: A2UIDocument;
   artifacts: Artifact[];
   compositionTurn: number;
+  motionPaused: boolean;
   recentSurfaceFamilies: A2UISurfaceFamily[];
   recentVisualVariants: A2UIVisualVariant[];
+  renderer: A2UIRenderer;
   onAsk: (prompt: string) => void;
 }) {
   const router = useRouter();
-  const reduceMotion = useReducedMotion();
-  const [revealStage, setRevealStage] = useState(uiDocument ? 0 : 3);
+  const compositionRef = useRef<A2UIComposition | null>(null);
+  const sceneRef = useSceneChoreography(uiDocument?.presentationSeed ?? compositionTurn, Boolean(uiDocument), motionPaused);
   const artifactMap = useMemo(
     () => new Map(artifacts.map((artifact) => [artifact.id, artifact])),
     [artifacts],
   );
 
-  useEffect(() => {
-    if (!uiDocument || reduceMotion) {
-      setRevealStage(3);
-      return;
-    }
-    setRevealStage(0);
-    const timers = [
-      setTimeout(() => setRevealStage(1), 70),
-      setTimeout(() => setRevealStage(2), 250),
-      setTimeout(() => setRevealStage(3), 450),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, [uiDocument, reduceMotion]);
-
+  if (!uiDocument && renderer === "board" && isLoading) {
+    return (
+      <>
+        <SceneTitle>{question}</SceneTitle>
+        <article ref={sceneRef} className={styles.answerSurface} data-renderer="board">
+          <BoardScene board={{ pieces: [], sourceArtifactIds: [], referencedArtifactIds: [] }}
+            seed={mixPresentationSeed(compositionTurn, question)} motionPaused={motionPaused} isLoading={isLoading}
+            sourceLabel={() => ""} onOpen={() => {}} />
+        </article>
+      </>
+    );
+  }
   if (!uiDocument) {
     return (
       <>
-        <h1 className={styles.question}>{question}</h1>
-        <article className={styles.answerSurface}>
+        <SceneTitle>{question}</SceneTitle>
+        <article ref={sceneRef} className={styles.answerSurface}>
           <Markdown className={styles.lead}>{content}</Markdown>
         </article>
       </>
@@ -368,6 +418,92 @@ function A2UICanvas({
     }
   };
   const presentationSeed = uiDocument.presentationSeed ?? compositionTurn;
+  const openArtifact = (id: string) => {
+    const path = artifactPath(id);
+    if (path) router.push(path);
+  };
+
+  if (renderer === "board") {
+    // The board reads the document as written: no seeded type rotation and no
+    // count-dependent item reordering, both of which reshuffle a surface that
+    // is still streaming in.
+    const board = buildBoard(
+      uiDocument,
+      artifacts.map(
+        (artifact): BoardArtifact => ({
+          id: artifact.id,
+          label: artifactLabel(artifact),
+          annotation: artifact.annotation,
+        }),
+      ),
+      presentationSeed,
+    );
+    const boardNavigationPaths = new Set(
+      board.pieces.map((piece) => piece.navigationPath).filter(Boolean),
+    );
+    const boardBacklinkedPaths = new Set(
+      board.referencedArtifactIds.flatMap((artifactId) => {
+        const path = artifactPath(artifactId);
+        return path ? [path] : [];
+      }),
+    );
+    const boardActions = uiDocument.actions.filter((action) => {
+      const actionPath =
+        action.intent === "open_path" ? normalizeA2UIPath(action.payload) : null;
+      return (
+        !(
+          actionPath &&
+          (boardNavigationPaths.has(actionPath) ||
+            boardBacklinkedPaths.has(actionPath))
+        ) &&
+        !(
+          action.intent === "open_artifact" &&
+          board.referencedArtifactIds.includes(action.payload)
+        )
+      );
+    });
+
+    return (
+      <>
+        <SceneTitle>{uiDocument.title || question}</SceneTitle>
+        <article
+          ref={sceneRef}
+          className={styles.answerSurface}
+          data-renderer="board"
+        >
+          <BoardScene
+            board={board}
+            isLoading={isLoading}
+            seed={presentationSeed}
+            motionPaused={motionPaused}
+            sourceLabel={(artifactId) =>
+              sourceActionLabel(artifactId, artifactMap)
+            }
+            onOpen={openArtifact}
+          />
+          {boardActions.length > 0 ? (
+            <div className={styles.actions}>
+              {boardActions.map((action, index) => (
+                <button
+                  type="button"
+                  key={`${action.intent}-${action.payload}-${index}`}
+                  onClick={() => execute(action)}
+                >
+                  {action.intent === "copy_answer" ? (
+                    <Copy aria-hidden="true" />
+                  ) : (
+                    <ArrowRight aria-hidden="true" />
+                  )}
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </article>
+      </>
+    );
+  }
+
   const presentedPrimary = presentA2UIComponent(
     uiDocument.primary,
     presentationSeed,
@@ -488,7 +624,7 @@ function A2UICanvas({
     hasAuthoredSurface && authoredCompositionOptions.length > 0
       ? authoredCompositionOptions
       : baseCompositionOptions;
-  const composition: A2UIComposition =
+  const proposedComposition: A2UIComposition =
     supportingComponents.length > 0
       ? (
           safeCompositionOptions[
@@ -498,6 +634,9 @@ function A2UICanvas({
           "stacked"
         )
       : "stacked";
+  // A streamed answer must not reshuffle the primary when supporting pieces arrive.
+  if (compositionRef.current === null) compositionRef.current = proposedComposition;
+  const composition = compositionRef.current;
   const visibleActions = uiDocument.actions.filter(
     (action) => {
       const actionPath =
@@ -517,20 +656,22 @@ function A2UICanvas({
 
   return (
     <>
-      <h1 className={styles.question}>{uiDocument.title || question}</h1>
+      <SceneTitle>{uiDocument.title || question}</SceneTitle>
       <article
+        ref={sceneRef}
         className={styles.answerSurface}
         data-composition={composition}
         data-visual={visualVariant}
+        data-photo-spread={!uiDocument.progressive && presentedPrimary.type === "visual_mosaic" && supportingComponents.every((component, index) =>
+          ["narrative", "evidence_stack", "quote_focus"].includes(component.type) &&
+          ["default", "essay_constellation"].includes(supportingSurfaces[index] ?? "default"),
+        )}
       >
-        <div className={styles.reveal} data-visible={revealStage >= 1}>
+        <div>
           <Markdown className={styles.lead}>{uiDocument.lead}</Markdown>
         </div>
 
-        <div
-          className={`${styles.primary} ${styles.reveal}`}
-          data-visible={revealStage >= 2}
-        >
+        <div className={styles.primary}>
           <A2UIBlock
             component={presentedPrimary}
             embeddedQuote={embeddedQuote}
@@ -552,10 +693,7 @@ function A2UICanvas({
         </div>
 
         {supportingComponents.length > 0 ? (
-          <div
-            className={`${styles.supporting} ${styles.reveal}`}
-            data-visible={revealStage >= 3}
-          >
+          <div className={styles.supporting}>
             {supportingComponents.map((component, index) => (
               <A2UIBlock
                 key={component.id}
@@ -580,7 +718,7 @@ function A2UICanvas({
         ) : null}
 
         {fallbackSourceArtifactIds.length > 0 ? (
-          <div className={styles.reveal} data-visible={revealStage >= 3}>
+          <div>
             <ArtifactSourceStrip
               artifactIds={fallbackSourceArtifactIds}
               artifactMap={artifactMap}
@@ -593,10 +731,7 @@ function A2UICanvas({
         ) : null}
 
         {visibleActions.length > 0 ? (
-          <div
-            className={`${styles.actions} ${styles.reveal}`}
-            data-visible={revealStage >= 3}
-          >
+          <div className={styles.actions}>
             {visibleActions.map((action, index) => (
               <button
                 type="button"
@@ -2454,7 +2589,7 @@ function VisualMosaic({
     return chosen;
   })();
 
-  if (surfaceFamily === "photo_letter") {
+  if (surfaceFamily === "photo_letter" && visualVariant === "folio") {
     const firstItem = component.items[0];
     const sourceArtifactIds = componentSourceArtifactIds(component, artifactMap);
     return (
@@ -2496,14 +2631,14 @@ function VisualMosaic({
               <figure key={image}>
                 <Image
                   src={image}
-                  alt="A second view from the same gallery collection"
+                  alt={`Karthik's photograph from ${galleryCategoryFromAssetId(component.items[component.items.length > 1 ? index + 1 : 0]?.assetId ?? "") ?? "the trip"}`}
                   width={900}
                   height={700}
                   sizes="(max-width: 720px) 44vw, 22vw"
                   loading="lazy"
                   unoptimized
                 />
-                <span aria-hidden="true">{String(index + 2).padStart(2, "0")}</span>
+                <figcaption>{component.items[component.items.length > 1 ? index + 1 : 0]?.label}</figcaption>
               </figure>
             ))}
           </div>
@@ -2830,43 +2965,6 @@ function PencilLineFilter({
   );
 }
 
-function Markdown({
-  children,
-  className,
-}: {
-  children: string;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <ReactMarkdown
-        components={{
-          a: ({ href, children, ...props }) => {
-            const internalPath = href ? normalizeA2UIPath(href) : null;
-            if (internalPath) {
-              return <Link href={internalPath}>{children}</Link>;
-            }
-            if (href?.startsWith("/")) return <span>{children}</span>;
-            return (
-              <a
-                {...props}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {children}
-              </a>
-            );
-          },
-          p: ({ ...props }) => <p {...props} />,
-        }}
-      >
-        {children}
-      </ReactMarkdown>
-    </div>
-  );
-}
-
 function artifactLabel(artifact: Artifact): string {
   if (artifact.kind === "work") return artifact.data.company;
   return artifact.data.title;
@@ -2906,7 +3004,7 @@ function A2UILoading({ question }: { question: string }) {
 
   return (
     <>
-      <h1 className={styles.question}>{question}</h1>
+      <SceneTitle>{question}</SceneTitle>
       <article className={`${styles.answerSurface} ${styles.loading}`}>
         <div className={styles.loadingLead} />
         <div className={styles.loadingLeadShort} />

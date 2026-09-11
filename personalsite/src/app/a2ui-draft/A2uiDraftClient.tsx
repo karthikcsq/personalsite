@@ -16,6 +16,7 @@ import {
 import { InteriorBotanicalFrame } from "@/app/components/BotanicalDetails";
 import {
   A2UIExperience,
+  type A2UIRenderer,
   type A2UITurn,
 } from "@/app/components/a2ui/A2UIExperience";
 import type { A2UIDocument } from "@/a2ui/protocol";
@@ -621,7 +622,26 @@ function buildDynamicGalleryFixture(
   };
 }
 
+const VERITAS_DETAILS_FIXTURE: A2UIDocument = {
+  ...FOLD_TIMELINE_FIXTURE,
+  question: "What did Karthik build with Veritas?",
+  title: "Veritas checks the quality and authenticity of responses",
+  lead: "",
+  primary: {
+    ...FOLD_TIMELINE_FIXTURE.primary,
+    id: "veritas-details",
+    type: "metric_grid",
+    items: [
+      { label: "Response scoring", value: "Quality across four dimensions", detail: "The pipeline evaluates coherence, effort, consistency, and specificity for every response.", artifactId: "", assetId: "" },
+      { label: "Fraud signals", value: "Duplicates and contradictions", detail: "Vector embeddings flag copied responses, while contradiction questions lower confidence when answers conflict.", artifactId: "", assetId: "" },
+      { label: "Award", value: "Best Proof-of-Human Application", detail: "Veritas won the award at Catapult 2026.", artifactId: "", assetId: "" },
+      { label: "Build time", value: "36-hour hackathon build", detail: "The team developed Veritas at Catapult 2026.", artifactId: "", assetId: "" },
+    ],
+  },
+};
+
 const A2UI_FIXTURES: Record<string, A2UIDocument> = {
+  veritas: VERITAS_DETAILS_FIXTURE,
   favorite: FAVORITE_PROJECT_FIXTURE,
   fold: FOLD_TIMELINE_FIXTURE,
   mcp: MCP_FIXTURE,
@@ -643,10 +663,14 @@ export default function A2uiDraftClient() {
   const [prompt, setPrompt] = useState("");
   const [history, setHistory] = useState<TurnSnapshot[]>(INITIAL_HISTORY);
   const [historyOpen, setHistoryOpen] = useState(false);
+  // ?renderer=legacy draws the same fixture through the previous per-component
+  // panels, so board changes can be compared against what they replaced.
+  const [renderer, setRenderer] = useState<A2UIRenderer>("board");
 
   useEffect(() => {
     const parameters = new URLSearchParams(window.location.search);
     setFixture(parameters.get("fixture") ?? "");
+    setRenderer(parameters.get("renderer") === "legacy" ? "legacy" : "board");
     setFixtureSeed(Number.parseInt(parameters.get("seed") ?? "0", 10) || 0);
     const galleryCategory = parameters.get("gallery");
     if (galleryCategory === null) return;
@@ -686,6 +710,7 @@ export default function A2uiDraftClient() {
     return (
       <A2UIExperience
         turns={turns}
+        renderer={renderer}
         onAsk={() => {}}
         onNewConversation={() => {}}
         suggestions={[]}

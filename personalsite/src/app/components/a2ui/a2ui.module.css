@@ -392,19 +392,6 @@
   margin-top: 34px;
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 300ms ease,
-    transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal[data-visible="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .supporting {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7793,7 +7780,6 @@ button.researchStage:hover .researchStageAsset {
 
 @media (prefers-reduced-motion: reduce) {
   .scene,
-  .reveal,
   .loadingLead,
   .loadingLeadShort,
   .loadingComponent span,
@@ -9000,3 +8986,386 @@ button:hover .itemSourceCue svg {
     transform: none;
   }
 }
+
+/* Titles lead; content choreography is viewport-aware in useSceneChoreography. */
+.titleWord { display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+  .titleWord { animation: wordArrive 700ms cubic-bezier(.16, 1, .3, 1) backwards; }
+}
+@keyframes wordArrive {
+  from { opacity: 0; translate: 0 22px; rotate: 2deg; }
+  to { opacity: 1; translate: 0 0; rotate: 0deg; }
+}
+
+/* The answer is an open journal, composed from prints and editorial fragments. */
+.scene {
+  overflow-x: clip;
+  padding: 10px 12px 28px;
+}
+.scene .question {
+  font-family: var(--font-serif);
+  font-size: clamp(34px, 3.8vw, 56px);
+  font-weight: 400;
+  letter-spacing: -.045em;
+  line-height: 1.08;
+  margin-bottom: 24px;
+}
+.scene .question::after {
+  display: block;
+  width: 68px;
+  height: 3px;
+  margin-top: 24px;
+  background: var(--a2ui-green);
+  border-radius: 50%;
+  transform: rotate(-2deg);
+  content: "";
+}
+
+.scene .visualMosaic[data-variant] {
+  background: transparent;
+  color: var(--color-ink);
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  clip-path: none;
+}
+.scene .visualMosaic[data-variant]::before,
+.scene .visualMosaic[data-variant]::after { display: none; }
+.scene .visualMosaicIntro,
+.scene .photoLetterHeading {
+  display: block;
+  margin-bottom: 28px;
+  padding: 0;
+  border: 0;
+}
+.scene .visualMosaicIntro h2,
+.scene .photoLetterHeading h2 {
+  color: var(--a2ui-green);
+  font-size: clamp(25px, 2.6vw, 36px);
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.scene .visualMosaicIntro > div,
+.scene .photoLetterHeading > div {
+  color: var(--color-ink-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.scene .visualMosaic[data-variant][data-arrangement] .visualMosaicGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  align-items: start;
+  gap: 26px 20px;
+  padding: 12px 10px 18px;
+}
+.scene .visualMosaic[data-variant][data-arrangement] .visualMosaicGrid > * {
+  grid-column: auto;
+  grid-row: auto;
+  margin: 0;
+  padding: 10px;
+  overflow: visible;
+  background: #fffcf6;
+  border: 1px solid #ddd5c5;
+  color: var(--color-ink);
+  box-shadow: 0 2px 3px #3827140d, 0 12px 24px -12px #38271433;
+  clip-path: none;
+  transform: rotate(1.4deg);
+}
+.scene .visualMosaic[data-variant][data-arrangement] .visualMosaicGrid > :first-child {
+  grid-column: 1 / -1;
+  transform: rotate(-1deg);
+}
+.scene .visualMosaic[data-variant][data-arrangement] .visualMosaicGrid > :nth-child(3n) {
+  transform: rotate(-2deg);
+  margin-top: 12px;
+}
+.scene .visualMosaicGrid > *::before {
+  position: absolute;
+  top: -11px;
+  left: 42%;
+  width: 62px;
+  height: 22px;
+  background: #d7c89c99;
+  border: 1px solid #c6b98e44;
+  transform: rotate(-3deg);
+  z-index: 3;
+  content: "";
+}
+.scene .visualMosaicGrid .visualMosaicImage,
+.scene .visualMosaicGrid .visualMosaicPlaceholder {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0;
+}
+.scene .visualMosaicImage:not([data-loaded]) { opacity: 1; }
+.scene .visualMosaicGrid > :first-child .visualMosaicImage { aspect-ratio: 3 / 2; }
+.scene .visualMosaicCaption {
+  position: relative;
+  inset: auto;
+  display: grid;
+  padding: 15px 7px 10px;
+  background: none;
+  color: var(--color-ink);
+  gap: 5px;
+}
+.scene .visualMosaicCaption strong {
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2.3vw, 31px);
+  line-height: 1.12;
+}
+.scene .visualMosaicCaption b { color: var(--a2ui-green); font-size: 12px; }
+.scene .visualMosaicCaption small { color: var(--color-ink-muted); font-size: 13px; line-height: 1.5; }
+.scene .photoLetterSpread::before { display: none; }
+.scene .photoLetterSpread figure { clip-path: none; }
+.scene .photoLetterSpread img { aspect-ratio: 4 / 3; object-fit: cover; }
+.scene .photoLetterDetails figure { padding: 8px 8px 34px; }
+.scene .photoLetterDetails figcaption { padding: 10px 4px 0; font-family: var(--font-serif); font-size: 19px; line-height: 1.2; }
+
+@media (min-width: 1000px) {
+  .scene:has(> .answerSurface[data-photo-spread="true"]) {
+    display: grid;
+    grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr);
+    gap: 0 44px;
+    align-items: start;
+  }
+  .scene .answerSurface[data-photo-spread="true"] { display: contents; }
+  .scene:has(> .answerSurface[data-photo-spread="true"]) > .question {
+    grid-column: 1;
+    grid-row: 1;
+    padding-top: 24px;
+    font-size: clamp(40px, 4.2vw, 62px);
+  }
+  .scene .answerSurface[data-photo-spread="true"] > div:first-child {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .scene .answerSurface[data-photo-spread="true"] > .primary {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    margin: 0;
+    min-width: 0;
+  }
+  .scene .answerSurface[data-photo-spread="true"] > .supporting {
+    grid-column: 1;
+    grid-row: 3;
+    display: block;
+    margin-top: 36px;
+  }
+  .scene .answerSurface[data-photo-spread="true"] > .actions {
+    grid-column: 1;
+    grid-row: 4;
+    margin-top: 24px;
+  }
+  .scene .photoLetterSpread { display: block; padding: 12px 10px; }
+  .scene .photoLetterDetails { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; gap: 20px; margin-top: 28px; }
+}
+
+@media (max-width: 600px) {
+  .scene { padding: 6px 8px 24px; }
+  .scene .question { font-size: 36px; line-height: 1.06; letter-spacing: -.04em; }
+  .scene .question::after { margin-top: 18px; }
+  .scene .visualMosaic[data-variant][data-arrangement] .visualMosaicGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+    padding: 8px 5px;
+  }
+  .scene .visualMosaicCaption { padding: 14px 6px 12px; }
+  .scene .visualMosaicCaption strong { font-size: 27px; }
+  .scene .photoLetterSpread { padding-inline: 5px; }
+  .scene .photoLetterSpread figure { box-shadow: 0 5px 14px #38271420; }
+  .scene .photoLetterNotes { grid-template-columns: 1fr; }
+}
+
+/* All legacy visual variants share the new print treatment. */
+.scene .visualMosaic[data-variant] .visualMosaicGrid { background: transparent; }
+.scene .visualMosaic[data-variant] .visualMosaicIntro h2 { color: var(--a2ui-green); font-size: clamp(25px, 2.6vw, 36px); }
+.scene .visualMosaic[data-variant] .visualMosaicIntro > div { color: var(--color-ink-muted); }
+.scene .visualMosaic[data-variant] .visualMosaicCaption { position: relative; inset: auto; padding: 15px 7px 10px; background: none; }
+.scene .visualMosaic[data-variant] .visualMosaicCaption strong { color: var(--color-ink); font-size: clamp(22px, 2.3vw, 31px); }
+.scene .visualMosaic[data-variant] .visualMosaicCaption small { display: block; color: var(--color-ink-muted); }
+.scene .visualMosaic[data-variant] .visualMosaicGrid > :is(figure, button) { border-radius: 0; }
+.scene .answerSurface[data-photo-spread="true"] .supporting .narrativeComponent {
+  display: block;
+  padding: 24px;
+  background: #f3ecdca8;
+  border-left: 2px solid #b4ac87;
+  transform: rotate(-.5deg);
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .narrativeComponent::before,
+.scene .answerSurface[data-photo-spread="true"] .supporting .narrativeComponent::after { display: none; }
+.scene .answerSurface[data-photo-spread="true"] .narrativeItems {
+  display: block;
+  border: 0;
+  margin: 20px 0 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .narrativeItems > div {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+  padding: 16px 0;
+  border: 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .narrativeItems > div > span { display: block; width: auto; min-width: 0; }
+.scene .answerSurface[data-photo-spread="true"] .narrativeItems > div::before { display: none; }
+.scene .answerSurface[data-photo-spread="true"] .narrativeBotanical { display: none; }
+.scene .photoLetter { padding: 0; background: transparent; }
+.scene .answerSurface[data-photo-spread="true"] .supporting .component h2 {
+  font-size: 31px;
+  line-height: 1.12;
+  margin-bottom: 14px;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .essayConstellation {
+  display: block;
+  padding: 24px;
+  background: #f3ecdca8;
+  border: 0;
+  border-left: 2px solid #b4ac87;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .constellationNotes {
+  display: block;
+  padding: 12px 0 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .constellationNotes strong { font-size: 25px; }
+@media (max-width: 760px) {
+  .scene .question { padding-left: 0; }
+}
+@media (max-width: 360px) {
+  .scene .question { font-size: 32px; }
+}
+
+/* Two non-paper voices share the site's forest-and-botanical palette. */
+.scene .visualMosaic[data-variant="diagram"] {
+  padding: clamp(20px, 3vw, 34px);
+  background: #173323;
+  border-radius: 8px;
+  color: #f8f4e9;
+}
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicIntro h2 { color: #f8f4e9; }
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicIntro > div { color: #d0d9cb; }
+.scene .visualMosaic[data-variant="diagram"][data-arrangement] .visualMosaicGrid { padding: 0; gap: 24px 18px; }
+.scene .visualMosaic[data-variant="diagram"][data-arrangement] .visualMosaicGrid > * {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  overflow: hidden;
+}
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicGrid > *::before,
+.scene .visualMosaic[data-variant="margin"] .visualMosaicGrid > *::before { display: none; }
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicCaption { padding: 16px 0 4px; }
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicCaption strong { color: #f8f4e9; }
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicCaption b { color: #bad0ac; }
+.scene .visualMosaic[data-variant="diagram"] .visualMosaicCaption small { color: #d0d9cb; }
+.scene .visualMosaic[data-variant="margin"][data-arrangement] .visualMosaicGrid > * {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+}
+.scene .visualMosaic[data-variant="margin"] .visualMosaicGrid > :first-child :is(.visualMosaicImage, .visualMosaicPlaceholder) {
+  border-radius: 42% 42% 4px 4px;
+  aspect-ratio: 5 / 4;
+}
+.scene .visualMosaic[data-variant="margin"] .visualMosaicCaption {
+  padding: 18px 0 12px;
+  border-bottom: 1px solid #b3bea7;
+}
+.scene .visualMosaic[data-variant="margin"] .visualMosaicGrid > :nth-child(3n) { margin-top: 32px; }
+
+/* Ambient motion starts only after the entrance has settled. The observer pauses
+   offscreen elements, and hidden tabs and reduced-motion preferences stop it. */
+@media (prefers-reduced-motion: no-preference) {
+  .answerSurface [data-scene-settled="true"][data-scene-ambient="photo"] {
+    animation: sceneCameraDrift 18s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  .answerSurface [data-scene-settled="true"][data-scene-ambient="float"] {
+    animation: sceneIllustrationDrift 9s ease-in-out infinite alternate;
+  }
+  .answerSurface [data-scene-settled="true"][data-scene-ambient="pulse"] {
+    animation: sceneNodeBreathe 5s ease-in-out infinite alternate;
+  }
+  .answerSurface [data-scene-settled][data-scene-ambient] { animation-play-state: paused; }
+  .answerSurface[data-page-visible="true"][data-motion-paused="false"] [data-scene-settled="true"][data-ambient-visible="true"] { animation-play-state: running; }
+}
+@keyframes sceneCameraDrift {
+  from { transform: scale(1); }
+  to { transform: scale(1.025); }
+}
+@keyframes sceneIllustrationDrift {
+  from { translate: 0 0; }
+  to { translate: 0 -4px; }
+}
+@keyframes sceneNodeBreathe {
+  from { opacity: .62; }
+  to { opacity: 1; }
+}
+
+.motionToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 50%;
+  background: var(--a2ui-bg);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+.motionToggle svg { width: 14px; height: 14px; }
+.motionToggle:hover { color: var(--a2ui-green); border-color: var(--a2ui-green); }
+.motionToggle:focus-visible { outline: 2px solid var(--a2ui-green); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .scene *, .scene *::before, .scene *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* The photo spread's supporting rail is narrow even on desktop. Reflow evidence
+   as independent readable notes instead of reusing a full-width diagram grid. */
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceStack {
+  display: block;
+  padding: 24px 0;
+  min-height: 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips {
+  display: block;
+  padding: 0;
+  margin: 20px 0 0;
+  border: 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips > :is(div, button) {
+  position: relative;
+  inset: auto;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  min-height: 0;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid #aebda5;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips strong { font-size: 26px; line-height: 1.15; }
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips small { width: auto; max-width: none; font-size: 13px; line-height: 1.6; }
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips > :is(div, button) > :is(span, strong, small) {
+  display: block;
+  margin: 8px 0;
+}
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips > :is(div, button)::before,
+.scene .answerSurface[data-photo-spread="true"] .supporting .evidenceSlips > :is(div, button)::after { display: none; }

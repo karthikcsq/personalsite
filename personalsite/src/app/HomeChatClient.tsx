@@ -1,4 +1,7 @@
 "use client";
+
+import { a2uiHistoryText } from "@/a2ui/history";
+import { stablePresentationSeed } from "@/a2ui/streaming";
 import {
   memo,
   useCallback,
@@ -327,17 +330,20 @@ export default function HomeChatClient() {
           try {
             const parsed = JSON.parse(data);
             if (parsed.a2ui) {
-              const presentationSeed =
-                typeof crypto !== "undefined" && crypto.getRandomValues
-                  ? crypto.getRandomValues(new Uint32Array(1))[0]
-                  : Date.now();
               setMessages((prev) => {
                 const next = [...prev];
+                const presentationSeed = stablePresentationSeed(next[assistantIndex].a2ui?.presentationSeed, () =>
+                  typeof crypto !== "undefined" && crypto.getRandomValues
+                    ? crypto.getRandomValues(new Uint32Array(1))[0]
+                    : Date.now(),
+                );
                 next[assistantIndex] = {
                   ...next[assistantIndex],
+                  content: a2uiHistoryText(parsed.a2ui as A2UIDocument),
                   a2ui: {
                     ...(parsed.a2ui as A2UIDocument),
                     presentationSeed,
+                    progressive: next[assistantIndex].a2ui?.progressive || parsed.a2uiStreaming === true,
                   },
                 };
                 return next;
