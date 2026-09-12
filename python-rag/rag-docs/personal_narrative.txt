@@ -2,11 +2,11 @@ Karthik Thyagarajan - Personal Narrative & Background
 
 ## Who is Karthik?
 
-Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (class of 2027) from Northern Virginia. He describes himself as "an ideator, a builder, and a dreamer." He is passionate about building systems that blend perception and reasoning, and enjoys tackling complex problems at the intersection of intelligence and interactivity.
+Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (class of 2027) from Northern Virginia. He describes himself as "an ideator, a builder, and a dreamer." He is passionate about building systems that blend perception and reasoning, and enjoys tackling complex problems at the intersection of intelligence and interactivity. These days his work centers on agent systems and memory.
 
 Karthik attended Thomas Jefferson High School for Science and Technology (TJHSST) in Alexandria, Virginia from 2020 to 2024, one of the top-ranked STEM high schools in the United States. He scored 5s on both AP Physics C: Electricity and Magnetism and AP Physics C: Mechanics. He also achieved Royal Conservatory of Music Piano Examination Level 8, showing his musical side.
 
-At Purdue, he is double majoring in Computer Science and Artificial Intelligence with a 3.93 GPA. He has led ML projects in both academic and applied settings and is always looking for opportunities to build, learn, and collaborate on impactful tech.
+At Purdue, he is double majoring in Computer Science and Artificial Intelligence. He has led ML projects in both academic and applied settings and is always looking for opportunities to build, learn, and collaborate on impactful tech.
 
 He is currently based in the San Francisco Bay Area and is open to Artificial Intelligence Intern, Machine Learning Intern, and Software Engineer roles.
 
@@ -14,7 +14,7 @@ He is currently based in the San Francisco Bay Area and is open to Artificial In
 
 Karthik's interest in AI/ML started early. He went to work at the Naval Research Laboratory the summer after high school, developing ML algorithms for underwater acoustics and building a LangChain RAG system for classified document retrieval.
 
-His AI/ML work has since spanned reinforcement learning (Peraton Labs), computer vision (Memories.ai), robotics and SLAM (IDEAS Lab), agricultural ML (AgRPA), and multi-agent AI systems (Caladrius). He holds certifications in MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
+His AI/ML work has since spanned agent systems and agent memory (Samsung Research America), computer vision research on memory for long-form video (Memories.ai, his first startup role), reinforcement learning (Peraton Labs), robotics and SLAM (IDEAS Lab), agricultural ML (AgRPA), and multi-agent AI systems (Caladrius). He holds certifications in MCP Fundamentals and AI Agents Fundamentals from Hugging Face.
 
 AI/ML excites Karthik because it enables modeling of thinking and intelligence. If taken to the limit, it will change the way we understand the universe, enabling progress and discovery at a scale never thought of before.
 
@@ -30,6 +30,7 @@ Startups draw Karthik in because all innovation comes from founders, whether tha
 
 ## What Makes Karthik Stand Out?
 
+- Co-architected Samsung's always-on AI agent orchestrator at Samsung Research America, including the agent's long-term memory
 - Breadth: ML + full-stack + quantum computing + entrepreneurship + open source is an extremely rare combination for an undergraduate
 - He attended TJHSST, one of the top STEM high schools in the country
 - Published on arXiv as an undergrad (quantum key distribution research)

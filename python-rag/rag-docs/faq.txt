@@ -1,7 +1,7 @@
 Karthik Thyagarajan - Frequently Asked Questions
 
 Q: Who is Karthik Thyagarajan?
-A: Karthik Thyagarajan is a computer science and artificial intelligence student at Purdue University (graduating May 2027) with a 3.93 GPA. He describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US. He builds AI systems, open-source tools, and products including google-tools-mcp.
+A: These days Karthik Thyagarajan's work centers on agent systems and memory. Most recently, as an AI Research Intern at Samsung Research America, he co-architected Samsung's always-on AI agent orchestrator, including the agent's long-term memory. Before that he did computer vision research at Memories.ai, his first startup role, building a memory framework for hours-long video. He also built google-tools-mcp, an open-source MCP server for agents, and co-founded buildpurdue. He is a computer science and artificial intelligence student at Purdue University (graduating May 2027), and describes himself as "an ideator, a builder, and a dreamer." He attended Thomas Jefferson High School for Science and Technology (TJHSST), one of the top STEM high schools in the US.
 
 Q: What is Karthik's favorite project?
 A: Karthik's favorite project is Repple. He loves that he built an app with real users that solves a real need: a sense of community and friendly competition at the gym.
