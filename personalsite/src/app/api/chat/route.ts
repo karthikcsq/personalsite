@@ -437,7 +437,7 @@ Rules:
 - Query 3 emphasizes outcomes, themes, beliefs, constraints, and adjacent evidence that may answer the broader intent.
 - Each query is one or two confident plain-prose declarative sentences. No question marks, hedging, or "I think".
 - Make the three queries meaningfully different. Do not produce paraphrases.
-- Resolve pronouns ("that", "his latest") using recent conversation context.
+- Resolve pronouns ("that", "his latest") using recent conversation context. When the latest question names its own subject, including Karthik himself, write queries for that subject and ignore the earlier topic.
 - When the question uses general or category-level wording, name specific entities, places, projects, or activities you can plausibly infer about Karthik. Bridging vocabulary from general to specific is the entire point.
 - Do NOT invent specific facts you'd be embarrassed to be wrong about — exact dates, company names you've never heard of, named partners. If unsure, stay topical but vague ("Karthik has worked on several research projects").
 - Output only the JSON object required by the schema.`

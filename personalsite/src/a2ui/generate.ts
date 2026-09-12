@@ -106,7 +106,8 @@ const HARD_CONSTRAINTS = `HARD CONSTRAINTS (override every other rule below):
 5. NO TRAINING-DATA INFERENCE. Your prior knowledge of Karthik is off-limit. The supplied sources are the only ground truth.
 6. NAMED ENTITIES. Never name a specific technology, framework, library, company, or project unless that exact name appears in the sources. Do not guess a tech stack ("LangChain", "RAG", "vector DB") from general AI knowledge.
 7. THIRD PERSON. Speak as someone who knows him ("Karthik has...", "He built...", "His work includes...").
-8. NO META. Never reference retrieval, "the context", "the sources", "the docs", "what's available", or any variant. State facts directly.`;
+8. NO META. Never reference retrieval, "the context", "the sources", "the docs", "what's available", or any variant. State facts directly.
+9. LATEST QUESTION. EARLIER IN THIS CONVERSATION is history, not the topic. Answer only the QUESTION. Use history to resolve pronouns and follow-ups that lean on it ("what about his internship?", "tell me more"). When the latest question names its own subject, including Karthik himself, answer that subject from scratch. Never repeat an earlier answer.`;
 
 const STYLE_RULES = `STYLE RULES (follow strictly):
 - Never use em dashes (U+2014). Replace with commas, a colon, a semicolon, or two sentences.
@@ -335,6 +336,24 @@ ${STYLE_RULES}
 Return only the schema-compliant A2UI document.`;
 }
 
+/** Earlier turns as labeled history inside the prompt. Sent as separate chat
+ * messages, the previous question read as the one still to answer, so a
+ * follow-up like "tell me about karthik" came back as a copy of the answer
+ * before it. */
+function formatEarlierTurns(
+  conversation: A2UIGenerationMessage[] | undefined,
+): string {
+  return (conversation ?? [])
+    .filter((message) => message.role !== "system")
+    .slice(-6, -1)
+    .map((message) => {
+      const text = message.content.replace(/\s+/g, " ").trim();
+      const clipped = text.length > 500 ? `${text.slice(0, 500)}…` : text;
+      return `${message.role === "user" ? "Visitor" : "Answer"}: ${clipped}`;
+    })
+    .join("\n");
+}
+
 function buildUserPrompt(options: {
   question: string;
   context: string;
@@ -357,7 +376,10 @@ function buildUserPrompt(options: {
         .join("\n\n")
     : "(none)";
 
-  return `QUESTION
+  return `EARLIER IN THIS CONVERSATION (history only; use it to resolve references in the QUESTION)
+${options.earlierTurns || "(none)"}
+
+QUESTION (the visitor's latest message; the document answers this)
 ${options.question}
 
 CONTEXT (retrieved source material, authoritative)
@@ -500,6 +522,8 @@ export async function generateA2UI(
     sources,
     galleryDirectory: galleryCategoryPromptDirectory(galleryCategories),
     datedWorkOrder,
+    impactRanking,
+    earlierTurns: formatEarlierTurns(conversation),
   });
 
   let lastDocument: A2UIDocument | undefined;
@@ -507,11 +531,6 @@ export async function generateA2UI(
   let raw = "";
 
   try {
-    const priorTurns = (conversation ?? [])
-      .filter((message) => message.role !== "system")
-      .slice(-6, -1)
-      .map((message) => ({ role: message.role, content: message.content }));
-
     const stream = await llm.chat.completions.create({
       model: MODEL_CONFIG.a2uiModel,
       // Gemini accepts "minimal"; the OpenAI SDK's types predate it.
@@ -523,7 +542,6 @@ export async function generateA2UI(
       response_format: A2UI_GENERATION_RESPONSE_FORMAT,
       messages: [
         { role: "system", content: systemPrompt },
-        ...(priorTurns as { role: "user" | "assistant"; content: string }[]),
         { role: "user", content: userPrompt },
       ],
     });
