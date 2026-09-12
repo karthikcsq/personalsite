@@ -1,5 +1,46 @@
 [
   {
+    "id": "parm",
+    "title": "PARM",
+    "date": "Jun 2026",
+    "description": "A causal benchmark for when an AI agent should use personal memory mid-workflow. An agent works through a seeded tool environment, a late tool result makes one memory actionable, and PARM scores whether the agent retrieves that memory before it acts and stays silent when the cue is removed. 157 frozen scenarios, 471 executable cases, and deterministic scoring with no LLM judge.",
+    "ragNarrative": "PARM is a causal benchmark suite Karthik built for testing when an AI agent should use personal memory during a real workflow. It asks whether an agent can recognize when a late observation makes a specific memory actionable, retrieve it before the action it governs, and stay silent when the cue is removed. Prompt-time retrieval cannot see a cue that only arrives in a late tool result, and naively searching the whole observation floods the agent with unrelated personal context.\n\nKey details:\n- Every scenario is a causal triplet: a positive case where a late cue makes a memory relevant, a cue-ablated control with the cue removed, and a memory-included ceiling that confirms the intended action is achievable\n- PARMBench v1 calibration batch: 157 frozen base scenarios, 471 executable cases, and 140 persona-isolated histories; the final frozen replay passes 157 of 157 scenario contracts\n- Retrieval-agnostic: the benchmark supplies raw history and a causal contract, not a preferred memory store\n- PARMBench Workflows, the primary track, scores multi-step tool trajectories from the final environment state, timely memory admission, and intervention restraint, without an LLM judge. It currently validates 18 deterministic cases\n- On the 54-case Amara development suite, PARM V5 made 30 of 36 correct positive and control decisions, against 18 of 36 for the strongest comparison conditions (no memory, all-entity output RAG, and naive output RAG). PARM admitted 15 gold sources with 6 spurious admissions, while all-entity output RAG admitted 16 gold sources with 1,361 spurious ones. This is a development result, not a held-out claim\n- Data, manifests, retrieval artifacts, and results are versioned so every claim can be replayed\n- Apache 2.0 licensed",
+    "tools": "Python, TypeScript, OpenAI API",
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/karthikcsq/parm",
+        "type": "github"
+      }
+    ],
+    "display": {}
+  },
+  {
+    "id": "gantry",
+    "title": "gantry",
+    "date": "May 2026",
+    "description": "A coding-agent skill for Claude Code, Codex, and other .agents hosts that keeps engineers in the design loop while AI writes the code. Code generation is gated behind collaborative pseudocode the engineer must approve, and every decision is kept in a .gantry doc. Forward, continue, and rebuild modes cover new code, revisited designs, and auditing existing code. MIT licensed.",
+    "ragNarrative": "gantry is an open-source coding-agent skill package Karthik built for Claude Code, Codex, and generic .agents-compatible hosts. Its goal is to keep engineers in the design loop while AI writes the code, so the code stays comprehensible to its author and to onboarders months later.\n\nKey details:\n- One primitive: collaborative pseudocode with a hard approval gate before any code is written. The gate fails closed until the engineer has reviewed the current pseudocode and separately authorized implementation; a passing format check never counts as approval\n- Routes to one of three modes by inspecting the working tree. Forward mode authors something new from pseudocode the engineer writes or has the AI draft, with references resolved and edge cases surfaced inline. Continue mode drift-checks an existing .gantry doc against the current code before extending it. Rebuild mode runs the primitive in reverse: the engineer writes pseudocode of what they think a function does, and the mismatches with the real body expose gaps in their mental model\n- The .gantry/<slug>.md doc is the source of truth: what was decided, which edge cases were surfaced, what was accepted, edited, or rejected and why, and the code as written\n- Guidance levels (guided, collaborative, concise) change how much explanation it gives without changing the approval gate\n- Ships a browser editor for drafting and reviewing docs\n- No build step and no npm dependencies: two skill folders backed by Node's standard library, with bash and PowerShell installers\n- MIT licensed",
+    "tools": "JavaScript, Node.js, Shell, PowerShell, Claude Code, Codex",
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/karthikcsq/gantry",
+        "type": "github"
+      }
+    ],
+    "display": {
+      "images": [
+        {
+          "src": "/gantry-editor.png",
+          "alt": "gantry's browser editor reviewing AI-drafted pseudocode: two accepted steps and an open fork between holding streamed prose back on the server or keeping placed cards on the client",
+          "width": 1400,
+          "height": 1000
+        }
+      ]
+    }
+  },
+  {
     "id": "repple",
     "title": "Repple",
     "date": "Nov 2025 - Jun 2026",
