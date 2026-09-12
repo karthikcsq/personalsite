@@ -7,6 +7,11 @@ import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
 import { resolveTopic } from "@/utils/topicsUtils";
 import { projects as projectsCatalog } from "@/data/projectsData";
 import { getCorpusForArtifact } from "@/utils/quotesUtils";
+import {
+  formatImpactRanking,
+  getImpactFocus,
+  getImpactRanking,
+} from "@/utils/impactUtils";
 import { checkChatRateLimit, getClientIdentifier } from "@/utils/rateLimit";
 import { generateA2UI, type A2UIGenerationSource } from "@/a2ui/generate";
 import { artifactDateRank } from "@/a2ui/surface";
@@ -629,6 +634,11 @@ export async function POST(req: NextRequest) {
               })),
               galleryCategories: await loadGalleryCategoryDirectory().catch(() => []),
               datedWorkOrder: "Use the dates in the cached context.",
+              impactRanking: formatImpactRanking(
+                getImpactRanking(),
+                new Set(cachedArtifacts.map((artifact) => artifact.id)),
+                getImpactFocus(),
+              ),
               hydrate: (id, annotation) => {
                 const artifact = cachedArtifacts.find(candidate => candidate.id === id);
                 return artifact ? { ...artifact, annotation } : null;
@@ -1155,6 +1165,13 @@ ${galleryCategoryPromptDirectory(galleryCategories)}`,
     const QUOTE_SOURCE_LIMIT = 5;
     const QUOTE_SOURCE_CHARS = 3500;
     const directoryIds = new Set(rawEntries.map((entry) => entry.id));
+    // Retrieval decides what the answer can draw on; the ranking decides what
+    // a broad answer leads with.
+    const impactRanking = formatImpactRanking(
+      getImpactRanking(),
+      directoryIds,
+      getImpactFocus(),
+    );
     const quoteCandidateIds: string[] = [];
     const considerQuoteCandidate = (id: string) => {
       if (!directoryIds.has(id) || quoteCandidateIds.includes(id)) return;
@@ -1252,6 +1269,7 @@ ${galleryCategoryPromptDirectory(galleryCategories)}`,
             sources: generationSources,
             galleryCategories,
             datedWorkOrder,
+            impactRanking,
             conversation: routingConversationHistory,
             hydrate: (id, annotation) => hydrateArtifactById(id, retrievedBlogs, annotation),
             onUsage: recordUsage,

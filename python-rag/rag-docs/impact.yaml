@@ -1,0 +1,73 @@
+# What my work says about me now, most representative first.
+#
+# The chat reads this on every question. A broad question ("who is Karthik?",
+# "what's his best work?") frames me around `focus` and builds its answer from
+# the top tiers instead of from whatever vector search happened to match. A
+# focused question uses it only to choose between equally relevant items.
+#
+# Private: the site never renders this file, and create-pinecone.py ignores
+# these keys, so nothing here is embedded. Reorder freely. Order inside a tier
+# is rank order.
+#
+# Tiers:
+#   flagship    lead any broad answer about me
+#   strong      supports a broad answer
+#   supporting  featured only when the question points at it
+#   early       featured only when someone asks about it or that era
+#
+# `id` must match the chat's artifact id: work:<company in the truth YAML>,
+# project:<id in src/data/projects.json>, involvement:<slug in involvement.yaml>.
+# Every work, project, and involvement entry must appear exactly once; a test
+# enforces it. `focus` and `why` are stated as fact in answers, so keep them to
+# things that are true.
+
+focus: "These days Karthik's work centers on agent systems and memory."
+
+impact:
+  - tier: flagship
+    entries:
+      - id: "work:Samsung Research America"
+        why: "Co-architected Samsung's always-on AI agent orchestrator, owning half of a 25+ module runtime that ships on XR glasses, including the agent's long-term memory, model routing, and safety layers."
+      - id: "work:Memories.ai"
+        why: "His first startup role, doing real computer vision research: built a memory framework that lets vision language models work over hours-long video, indexing 10K+ streams for multimodal search."
+      - id: "project:parm"
+        why: "Built PARM, a causal benchmark for whether an AI agent uses personal memory only once a late tool result makes it relevant, with 157 frozen scenarios and 471 executable cases; on its development suite, PARM's retrieval policy made 30 of 36 correct decisions against 18 for the strongest baselines."
+      - id: "project:google-tools-mcp"
+        why: "Open-source MCP server on npm that lets agents operate an entire Google Workspace, with 169 tools behind a single OAuth flow."
+      - id: "involvement:buildpurdue"
+        why: "Co-founded and co-leads buildpurdue, a founder-led community for student builders at Purdue supporting 15 student startups with partnerships across 4 VC firms, and led the build of its operating platform."
+      - id: "work:Peraton Labs"
+        why: "Built a first-of-its-kind reinforcement learning agent for IoT malware detection in a classified defense research environment, raising detection coverage 25% across 500K+ daily device events."
+
+  - tier: strong
+    entries:
+      - id: "project:gantry"
+        why: "Open-source coding-agent skill for Claude Code and Codex that gates code generation behind collaborative pseudocode the engineer must approve first."
+      - id: "project:caladrius"
+        why: "Won 2nd place in HackGT 12's social impact track with a multi-agent LangGraph triage assistant reaching 85% triage accuracy."
+      - id: "project:veritas"
+        why: "Won Best Proof-of-Human Application at Catapult 2026 with a clinical research platform that filters fraudulent trial participants."
+      - id: "work:AgRPA"
+        why: "Fine-tuned drone-imagery weed detection to 92% accuracy, cutting herbicide use 60% and saving $150K a year."
+      - id: "project:qkd"
+        why: "Built a photonic quantum key distribution prototype and published the work on arXiv."
+
+  - tier: supporting
+    entries:
+      - id: "project:repple"
+        why: "Past work, Nov 2025 to Jun 2026: co-founded Repple, a competitive fitness iOS app live on the App Store, and built its entire backend."
+      - id: "work:IDEAS Lab"
+        why: "Built a real-time SLAM pipeline and NeRF reconstructions for robot navigation, improving 3D reconstruction accuracy 25%."
+      - id: "work:Naval Research Laboratory"
+        why: "ML apprenticeship the summer after high school, applying deep learning to underwater acoustics and building a fully local RAG system for classified documents."
+      - id: "project:verbatim"
+        why: "Video localization platform combining transcription, translation, voice cloning, and lip-sync that processed 500+ videos."
+
+  - tier: early
+    entries:
+      - id: "project:formulator"
+        why: "Computer vision app that gives instant feedback on body movement through pose estimation."
+      - id: "project:kmeans-som"
+        why: "Compared self-organizing maps against k-means for capturing structure in data."
+      - id: "project:quantum-racer"
+        why: "High school Android game teaching quantum decoherence, shared with 100+ students through workshops."
