@@ -9310,11 +9310,100 @@ button:hover .itemSourceCue svg {
   to { opacity: 1; }
 }
 
-.motionToggle {
+/* Top-right cluster: section menu + ambient-motion toggle. */
+.topActions {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionsMenu {
+  position: relative;
+}
+
+.sectionsTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: var(--a2ui-bg);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  font-size: 12.5px;
+  line-height: 1;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.sectionsTrigger svg { width: 14px; height: 14px; }
+.sectionsTrigger:hover,
+.sectionsTrigger[aria-expanded="true"] { color: var(--a2ui-green); border-color: var(--a2ui-green); }
+.sectionsTrigger:focus-visible { outline: 2px solid var(--a2ui-green); outline-offset: 3px; }
+
+.sectionsPanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 196px;
+  padding: 12px 6px 6px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: var(--a2ui-card);
+  box-shadow: var(--shadow-soft);
+  animation: sectionsPanelIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sectionsPanel > span {
+  display: block;
+  padding: 0 10px 8px;
+  color: var(--color-ink-subtle);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sectionsPanel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sectionsPanel a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--color-ink);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+.sectionsPanel a:hover,
+.sectionsPanel a:focus-visible { background: var(--color-surface-muted); outline: none; }
+.sectionsPanel a small {
+  color: var(--color-ink-faint);
+  font-size: 12px;
+}
+
+@keyframes sectionsPanelIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .sectionsTrigger { width: 36px; padding: 0; justify-content: center; }
+  .sectionsTrigger > span { display: none; }
+}
+
+.motionToggle {
   display: grid;
   place-items: center;
   width: 36px;

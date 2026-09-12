@@ -56,6 +56,8 @@ export function BoardPiece({
       <Link
         id={anchorId}
         href={piece.navigationPath}
+        target="_blank"
+        rel="noopener"
         className={styles.piece}
         data-piece-key={piece.key}
         data-kind="link"

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/work", label: "Work" },
   { href: "/projects", label: "Projects" },
   { href: "/involvement", label: "Involvement" },

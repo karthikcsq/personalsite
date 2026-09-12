@@ -4,9 +4,9 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { normalizeA2UIPath } from "@/a2ui/protocol";
 
-/** Shared A2UI prose renderer. Internal portfolio paths become client-side
- * links, unknown absolute paths render as plain text, and anything external
- * opens in a new tab. */
+/** Shared A2UI prose renderer. Internal portfolio paths become links, unknown
+ * absolute paths render as plain text. Every link opens in a new tab so the
+ * in-memory conversation survives. */
 export function Markdown({
   children,
   className,
@@ -21,7 +21,11 @@ export function Markdown({
           a: ({ href, children, ...props }) => {
             const internalPath = href ? normalizeA2UIPath(href) : null;
             if (internalPath) {
-              return <Link href={internalPath}>{children}</Link>;
+              return (
+                <Link href={internalPath} target="_blank" rel="noopener">
+                  {children}
+                </Link>
+              );
             }
             if (href?.startsWith("/")) return <span>{children}</span>;
             return (

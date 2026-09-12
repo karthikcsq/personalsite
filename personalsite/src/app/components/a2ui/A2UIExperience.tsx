@@ -10,7 +10,6 @@ import {
 } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   AnimatePresence,
   motion,
@@ -32,6 +31,7 @@ import {
   X,
 } from "lucide-react";
 import type { Artifact } from "@/app/components/ChatArtifact";
+import SectionsMenu from "@/app/components/a2ui/SectionsMenu";
 import {
   A2UI_VISUAL_ASSETS,
   galleryCategoryFromAssetId,
@@ -244,17 +244,20 @@ export function A2UIExperience({
         <History aria-hidden="true" />
       </button>
 
-      {!reduceMotion ? (
-        <button
-          type="button"
-          className={styles.motionToggle}
-          aria-label={motionPaused ? "Resume ambient motion" : "Pause ambient motion"}
-          aria-pressed={motionPaused}
-          onClick={() => setMotionPaused((paused) => !paused)}
-        >
-          {motionPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-        </button>
-      ) : null}
+      <div className={styles.topActions}>
+        <SectionsMenu />
+        {!reduceMotion ? (
+          <button
+            type="button"
+            className={styles.motionToggle}
+            aria-label={motionPaused ? "Resume ambient motion" : "Pause ambient motion"}
+            aria-pressed={motionPaused}
+            onClick={() => setMotionPaused((paused) => !paused)}
+          >
+            {motionPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+          </button>
+        ) : null}
+      </div>
 
       {historyOpen ? (
         <MobileHistory
@@ -316,6 +319,12 @@ export function A2UIExperience({
   );
 }
 
+// The conversation lives only in memory, so anything the answer links to opens
+// in a new tab instead of navigating away and discarding the thread.
+function openInNewTab(path: string) {
+  window.open(path, "_blank", "noopener");
+}
+
 // Stable DOM nodes let streaming updates leave existing entrance animations alone.
 function SceneTitle({ children }: { children: string }) {
   return (
@@ -359,7 +368,6 @@ function A2UICanvas({
   renderer: A2UIRenderer;
   onAsk: (prompt: string) => void;
 }) {
-  const router = useRouter();
   const compositionRef = useRef<A2UIComposition | null>(null);
   const sceneRef = useSceneChoreography(uiDocument?.presentationSeed ?? compositionTurn, Boolean(uiDocument), motionPaused);
   const artifactMap = useMemo(
@@ -397,11 +405,11 @@ function A2UICanvas({
     }
     if (action.intent === "open_artifact") {
       const path = artifactPath(action.payload);
-      if (path) router.push(path);
+      if (path) openInNewTab(path);
       return;
     }
     if (action.intent === "open_path") {
-      router.push(action.payload);
+      openInNewTab(action.payload);
       return;
     }
     if (action.intent === "focus_component") {
@@ -420,7 +428,7 @@ function A2UICanvas({
   const presentationSeed = uiDocument.presentationSeed ?? compositionTurn;
   const openArtifact = (id: string) => {
     const path = artifactPath(id);
-    if (path) router.push(path);
+    if (path) openInNewTab(path);
   };
 
   if (renderer === "board") {
@@ -687,7 +695,7 @@ function A2UICanvas({
             artifactMap={artifactMap}
             onOpen={(id) => {
               const path = artifactPath(id);
-              if (path) router.push(path);
+              if (path) openInNewTab(path);
             }}
           />
         </div>
@@ -710,7 +718,7 @@ function A2UICanvas({
                 artifactMap={artifactMap}
                 onOpen={(id) => {
                   const path = artifactPath(id);
-                  if (path) router.push(path);
+                  if (path) openInNewTab(path);
                 }}
               />
             ))}
@@ -724,7 +732,7 @@ function A2UICanvas({
               artifactMap={artifactMap}
               onOpen={(id) => {
                 const path = artifactPath(id);
-                if (path) router.push(path);
+                if (path) openInNewTab(path);
               }}
             />
           </div>
@@ -799,6 +807,8 @@ function A2UIBlock({
       <Link
         id={`a2ui-${component.id}`}
         href={navigationPath}
+        target="_blank"
+        rel="noopener"
         className={styles.navigationComponent}
         data-variant={visualVariant}
         data-arrangement={arrangement}
