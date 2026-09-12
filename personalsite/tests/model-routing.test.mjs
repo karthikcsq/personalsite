@@ -145,10 +145,10 @@ test("usage summaries preserve cached and generated token totals", () => {
 
 test("host-authored suggestions normalize safely and gate reply caching", () => {
   assert.equal(
-    normalizeSuggestedQuestion("  What's Caladrius??? "),
-    "what's caladrius",
+    normalizeSuggestedQuestion("  What’s his take on MCP??? "),
+    "what's his take on mcp",
   );
-  assert.equal(isHostSuggestedQuestion("What's Caladrius?"), true);
+  assert.equal(isHostSuggestedQuestion("What's his take on MCP?"), true);
   assert.equal(isHostSuggestedQuestion("Tell me a joke"), false);
 });
 
@@ -160,18 +160,18 @@ test("rewrite and suggested reply caches round-trip without freezing A2UI", asyn
   await setRewriteCache(rewriteQuestion, rewrites);
   assert.deepEqual(await getRewriteCache(rewriteQuestion), rewrites);
 
-  await setSuggestedReplyCache("What's Caladrius?", {
-    reply: "Caladrius is a privacy-first hospital triage assistant.",
+  await setSuggestedReplyCache("What is PARM?", {
+    reply: "PARM is a causal benchmark for output-conditioned agent memory.",
     artifacts: [
       {
         kind: "project",
-        id: "project:caladrius",
-        data: { title: "Caladrius" },
+        id: "project:parm",
+        data: { title: "PARM" },
       },
     ],
   });
-  const cached = await getSuggestedReplyCache("What's Caladrius?");
-  assert.equal(cached?.reply.includes("privacy-first"), true);
+  const cached = await getSuggestedReplyCache("What is PARM?");
+  assert.equal(cached?.reply.includes("causal benchmark"), true);
   assert.equal("a2ui" in (cached || {}), false);
 
   await setSuggestedReplyCache("Tell me a joke", {

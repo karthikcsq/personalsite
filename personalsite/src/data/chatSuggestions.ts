@@ -7,21 +7,45 @@ export type ChatSuggestion = {
 
 export const CHAT_SUGGESTIONS: readonly ChatSuggestion[] = [
   { text: "What is Karthik building right now?", tags: ["work"] },
+  {
+    text: "What did he build at Samsung Research America?",
+    tags: ["work"],
+  },
+  { text: "What did he work on at Memories.ai?", tags: ["work"] },
+  { text: "What is PARM?", tags: ["work"] },
+  { text: "What is gantry?", tags: ["work"] },
+  { text: "What is google-tools-mcp?", tags: ["work"] },
+  { text: "What did he do at Peraton Labs?", tags: ["work"] },
   { text: "Where has he worked?", tags: ["work"] },
   { text: "Show me his research.", tags: ["work"] },
-  { text: "Tell me about Repple.", tags: ["work"] },
-  { text: "What is google-tools-mcp?", tags: ["work"] },
   { text: "Which hackathons has he won?", tags: ["work"] },
-  { text: "Tell me about buildpurdue.", tags: ["work"] },
-  { text: "What did he do at Peraton Labs?", tags: ["work"] },
-  { text: "What's Veritas?", tags: ["work"] },
-  { text: "What's Caladrius?", tags: ["work"] },
-  { text: "What did he build at the Naval Research Lab?", tags: ["work"] },
-  { text: "Has he done quantum computing research?", tags: ["work"] },
-  { text: "What tools does he use to build?", tags: ["work"] },
-  { text: "Show me his favorite project.", tags: ["work", "opinions"] },
+  {
+    text: "What does he do at buildpurdue?",
+    tags: ["opinions", "work"],
+  },
+  {
+    text: "Why did he co-found buildpurdue?",
+    tags: ["opinions", "work"],
+  },
+  {
+    text: "When is an agent actually worth building?",
+    tags: ["opinions"],
+  },
+  { text: "What's overhyped about agents?", tags: ["opinions"] },
+  {
+    text: "Why hasn't ambient AI happened yet?",
+    tags: ["opinions", "work"],
+  },
+  {
+    text: "Why isn't long context enough for hours-long video?",
+    tags: ["opinions"],
+  },
   { text: "What's his take on MCP?", tags: ["opinions"] },
-  { text: "What does he write about?", tags: ["opinions"] },
+  {
+    text: "Why can't agents book a restaurant yet?",
+    tags: ["opinions"],
+  },
+  { text: "Where doesn't AI belong?", tags: ["opinions"] },
   {
     text: "What's his view on the future of AI work?",
     tags: ["opinions"],
@@ -32,22 +56,7 @@ export const CHAT_SUGGESTIONS: readonly ChatSuggestion[] = [
     text: "What makes a great engineer in his view?",
     tags: ["opinions"],
   },
-  {
-    text: "What does he think about quantum computing?",
-    tags: ["opinions"],
-  },
-  {
-    text: "Why did he co-found buildpurdue?",
-    tags: ["opinions", "work"],
-  },
-  {
-    text: "What does he do at buildpurdue?",
-    tags: ["opinions", "work"],
-  },
-  {
-    text: "Why can't agents book a restaurant yet?",
-    tags: ["opinions"],
-  },
+  { text: "What does he write about?", tags: ["opinions"] },
   { text: "How did he get into AI?", tags: ["life"] },
   { text: "Where did he grow up?", tags: ["life"] },
   { text: "Tell me about his time at TJHSST.", tags: ["life"] },
