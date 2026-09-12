@@ -210,6 +210,19 @@ test("navigation components stay one clickable piece with their link intact", ()
   assert.equal(link.body, "The rest of the work lives on his projects page.");
 });
 
+test("a navigation component with no title or body never becomes an empty link card", () => {
+  const board = buildBoard(
+    document({
+      supporting: [component({ id: "more" })],
+      actions: [{ label: "See his projects", intent: "open_path", payload: "/projects" }],
+    }),
+    [],
+    SEED,
+  );
+
+  assert.equal(board.pieces.some((piece) => piece.componentId === "more"), false);
+});
+
 test("unclaimed sources become board source tags instead of vanishing", () => {
   const board = buildBoard(
     document({

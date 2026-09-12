@@ -1,5 +1,5 @@
 import type OpenAI from "openai";
-import { readCompletedA2UI } from "./streaming";
+import { readA2UIStream, withSettledProse } from "./streaming";
 import { a2uiVisualAssetPromptDirectory } from "./assetCatalog";
 import {
   A2UI_GENERATION_RESPONSE_FORMAT,
@@ -515,20 +515,24 @@ export async function generateA2UI(
     for await (const chunk of stream) {
       if (chunk.usage) finalUsage = chunk.usage;
       raw += chunk.choices[0]?.delta?.content ?? "";
-      const completed = readCompletedA2UI(raw);
+      const completed = readA2UIStream(raw);
       if (!completed) continue;
-      const partial = build(completed);
+      const partial = build(completed.document);
       // Never flash a primary that does not yet carry an answer.
       if (!hasAnswerBearingPrimary(partial.document)) continue;
+      // Publish only prose no later slot can clear, so the board never places a
+      // note and then takes it away. A truncated stream still keeps it all.
+      const visible = withSettledProse(partial.document, completed.progress);
       const signature = JSON.stringify([
-        partial.document.primary,
-        partial.document.supporting,
+        visible.lead,
+        visible.primary,
+        visible.supporting,
       ]);
       if (signature === emittedSignature) continue;
       emittedSignature = signature;
       lastDocument = partial.document;
       lastArtifacts = partial.artifacts;
-      onPartial?.(partial.document, partial.artifacts);
+      onPartial?.(visible, partial.artifacts);
     }
     const usage = toUsageRecord(
       "a2ui_generate",

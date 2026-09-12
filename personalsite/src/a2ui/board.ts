@@ -272,8 +272,13 @@ function componentDrafts(
     quoteDrafts[0].eyebrow = component.title;
   }
 
+  // A link needs something to say where it goes. When point ownership has
+  // cleared both the title and body, the action row still carries the path.
   let notePiece: BoardPieceDraft | undefined;
-  if (!quoteOwnsHeading && (component.body.trim() || navigationPath)) {
+  if (
+    !quoteOwnsHeading &&
+    (component.body.trim() || (navigationPath && component.title.trim()))
+  ) {
     notePiece = emptyDraft(
       key("note"),
       navigationPath ? "link" : "note",

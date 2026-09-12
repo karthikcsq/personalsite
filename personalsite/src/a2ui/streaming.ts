@@ -1,3 +1,9 @@
+import {
+  componentNavigationPath,
+  type A2UIComponent,
+  type A2UIDocument,
+} from "./protocol.ts";
+
 /** Extract only fully closed JSON values. Delimiters inside strings, escaped
  * quotes and chunk boundaries never turn incomplete components into UI. */
 function valueEnd(text: string, start: number): number | null {
@@ -103,8 +109,35 @@ const componentArrays = new Set(["items", "options"]);
  * artifact id or quote is invisible until it is whole.
  */
 export function readCompletedA2UI(buffer: string): Record<string, unknown> | null {
+  return readA2UIStream(buffer)?.document ?? null;
+}
+
+/** How much of the document's structure has closed. Sanitizing judges each
+ * slot against the slots that outrank it, so a slot is final only once nothing
+ * that could outrank it can still arrive. */
+export type A2UIStreamProgress = {
+  /** The primary component is still being written. */
+  primaryOpen: boolean;
+  /** The last published supporting component is still being written. */
+  lastSupportingOpen: boolean;
+  /** Further supporting components may still arrive. */
+  supportingOpen: boolean;
+  /** Actions, the document's last field, are still being written. */
+  actionsOpen: boolean;
+};
+
+/** `readCompletedA2UI`, plus which parts of the document have closed. */
+export function readA2UIStream(
+  buffer: string,
+): { document: Record<string, unknown>; progress: A2UIStreamProgress } | null {
   if (buffer.length > 100_000) return null;
   const doc: Record<string, unknown> = Object.create(null);
+  const progress: A2UIStreamProgress = {
+    primaryOpen: true,
+    lastSupportingOpen: false,
+    supportingOpen: true,
+    actionsOpen: true,
+  };
   let pos = 0;
   const skip = () => { while (/\s/.test(buffer[pos] ?? "") && pos < buffer.length) pos++; };
   skip();
@@ -112,7 +145,10 @@ export function readCompletedA2UI(buffer: string): Record<string, unknown> | nul
   try {
     while (pos < buffer.length) {
       skip();
-      if (buffer[pos] === "}") break;
+      if (buffer[pos] === "}") {
+        Object.assign(progress, { primaryOpen: false, supportingOpen: false, actionsOpen: false });
+        break;
+      }
       const keyEnd = valueEnd(buffer, pos);
       if (buffer[pos] !== '"' || keyEnd === null) break;
       const key = JSON.parse(buffer.slice(pos, keyEnd)) as string;
@@ -133,7 +169,10 @@ export function readCompletedA2UI(buffer: string): Record<string, unknown> | nul
             const itemEnd = valueEnd(buffer, pos);
             if (itemEnd === null) {
               const open = readOpenObject(buffer, pos, new Set(), componentArrays);
-              if (open && typeof open.type === "string" && typeof open.body === "string" && (open.type !== "quote_focus" || Array.isArray(open.quoteIds)) && open.type !== "navigation") supporting.push(open);
+              if (open && typeof open.type === "string" && typeof open.body === "string" && (open.type !== "quote_focus" || Array.isArray(open.quoteIds)) && open.type !== "navigation") {
+                supporting.push(open);
+                progress.lastSupportingOpen = true;
+              }
               break;
             }
             supporting.push(JSON.parse(buffer.slice(pos, itemEnd)));
@@ -147,13 +186,57 @@ export function readCompletedA2UI(buffer: string): Record<string, unknown> | nul
       }
       const value: unknown = JSON.parse(buffer.slice(pos, end));
       if (fields.has(key)) doc[key] = value;
+      if (key === "primary") progress.primaryOpen = false;
+      if (key === "supporting") progress.supportingOpen = false;
+      if (key === "actions") progress.actionsOpen = false;
       pos = end; skip();
       if (buffer[pos] !== ",") break;
       pos++;
     }
   } catch { return null; }
   if (!doc.primary || typeof doc.primary !== "object" || Array.isArray(doc.primary)) return null;
-  return { ...doc, supporting: doc.supporting ?? [], actions: doc.actions ?? [] };
+  return {
+    document: { ...doc, supporting: doc.supporting ?? [], actions: doc.actions ?? [] },
+    progress,
+  };
+}
+
+/**
+ * Hold back prose that a slot still being written could clear.
+ *
+ * Point ownership ranks a component's items above its body and title, and the
+ * lead below every component, but the model writes the lead and each title and
+ * body before those higher slots. Publishing that prose early put a note on the
+ * board that a later update then took away. Prose is published once nothing
+ * that outranks it can still arrive: a component's title and body when the
+ * component closes, the lead when the last component closes, and a bare
+ * narrative note, which turns into a link card once an action names its
+ * section, when the actions close. Items and options are never held back.
+ */
+export function withSettledProse(
+  document: A2UIDocument,
+  progress: A2UIStreamProgress,
+): A2UIDocument {
+  const settle = (component: A2UIComponent, open: boolean): A2UIComponent => {
+    const awaitingLink =
+      progress.actionsOpen &&
+      component.type === "narrative" &&
+      component.items.length +
+        component.options.length +
+        component.artifactIds.length +
+        component.quoteIds.length === 0 &&
+      !componentNavigationPath(component, []);
+    return open || awaitingLink ? { ...component, title: "", body: "" } : component;
+  };
+  const last = document.supporting.length - 1;
+  return {
+    ...document,
+    lead: progress.supportingOpen ? "" : document.lead,
+    primary: settle(document.primary, progress.primaryOpen),
+    supporting: document.supporting.map((component, index) =>
+      settle(component, progress.lastSupportingOpen && index === last),
+    ),
+  };
 }
 
 export function stablePresentationSeed(previous: number | undefined, create: () => number): number {

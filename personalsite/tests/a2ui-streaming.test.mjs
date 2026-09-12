@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readCompletedA2UI, stablePresentationSeed } from '../src/a2ui/streaming.ts';
+import { readA2UIStream, readCompletedA2UI, stablePresentationSeed, withSettledProse } from '../src/a2ui/streaming.ts';
 
 const items = [
   { label: 'One', value: 'First fact', detail: 'nested [value]', artifactId: 'project:a', assetId: '' },
@@ -32,6 +32,43 @@ function assertNothingPartial(parsed) {
     }
   });
 }
+
+test('progress reports which components can still change', () => {
+  const at = (marker) => readA2UIStream(marker === undefined ? json : json.slice(0, json.indexOf(marker))).progress;
+  assert.deepEqual(at('"options"'), { primaryOpen: true, lastSupportingOpen: false, supportingOpen: true, actionsOpen: true });
+  assert.deepEqual(at('"items":[]},{"id":"b"'), { primaryOpen: false, lastSupportingOpen: true, supportingOpen: true, actionsOpen: true });
+  assert.deepEqual(at('{"id":"b"'), { primaryOpen: false, lastSupportingOpen: false, supportingOpen: true, actionsOpen: true });
+  assert.deepEqual(at('"actions"'), { primaryOpen: false, lastSupportingOpen: false, supportingOpen: false, actionsOpen: true });
+  assert.deepEqual(at(), { primaryOpen: false, lastSupportingOpen: false, supportingOpen: false, actionsOpen: false });
+});
+
+test('prose waits until nothing that outranks it can still arrive', () => {
+  const component = (over = {}) => ({ id: 'c', type: 'evidence_stack', title: 'Title', body: 'Body', items: [], options: [], artifactIds: [], quoteIds: [], ...over });
+  const sanitized = { version: '1.0', question: 'Q', title: 'Answer', lead: 'Lead', compositionOptions: [], primary: component({ items: [{ label: 'L', value: 'V', detail: '', artifactId: '', assetId: '' }] }), supporting: [component({ id: 's0' }), component({ id: 's1' })], actions: [] };
+  const closed = { primaryOpen: false, lastSupportingOpen: false, supportingOpen: false, actionsOpen: false };
+
+  const writingPrimary = withSettledProse(sanitized, { ...closed, primaryOpen: true, supportingOpen: true, actionsOpen: true });
+  assert.equal(writingPrimary.title, 'Answer');
+  assert.equal(writingPrimary.lead, '');
+  assert.deepEqual([writingPrimary.primary.title, writingPrimary.primary.body], ['', '']);
+  assert.equal(writingPrimary.primary.items.length, 1, 'items are never held back');
+
+  const writingSupport = withSettledProse(sanitized, { ...closed, lastSupportingOpen: true, supportingOpen: true, actionsOpen: true });
+  assert.equal(writingSupport.primary.body, 'Body');
+  assert.equal(writingSupport.supporting[0].body, 'Body');
+  assert.deepEqual([writingSupport.supporting[1].title, writingSupport.supporting[1].body], ['', '']);
+  assert.equal(writingSupport.lead, '');
+
+  const writingActions = { ...closed, actionsOpen: true };
+  assert.equal(withSettledProse(sanitized, writingActions).lead, 'Lead');
+
+  // A bare narrative becomes a link card once an action names its section.
+  const bare = { ...sanitized, primary: component({ type: 'narrative' }) };
+  assert.equal(withSettledProse(bare, writingActions).primary.body, '');
+  assert.equal(withSettledProse(bare, closed).primary.body, 'Body');
+  const linked = { ...sanitized, primary: component({ type: 'narrative', body: 'See [his work](/work).' }) };
+  assert.equal(withSettledProse(linked, writingActions).primary.body, 'See [his work](/work).');
+});
 
 test('a completed item is placed before the component around it closes', () => {
   const primaryEnd = json.indexOf(',"supporting"');

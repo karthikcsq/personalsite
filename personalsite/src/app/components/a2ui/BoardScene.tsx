@@ -36,7 +36,7 @@ export function BoardScene({
   const [theme] = useState(() =>
     (["linen", "folio", "cork"] as const)[mixPresentationSeed(seed, "board-material") % 3],
   );
-  const [visibleCount, setVisibleCount] = useState(0);
+  const [revealed, setRevealed] = useState<ReadonlySet<string>>(() => new Set());
   const [reduceMotion, setReduceMotion] = useState(false);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -47,19 +47,30 @@ export function BoardScene({
   }, []);
   // Pace actual, validated pieces rather than simulating model progress.
   // Streaming gaps remain honest; bursts are spread into a short placement rhythm.
+  // Reveal by key, not by count: a piece that settles late can land ahead of
+  // pieces already placed, and a count would push the last of them back off
+  // the board for a beat.
+  const nextKey = reduceMotion
+    ? undefined
+    : board.pieces.find((piece) => !revealed.has(piece.key))?.key;
   useEffect(() => {
-    if (visibleCount >= board.pieces.length) return;
-    if (reduceMotion) { setVisibleCount(board.pieces.length); return; }
-    const timer = window.setTimeout(() => setVisibleCount(count => count + 1), visibleCount === 0 ? 0 : 240);
+    if (!nextKey) return;
+    const timer = window.setTimeout(
+      () => setRevealed((current) => new Set(current).add(nextKey)),
+      revealed.size === 0 ? 0 : 240,
+    );
     return () => window.clearTimeout(timer);
-  }, [visibleCount, board.pieces.length, reduceMotion]);
+  }, [nextKey, revealed.size]);
   const visiblePieces = useMemo(
-    () => board.pieces.slice(0, visibleCount),
-    [board.pieces, visibleCount],
+    () =>
+      reduceMotion
+        ? board.pieces
+        : board.pieces.filter((piece) => revealed.has(piece.key)),
+    [board.pieces, revealed, reduceMotion],
   );
   const boardRef = useRef<HTMLDivElement>(null);
   useBoardPacking(boardRef, visiblePieces);
-  const assembling = isLoading || visibleCount < board.pieces.length;
+  const assembling = isLoading || Boolean(nextKey);
   const [galleryIndex, setGalleryIndex] = useState<Record<string, string[]>>({});
   const hasGallery = board.pieces.some(piece => Boolean(piece.galleryCategory));
 
