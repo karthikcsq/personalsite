@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateA2UIQuotes, isVerbatimQuote } from '../src/a2ui/quotes.ts';
-import { a2uiHistoryText } from '../src/a2ui/history.ts';
+import { validateA2UIQuotes, isVerbatimQuote, quoteFingerprint } from '../src/a2ui/quotes.ts';
+import { a2uiHistoryText, quotesAlreadyUsed } from '../src/a2ui/history.ts';
 import { sanitizeA2UIDocument, A2UI_GENERATION_RESPONSE_FORMAT } from '../src/a2ui/protocol.ts';
 import { readCompletedA2UI } from '../src/a2ui/streaming.ts';
 const primary={id:'answer',type:'narrative',title:'An answer',body:'Karthik builds systems that help people make useful decisions.',items:[],options:[],artifactIds:['project:real','project:invented'],quoteIds:[]};
@@ -11,6 +11,9 @@ const artifacts=[{id:'project:real',data:{title:'Real'},annotation:'“Useful sy
 test('generation schema puts complete quotes before components',()=>{const keys=Object.keys(A2UI_GENERATION_RESPONSE_FORMAT.json_schema.schema.properties);assert.ok(keys.indexOf('quotes')<keys.indexOf('primary'));const json=JSON.stringify(raw);const part=readCompletedA2UI(json.slice(0,json.indexOf(',"supporting"')));assert.deepEqual(part.quotes,raw.quotes)});
 test('stream sanitization never inserts a temporary quote or drops authored support',()=>{const first=sanitizeA2UIDocument({...raw,supporting:[]},'Why?','',artifacts,[],{autoQuote:false});const next=sanitizeA2UIDocument(raw,'Why?','',artifacts,[],{autoQuote:false});assert.deepEqual(first.supporting,[]);assert.deepEqual(first.primary,next.primary);assert.deepEqual(next.supporting.map(s=>s.id),['rationale']);assert.deepEqual(next.primary.artifactIds,['project:real'])});
 test('quotes reject fabricated text, unknown sources and reordered ellipsis fragments',()=>{const corpus='Useful systems help people make decisions. Careful experiments reveal what actually works.';assert.equal(isVerbatimQuote(corpus,'Useful systems help people…what actually works.'),true);assert.equal(isVerbatimQuote(corpus,'Careful experiments…Useful systems'),false);assert.equal(isVerbatimQuote(corpus,'Useful systems…fake'),false);const result=validateA2UIQuotes([{artifactId:'unknown',text:'Useful systems help people make decisions.'},{artifactId:'real',text:'This is fabricated text.'},{artifactId:'real',text:'Useful systems help people make decisions.'}],()=>corpus,new Set(['real']));assert.equal(result.size,1);assert.ok(result.get('real').includes('Useful systems'))});
+test('a quote an earlier turn already pinned is rejected, a fresh one is not',()=>{const corpus='Useful systems help people make decisions. Careful experiments reveal what actually works.';const used=new Set([quoteFingerprint('“Useful systems help people make decisions.”')]);assert.equal(validateA2UIQuotes([{artifactId:'real',text:'Useful systems help people make decisions.'}],()=>corpus,new Set(['real']),3,used).size,0);assert.equal(validateA2UIQuotes([{artifactId:'real',text:'Careful experiments reveal what actually works.'}],()=>corpus,new Set(['real']),3,used).size,1)});
+test('the quotes written into history are the ones read back out of it',()=>{const doc=sanitizeA2UIDocument(raw,'Why?','',artifacts,[],{autoQuote:false});const text=a2uiHistoryText(doc,artifacts);assert.deepEqual(quotesAlreadyUsed([{role:'assistant',content:text}]),['“Useful systems help people make decisions.”']);assert.deepEqual(quotesAlreadyUsed([{role:'user',content:text}]),[]);assert.deepEqual(quotesAlreadyUsed(undefined),[])});
+test('history carries the quotes an answer used, so the next turn can avoid them',()=>{const doc=sanitizeA2UIDocument(raw,'Why?','',artifacts,[],{autoQuote:false});const carried=a2uiHistoryText(doc,artifacts);assert.ok(carried.includes('Quoted here: “Useful systems help people make decisions.”'));assert.equal(carried.split('Quoted here:').length-1,1);assert.ok(!a2uiHistoryText(doc).includes('Quoted here:'));assert.equal(a2uiHistoryText(doc,[...artifacts,...artifacts]).split('Quoted here:').length-1,1)});
 test('history comes from the same sanitized facts without another model',()=>{const doc=sanitizeA2UIDocument(raw,'Why?','',artifacts,[],{autoQuote:false});const text=a2uiHistoryText(doc);assert.ok(text.includes(primary.body));assert.ok(text.includes(raw.title));assert.ok(!text.includes('project:invented'));assert.ok(text.length<=4000)});
 
 // Load the real server generator with only the server-only gallery formatter
@@ -36,6 +39,18 @@ test('one completion streams stable complete components with validated hydrated 
   let calls=0,ended=false;const updates=[];
   const result=await generateA2UI(options(async config=>{calls++;assert.equal(config.stream,true);return (async function*(){const json=JSON.stringify(raw);for(let n=0;n<json.length;n+=11)yield {choices:[{delta:{content:json.slice(n,n+11)}}]};ended=true;})()},(doc,source)=>{assert.equal(ended,false);updates.push(doc);assert.ok(source.every(a=>a.id==='project:real'));assert.ok(source[0].annotation)}));
   assert.equal(calls,1);assert.equal(result.grounded,true);assert.equal(updates[0].supporting.length,0);assert.equal(updates.at(-1).supporting[0].id,'rationale');assert.equal(updates[0].primary.id,result.document.primary.id);assert.equal(updates.find(u=>u.primary.body).primary.body,result.document.primary.body);assert.deepEqual(result.document.primary.artifactIds,["project:real"]);assert.ok(result.historyText.includes(primary.body));
+});
+// End to end: a quote an earlier turn already pinned must not render again,
+// whether or not the model honours the prompt rule.
+test('a quote the conversation already shows is dropped before it can render',async()=>{
+  const stream=()=>(async function*(){const json=JSON.stringify(raw);for(let n=0;n<json.length;n+=17)yield {choices:[{delta:{content:json.slice(n,n+17)}}]}})();
+  const fresh=await generateA2UI(options(async()=>stream()));
+  assert.ok(fresh.artifacts.some(a=>a.annotation),'control: a new quote still renders');
+  assert.ok(fresh.historyText.includes('Quoted here:'));
+  const repeat=await generateA2UI({...options(async()=>stream()),conversation:[{role:'user',content:'Why?'},{role:'assistant',content:'An answer\n\nQuoted here: “Useful systems help people make decisions.”'},{role:'user',content:'Why again?'}]});
+  assert.deepEqual(repeat.artifacts.filter(a=>a.annotation),[]);
+  assert.deepEqual([repeat.document.primary,...repeat.document.supporting].flatMap(c=>c.quoteIds),[]);
+  assert.ok(!repeat.historyText.includes('Quoted here:'));
 });
 test('truncated output retains a completed primary without repair calls',async()=>{
   let calls=0;const json=JSON.stringify(raw);const cutoff=json.indexOf(',"supporting"');

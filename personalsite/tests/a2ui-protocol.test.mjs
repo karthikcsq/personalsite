@@ -63,6 +63,39 @@ test("sanitizer keeps only host-known evidence and quote references", () => {
   assert.deepEqual(document.primary.quoteIds, ["quote:work:Peraton Labs"]);
 });
 
+test("a quote belongs to one component, and auto-quote never adds a second copy", () => {
+  const document = sanitizeA2UIDocument(
+    {
+      version: "1.0",
+      question: "What changed?",
+      title: "What changed at Peraton Labs",
+      lead: "",
+      primary: { ...component, type: "artifact_focus" },
+      supporting: [
+        {
+          ...component,
+          id: "echo",
+          type: "quote_focus",
+          items: [],
+          artifactIds: [],
+          quoteIds: ["quote:work:Peraton Labs"],
+        },
+      ],
+      actions: [],
+    },
+    "What changed?",
+    "",
+    artifacts,
+  );
+
+  assert.deepEqual(document.primary.quoteIds, ["quote:work:Peraton Labs"]);
+  assert.deepEqual(
+    document.supporting.flatMap((entry) => entry.quoteIds),
+    [],
+    "a second component repeated the same quote",
+  );
+});
+
 test("sanitizer rejects unsafe paths and fabricated intent payloads", () => {
   const document = sanitizeA2UIDocument(
     {

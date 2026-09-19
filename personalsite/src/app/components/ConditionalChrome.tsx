@@ -8,11 +8,12 @@ function ChromeInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isA2uiDraft = pathname === "/a2ui-draft";
-  const isImmersive = isHome || isA2uiDraft;
+  const isLivingCorpusDraft = pathname === "/living-corpus-draft";
+  const isImmersive = isHome || isA2uiDraft || isLivingCorpusDraft;
   // Hide the global navbar on the unscrolled home: the hero rail carries
   // section nav, and showing both creates a duplicated navigation system on
   // a page whose only job is to surface the chat input.
-  const hideNavbar = isA2uiDraft || isHome;
+  const hideNavbar = isA2uiDraft || isLivingCorpusDraft || isHome;
   return (
     <>
       {!hideNavbar && <Navbar />}

@@ -1,4 +1,8 @@
-import type { A2UIComponent, A2UIDocument } from "./protocol";
+import type {
+  A2UIArtifactLike,
+  A2UIComponent,
+  A2UIDocument,
+} from "./protocol";
 
 // The one-call generator writes a document, not prose, so there is no reply
 // string to keep. This flattens the finished document back into readable text
@@ -10,6 +14,26 @@ import type { A2UIComponent, A2UIDocument } from "./protocol";
 // It is derived, never generated: no second model call.
 
 const MAX_HISTORY_CHARS = 4000;
+
+/** Marks a quote inside an assistant turn, so a later turn can read back which
+ * quotes are already on screen. Written here, read by `quotesAlreadyUsed`. */
+const QUOTED_PREFIX = "Quoted here: ";
+
+/** The quotes earlier answers in this conversation already pinned. */
+export function quotesAlreadyUsed(
+  conversation: ReadonlyArray<{ role: string; content: string }> | undefined,
+): string[] {
+  return (conversation ?? [])
+    .filter((message) => message.role === "assistant")
+    .flatMap((message) => message.content.split("\n"))
+    .flatMap((line) => {
+      const trimmed = line.trim();
+      return trimmed.startsWith(QUOTED_PREFIX)
+        ? [trimmed.slice(QUOTED_PREFIX.length).trim()]
+        : [];
+    })
+    .filter(Boolean);
+}
 
 function itemLine(label: string, value: string, detail: string): string {
   const head = [label.trim(), value.trim()].filter(Boolean).join(": ");
@@ -33,12 +57,42 @@ function componentText(component: A2UIComponent): string {
   return lines.join("\n");
 }
 
-export function a2uiHistoryText(document: A2UIDocument): string {
+/** The quotes this answer pinned, so the next turn can see them. Without
+ * them the model has no record of what it already quoted, and it reached for
+ * the same passage every time a topic came back. */
+function quotedText(
+  document: A2UIDocument,
+  artifacts: A2UIArtifactLike[],
+): string[] {
+  const annotations = new Map(
+    artifacts.flatMap((artifact) =>
+      artifact.annotation?.trim()
+        ? ([[artifact.id, artifact.annotation.trim()]] as const)
+        : [],
+    ),
+  );
+  return [
+    ...new Set(
+      [document.primary, ...document.supporting]
+        .flatMap((component) => component.quoteIds)
+        .flatMap((quoteId) => {
+          const text = annotations.get(quoteId.replace(/^quote:/, ""));
+          return text ? [text] : [];
+        }),
+    ),
+  ];
+}
+
+export function a2uiHistoryText(
+  document: A2UIDocument,
+  artifacts: A2UIArtifactLike[] = [],
+): string {
   const blocks = [
     document.title.trim(),
     document.lead.trim(),
     componentText(document.primary),
     ...document.supporting.map(componentText),
+    ...quotedText(document, artifacts).map((text) => `${QUOTED_PREFIX}${text}`),
   ].filter((block) => block.length > 0);
 
   const text = blocks.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();

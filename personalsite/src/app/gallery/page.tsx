@@ -56,7 +56,10 @@ export default function GalleryPage() {
           <p className="px-5 text-[var(--color-ink-muted)] md:px-8">No albums yet.</p>
         ) : (
           Object.entries(galleryData).map(([folder, images], i) => (
-            <section key={folder}>
+            <section
+              key={folder}
+              id={folder.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}
+            >
               <h2 className="mx-auto mb-5 max-w-[1280px] px-5 font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-ink)] md:px-8">
                 {folder}
               </h2>

@@ -1,0 +1,718 @@
+.page {
+  --paper: #fff;
+  --ink: #111113;
+  --body: #3d3d43;
+  --muted: #727582;
+  --faint: rgb(17 17 19 / 10%);
+  --solar: #ef4d27;
+  position: relative;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--paper);
+  color: var(--ink);
+  isolation: isolate;
+}
+
+.environment {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sun {
+  position: absolute;
+  top: clamp(52px, 6.2vw, 92px);
+  left: clamp(44px, 5.2vw, 82px);
+  width: clamp(36px, 2.9vw, 44px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--solar);
+  box-shadow: inset -5px -4px 10px rgb(166 38 13 / 8%);
+}
+
+.branch {
+  position: absolute;
+  bottom: -72px;
+  left: clamp(-150px, -8vw, -88px);
+  width: min(63vw, 960px);
+  opacity: 0.43;
+  transform-origin: 10% 90%;
+  filter: grayscale(1) brightness(0.62) contrast(1.08);
+  mix-blend-mode: multiply;
+}
+
+.branch img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.page[data-stage="journey"] .branch {
+  bottom: -170px;
+  left: -180px;
+  width: min(42vw, 640px);
+}
+
+.identity,
+.entryIndex,
+.journey {
+  position: relative;
+  z-index: 2;
+}
+
+.identity {
+  position: absolute;
+  display: grid;
+  gap: 4px;
+  z-index: 4;
+}
+
+.identityButton {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(20px, 1.45vw, 24px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.identityButton:hover,
+.identityButton:focus-visible {
+  color: var(--solar);
+}
+
+.identity p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.page[data-stage="home"] .identity {
+  top: calc(50% - 160px);
+  left: max(24px, calc(50% - 180px));
+  width: min(360px, calc(100vw - 48px));
+}
+
+.entryIndex {
+  position: absolute;
+  top: calc(50% - 28px);
+  left: max(24px, calc(50% - 180px));
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  width: min(360px, calc(100vw - 48px));
+  gap: 18px 34px;
+}
+
+.entryButton,
+.nextOptions button,
+.retryButton,
+.restartButton {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.entryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: var(--muted);
+  font-size: clamp(20px, 1.55vw, 25px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  text-align: left;
+  transition: color 160ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.entryButton svg,
+.nextOptions button svg {
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity 160ms ease, transform 220ms ease;
+}
+
+.entryButton:hover,
+.entryButton:focus-visible {
+  color: var(--ink);
+  transform: translateX(3px);
+}
+
+.entryButton:hover svg,
+.entryButton:focus-visible svg,
+.nextOptions button:hover svg,
+.nextOptions button:focus-visible svg {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page[data-stage="journey"] .identity {
+  top: clamp(48px, 7vh, 78px);
+  left: max(32px, calc(50% - 320px));
+  width: min(640px, calc(100vw - 64px));
+}
+
+.journey {
+  width: min(640px, calc(100vw - 64px));
+  margin: 0 auto;
+  padding: clamp(150px, 19vh, 190px) 0 18vh;
+}
+
+.chapter {
+  display: grid;
+  align-content: center;
+  width: min(560px, 92%);
+  min-height: 0;
+  padding: 30px 0;
+  scroll-margin-top: 72px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}
+
+.chapter + .chapter {
+  margin-top: clamp(24px, 4vh, 38px);
+}
+
+.chapterMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 13px;
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+
+.noteContext {
+  max-width: 530px;
+  margin: 0 0 13px;
+  color: color-mix(in srgb, var(--muted) 78%, white);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.chapterMeta span:first-child {
+  color: var(--solar);
+}
+
+.chapter h2 {
+  max-width: 510px;
+  margin: 0;
+  font-size: clamp(24px, 2.15vw, 31px);
+  font-weight: 500;
+  line-height: 1.14;
+  letter-spacing: -0.033em;
+}
+
+.chapterText {
+  max-width: 530px;
+  margin: 21px 0 0;
+  color: var(--body);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.68;
+}
+
+.chapterMedia {
+  display: grid;
+  gap: 7px;
+  max-width: 530px;
+  margin: 24px 0 0;
+}
+
+.chapterMedia img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 53 / 34;
+  object-fit: cover;
+}
+
+.chapterMedia figcaption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.055em;
+  text-transform: lowercase;
+}
+
+.reference {
+  display: grid;
+  gap: 13px;
+  max-width: 530px;
+  margin-top: 27px;
+  padding-top: 14px;
+  border-top: 1px solid var(--faint);
+}
+
+.referenceHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.referenceHeader p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin: 0;
+}
+
+.referenceHeader p span {
+  color: var(--solar);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.referenceHeader strong {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.referenceHeader a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 10px;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.referenceHeader a:hover,
+.referenceHeader a:focus-visible {
+  color: var(--solar);
+}
+
+.referenceHeader svg {
+  width: 11px;
+  height: 11px;
+}
+
+.reference ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.52;
+  list-style: none;
+}
+
+.reference li {
+  position: relative;
+  padding-left: 13px;
+}
+
+.reference li::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--solar);
+  content: "·";
+}
+
+.referencePreview {
+  max-width: 480px;
+  margin: 0;
+  color: var(--muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.noteDisclosure {
+  max-width: 530px;
+  margin-top: 22px;
+  border-top: 1px solid var(--faint);
+}
+
+.noteDisclosure summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  list-style: none;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.noteDisclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.noteDisclosure summary:hover,
+.noteDisclosure summary:focus-visible {
+  color: var(--ink);
+}
+
+.disclosureMark {
+  position: relative;
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+
+.disclosureMark::before,
+.disclosureMark::after {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transition: transform 180ms ease;
+}
+
+.disclosureMark::after {
+  transform: rotate(90deg);
+}
+
+.noteDisclosure[open] .disclosureMark::after {
+  transform: rotate(0deg);
+}
+
+.noteBody {
+  display: grid;
+  gap: 30px;
+  padding: 33px 0 8px;
+}
+
+.noteSection {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.34fr) minmax(220px, 1fr);
+  gap: 25px;
+}
+
+.noteSection h3,
+.noteSection p {
+  margin: 0;
+}
+
+.noteSection h3 {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.045em;
+}
+
+.noteSection p {
+  color: var(--body);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.sourceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  color: var(--muted);
+  font-size: 10px;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.sourceLink:hover,
+.sourceLink:focus-visible {
+  color: var(--solar);
+}
+
+.sourceLink svg {
+  width: 12px;
+  height: 12px;
+}
+
+.chosenDirection {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 24px 0 0;
+  color: var(--solar);
+  font-size: 12px;
+}
+
+.chosenDirection svg {
+  width: 13px;
+  height: 13px;
+}
+
+.nextArea {
+  min-height: 64px;
+  margin-top: 28px;
+}
+
+.nextOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+}
+
+.nextOptions button {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+  transition: color 160ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nextOptions button:hover,
+.nextOptions button:focus-visible {
+  color: var(--ink);
+  transform: translateX(2px);
+}
+
+.nextOptions button svg {
+  width: 13px;
+  height: 13px;
+  margin-bottom: 3px;
+}
+
+.optionCopy {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.optionSource {
+  color: color-mix(in srgb, var(--muted) 72%, white);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.thinkingLine {
+  display: block;
+  width: 52px;
+  height: 1px;
+  background: var(--solar);
+  transform-origin: left center;
+  animation: attend 1.15s ease-in-out infinite alternate;
+}
+
+.retryButton,
+.restartButton {
+  padding: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+.retryButton:hover,
+.retryButton:focus-visible,
+.restartButton:hover,
+.restartButton:focus-visible {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.coda {
+  display: grid;
+  align-content: center;
+  width: min(560px, 92%);
+  min-height: 72svh;
+  padding: 70px 0 16vh;
+}
+
+.pathLine {
+  margin: 0 0 28px;
+  color: var(--solar);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.coda ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--faint);
+  list-style: none;
+}
+
+.coda li {
+  border-bottom: 1px solid var(--faint);
+}
+
+.coda li a {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.34fr) minmax(220px, 1fr);
+  gap: 25px;
+  padding: 15px 0;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.coda li a span:first-child {
+  color: var(--muted);
+}
+
+.coda li a:hover span:last-child,
+.coda li a:focus-visible span:last-child {
+  color: var(--solar);
+}
+
+.restartButton {
+  width: fit-content;
+  margin-top: 30px;
+}
+
+@keyframes attend {
+  from {
+    opacity: 0.35;
+    transform: scaleX(0.32);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 700px) {
+  .sun {
+    top: 27px;
+    left: 24px;
+    width: 30px;
+  }
+
+  .page[data-stage="journey"] .sun {
+    right: 42px;
+    left: auto;
+  }
+
+  .branch {
+    bottom: -3vh;
+    left: -27vw;
+    width: 92vw;
+  }
+
+  .page[data-stage="journey"] .branch {
+    bottom: -14vh;
+    left: -34vw;
+    width: 70vw;
+    opacity: 0.16 !important;
+  }
+
+  .page[data-stage="home"] .identity {
+    top: calc(50% - 148px);
+  }
+
+  .identityButton {
+    font-size: 20px;
+  }
+
+  .entryIndex {
+    top: calc(50% - 25px);
+    gap: 18px 24px;
+  }
+
+  .entryButton {
+    font-size: 21px;
+  }
+
+  .page[data-stage="journey"] .identity {
+    top: 82px;
+    left: 24px;
+    width: calc(100vw - 48px);
+  }
+
+  .journey {
+    width: calc(100vw - 48px);
+    padding-top: 175px;
+  }
+
+  .chapter,
+  .coda {
+    width: 100%;
+  }
+
+  .chapter {
+    min-height: 0;
+    padding: 28px 0;
+    scroll-margin-top: 55px;
+  }
+
+  .chapter + .chapter {
+    margin-top: 20px;
+  }
+
+  .chapter h2 {
+    font-size: 25px;
+  }
+
+  .chapterText {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .chapterMedia {
+    margin-top: 20px;
+  }
+
+  .referenceHeader {
+    gap: 16px;
+  }
+
+  .reference ul {
+    font-size: 12px;
+  }
+
+  .noteSection,
+  .coda li a {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .nextOptions {
+    display: grid;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinkingLine {
+    animation: none;
+  }
+
+  .entryButton,
+  .entryButton svg,
+  .nextOptions button,
+  .nextOptions button svg,
+  .disclosureMark::after {
+    transition-duration: 0.01ms;
+  }
+}

@@ -339,7 +339,10 @@ export default function HomeChatClient() {
                 );
                 next[assistantIndex] = {
                   ...next[assistantIndex],
-                  content: a2uiHistoryText(parsed.a2ui as A2UIDocument),
+                  content: a2uiHistoryText(
+                    parsed.a2ui as A2UIDocument,
+                    next[assistantIndex].artifacts ?? [],
+                  ),
                   a2ui: {
                     ...(parsed.a2ui as A2UIDocument),
                     presentationSeed,

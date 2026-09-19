@@ -244,6 +244,23 @@ test("unclaimed sources become board source tags instead of vanishing", () => {
   assert.deepEqual(new Set(board.referencedArtifactIds), new Set(reachable));
 });
 
+test("a quote two components both name is pinned once", () => {
+  const board = buildBoard(
+    document({
+      primary: component({ id: "answer", quoteIds: ["quote:blog:stability"] }),
+      supporting: [
+        component({ id: "more", type: "quote_focus", quoteIds: ["quote:blog:stability"] }),
+      ],
+    }),
+    artifacts,
+    SEED,
+  );
+
+  const quotes = board.pieces.filter((piece) => piece.kind === "quote");
+  assert.equal(quotes.length, 1);
+  assert.equal(quotes[0].componentId, "answer");
+});
+
 test("unknown ids and unverified quotes never reach the board", () => {
   const board = buildBoard(
     document({
