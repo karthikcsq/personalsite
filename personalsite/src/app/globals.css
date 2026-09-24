@@ -61,6 +61,50 @@
   --color-wood-edge: oklch(69% 0.05 72);
 }
 
+/* The corpus eclipse follows the visit into the site's interior pages. */
+html[data-interior-eclipse="day"] {
+  --color-surface: #b8bcc0;
+  --color-surface-raised: #c3c7ca;
+  --color-surface-muted: #aeb3b8;
+  --color-surface-sunken: #a3a8ad;
+  --color-surface-wash: #afb4b9;
+  --color-ink: #171719;
+  --color-ink-muted: #484d55;
+  --color-ink-subtle: #5b6069;
+  --color-ink-faint: #777d85;
+  --color-hairline: #90959d;
+  --color-hairline-strong: #686e77;
+  --color-leaf: #5d646d;
+  --color-leaf-mid: #747b83;
+  --color-leaf-soft: #959ba2;
+  --background: var(--color-surface);
+  --foreground: var(--color-ink);
+}
+
+html[data-interior-eclipse="night"] {
+  color-scheme: dark;
+  --color-surface: #090d14;
+  --color-surface-raised: #141923;
+  --color-surface-muted: #1c2330;
+  --color-surface-sunken: #070a0f;
+  --color-surface-wash: #1c2330;
+  --color-ink: #f3f5f8;
+  --color-ink-muted: #b0b7c3;
+  --color-ink-subtle: #929aa8;
+  --color-ink-faint: #6f7886;
+  --color-hairline: #333a46;
+  --color-hairline-strong: #626b78;
+  --color-accent: #b6becb;
+  --color-accent-hover: #e0e6ee;
+  --color-accent-soft: #303948;
+  --color-accent-tint: #202833;
+  --color-leaf: #424a57;
+  --color-leaf-mid: #56606c;
+  --color-leaf-soft: #6b7580;
+  --background: var(--color-surface);
+  --foreground: var(--color-ink);
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
@@ -75,6 +119,8 @@ html, body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Selection */

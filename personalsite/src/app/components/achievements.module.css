@@ -1,0 +1,336 @@
+.root {
+  --achievement-surface: #fff;
+  --achievement-toast-surface: #fff;
+  --achievement-toast-border: #cbd0d9;
+  --achievement-pull-surface: #e7e9e8;
+  --achievement-ink: #202124;
+  --achievement-muted: #767b84;
+  --achievement-rule: rgba(32, 33, 36, 0.12);
+  --achievement-motif: #929aa7;
+  --achievement-halo: rgba(32, 33, 36, 0.11);
+  position: fixed;
+  z-index: 60;
+  top: 18px;
+  right: clamp(18px, 3.2vw, 48px);
+  color: var(--achievement-ink);
+  font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+  pointer-events: none;
+}
+
+:global(body:has([data-night="true"])) .root,
+:global(html[data-interior-eclipse="night"]) .root {
+  --achievement-surface: #0f141d;
+  --achievement-toast-surface: #141923;
+  --achievement-toast-border: rgba(223, 231, 242, 0.34);
+  --achievement-pull-surface: #303744;
+  --achievement-ink: #f3f5f8;
+  --achievement-muted: #a1aab8;
+  --achievement-rule: rgba(223, 231, 242, 0.17);
+  --achievement-motif: #a9b2bf;
+  --achievement-halo: rgba(243, 245, 248, 0.14);
+}
+
+.trigger {
+  position: relative;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--achievement-muted);
+  cursor: pointer;
+  font: inherit;
+  opacity: 0.5;
+  pointer-events: auto;
+  transition: color 220ms ease, opacity 220ms ease;
+}
+
+.ripple {
+  position: absolute;
+  inset: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: var(--achievement-halo);
+  opacity: 0;
+  pointer-events: none;
+  animation: collectRipple 4100ms both;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] { color: var(--achievement-ink); opacity: 1; }
+.trigger[data-notifying="true"] { opacity: 1; }
+.trigger:focus-visible,
+.collection button:focus-visible,
+.toast:focus-visible { outline: 1px solid var(--achievement-ink); outline-offset: 4px; }
+.glyph {
+  display: block;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+  -webkit-text-stroke: 0 currentColor;
+  transform-origin: center;
+  transition: color 260ms ease, transform 260ms ease;
+}
+.glyphPulse {
+  position: absolute;
+  display: block;
+  color: var(--achievement-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  animation: collectMark 4100ms both;
+}
+
+.collection {
+  border: 1px solid var(--achievement-rule);
+  background: var(--achievement-surface);
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+
+.collection {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  width: min(304px, calc(100vw - 36px));
+  max-height: calc(100svh - 78px);
+  padding: 21px 22px 12px;
+  overflow-y: auto;
+  animation: arrive 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.collectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 11px;
+}
+
+.collectionHeader h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 560;
+  letter-spacing: -0.025em;
+}
+
+.collectionActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.collectionHeader button {
+  border: 0;
+  background: transparent;
+  color: var(--achievement-muted);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 0.8;
+}
+.collectionHeader .soundToggle {
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.collectionHeader .soundToggle:hover { color: var(--achievement-ink); }
+
+.list { margin: 0; padding: 0; list-style: none; }
+.list li {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--achievement-rule);
+  opacity: 0.55;
+}
+.list li[data-found="true"] { opacity: 1; }
+.mark {
+  display: grid;
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  place-items: center;
+  border: 1px solid var(--achievement-rule);
+  border-radius: 50%;
+  font-size: 11px;
+  line-height: 1;
+}
+.list li[data-found="true"] .mark { border-color: currentColor; }
+.list h3 { margin: 0; font-size: 13px; font-weight: 550; line-height: 1.25; }
+.list p { margin: 4px 0 0; color: var(--achievement-muted); font-size: 11px; line-height: 1.45; }
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.announcement { position: absolute; top: 36px; right: 0; }
+.toast {
+  position: relative;
+  display: block;
+  width: min(252px, calc(100vw - 36px));
+  min-height: 48px;
+  padding: 7px 15px 7px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--achievement-ink);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  animation: toastArrive 560ms cubic-bezier(0.16, 1, 0.3, 1) both, toastVisibility 4100ms both;
+  pointer-events: auto;
+}
+.toastCard {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border: 1px solid var(--achievement-toast-border);
+  border-radius: 999px;
+  background: var(--achievement-toast-surface);
+  transform-origin: calc(100% - 14px) -22px;
+  animation: toastCardLife 4100ms both;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.toastCard::after {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--achievement-pull-surface);
+  content: "";
+  opacity: 0;
+  animation: toastCardTint 4100ms both;
+  will-change: opacity;
+}
+.toastPull {
+  position: absolute;
+  z-index: 0;
+  top: -22px;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 22px);
+  transform-origin: calc(100% - 14px) 0;
+  animation: toastPullLife 4100ms both;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.toastSurface { display: block; width: 100%; height: 100%; overflow: visible; }
+.toastSurface path {
+  fill: var(--achievement-pull-surface);
+}
+.toastCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 34px;
+  transform-origin: calc(100% - 14px) -22px;
+  animation: toastCopyLife 4100ms both;
+  will-change: transform, opacity;
+}
+.toastMotif {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  color: var(--achievement-motif);
+  transform-origin: 20% 86%;
+  animation: motifGrow 850ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.toastMotif svg { display: block; width: 24px; height: 24px; }
+.toast[data-kind="eclipse"] .toastMotif,
+.toast[data-kind="break"] .toastMotif { color: #ba6b55; }
+.toastTitle { flex: 1; font-size: 14px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
+.toastOrdinal { align-self: center; color: var(--achievement-muted); font-size: 11px; font-weight: 400; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastArrive {
+  from { opacity: 0; transform: translate3d(calc(100% + 48px), 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes toastVisibility {
+  0%, 73% { visibility: visible; }
+  74%, 100% { visibility: hidden; }
+}
+
+@keyframes toastCopyLife {
+  0%, 51% { opacity: 1; transform: scale(1); }
+  52% { opacity: 1; transform: scale(0.965, 1.04); animation-timing-function: cubic-bezier(0.38, 0.16, 0.64, 0.88); }
+  58% { opacity: 1; }
+  65% { opacity: 0; }
+  73%, 100% { opacity: 0; transform: scale(0.006, 0.009); }
+}
+
+@keyframes motifGrow {
+  from { opacity: 0; transform: scale(0.55) rotate(-14deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes toastCardLife {
+  0%, 48% { opacity: 1; transform: scale(1); }
+  52% { opacity: 1; transform: scale(0.965, 1.04); animation-timing-function: cubic-bezier(0.38, 0.16, 0.64, 0.88); }
+  58% { opacity: 1; }
+  65% { opacity: 0; }
+  73%, 100% { opacity: 0; transform: scale(0.006, 0.009); }
+}
+
+@keyframes toastCardTint {
+  0%, 49% { opacity: 0; }
+  58%, 100% { opacity: 1; }
+}
+
+@keyframes toastPullLife {
+  0%, 52% { opacity: 0; transform: scale(0.965, 1.04); animation-timing-function: cubic-bezier(0.38, 0.16, 0.64, 0.88); }
+  55% { opacity: 0; }
+  58% { opacity: 0.2; }
+  65% { opacity: 1; }
+  69% { opacity: 1; }
+  73%, 100% { opacity: 0; transform: scale(0.006, 0.009); }
+}
+
+@keyframes collectMark {
+  0%, 71% { opacity: 0; transform: scale(1) rotate(0); }
+  74% { opacity: 0.6; transform: scale(0.88) rotate(-10deg); }
+  78% { opacity: 1; transform: scale(1.55) rotate(8deg); }
+  85% { opacity: 1; transform: scale(1.18) rotate(-3deg); }
+  91% { opacity: 1; transform: scale(1.3) rotate(0); }
+  95% { opacity: 1; transform: scale(1.22) rotate(0); }
+  100% { opacity: 0; transform: scale(1.04) rotate(0); }
+}
+
+@keyframes collectRipple {
+  0%, 74% { opacity: 0; transform: scale(0.45); }
+  79% { opacity: 0.55; transform: scale(0.95); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection,
+  .toast,
+  .toastCard,
+  .toastCard::after,
+  .toastCopy,
+  .toastMotif,
+  .ripple,
+  .glyphPulse { animation: none; }
+  .toastPull { display: none; }
+  .trigger,
+  .glyph { transition: none; }
+}

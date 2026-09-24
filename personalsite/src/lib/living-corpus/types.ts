@@ -17,6 +17,8 @@ export interface CorpusQuote {
   source: string;
 }
 
+export type CorpusSection = CorpusQuote;
+
 export interface CorpusMedia {
   type: "image";
   src: string;
@@ -34,6 +36,7 @@ export interface CorpusArtifact {
   href: string;
   topics: string[];
   quotes: CorpusQuote[];
+  sections: CorpusSection[];
   media?: CorpusMedia;
 }
 
@@ -97,4 +100,21 @@ export interface AttentiveReveal {
   artifactId: string;
   quote: CorpusQuote | null;
   confidence: number;
+}
+
+export interface FailureExcerpt {
+  id: string;
+  artifactId: string;
+  category: CorpusCategory;
+  source: string;
+  meta: string;
+  heading: string;
+  text: string;
+  href: string;
+}
+
+export interface WhatBrokeResponse {
+  excerpts: FailureExcerpt[];
+  confidence: number;
+  selectionMode: "typesafe" | "authored";
 }

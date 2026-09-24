@@ -1,16 +1,12 @@
-import { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Gallery',
-  description: 'Photo gallery showcasing Karthik Thyagarajan\'s travels and adventures around the world. Explore images from Costa Rica, Hawaii, Kilimanjaro, Amsterdam, and more.',
-  keywords: ['gallery', 'photos', 'travel', 'adventure', 'Costa Rica', 'Hawaii', 'Kilimanjaro', 'Amsterdam', 'Karthik Thyagarajan'],
-  alternates: { canonical: '/gallery' },
+  title: "Photos",
+  description: "Photographs from Karthik Thyagarajan's travels, including Costa Rica, Hawaii, Kilimanjaro, Amsterdam, and San Francisco.",
+  keywords: ["gallery", "photos", "travel", "Costa Rica", "Hawaii", "Kilimanjaro", "Amsterdam", "Karthik Thyagarajan"],
+  alternates: { canonical: "/gallery" },
 };
 
-export default function GalleryLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function GalleryLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

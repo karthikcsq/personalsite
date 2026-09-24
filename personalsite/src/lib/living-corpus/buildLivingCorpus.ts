@@ -18,10 +18,10 @@ import type {
   CorpusCategory,
   CorpusMedia,
   CorpusQuote,
+  CorpusSection,
   LivingCorpusPayload,
 } from "@/lib/living-corpus/types";
 
-const MAX_DESCRIPTION = 176;
 const MAX_QUOTE = 760;
 
 const TOPIC_RULES: Array<[string, RegExp]> = [
@@ -134,12 +134,22 @@ function quotesFromMarkdown(
   href: string,
   source: string,
 ): CorpusQuote[] {
+  return sectionsFromMarkdown(markdown, href, source).map((section) => ({
+    ...section,
+    text: truncate(section.text, MAX_QUOTE),
+  }));
+}
+
+function sectionsFromMarkdown(
+  markdown: string | null,
+  href: string,
+  source: string,
+): CorpusSection[] {
   if (!markdown) return [];
-  return extractSections(markdown)
-    .map((section) => ({
+  return extractSections(markdown).map((section) => ({
       id: section.id,
       heading: section.heading,
-      text: truncate(section.text, MAX_QUOTE),
+      text: cleanMarkdown(section.text),
       href: `${href}#${section.id}`,
       source,
     }));
@@ -153,6 +163,16 @@ function fallbackQuote(
   source: string,
 ): CorpusQuote {
   return { id, heading, text: truncate(text, MAX_QUOTE), href, source };
+}
+
+function fallbackSection(
+  id: string,
+  heading: string,
+  text: string,
+  href: string,
+  source: string,
+): CorpusSection {
+  return { id, heading, text: cleanMarkdown(text), href, source };
 }
 
 function noteData(
@@ -175,6 +195,7 @@ function artifact(input: {
   href: string;
   explicitTopics?: string[];
   quotes: CorpusQuote[];
+  sections?: CorpusSection[];
   media?: CorpusMedia;
 }): CorpusArtifact {
   const topics = collectTopics(
@@ -185,8 +206,12 @@ function artifact(input: {
   );
   return {
     ...input,
-    description: truncate(input.description, MAX_DESCRIPTION),
+    description: cleanMarkdown(input.description),
     referenceItems: (input.referenceItems ?? []).map((item) => cleanMarkdown(item)),
+    sections: (input.sections ?? input.quotes).map((section) => ({
+      ...section,
+      text: cleanMarkdown(section.text),
+    })),
     topics,
   };
 }
@@ -287,6 +312,7 @@ function buildWork(): CorpusArtifact[] {
     const data = noteData("work", slug);
     const href = data.href ?? `/work#${slug}`;
     const quotes = quotesFromMarkdown(data.markdown, href, job.company);
+    const sections = sectionsFromMarkdown(data.markdown, href, job.company);
     if (!quotes.length && job.description[0]) {
       quotes.push(
         fallbackQuote("work", job.title, job.description[0], href, job.company),
@@ -302,6 +328,7 @@ function buildWork(): CorpusArtifact[] {
       href,
       explicitTopics: data.note?.topics,
       quotes,
+      sections: sections.length ? sections : undefined,
     });
   });
 }
@@ -312,6 +339,7 @@ function buildProjects(): CorpusArtifact[] {
     const data = noteData("project", project.id);
     const href = data.href ?? `/projects#${project.id}`;
     const quotes = quotesFromMarkdown(data.markdown, href, project.title);
+    const sections = sectionsFromMarkdown(data.markdown, href, project.title);
     const normalizedTitle = project.title.trim().toLowerCase();
     const resumeProject = resumeProjects.find((entry) => {
       const candidate = entry.title.trim().toLowerCase();
@@ -338,6 +366,17 @@ function buildProjects(): CorpusArtifact[] {
       href,
       explicitTopics: data.note?.topics,
       quotes,
+      sections: sections.length
+        ? sections
+        : [
+            fallbackSection(
+              "overview",
+              project.title,
+              project.ragNarrative || project.description,
+              href,
+              project.title,
+            ),
+          ],
     });
   });
 }
@@ -347,6 +386,7 @@ function buildInvolvement(): CorpusArtifact[] {
     const data = noteData("involvement", entry.slug);
     const href = data.href ?? `/involvement#${entry.slug}`;
     const quotes = quotesFromMarkdown(data.markdown, href, entry.title);
+    const sections = sectionsFromMarkdown(data.markdown, href, entry.title);
     if (!quotes.length) {
       const fallback = entry.whatItIs || entry.tagline || entry.myRole;
       if (fallback) {
@@ -364,6 +404,17 @@ function buildInvolvement(): CorpusArtifact[] {
       href,
       explicitTopics: data.note?.topics,
       quotes,
+      sections: sections.length
+        ? sections
+        : [
+            fallbackSection(
+              "overview",
+              entry.title,
+              entry.whatItIs || entry.tagline || entry.myRole,
+              href,
+              entry.title,
+            ),
+          ],
     });
   });
 }
@@ -387,6 +438,7 @@ function ideaArtifacts(note: NoteMeta, markdown: string): CorpusArtifact[] {
       href: quote.href,
       explicitTopics: note.topics,
       quotes: [quote],
+      sections: [{ ...quote, text: cleanMarkdown(section.text) }],
     });
   });
 }
@@ -414,7 +466,12 @@ function buildWriting(): CorpusArtifact[] {
     const markdown = readBlogMarkdown(post.slug);
     const href = `/blog/${post.slug}`;
     const quotes = quotesFromMarkdown(markdown, href, post.title);
+    const sections = sectionsFromMarkdown(markdown, href, post.title);
     const description = post.summary || quotes[0]?.text || post.title;
+    const finalQuotes =
+      quotes.length > 0
+        ? quotes
+        : [fallbackQuote("writing", post.title, description, href, post.title)];
     return artifact({
       id: `writing:${post.slug}`,
       category: "writing",
@@ -422,10 +479,8 @@ function buildWriting(): CorpusArtifact[] {
       meta: post.date,
       description,
       href,
-      quotes:
-        quotes.length > 0
-          ? quotes
-          : [fallbackQuote("writing", post.title, description, href, post.title)],
+      quotes: finalQuotes,
+      sections: sections.length ? sections : finalQuotes,
     });
   });
 }

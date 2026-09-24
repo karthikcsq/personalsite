@@ -1,0 +1,141 @@
+.page {
+  max-width: 1010px;
+  margin: 0 auto;
+  padding: clamp(98px, 15vh, 170px) 0 70px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 550;
+  letter-spacing: 0.19em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 270px);
+  grid-template-areas:
+    "heading portrait"
+    "prose portrait";
+  column-gap: clamp(52px, 7vw, 100px);
+  align-items: start;
+}
+
+.introHeading { grid-area: heading; }
+
+.portrait {
+  grid-area: portrait;
+  align-self: start;
+  margin: 36px 0 0;
+}
+
+.portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.intro h1 {
+  max-width: 690px;
+  margin: 22px 0 40px;
+  color: var(--ink);
+  font-size: clamp(36px, 4.4vw, 60px);
+  font-weight: 480;
+  letter-spacing: -0.052em;
+  line-height: 1.1;
+}
+
+.prose {
+  grid-area: prose;
+  max-width: 640px;
+  color: var(--ink);
+  font-size: clamp(16px, 1.43vw, 18px);
+  letter-spacing: -0.013em;
+  line-height: 1.75;
+}
+
+.prose p + p { margin-top: 22px; }
+
+.lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  gap: clamp(70px, 10vw, 160px);
+  margin-top: clamp(80px, 12vh, 140px);
+  align-items: start;
+}
+
+.pathList { margin-top: 20px; }
+
+.pathList a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 360px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  font-size: 21px;
+  letter-spacing: -0.035em;
+  text-decoration: none;
+  transition: padding-left 220ms ease, color 220ms ease;
+}
+
+.pathList a:hover { padding-left: 7px; }
+.pathList a span:last-child { color: var(--faint); font-size: 16px; }
+
+.photoLink {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--rule);
+}
+
+.photo { object-fit: cover; transition: transform 600ms ease; }
+.photoLink:hover .photo { transform: scale(1.035); }
+
+.photoCaption {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--ink);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.photoCaption:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: clamp(96px, 16vh, 180px);
+  padding-top: 25px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.footer p:last-child { margin-top: 6px; }
+.footer nav { display: flex; flex-wrap: wrap; gap: 16px 22px; align-self: flex-end; }
+.footer a { color: var(--ink); text-decoration: none; }
+.footer a:hover { text-decoration: underline; text-underline-offset: 5px; }
+
+@media (max-width: 760px) {
+  .page { padding: 84px 0 55px; }
+  .intro {
+    grid-template-columns: 1fr;
+    grid-template-areas: "heading" "portrait" "prose";
+  }
+  .intro h1 { margin: 18px 0 28px; font-size: clamp(36px, 9vw, 50px); }
+  .portrait { width: min(75%, 300px); margin: 0 0 34px; }
+  .prose { font-size: 16px; line-height: 1.72; }
+  .lower { grid-template-columns: 1fr; gap: 72px; margin-top: 76px; }
+  .pathList a { max-width: none; }
+  .personal { max-width: 520px; }
+  .footer { display: block; margin-top: 96px; }
+  .footer nav { margin-top: 26px; }
+}
