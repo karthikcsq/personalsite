@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import MinimalInterior from "@/app/components/MinimalInterior";
+import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import styles from "./about.module.css";
 
 export const metadata: Metadata = {
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
 const paths = [
   { label: "Work", href: "/?section=work" },
   { label: "Projects", href: "/?section=projects" },
-  { label: "Ideas", href: "/?section=ideas" },
   { label: "Writing", href: "/?section=writing" },
+  { label: "Involvement", href: "/?section=involvement" },
 ];
 
 const connect = [
@@ -26,7 +27,8 @@ const connect = [
 
 export default function AboutPage() {
   return (
-    <MinimalInterior page="about">
+    <CorpusPageTransition page="about">
+      <MinimalInterior page="about">
       <main className={styles.page}>
         <div className={styles.intro}>
           <div className={styles.introHeading}>
@@ -111,6 +113,7 @@ export default function AboutPage() {
           </nav>
         </footer>
       </main>
-    </MinimalInterior>
+      </MinimalInterior>
+    </CorpusPageTransition>
   );
 }

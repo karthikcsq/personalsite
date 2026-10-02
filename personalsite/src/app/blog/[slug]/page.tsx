@@ -1,4 +1,5 @@
-import Link from "next/link";
+import CorpusArticle from "@/app/components/CorpusArticle";
+import { notFound } from "next/navigation";
 import { getPostBySlug, getSortedPosts } from "@/utils/blogUtils";
 import { Metadata } from "next";
 
@@ -9,6 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
+  if (!getSortedPosts().some((post) => post.slug === resolvedParams.slug)) notFound();
   const post = await getPostBySlug(resolvedParams.slug);
   return {
     title: post.title,
@@ -49,6 +51,7 @@ const SITE = "https://www.karthikthyagarajan.com";
 
 export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
+  if (!getSortedPosts().some((post) => post.slug === resolvedParams.slug)) notFound();
   const post = await getPostBySlug(resolvedParams.slug);
   const url = `${SITE}/blog/${resolvedParams.slug}`;
 
@@ -65,38 +68,9 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <article className="mx-auto max-w-[720px] px-5 pt-16 pb-24 md:px-6 md:pt-24">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-subtle)] transition-colors hover:text-[var(--color-accent)]"
-      >
-        <span>←</span> Writing
-      </Link>
-
-      <time className="mt-10 block font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-subtle)]">
-        {post.date}
-      </time>
-
-      <h1 className="mt-3 font-serif text-[clamp(2rem,4.5vw,3rem)] italic leading-[1.05] tracking-tight text-[var(--color-ink)]">
-        {post.title}
-      </h1>
-
-      {post.summary && (
-        <p className="mt-5 max-w-[620px] text-[17px] leading-[1.6] text-[var(--color-ink-muted)]">
-          {post.summary}
-        </p>
-      )}
-
-      <div className="my-12 h-px bg-[var(--color-hairline)]" />
-
-      <div
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-      />
-    </article>
+    <CorpusArticle category="writing" title={post.title} meta={post.date} summary={post.summary}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
+    </CorpusArticle>
   );
 }

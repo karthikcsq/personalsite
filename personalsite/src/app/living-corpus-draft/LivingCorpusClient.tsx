@@ -1,7 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import CorpusNavigation from "@/app/components/CorpusNavigation";
 import {
+  Fragment,
+  ViewTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -111,8 +114,8 @@ const BRANCH_FRAME_RATIO = 724 / 543;
 const BRANCH_ORIENTATION = {
   work: { angle: -14, flipped: false },
   projects: { angle: -52, flipped: true },
-  ideas: { angle: -18, flipped: false },
   writing: { angle: -56, flipped: true },
+  involvement: { angle: -18, flipped: false },
 } satisfies Record<
   MinimalCategory,
   { angle: number; flipped: boolean }
@@ -244,6 +247,19 @@ function snowContactStyle(
 
 type ReadEntries = Partial<Record<MinimalCategory, string[]>>;
 
+function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null) {
+  const url = new URL(window.location.href);
+  if (category) url.searchParams.set("section", category);
+  else url.searchParams.delete("section");
+  if (itemId) url.searchParams.set("item", itemId);
+  else url.searchParams.delete("item");
+  url.hash = sectionId ?? "";
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  if (nextUrl !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+    window.history.replaceState(null, "", nextUrl);
+  }
+}
+
 function xrayEntryLabel(
   entryId: string,
   itemById: ReadonlyMap<string, MinimalCorpusItem>,
@@ -296,7 +312,7 @@ function ReaderMedia({ media }: { media: MinimalCorpusMedia[] }) {
                 title={entry.title}
                 height={entry.height}
                 loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 referrerPolicy="strict-origin-when-cross-origin"
               />
@@ -408,7 +424,7 @@ function InlineReader({
   };
 
   return (
-    <main className={styles.reader} ref={readerRef} key={item.id}>
+    <section className={styles.reader} ref={readerRef} key={item.id}>
       <button type="button" className={styles.back} onClick={onBack}>
         <ArrowIcon back />
         <span>{item.category}</span>
@@ -427,6 +443,17 @@ function InlineReader({
           ))}
         </ul>
       ) : null}
+
+      {item.fullTextHref || item.links?.length ? (
+        <div className={styles.readerLinks}>
+          {item.fullTextHref ? <a href={item.fullTextHref}>Full text ↗</a> : null}
+          {item.links?.map((link) => (
+            <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} ↗</a>
+          ))}
+        </div>
+      ) : null}
+
+      <ReaderMedia media={item.media} />
 
       {bodySections.length > 0 ? (
         <nav className={styles.readerToc} aria-label={`Contents of ${item.title}`}>
@@ -448,8 +475,6 @@ function InlineReader({
         </nav>
       ) : null}
 
-      <ReaderMedia media={item.media} />
-
       {bodySections.length ? (
         <div className={styles.noteSections}>
           {bodySections.map((section) => (
@@ -463,7 +488,7 @@ function InlineReader({
           ))}
         </div>
       ) : null}
-    </main>
+    </section>
   );
 }
 
@@ -797,6 +822,7 @@ function Environment({
 
   return (
     <div className={styles.environment}>
+      <ViewTransition name="corpus-sun" share="corpus-sun" default="none">
       <button
         type="button"
         className={styles.sun}
@@ -854,6 +880,7 @@ function Environment({
           onToggleNight();
         }}
       />
+      </ViewTransition>
       {failure ? (
         <div className={styles.failureBackground} aria-hidden="true" />
       ) : null}
@@ -868,7 +895,7 @@ function Environment({
           {(
             [
               { className: styles.branchRootLayer, categories: ["work", "projects"] },
-              { className: styles.branchTipLayer, categories: ["ideas", "writing"] },
+              { className: styles.branchTipLayer, categories: ["involvement", "writing"] },
             ] as const
           ).map((layer) => (
             <div className={layer.className} key={layer.className}>
@@ -994,7 +1021,7 @@ function FailureView({
   onRetry: () => void;
 }) {
   return (
-    <main className={styles.failureView} id="what-broke">
+    <section className={styles.failureView} id="what-broke">
       <button type="button" className={styles.back} onClick={onClose}>
         <ArrowIcon back />
         <span>Back</span>
@@ -1037,17 +1064,22 @@ function FailureView({
           ))}
         </div>
       )}
-    </main>
+    </section>
   );
 }
 
 export default function LivingCorpusClient({
   items,
+  initialSection = null,
+  initialItemId,
 }: {
   items: MinimalCorpusItem[];
+  initialSection?: MinimalCategory | null;
+  initialItemId?: string;
 }) {
-  const [selected, setSelected] = useState<MinimalCategory | null>(null);
-  const [activeItem, setActiveItem] = useState<MinimalCorpusItem | null>(null);
+  const [selected, setSelected] = useState<MinimalCategory | null>(initialSection);
+  const [animateIndex, setAnimateIndex] = useState(initialSection === null);
+  const [activeItem, setActiveItem] = useState<MinimalCorpusItem | null>(() => items.find((item) => item.id === initialItemId) ?? null);
   const [readerSectionId, setReaderSectionId] = useState<string | null>(null);
   const [branches, setBranches] = useState<MinimalCategory[]>([]);
   const [readEntries, setReadEntries] = useState<ReadEntries>({});
@@ -1075,9 +1107,25 @@ export default function LivingCorpusClient({
     [items],
   );
   const allLeafTargets = useMemo(() => leafTargets(items), [items]);
+
+  useEffect(() => {
+    let hash = window.location.hash.slice(1);
+    try { hash = decodeURIComponent(hash); } catch { return; }
+    if (initialItemId) {
+      setReaderSectionId(hash || null);
+      return;
+    }
+    if (!initialSection || !hash) return;
+    const linkedItem = items.find((item) => item.category === initialSection && item.id.split(":")[1] === hash);
+    if (linkedItem) {
+      setActiveItem(linkedItem);
+      syncSectionUrl(linkedItem.category, linkedItem.id);
+    }
+  }, [initialItemId, initialSection, items]);
   const visibleItems = selected
     ? items.filter((item) => item.category === selected)
     : [];
+  const firstIdeaIndex = visibleItems.findIndex((item) => item.id.startsWith("idea:"));
   const attentionItems = attentionCategory
     ? (() => {
         const inspectedIds = new Set(
@@ -1100,12 +1148,14 @@ export default function LivingCorpusClient({
       window.sessionStorage.setItem(SESSION_KEYS.active, "1");
       const savedBranches = JSON.parse(
         window.sessionStorage.getItem(SESSION_KEYS.branches) ?? "[]",
-      ) as MinimalCategory[];
+      ) as string[];
       const requestedSection = new URLSearchParams(window.location.search).get("section");
       const linkedCategory = MINIMAL_CATEGORIES.find(
-        (category) => category.id === requestedSection,
+        (category) => category.id === (requestedSection === "ideas" ? "writing" : requestedSection),
       )?.id;
-      const restoredBranches = savedBranches.filter((branch) =>
+      const restoredBranches = [...new Set(savedBranches.map((branch) =>
+        branch === "ideas" ? "writing" : branch,
+      ))].filter((branch): branch is MinimalCategory =>
         MINIMAL_CATEGORIES.some((category) => category.id === branch),
       );
       const linkedBranchGrew = linkedCategory && !restoredBranches.includes(linkedCategory);
@@ -1120,16 +1170,19 @@ export default function LivingCorpusClient({
       }
       const savedReadEntries = JSON.parse(
         window.sessionStorage.getItem(SESSION_KEYS.readEntries) ?? "{}",
-      ) as ReadEntries;
+      ) as ReadEntries & { ideas?: string[] };
       const restoredReadEntries = Object.fromEntries(
-        MINIMAL_CATEGORIES.map(({ id }) => [
-          id,
-          Array.isArray(savedReadEntries[id])
-            ? savedReadEntries[id].filter(
-                (entryId): entryId is string => typeof entryId === "string",
-              )
-            : [],
-        ]),
+        MINIMAL_CATEGORIES.map(({ id }) => {
+          const saved = [
+            ...(Array.isArray(savedReadEntries[id]) ? savedReadEntries[id] : []),
+            ...(id === "writing" && Array.isArray(savedReadEntries.ideas)
+              ? savedReadEntries.ideas
+              : []),
+          ];
+          return [id, [...new Set(saved.filter(
+            (entryId): entryId is string => typeof entryId === "string",
+          ))]];
+        }),
       ) as ReadEntries;
       readEntriesRef.current = restoredReadEntries;
       setReadEntries(restoredReadEntries);
@@ -1243,6 +1296,8 @@ export default function LivingCorpusClient({
   const chooseCategory = (category: MinimalCategory) => {
     clearAttention();
     growBranch(category);
+    setAnimateIndex(selected === null);
+    syncSectionUrl(category);
     setReaderSectionId(null);
     setActiveItem(null);
     setSelected(category);
@@ -1257,6 +1312,7 @@ export default function LivingCorpusClient({
       return;
     }
     setReaderSectionId(sectionId);
+    syncSectionUrl(category, item.id, sectionId);
     setSelected(category);
     setActiveItem(item);
   };
@@ -1305,6 +1361,7 @@ export default function LivingCorpusClient({
   const resetVisit = () => {
     clearAttention();
     resetAchievements();
+    syncSectionUrl(null);
     setSelected(null);
     setActiveItem(null);
     setReaderSectionId(null);
@@ -1420,8 +1477,10 @@ export default function LivingCorpusClient({
   };
 
   return (
-    <div
+    <main
       className={styles.page}
+      data-corpus-page="home"
+      data-animate-index={animateIndex ? "true" : "false"}
       data-night={night ? "true" : "false"}
       data-open={selected ? "true" : "false"}
       data-failure={failureOpen ? "true" : "false"}
@@ -1465,11 +1524,13 @@ export default function LivingCorpusClient({
         </>
       ) : null}
 
+      <ViewTransition name="corpus-identity" share="corpus-identity" default="none">
       <header className={styles.identity}>
         <button
           type="button"
           onClick={() => {
             clearAttention();
+            syncSectionUrl(null);
             setReaderSectionId(null);
             setActiveItem(null);
             setSelected(null);
@@ -1479,23 +1540,15 @@ export default function LivingCorpusClient({
         </button>
         <p>researcher · builder · writer</p>
       </header>
+      </ViewTransition>
 
-      <nav className={styles.menu} aria-label="Portfolio sections">
-        {MINIMAL_CATEGORIES.map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            data-selected={selected === category.id ? "true" : "false"}
-            onBlur={endAttention}
-            onClick={() => chooseCategory(category.id)}
-            onFocus={() => beginAttention(category.id)}
-            onPointerEnter={() => beginAttention(category.id)}
-            onPointerLeave={endAttention}
-          >
-            {category.label}
-          </button>
-        ))}
-      </nav>
+      <CorpusNavigation
+        className={styles.menu}
+        current={selected}
+        onSelectCategory={chooseCategory}
+        onAttentionStart={beginAttention}
+        onAttentionEnd={endAttention}
+      />
 
       {attentionCategory && !selected && !failureOpen ? (
         <aside
@@ -1524,6 +1577,7 @@ export default function LivingCorpusClient({
                 clearAttention();
                 growBranch(item.category);
                 rememberEntry(item.category, `${item.id}#opened`);
+                syncSectionUrl(item.category, item.id);
                 setSelected(item.category);
                 setReaderSectionId(null);
                 setActiveItem(item);
@@ -1541,17 +1595,18 @@ export default function LivingCorpusClient({
         {activeItem ? (
           <InlineReader
             item={activeItem}
-            onBack={() => setActiveItem(null)}
+            onBack={() => { syncSectionUrl(selected); setActiveItem(null); setReaderSectionId(null); }}
             onRead={rememberEntry}
             focusSectionId={readerSectionId}
           />
         ) : selected ? (
-          <main className={styles.index} key={selected}>
+          <section className={styles.index}>
             <button
               type="button"
               className={styles.back}
               onClick={() => {
                 setActiveItem(null);
+                syncSectionUrl(null);
                 setSelected(null);
               }}
             >
@@ -1560,30 +1615,36 @@ export default function LivingCorpusClient({
             </button>
 
             <ol className={styles.list}>
-              {visibleItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      growBranch(item.category);
-                      rememberEntry(item.category, `${item.id}#opened`);
-                      setReaderSectionId(null);
-                      setActiveItem(item);
-                    }}
-                  >
-                    <div className={styles.itemHeading}>
-                      <h2>{item.title}</h2>
-                      <span className={styles.itemArrow}>
-                        <ArrowIcon />
-                      </span>
-                    </div>
-                    <p className={styles.meta}>{item.meta}</p>
-                    <p className={styles.description}>{item.description}</p>
-                  </button>
-                </li>
+              {visibleItems.map((item, index) => (
+                <Fragment key={item.id}>
+                  {selected === "writing" && index === firstIdeaIndex ? (
+                    <li className={styles.listGroupLabel}>Ideas</li>
+                  ) : null}
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        growBranch(item.category);
+                        rememberEntry(item.category, `${item.id}#opened`);
+                        setReaderSectionId(null);
+                        syncSectionUrl(item.category, item.id);
+                        setActiveItem(item);
+                      }}
+                    >
+                      <div className={styles.itemHeading}>
+                        <h2>{item.title}</h2>
+                        <span className={styles.itemArrow}>
+                          <ArrowIcon />
+                        </span>
+                      </div>
+                      <p className={styles.meta}>{item.meta}</p>
+                      <p className={styles.description}>{item.description}</p>
+                    </button>
+                  </li>
+                </Fragment>
               ))}
             </ol>
-          </main>
+          </section>
         ) : null}
       </div>
 
@@ -1597,10 +1658,6 @@ export default function LivingCorpusClient({
         />
       ) : null}
 
-      <nav className={styles.personalLinks} aria-label="Personal pages">
-        <a href="/about">About</a>
-        <a href="/gallery">Photos</a>
-      </nav>
       <button
         type="button"
         className={styles.resetControl}
@@ -1610,6 +1667,6 @@ export default function LivingCorpusClient({
       >
         ↺
       </button>
-    </div>
+    </main>
   );
 }

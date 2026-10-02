@@ -9,9 +9,9 @@
   --open-gutter: clamp(260px, 35vw, 650px);
   --shell-width: min(760px, calc(100vw - 64px));
   --open-shell-width: min(700px, calc(100vw - var(--open-gutter) - 40px));
-  --open-menu-width: 224px;
+  --open-menu-width: 360px;
   --shell-left: calc((100vw - var(--shell-width)) / 2);
-  --home-menu-width: clamp(288px, 28.3vw, 385px);
+  --home-menu-width: clamp(390px, 34vw, 460px);
   --home-anchor-left: calc(50vw - (var(--home-menu-width) / 2));
   position: relative;
   min-height: 100svh;
@@ -188,7 +188,7 @@
 .failureBackground::before {
   position: absolute;
   inset: 0;
-  background-image: url("/living-corpus/what-broke-illustration.png");
+  background-image: url("/living-corpus/what-broke-illustration-v3.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -507,7 +507,7 @@
   --xray-arrival: 350ms;
 }
 
-.subBranch[data-branch="ideas"] {
+.subBranch[data-branch="involvement"] {
   --socket-x: 42.38%;
   --socket-y: 58.59%;
   --branch-angle: -18deg;
@@ -865,12 +865,12 @@
 
 .menu {
   position: absolute;
-  top: calc(50svh + 36px);
+  top: calc(50svh + 12px);
   left: var(--home-anchor-left);
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: clamp(26px, 4vw, 56px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 20px;
   align-items: center;
   justify-content: start;
   width: var(--home-menu-width);
@@ -881,7 +881,9 @@
   will-change: top, left;
 }
 
-.menu button {
+.menu button,
+.menu a {
+  display: block;
   padding: 7px 0;
   border: 0;
   background: transparent;
@@ -890,6 +892,8 @@
   font-size: clamp(16px, 1.45vw, 19px);
   letter-spacing: -0.018em;
   text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 180ms ease,
     font-size 720ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -897,14 +901,16 @@
 
 .menu button:hover,
 .menu button:focus-visible,
+.menu a:hover,
+.menu a:focus-visible,
 .menu button[data-selected="true"] {
   color: var(--ink);
 }
 
 .menu button:focus-visible,
+.menu a:focus-visible,
 .identity button:focus-visible,
 .back:focus-visible,
-.personalLinks a:focus-visible,
 .list button:focus-visible,
 .gravityItem:focus-visible {
   outline: 1px solid var(--ink);
@@ -968,13 +974,13 @@
   top: 25%;
 }
 
-.gravityField[data-category="ideas"] .gravityItem[data-slot="2"],
+.gravityField[data-category="involvement"] .gravityItem[data-slot="2"],
 .gravityField[data-category="writing"] .gravityItem[data-slot="2"] {
   top: 34%;
 }
 
 .gravityField[data-category="projects"] .gravityItem[data-slot="3"],
-.gravityField[data-category="ideas"] .gravityItem[data-slot="3"] {
+.gravityField[data-category="involvement"] .gravityItem[data-slot="3"] {
   bottom: 12%;
 }
 
@@ -1048,18 +1054,22 @@
 }
 
 .page[data-open="true"] .menu {
-  top: clamp(40px, 7vh, 76px);
+  top: 104px;
   left: calc(var(--open-gutter) + var(--open-shell-width) - var(--open-menu-width));
   width: var(--open-menu-width);
-  gap: 25px;
+  gap: 4px 16px;
 }
 
-.page[data-open="true"] .menu button {
+.page[data-open="true"] .menu button,
+.page[data-open="true"] .menu a {
   font-size: 13px;
 }
 
 .index {
   padding-top: clamp(150px, 21vh, 210px);
+}
+
+.page[data-animate-index="true"] .index {
   animation: reveal 620ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
 }
 
@@ -1091,6 +1101,16 @@
 
 .list li {
   border-bottom: 1px solid var(--rule);
+}
+
+.list li.listGroupLabel {
+  padding: 28px 0 9px;
+  border-bottom: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 530;
+  letter-spacing: 0.095em;
+  text-transform: uppercase;
 }
 
 .list button {
@@ -1327,33 +1347,6 @@
   color: #adb4c0;
 }
 
-.personalLinks {
-  position: fixed;
-  right: calc(clamp(24px, 3.5vw, 54px) + 46px);
-  bottom: clamp(22px, 3.5vh, 42px);
-  z-index: 2;
-  display: flex;
-  gap: 18px;
-  transition: opacity 320ms ease;
-}
-
-.personalLinks a {
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  transition: color 180ms ease;
-}
-
-.personalLinks a:hover {
-  color: var(--ink);
-}
-
-.page[data-open="true"] .personalLinks {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .page[data-failure="true"] {
   background: var(--surface);
   animation: failure-background 1280ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -1366,15 +1359,13 @@
 .page[data-failure="true"] .shell,
 .page[data-failure="true"] .identity,
 .page[data-failure="true"] .menu,
-.page[data-failure="true"] .personalLinks,
 .page[data-failure="true"] .resetControl {
   animation: interface-break 1180ms cubic-bezier(0.22, 1, 0.36, 1) both;
   pointer-events: none;
   will-change: opacity, filter, transform;
 }
 
-.page[data-failure="true"] .identity,
-.page[data-failure="true"] .personalLinks {
+.page[data-failure="true"] .identity {
   animation-delay: 34ms;
 }
 
@@ -1419,8 +1410,8 @@
   background: linear-gradient(
     90deg,
     transparent 0,
-    color-mix(in srgb, var(--surface) 92%, transparent) 9%,
-    color-mix(in srgb, var(--surface) 92%, transparent) 91%,
+    color-mix(in srgb, var(--surface) 72%, transparent) 9%,
+    color-mix(in srgb, var(--surface) 72%, transparent) 91%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
@@ -1478,7 +1469,6 @@
 .page[data-failure-closing="true"] .shell,
 .page[data-failure-closing="true"] .identity,
 .page[data-failure-closing="true"] .menu,
-.page[data-failure-closing="true"] .personalLinks,
 .page[data-failure-closing="true"] .resetControl {
   animation: interface-break 980ms cubic-bezier(0.22, 1, 0.36, 1) reverse both;
 }
@@ -2295,8 +2285,8 @@
     --open-shell-width: calc(100vw - 48px);
     --open-menu-width: calc(100vw - 48px);
     --shell-left: 24px;
-    --home-menu-width: 214px;
-    --home-anchor-left: calc(50vw - 107px);
+    --home-menu-width: calc(100vw - 48px);
+    --home-anchor-left: 24px;
   }
 
   .sun {
@@ -2383,19 +2373,19 @@
   }
 
   .menu {
-    top: calc(50svh + 25px);
-    grid-template-columns: repeat(2, minmax(88px, auto));
-    row-gap: 22px;
-    column-gap: 38px;
+    top: calc(50svh + 20px);
+    row-gap: 12px;
+    column-gap: 12px;
   }
 
-  .menu button {
-    font-size: 17px;
+  .menu button,
+  .menu a {
+    font-size: 16px;
   }
 
   .page[data-open="true"] .identity {
-    top: 31px;
-    left: var(--home-anchor-left);
+    top: 112px;
+    left: 24px;
     width: max-content;
   }
 
@@ -2404,16 +2394,16 @@
   }
 
   .page[data-open="true"] .menu {
-    top: 91px;
+    top: 178px;
     left: 24px;
-    grid-template-columns: repeat(4, auto);
-    gap: 0 21px;
+    gap: 4px 12px;
     width: var(--open-menu-width);
     justify-content: start;
     animation: mobile-menu-settle 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .page[data-open="true"] .menu button {
+  .page[data-open="true"] .menu button,
+  .page[data-open="true"] .menu a {
     font-size: 12px;
   }
 
@@ -2471,11 +2461,6 @@
     padding-bottom: 34px;
   }
 
-  .personalLinks {
-    right: 70px;
-    bottom: 20px;
-  }
-
   .resetControl {
     right: 24px;
     bottom: 20px;
@@ -2497,6 +2482,13 @@
   }
 }
 
+@media (max-width: 360px) {
+  .menu button,
+  .menu a {
+    font-size: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .identity,
   .menu,
@@ -2511,7 +2503,7 @@
     transition-duration: 0.01ms;
   }
 
-  .index,
+  .page[data-animate-index="true"] .index,
   .reader,
   .failureView,
   .failureView::before,
@@ -2542,7 +2534,6 @@
   .page[data-failure="true"] .shell,
   .page[data-failure="true"] .identity,
   .page[data-failure="true"] .menu,
-  .page[data-failure="true"] .personalLinks,
   .page[data-failure="true"] .resetControl {
     animation: none;
   }
@@ -2576,7 +2567,6 @@
   .page[data-failure="true"] .shell,
   .page[data-failure="true"] .identity,
   .page[data-failure="true"] .menu,
-  .page[data-failure="true"] .personalLinks,
   .page[data-failure="true"] .resetControl {
     opacity: 0;
   }
@@ -2607,3 +2597,7 @@
     display: none;
   }
 }
+
+.readerLinks { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 24px 0; }
+.readerLinks a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.readerLinks a:hover { color: var(--ink); }

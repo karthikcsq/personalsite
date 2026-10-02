@@ -162,7 +162,7 @@
 }
 
 @media (max-width: 760px) {
-  .page { padding: 80px 0 70px; }
+  .page { padding: 50px 0 70px; }
   .heading { display: block; margin-bottom: 32px; }
   .heading h1 { margin-top: 18px; font-size: clamp(39px, 10vw, 56px); }
   .gallery { display: flex; flex-direction: column-reverse; gap: 28px; }

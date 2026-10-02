@@ -1,5 +1,7 @@
 import LivingCorpusClient from "@/app/living-corpus-draft/LivingCorpusClient";
+import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import { buildMinimalCorpusItems } from "@/lib/living-corpus/minimalHomepage";
+import { MINIMAL_CATEGORIES } from "@/lib/living-corpus/minimalTypes";
 import { buildLlmsIndex } from "@/utils/llmsIndex";
 
 // Only `</script` can terminate the block early; the rest of the markdown is
@@ -44,7 +46,21 @@ const identityJsonLd = {
   ],
 };
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string | string[]; item?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const sectionParam = params.section;
+  const itemParam = Array.isArray(params.item) ? params.item[0] : params.item;
+  const items = buildMinimalCorpusItems();
+  const initialItem = items.find((item) => item.id === itemParam) ?? null;
+  const requestedSection = Array.isArray(sectionParam) ? sectionParam[0] : sectionParam;
+  const initialSection = initialItem?.category ?? MINIMAL_CATEGORIES.find(
+    ({ id }) => id === (requestedSection === "ideas" ? "writing" : requestedSection),
+  )?.id ?? null;
+
   return (
     <>
       <script
@@ -66,15 +82,16 @@ export default function Page() {
       {/* Crawlable path into the rest of the site for agents that do not
           execute the client-side living corpus. */}
       <nav aria-label="Sections" className="sr-only">
-        <a href="/work">Work</a>
-        <a href="/projects">Projects</a>
-        <a href="/involvement">Involvement</a>
-        <a href="/notes">Notes</a>
-        <a href="/blog">Writing</a>
+        <a href="/?section=work">Work</a>
+        <a href="/?section=projects">Projects</a>
+        <a href="/?section=involvement">Involvement</a>
+        <a href="/?section=writing">Writing</a>
         <a href="/gallery">Photography</a>
         <a href="/about">About</a>
       </nav>
-      <LivingCorpusClient items={buildMinimalCorpusItems()} />
+      <CorpusPageTransition page="home">
+        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} initialSection={initialSection} initialItemId={initialItem?.id} />
+      </CorpusPageTransition>
     </>
   );
 }

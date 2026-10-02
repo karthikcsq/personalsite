@@ -142,68 +142,12 @@
 
 .world:has([role="dialog"]) .shell { z-index: 10; }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 32px;
-  padding-top: 56px;
-  margin-left: clamp(70px, 7vw, 116px);
-}
-
-.identity {
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 550;
-  letter-spacing: -0.025em;
-  white-space: nowrap;
-}
-
-.nav {
-  display: flex;
-  gap: clamp(18px, 2.3vw, 36px);
-}
-
-.nav a {
-  color: var(--muted);
-  font-size: 13px;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  transition: color 180ms ease;
-}
-
-.nav a:hover,
-.nav a[aria-current="page"] {
-  color: var(--ink);
-}
-
-.nav a[aria-current="page"] {
-  text-decoration: underline;
-  text-underline-offset: 8px;
-  text-decoration-color: var(--faint);
-}
-
 @media (max-width: 760px) {
   .shell { width: min(100% - 40px, 640px); }
-  .header {
-    margin-left: 0;
-    padding-top: 118px;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  .identity { font-size: 14px; }
-  .nav { gap: 14px; }
-  .nav a { font-size: 12px; }
   .sun { position: absolute; top: 34px; left: 20px; width: 42px; }
   .branch { position: fixed; left: -30vw; bottom: -20vw; width: 105vw; opacity: 0.1; }
   .world[data-night="true"] .branch { opacity: 0.1; }
   .world[data-xray="true"] .branch { opacity: 0.2; }
-}
-
-@media (max-width: 420px) {
-  .header { display: block; }
-  .nav { justify-content: flex-start; margin-top: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

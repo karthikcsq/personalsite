@@ -22,7 +22,7 @@ export interface AchievementRecord {
 
 export const ACHIEVEMENTS: readonly AchievementRecord[] = [
   { id: "branch", title: "First branch", description: "Grow your first category branch." },
-  { id: "all-branches", title: "All branches", description: "Grow the Work, Projects, Ideas, and Writing branches." },
+  { id: "all-branches", title: "All branches", description: "Grow the Work, Projects, Writing, and Involvement branches." },
   { id: "leaf", title: "First leaf", description: "Open your first piece of the corpus." },
   { id: "all-leaves", title: "All leaves", description: "Read every item and section in the corpus." },
   { id: "night", title: "Winter night", description: "Discover the winter version of the page." },
@@ -50,6 +50,11 @@ let growthMemory: GrowthCoverage = { branches: [], entries: [] };
 
 function isCategory(value: unknown): value is MinimalCategory {
   return typeof value === "string" && validCategories.has(value as MinimalCategory);
+}
+
+function currentCategory(value: unknown): MinimalCategory | null {
+  if (value === "ideas") return "writing";
+  return isCategory(value) ? value : null;
 }
 
 export function isAchievementRecord(value: unknown): value is AchievementRecord {
@@ -105,7 +110,7 @@ export function parseGrowthCoverage(raw: string | null, legacyAchievements: stri
     ...oldIds.filter((id) => id.startsWith("leaf:")).map((id) => id.slice(5)),
   ];
   return {
-    branches: [...new Set(branches.filter(isCategory))],
+    branches: [...new Set(branches.map(currentCategory).filter((category): category is MinimalCategory => category !== null))],
     entries: [...new Set(entries.filter((entry): entry is string =>
       typeof entry === "string" && entry.length > 0 && entry.length <= 500,
     ))],

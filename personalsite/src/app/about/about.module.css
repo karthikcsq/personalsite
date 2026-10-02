@@ -125,7 +125,7 @@
 .footer a:hover { text-decoration: underline; text-underline-offset: 5px; }
 
 @media (max-width: 760px) {
-  .page { padding: 84px 0 55px; }
+  .page { padding: 54px 0 55px; }
   .intro {
     grid-template-columns: 1fr;
     grid-template-areas: "heading" "portrait" "prose";

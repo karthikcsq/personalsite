@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import { corpusItemHref } from "./links";
+import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
 import path from "node:path";
 import matter from "gray-matter";
 import { projects } from "@/data/projectsData";
@@ -151,9 +153,14 @@ function blogMediaBySection(
 }
 
 export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
-  return buildLivingCorpus().artifacts.flatMap<MinimalCorpusItem>((artifact) => {
-    const category =
-      artifact.category === "involvement" ? "projects" : artifact.category;
+  const artifacts = buildLivingCorpus().artifacts;
+  const involvementById = new Map(getInvolvementsFromYaml().map((item) => [`involvement:${item.slug}`, item]));
+  const orderedArtifacts = [
+    ...artifacts.filter((artifact) => artifact.category !== "ideas"),
+    ...artifacts.filter((artifact) => artifact.category === "ideas"),
+  ];
+  return orderedArtifacts.flatMap<MinimalCorpusItem>((artifact) => {
+    const category = artifact.category === "ideas" ? "writing" : artifact.category;
     if (!VISIBLE_CATEGORIES.has(category as MinimalCategory)) return [];
     const normalizedDescription = artifact.description.trim().toLowerCase();
     const isWriting = artifact.category === "writing";
@@ -167,7 +174,11 @@ export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
         title: artifact.title,
         meta: artifact.meta,
         description: artifact.description,
-        href: artifact.href,
+        href: corpusItemHref(category as MinimalCategory, artifact.id),
+        fullTextHref: /^\/(blog|notes)\//.test(artifact.href) ? artifact.href : undefined,
+        links: (artifact.category === "projects"
+          ? projectsById.get(artifact.id.replace(/^project:/, ""))?.links
+          : involvementById.get(artifact.id)?.links)?.map(({ label, url }) => ({ label, url })) ?? [],
         referenceItems: artifact.referenceItems.filter(
           (reference) => reference.trim().toLowerCase() !== normalizedDescription,
         ),

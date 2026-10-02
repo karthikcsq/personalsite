@@ -1,8 +1,8 @@
 export const MINIMAL_CATEGORIES = [
   { id: "work", label: "Work" },
   { id: "projects", label: "Projects" },
-  { id: "ideas", label: "Ideas" },
   { id: "writing", label: "Writing" },
+  { id: "involvement", label: "Involvement" },
 ] as const;
 
 export type MinimalCategory = (typeof MINIMAL_CATEGORIES)[number]["id"];
@@ -29,6 +29,8 @@ export interface MinimalCorpusItem {
   meta: string;
   description: string;
   href: string;
+  fullTextHref?: string;
+  links?: Array<{ label: string; url: string }>;
   referenceItems: string[];
   media: MinimalCorpusMedia[];
   sections: Array<{

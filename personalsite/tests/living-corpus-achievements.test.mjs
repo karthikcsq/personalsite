@@ -46,6 +46,10 @@ test("only first/all growth milestones appear; old per-item awards become covera
     ])),
     { branches: ["work"], entries: ["work:samsung#opened"] },
   );
+  assert.deepEqual(
+    parseGrowthCoverage(JSON.stringify({ branches: ["ideas"] })),
+    { branches: ["writing"], entries: [] },
+  );
 });
 
 test("all leaves requires every item and every rendered section", () => {
@@ -59,8 +63,8 @@ test("all leaves requires every item and every rendered section", () => {
     },
     { id: "writing:essay", category: "writing", description: "An essay.", sections: [] },
   ];
-  assert.equal(hasAllBranches(["work", "projects", "ideas"]), false);
-  assert.equal(hasAllBranches(["writing", "ideas", "projects", "work"]), true);
+  assert.equal(hasAllBranches(["work", "projects", "writing"]), false);
+  assert.equal(hasAllBranches(["writing", "involvement", "projects", "work"]), true);
   const targets = leafTargets(items);
   assert.deepEqual(targets, ["work:samsung#opened", "work:samsung#router", "writing:essay#opened"]);
   assert.equal(hasAllLeaves(targets, []), false);
@@ -96,12 +100,12 @@ test("first leaf notification is generic; coverage persists and reset clears it"
   try {
     assert.deepEqual(readGrowthCoverage().branches, ["work"]);
     recordBranchCoverage("projects");
-    recordBranchCoverage("ideas");
+    recordBranchCoverage("involvement");
     assert.equal(hasAllBranches(readGrowthCoverage().branches), false);
     recordBranchCoverage("writing");
     assert.equal(hasAllBranches(readGrowthCoverage().branches), true);
     assert.deepEqual(JSON.parse(storage.get(GROWTH_COVERAGE_STORAGE_KEY)).branches,
-      ["work", "projects", "ideas", "writing"]);
+      ["work", "projects", "involvement", "writing"]);
 
     recordLeafCoverage("work:samsung#opened");
     assert.equal(unlockAchievement("leaf"), true);

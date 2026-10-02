@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { ViewTransition, useCallback, useLayoutEffect, useRef, useState } from "react";
+import SiteHeader from "./SiteHeader";
 import { LIVING_CORPUS_SESSION_KEYS as KEYS } from "@/lib/living-corpus/visitState";
 import { syncAchievements, unlockAchievement } from "@/lib/living-corpus/achievements";
 import styles from "./minimal-interior.module.css";
 
-type Page = "about" | "photos";
+type Page = "about" | "photos" | "work" | "projects" | "writing" | "involvement";
 
 export default function MinimalInterior({
   page,
@@ -76,10 +76,11 @@ export default function MinimalInterior({
   };
 
   return (
-    <div className={styles.world} data-night={night} data-xray={xray} data-ready={ready}>
+    <div className={styles.world} data-corpus-page={page} data-night={night} data-xray={xray} data-ready={ready}>
       <div className={styles.environment} aria-hidden="true">
         <div className={styles.branch} />
       </div>
+      <ViewTransition name="corpus-sun" share="corpus-sun" default="none">
       <button
         type="button"
         className={styles.sun}
@@ -134,17 +135,9 @@ export default function MinimalInterior({
         }}
         onContextMenu={(event) => event.preventDefault()}
       />
+      </ViewTransition>
       <div className={styles.shell}>
-        <header className={styles.header}>
-          <Link href="/" className={styles.identity} aria-label="Karthik Thyagarajan, home">
-            Karthik Thyagarajan
-          </Link>
-          <nav className={styles.nav} aria-label="Personal pages">
-            <Link href="/" className={styles.homeLink}>Home</Link>
-            <Link href="/about" aria-current={page === "about" ? "page" : undefined}>About</Link>
-            <Link href="/gallery" aria-current={page === "photos" ? "page" : undefined}>Photos</Link>
-          </nav>
-        </header>
+        <SiteHeader current={page} />
         {children}
       </div>
     </div>

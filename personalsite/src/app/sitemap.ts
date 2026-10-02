@@ -14,11 +14,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     [
       { url: `${SITE}/`, changeFrequency: "weekly", priority: 1 },
       { url: `${SITE}/about`, changeFrequency: "monthly", priority: 0.8 },
-      { url: `${SITE}/work`, changeFrequency: "monthly", priority: 0.9 },
-      { url: `${SITE}/projects`, changeFrequency: "monthly", priority: 0.9 },
-      { url: `${SITE}/involvement`, changeFrequency: "monthly", priority: 0.7 },
-      { url: `${SITE}/notes`, changeFrequency: "weekly", priority: 0.9 },
-      { url: `${SITE}/blog`, changeFrequency: "weekly", priority: 0.8 },
+      { url: `${SITE}/?section=work`, changeFrequency: "monthly", priority: 0.9 },
+      { url: `${SITE}/?section=projects`, changeFrequency: "monthly", priority: 0.9 },
+      { url: `${SITE}/?section=involvement`, changeFrequency: "monthly", priority: 0.7 },
+      { url: `${SITE}/?section=writing`, changeFrequency: "weekly", priority: 0.8 },
       { url: `${SITE}/gallery`, changeFrequency: "monthly", priority: 0.5 },
     ] satisfies MetadataRoute.Sitemap
   ).map((r) => ({ ...r, lastModified: now }));

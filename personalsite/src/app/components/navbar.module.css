@@ -1,0 +1,10 @@
+.shell {
+  position: relative;
+  z-index: 40;
+  width: min(100% - 96px, 1120px);
+  margin: 0 auto;
+}
+
+@media (max-width: 760px) {
+  .shell { width: min(100% - 40px, 640px); }
+}

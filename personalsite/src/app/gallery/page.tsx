@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import MinimalInterior from "@/app/components/MinimalInterior";
+import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import styles from "./gallery.module.css";
 
 type Albums = Record<string, string[]>;
@@ -80,7 +81,8 @@ export default function GalleryPage() {
   }, [expanded, move]);
 
   return (
-    <MinimalInterior page="photos">
+    <CorpusPageTransition page="photos">
+      <MinimalInterior page="photos">
       <main className={styles.page}>
         <div className={styles.heading}>
           <div>
@@ -122,8 +124,8 @@ export default function GalleryPage() {
                       width={1200}
                       height={800}
                       sizes="(max-width: 760px) 50vw, 420px"
-                      priority={imageIndex < 2}
-                      unoptimized
+                      loading={imageIndex < 2 ? "eager" : "lazy"}
+                      fetchPriority={imageIndex === 0 ? "high" : undefined}
                     />
                   </button>
                 ))}
@@ -152,13 +154,14 @@ export default function GalleryPage() {
             <span>{albumLabel(album)} · {index + 1} / {images.length}</span>
             <button ref={closeRef} type="button" onClick={() => setExpanded(false)} aria-label="Close photograph">Close ×</button>
           </div>
-          <Image src={selected} alt={`Photograph ${index + 1} from ${albumLabel(album)}`} fill sizes="100vw" className={styles.expandedImage} unoptimized />
+          <Image src={selected} alt={`Photograph ${index + 1} from ${albumLabel(album)}`} fill sizes="100vw" className={styles.expandedImage} loading="eager" fetchPriority="high" />
           <div className={styles.lightboxArrows}>
             <button type="button" onClick={() => move(-1)} aria-label="Previous photograph">←</button>
             <button type="button" onClick={() => move(1)} aria-label="Next photograph">→</button>
           </div>
         </div>
       )}
-    </MinimalInterior>
+      </MinimalInterior>
+    </CorpusPageTransition>
   );
 }
