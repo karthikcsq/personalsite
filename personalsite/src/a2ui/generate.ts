@@ -7,8 +7,8 @@ import {
   type A2UIArtifactLike,
   type A2UIDocument,
 } from "./protocol";
-import { validateA2UIQuotes } from "./quotes";
-import { a2uiHistoryText } from "./history";
+import { quoteFingerprint, validateA2UIQuotes } from "./quotes";
+import { a2uiHistoryText, quotesAlreadyUsed } from "./history";
 import { enforcePointOwnership } from "./points";
 import {
   asksAboutGallery,
@@ -133,7 +133,8 @@ const QUOTE_RULES = `QUOTES
 - Prefer a take, a motivation, a design rationale, or a narrative moment. The card already shows the title, dates, tools, and a blurb, so the quote must add something the card does not say.
 - Pick a quote that speaks to the specific point this answer makes about that artifact. Return no quote rather than a weak fit.
 - Reference an accepted quote from a component with quoteIds: ["quote:<artifactId>"]. Never write the quotation text into a body, item, or option.
-- A mid-quote "…" is allowed only when both halves are individually verbatim and the result reads coherently.`;
+- A mid-quote "…" is allowed only when both halves are individually verbatim and the result reads coherently.
+- Never reuse a quote that already appears in EARLIER IN THIS CONVERSATION, where past answers list theirs as "Quoted here:". Pick a different passage from that artifact's prose, or return no quote at all. The visitor can still see the earlier answer, so repeating its quote shows the same words twice.`;
 
 const POINT_RULES = `POINTS: PLAN EACH CLAIM ONCE
 - Before any visible copy, fill "points" with the distinct claims the answer needs, most important first, with ids "p1", "p2", and so on. A point is one specific claim a reader could check, never a topic or theme. Each item and option is normally its own point, so plan two to six. Two claims a reader would call the same idea are one point, however differently they are worded.
@@ -497,12 +498,24 @@ export async function generateA2UI(
     return artifacts;
   };
 
+  // Quotes earlier answers already pinned. The visitor can still see those
+  // turns, so repeating one shows the same words twice.
+  const usedQuotes = new Set(
+    quotesAlreadyUsed(conversation).map(quoteFingerprint),
+  );
+
   const build = (
     output: Record<string, unknown>,
   ): { document: A2UIDocument; artifacts: A2UIArtifactLike[] } => {
     // Settle claim ownership first, so a dropped repeat never hydrates a card.
     const raw = enforcePointOwnership(output);
-    const quotes = validateA2UIQuotes(raw.quotes, corpusFor, allowedIds);
+    const quotes = validateA2UIQuotes(
+      raw.quotes,
+      corpusFor,
+      allowedIds,
+      3,
+      usedQuotes,
+    );
     const artifacts = resolve(
       [...new Set([...referencedArtifactIds(raw), ...quotes.keys()])],
       quotes,
@@ -605,7 +618,7 @@ export async function generateA2UI(
   return {
     document: lastDocument,
     artifacts: lastArtifacts,
-    historyText: a2uiHistoryText(lastDocument),
+    historyText: a2uiHistoryText(lastDocument, lastArtifacts),
     grounded: true,
   };
 }

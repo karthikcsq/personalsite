@@ -1,0 +1,44 @@
+.compact {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 20px;
+  width: min(100%, 380px);
+}
+
+.compact a {
+  display: block;
+  padding: 5px 0;
+  color: var(--muted, var(--color-ink-muted));
+  font-size: 14px;
+  letter-spacing: -0.018em;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 180ms ease;
+}
+
+.compact a:hover,
+.compact a:focus-visible,
+.compact a[aria-current="page"] {
+  color: var(--ink, var(--color-ink));
+}
+
+.compact a[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  text-decoration-color: var(--faint, var(--color-ink-faint));
+}
+
+.compact a:focus-visible {
+  outline: 1px solid var(--ink, var(--color-ink));
+  outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .compact {
+    gap: 6px 12px;
+    width: min(100%, 350px);
+  }
+
+  .compact a { font-size: 13px; }
+}

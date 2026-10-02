@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     default: "Karthik Thyagarajan",
   },
   description:
-    "Karthik Thyagarajan — Builder, Researcher, Engineer. Ask the site anything about his work, writing, and photography.",
+    "Karthik Thyagarajan — researcher, builder, and writer. Explore his work, projects, writing, and involvement.",
   keywords: [
     "Karthik Thyagarajan",
     "Machine Learning",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     url: "https://www.karthikthyagarajan.com",
     title: "Karthik Thyagarajan",
     description:
-      "Karthik Thyagarajan — Builder, Researcher, Engineer. Ask the site anything.",
+      "Karthik Thyagarajan — researcher, builder, and writer. Explore his work, projects, writing, and involvement.",
     siteName: "Karthik Thyagarajan",
   },
   robots: {
@@ -70,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${karla.variable} ${sourceSerif.variable} h-full`}
     >
       <head>

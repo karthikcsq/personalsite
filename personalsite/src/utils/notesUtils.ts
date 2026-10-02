@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { corpusItemHref } from '@/lib/living-corpus/links';
 import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
@@ -189,7 +190,7 @@ function resolveArtifact(kind: NoteKind, slug: string): Resolved {
         title: p.title,
         subtitle: p.tools,
         meta: p.date,
-        sourceHref: `/projects#${p.id}`,
+        sourceHref: corpusItemHref("projects", `project:${p.id}`),
         sourceLabel: 'Projects',
       };
     }
@@ -202,7 +203,7 @@ function resolveArtifact(kind: NoteKind, slug: string): Resolved {
         title: job.company,
         subtitle: `${job.title} · ${job.year}`,
         meta: `${job.title} · ${job.year}`,
-        sourceHref: `/work#${slug}`,
+        sourceHref: corpusItemHref("work", `work:${slug}`),
         sourceLabel: 'Work',
       };
     }
@@ -215,7 +216,7 @@ function resolveArtifact(kind: NoteKind, slug: string): Resolved {
         title: inv.title || inv.org || slug,
         subtitle: [inv.role, inv.date].filter(Boolean).join(' · '),
         meta: [inv.role, inv.date].filter(Boolean).join(' · '),
-        sourceHref: `/involvement#${inv.slug}`,
+        sourceHref: corpusItemHref("involvement", `involvement:${inv.slug}`),
         sourceLabel: 'Involvement',
       };
     }

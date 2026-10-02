@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// The home page is a client-rendered chat UI, so an agent that fetches it gets
-// a shell and no content. When the requester is a program rather than a
-// browser, serve the markdown index instead.
+// When the requester is a program rather than a browser, serve the complete
+// markdown index of the corpus behind the interactive portfolio.
 //
 // Search engines and social preview crawlers are deliberately excluded: they
 // need the real HTML, and serving them something different from what a browser
@@ -44,9 +43,6 @@ export function middleware(request: NextRequest) {
   if (!isAgentUa && (headers.has("sec-fetch-site") || headers.has("sec-fetch-dest"))) {
     return NextResponse.next();
   }
-
-  // A shared chat link (/?q=...) has its own generated metadata worth serving.
-  if (request.nextUrl.searchParams.has("q")) return NextResponse.next();
 
   if (!isAgentUa && wantsHtml(headers.get("accept") ?? "")) return NextResponse.next();
 

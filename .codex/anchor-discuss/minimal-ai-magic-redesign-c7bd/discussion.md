@@ -1,0 +1,203 @@
+# Discussion
+
+## Current question
+How should the opened corpus become an interactive mind map for combining artifacts, displaying exact quotes, and filtering information without turning into a dense graph or AI dashboard?
+
+## Anchor-preserving points
+- [anchor] The visitor is AI-literate and should immediately recognize genuine AI-native behavior.
+- [anchor] The corpus, notes, and blogs are the identity layer; the screen is only a temporary view into them.
+- [anchor] The interface may reshape radically in response to visitor intent.
+- [anchor] Speed and legibility remain part of the magic.
+- [anchor] The home experience should not reduce Karthik to resume bullets or make the corpus feel secondary.
+
+## Interpretations
+- [interpretation] "Radically minimalist" means minimizing simultaneous information, not merely removing color, cards, and ornament.
+  - Alternative rejected: an editorially styled generated dashboard with many claims, excerpts, labels, and connectors visible at once.
+- [interpretation] Radical reshaping should happen over time as a sequence of focused states.
+  - Alternative rejected: generating a dense bespoke composition that displays the entire answer at once.
+- [interpretation] “Everything at a glance” refers to the site's four domains, not every artifact inside them.
+  - Alternative rejected: displaying representative jobs, projects, notes, and posts on the homepage before the visitor chooses a domain.
+- [interpretation] The first click should trade breadth for depth: the other categories recede while the chosen category opens into real entries and meaningful descriptions.
+  - Alternative rejected: a homepage accordion that merely adds descriptions below the four labels and makes the page progressively taller.
+- [interpretation] The mind map should be a focused interaction state, not a permanent visualization of the entire corpus.
+  - Alternative rejected: a force-directed graph with dozens of visible nodes and edges.
+- [interpretation] Combining two items should reveal evidence from Karthik's corpus, not generate a conversational answer about the pair.
+  - Alternative rejected: an AI-written synthesis paragraph, even if it is displayed without chat bubbles.
+- [interpretation] The AI should be felt through the site's transformations and source selection, not explained by AI-themed chrome.
+  - Alternative rejected: badges, latency readouts, model labels, or a conspicuous chatbot frame.
+- [interpretation] The Nemaas reference suggests minimalism through concentration: a narrow, ordinary information surface surrounded by one unusually crafted interactive system.
+  - Alternative rejected: interpreting minimalism as a nearly empty white screen with only one sentence.
+- [interpretation] The inspiring quality may be the ratio of simple content to deep environmental behavior, rather than Nemaas's particular pixel-art, monochrome, terminal, or landscape aesthetic.
+  - Alternative awaiting user confirmation: Karthik may specifically want the atmospheric visual world as well as the behavioral principle.
+
+## Options
+- [anchor] **The living line.** The resting page contains only Karthik's name and an invitation to type anywhere. Each question resolves to one distilled thought. A phrase or punctuation mark is the only source affordance. Opening it replaces the thought with the exact corpus passage; it does not add a panel.
+- [anchor] **One object at a time.** Depending on the question, the page may become a single sentence, a three-node diagram, one photograph, one timeline line, or one quotation. Never several simultaneously. The transformation is radical; the density is not.
+- [anchor] **Depth through motion.** Follow-ups replace, fold, or transmute the current object instead of appending a chat history. The browser history and share URL preserve the trail invisibly.
+- [anchor] **The living corpus.** Keep a small, calm reading column for Karthik's identity and current answer. Give the surrounding canvas to one custom semantic environment made from the corpus. Visitor actions change the environment; the environment changes what the reading column reveals.
+- [anchor] **Corpus physics.** Adapt Nemaas's authored physical interactions into semantic ones: drag two ideas together to ask what connects them; disturb a confident claim to reveal the counterexample; pull a thread from a project into the exact note that motivated it; change the "weather" from evidence to opinion to failure. Each interaction uses retrieval and exact sources rather than decorative animation.
+- [anchor] **The living thread.** Make the first screen a compact, glanceable text index of work, projects, ideas, writing, and the open-ended question. Surround it with only one continuous interactive thread. The model changes the thread's route and knots each session; the visitor can pull it between any two entries to discover a sourced relationship.
+- [anchor] **The living study.** Place the glanceable portfolio index inside one sparse, recognizable environment: a study, field station, or reading room with a desk, papers, lamp, window, trees, sun, weather, birds, and snow. AI changes the conditions, selects which corpus-linked objects surface, and directs the event sequence; every visible object remains physically understandable and hand-authored.
+- [anchor] **Winter Branch.** A dark field with one isolated branch, six snowflakes, and one vermilion berry. Strong minimalist density and tactile behavior, but close enough to Nemaas's natural/dark world to risk feeling derivative.
+- [anchor] **Solar Shadow.** A true-white field with one small vermilion sun and the sparse shadow of a sapling. The AI changes the sun position; the shadow physically touches or connects selected corpus entries. Distinctive, real, and highly restrained.
+- [anchor] **Circadian pair.** Use Solar Shadow as the daytime condition and Winter Branch as the night-mode condition. Preserve one compact, glanceable corpus index and one environmental event; only light, shadow, branch, and snow change with the condition.
+- [anchor] **Living table of contents.** Show the real internal headings of Karthik's notes as the homepage's primary material. Focusing a heading reveals an exact passage inline; the remaining headings quietly reorder by semantic relevance, while the environmental element follows the new adjacency. Opening a heading enters the complete note. The AI does not write an answer.
+- [anchor] **The light table.** Treat the compact note index as a resting shelf and the surrounding negative space as a physical working surface. A visitor can pull a heading out of the index, move it through the light, and drop it onto another heading. AI filters likely targets during the drag, then labels the combination and repaints the full page around the new lens. Text remains Karthik's own headings and passages; the magic lives in light, shadow, position, and motion.
+- [anchor] **Progressive semantic atlas.** Show the complete top-level portfolio at rest as a sparse typographic map: work, projects, ideas, writing, and their representative items. Hover previews the kind of deeper thought hidden beneath an item. Clicking moves that item to the center and replaces the top-level map with its real internal note headings plus a few cross-category relationships. Clicking inward reaches exact prose; dragging two items combines them under a short AI lens.
+- [anchor] **Four columns.** A restrained four-column directory keeps every top-level item immediately legible. Hover borrows adjacent whitespace for three deeper headings. Clearest baseline, but the preview can make the work column feel cramped.
+- [anchor] **Center-out.** Karthik's identity anchors the center while work, projects, ideas, and writing occupy four distant regions. Hover pulls deeper headings inward. Strong mind-map implication, but symmetry can feel static.
+- [anchor] **Typographic atlas.** Semantic territories are distributed asymmetrically across the canvas. Hover creates a local cluster of deeper headings. Uses space well, but arbitrary placement can reduce scanning speed.
+- [anchor] **Horizontal bands.** Each domain occupies one invisible horizontal lane. Hover expands only the active lane. Strongest at-a-glance resting state and easiest scanning while remaining sparse.
+- [anchor] **Compact-to-spatial.** Four compact index rows unfold toward the edges on hover while the selected item and deeper headings occupy the center. Strongest demonstration of repainting, but less useful as the literal resting composition.
+- [anchor] **Rain Glass.** A cool daylight field with seven draggable raindrops and one distant branch. Two selected ideas become droplets that merge into a sourced relationship. Tactile and nondeterministic, but the first concept render risks reading as atmospheric photography rather than a crafted system.
+- [anchor] **Local living map.** The map only exists around the currently selected artifact: one anchor, at most four or five related artifacts, one active semantic lens, and no permanent full-corpus graph. Selecting a new item repaints the entire local neighborhood.
+- [anchor] **Evidence-bound combine.** Drag one artifact onto another—or tap two in sequence—to reduce the scene to the pair, a short relationship label, and two to four exact quotes with source provenance. No assistant-written answer appears.
+- [anchor] **Semantic lenses.** Show a few contextual filter words as plain typography, such as trust, control, memory, failure, or evidence. Choosing one reranks the local neighborhood and changes which exact quotes surface; the atmosphere responds to the change.
+- [anchor] **Branch as topology.** The Solar Shadow branch can shift or regrow toward the small set of currently related artifacts, making semantic reconfiguration visible without permanent connector lines. Proximity, labels, and focus states still carry meaning accessibly.
+- [anchor] **Bounded nondeterminism.** AI chooses among several strongly relevant neighbors and lenses, while authored layout slots, collision rules, quote provenance, and pair caches keep the experience coherent and fast.
+- [expansion] Invisible behavioral personalization from cursor motion, referrer, or dwell time.
+  - Why it might be worth it: makes the site feel uncannily responsive before a visitor types.
+  - Cost: risks creepiness, opacity, false inference, and behavior that AI-literate visitors may recognize as a gimmick.
+
+## Direction changes proposed
+- [user-proposed] Target people who know AI rather than optimizing the front door primarily for recruiters.
+  - Status: explicitly accepted
+  - Reason: the intended reaction depends on recognizing the sophistication of the system.
+- [user-proposed] Permit radical interface reshaping.
+  - Status: explicitly accepted
+  - Reason: the corpus is stable; the presentation may be ephemeral.
+- [user-proposed] Reject the first three generated concepts as still too visually and informationally dense.
+  - Status: explicitly accepted
+  - Reason: clean editorial styling is not the same as radical minimalism.
+- [assistant-proposed] Treat minimalism as a temporal constraint: one semantic object at a time.
+  - Status: partially superseded after the Nemaas reference
+  - Reason: it preserves deep corpus access without filling the screen with the corpus all at once.
+- [user-proposed] Use Nemaas as an inspiration reference.
+  - Status: explicitly accepted as a reference; the precise transferable qualities are not yet confirmed
+  - Reason: it demonstrates a simple portfolio surface with a highly crafted, discoverable interactive environment.
+- [assistant-proposed] Reframe the site as a quiet portfolio surrounded by a living corpus rather than a blank generative answer page.
+  - Status: explicitly accepted in principle
+  - Reason: it preserves radical minimalism in the information layer while giving AI behavior a large, magical medium.
+- [user-proposed] Integrate AI as a source of real nondeterminism inside a Nemaas-like crafted experience.
+  - Status: explicitly accepted
+  - Reason: the desired magic is an authored interactive world that does not behave identically every time.
+- [assistant-proposed] Keep the visual grammar deterministic and let AI direct the content, relationships, and event sequence inside it.
+  - Status: proposed
+  - Reason: bounded generativity can produce surprise without sacrificing visual craft, speed, or coherence.
+- [user-proposed] Make the important portfolio content glanceable in the initial state while removing excess visual machinery.
+  - Status: explicitly accepted
+  - Reason: visitors should understand the site before interacting, and the earlier concept contained too many competing objects.
+- [assistant-proposed] Replace the field of mechanisms with one living thread as the complete magical layer.
+  - Status: superseded by the user's preference for recognizable physical elements
+  - Reason: one continuous object can carry nondeterminism, semantic connections, and physical delight without overwhelming the index.
+- [user-proposed] Use real environmental elements rather than abstract dots and mechanisms.
+  - Status: explicitly accepted
+  - Reason: the sun, snow, trees, and physical interactions are central to what makes the reference beautiful.
+- [assistant-proposed] Build the surrounding experience as one sparse living study or field station whose real objects are directed by AI.
+  - Status: rejected
+  - Reason: a coherent place can support glanceability, tactile discovery, corpus depth, and nondeterministic events without becoming a pile of widgets.
+- [user-proposed] Return to the minimalist quality of the first generated image and discard the more illustrative directions.
+  - Status: explicitly accepted; the exact frame is the dark `agents × verbatim` semantic-connection image
+  - Reason: later directions, especially the field-study illustration, accumulated too much visual content.
+- [user-proposed] Use the `agents × verbatim` frame as the visual anchor.
+  - Status: corrected; accepted only as a density benchmark, not a design direction
+  - Reason: its extreme negative space, compact text cluster, and single semantic event have the desired amount of minimalism, while its palette and visual language remain open.
+- [user-proposed] Continue iterating on distinct designs rather than locking the `agents × verbatim` aesthetic.
+  - Status: explicitly accepted
+  - Reason: the amount of minimalism is right, but the actual design is not yet chosen.
+- [assistant-proposed] Use TypeSafe AI as a typed semantic and scene-decision layer rather than a prose generator.
+  - Status: proposed
+  - Reason: Choice, Score, and Noul can select relationships, event types, and confidence-gated behaviors while the site retains authored visuals and avoids freeform chat.
+- [user-proposed] Lead with Solar Shadow as the daytime direction.
+  - Status: explicitly accepted
+  - Reason: it has the desired minimalist balance of true whitespace, a real natural presence, and a compact glanceable index.
+- [user-proposed] Use Winter Branch as the night-mode look paired with Solar Shadow.
+  - Status: explicitly accepted
+  - Reason: the dark winter condition keeps the same restrained density while giving the site an atmospheric nighttime identity.
+- [user-proposed] Reject the generated semantic-answer state as chat in another form.
+  - Status: explicitly accepted
+  - Reason: two excerpts plus an AI-written relationship still read as a system responding to a prompt rather than as a better display of Karthik's notes.
+- [assistant-proposed] Make the notes a living table of contents and limit AI to curation, semantic reordering, and physical behavior.
+  - Status: accepted as the resting state, but insufficient as the complete dynamic behavior
+  - Reason: visitors encounter Karthik's own claims immediately, while AI-native behavior remains visible without creating an assistant voice.
+- [user-proposed] Let AI create short labels and filters for notes.
+  - Status: explicitly accepted
+  - Reason: AI can add a useful semantic lens without becoming a conversational narrator.
+- [user-proposed] Make repainting spatial and physical through dragging, combining, moving elements, background changes, and environmental motion.
+  - Status: explicitly accepted
+  - Reason: the desired dynamism should use the empty canvas rather than filling it with more words.
+- [assistant-proposed] Use the living note index as a resting shelf and the surrounding canvas as a light table where notes can be pulled out and combined.
+  - Status: rejected as a dominant visual metaphor
+  - Reason: it combines glanceable notes, real physical behavior, AI labeling/filtering, and radical but sparse repainting in one interaction grammar.
+- [assistant-proposed] Explore five physical systems: Sunprint Light Table, Frosted Night Window, Living Herbarium, Tensioned Thread, and Folding Book.
+  - Status: rejected
+  - Reason: all five became visually substantial scenes or props and failed the radical-minimalism requirement.
+- [user-proposed] Begin with every important portfolio domain visible at a glance, then let visitors click inward as if navigating a mind map.
+  - Status: proposed, strongly preferred over the physical-system concepts
+  - Reason: it makes the site understandable before interaction while letting semantic depth replace, rather than accumulate on, the screen.
+- [assistant-proposed] Make typography the interface and keep natural elements as quiet atmospheric background conditions only.
+  - Status: proposed
+  - Reason: this preserves Solar Shadow/Winter Branch atmosphere without letting illustration or physical props compete with the corpus.
+- [assistant-proposed] Combine the Horizontal Bands resting state with the Compact-to-Spatial interaction state.
+  - Status: superseded by the clarified four-entrance structure; no visual composition has been selected by the user
+  - Reason: the first provides immediate scanability; the second turns a click into a visibly radical but still sparse repaint.
+- [user-proposed] Reduce the base state to four large clickable categories, then open the selected category into its entries and descriptions.
+  - Status: explicitly accepted
+  - Reason: the homepage should communicate the whole site's shape at a glance without also exposing all of its contents.
+- [user-proposed] Reject oversized category and entry typography as non-minimal.
+  - Status: explicitly accepted
+  - Reason: “big clickable categories” meant primary navigational choices, not large visual scale; the information surface itself should stay compact.
+- [user-proposed] Keep the accepted compact scale but restore the missing branch shadow.
+  - Status: explicitly accepted
+  - Reason: the natural element must be perceptible enough to give the empty field atmosphere and later carry behavior.
+- [user-proposed] Restore the larger sun and stronger branch from the earlier Solar Shadow composition.
+  - Status: explicitly accepted
+  - Reason: the latest correction was still too timid and used the wrong bare-branch, lower-right visual grammar. Daytime should use the established upper-left sun and soft leafy lower-left shadow; compactness applies to the information surface, not to erasing the atmosphere.
+- [assistant-proposed] Treat the homepage and opened category as two distinct full-viewport compositions rather than an expanding list.
+  - Status: proposed
+  - Reason: a complete repaint makes the transition feel magical while preserving minimalism at both depths.
+- [assistant-proposed] Treat the mind map as a temporary local projection rather than a screen containing the whole graph.
+  - Status: proposed
+  - Reason: it preserves the newly accepted minimal scale while still allowing radical semantic exploration.
+- [assistant-proposed] Make exact quotes the atomic evidence unit for combines and filters.
+  - Status: proposed
+  - Reason: visitors learn Karthik's actual thinking, and the AI demonstrates retrieval and relationship judgment without becoming a narrator.
+- [assistant-proposed] Use one coherent three-state grammar: category index → local map → evidence-bound pair.
+  - Status: proposed and visualized; not yet accepted
+  - Reason: each action replaces the prior composition, so discovery depth increases without accumulating a dense graph or transcript.
+- [assistant-proposed] Keep filtering as a small plain-text semantic lens row rather than permanent controls or pills.
+  - Status: rejected
+  - Reason: it makes AI classification visible and interactive while keeping interface chrome nearly absent.
+- [user-proposed] Make semantic filtering completely automatic rather than exposing clickable lens controls.
+  - Status: explicitly accepted
+  - Reason: visitors should interact with Karthik's artifacts, not operate an AI filtering interface.
+- [assistant-proposed] Prototype the interaction behind a provider boundary using a local corpus engine, then integrate TypeSafe directly once the behavior is approved.
+  - Status: proposed implementation approach
+  - Reason: this permits instant interaction testing without keys or latency and avoids building an OpenAI-shaped temporary architecture that would later need to be rewritten.
+
+## Risks
+- [risk] A near-empty interface could look unfinished unless the typography, transition quality, and first interaction are exceptional.
+- [risk] Hiding too much can make corpus depth undiscoverable; one tiny affordance must reliably reveal the source.
+- [risk] One-line synthesis can overstate or flatten nuance. Exact source transitions and uncertainty states must remain available.
+- [risk] A persistent chat transcript would slowly recreate maximalism.
+- [risk] Generated layouts could become a design demo rather than a compelling portrait of Karthik.
+- [risk] Copying Nemaas's pixel art, terminal typography, scenery, or hidden-interaction checklist would borrow its identity rather than its principle.
+- [risk] A semantic environment can become decorative if its interactions do not retrieve, connect, or challenge real corpus evidence.
+- [risk] A richly illustrated environment can become visually maximalist; recognizable objects must share one scene and remain sparse.
+- [risk] TypeSafe AI returns decisions rather than prose, so exact corpus excerpts or a separate tightly structured synthesis step are still needed when an interaction must explain a relationship.
+- [risk] Sampling directly from returned probability distributions is an application-level nondeterminism design, not a documented guarantee of the TypeSafe model itself.
+- [risk] Giving day and night unrelated interaction grammars could make the site feel like two demos. Their semantic behavior should remain legible as one system even when the physical expression changes.
+- [risk] Any synthesized relationship sentence can pull the experience back toward chat, even without an input box or message bubbles.
+- [risk] A notes index can become visually ordinary unless semantic reordering, exact-passage expansion, and environmental motion feel immediate and exceptionally crafted.
+- [risk] Scattering many note titles across the canvas would turn “using the space” into a different form of maximalism. The canvas should hold only the active note, likely targets, and one environmental event.
+- [risk] Dragging can become a desktop-only novelty. The same combine operation needs a deliberate keyboard and touch path without introducing permanent control chrome.
+- [risk] A fully visible mind map can become a dense node graph. Hide edges until focus, cap the number of visible relationships, and repaint the map between depths instead of expanding everything simultaneously.
+- [risk] Visitors will not interact if the first expansion promises only résumé detail. Hover and first click must surface specific, opinionated note headings that feel worth following.
+- [risk] A static typographic concept may look merely elegant rather than AI-native. The displacement, timing, semantic target selection, and continuity between rest and focus must carry the magic.
+- [risk] Four bare labels can feel like a conventional portfolio menu. Their spatial transition into the opened category must create continuity and promise depth before the AI layer appears.
+- [risk] Descriptions can quickly recreate the original density. Keep them concise, real, and visible only after a category has been chosen.
+- [risk] Using scale as the main hierarchy signal turns a sparse layout into a typographic poster. Prefer modest type sizes, careful spacing, weight, and motion.
+- [risk] A force-directed graph, persistent labels, or many visible edges would immediately violate the accepted minimalist scale.
+- [risk] Drag-only combining is undiscoverable and inaccessible. Tap-to-select, keyboard selection, and one transient teaching cue must provide equivalent paths.
+- [risk] If every interaction asks a model before responding, the site will feel slow. Precomputed relationships and quote spans should paint immediately; live AI should only rerank or introduce occasional novelty.
+- [risk] Nondeterministic relationship wording can undermine trust. Vary the route through verified material, not the evidence or meaning of a saved pair.

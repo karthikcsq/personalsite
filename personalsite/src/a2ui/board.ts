@@ -244,6 +244,7 @@ function componentDrafts(
   artifacts: Map<string, BoardArtifact>,
   claim: (artifactId: string) => string,
   claimable: (artifactId: string) => boolean,
+  quoted: Set<string>,
 ): { drafts: BoardPieceDraft[]; leftovers: string[] } {
   const key = (role: string) => `${slot}:${component.id}:${role}`;
   const navigationPath = componentNavigationPath(component, actions) ?? "";
@@ -257,6 +258,10 @@ function componentDrafts(
     const artifact = artifacts.get(artifactId);
     const text = artifact?.annotation?.trim();
     if (!artifact || !text) return [];
+    // One quote, one card. Two components naming the same quote pinned the
+    // same words to the board twice.
+    if (quoted.has(artifactId)) return [];
+    quoted.add(artifactId);
     const draft = emptyDraft(key(`quote:${artifactId}`), "quote", component.id, slot);
     draft.quote = stripWrappingQuotes(text);
     draft.attribution = artifact.label;
@@ -389,6 +394,8 @@ export function buildBoard(
     })),
   ];
 
+  const quoted = new Set<string>();
+
   for (const { component, slot } of slots) {
     const result = componentDrafts(
       component,
@@ -397,6 +404,7 @@ export function buildBoard(
       known,
       claim,
       claimable,
+      quoted,
     );
     drafts.push(...result.drafts);
     sourceArtifactIds.push(...result.leftovers);

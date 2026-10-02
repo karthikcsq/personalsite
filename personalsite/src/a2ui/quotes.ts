@@ -31,6 +31,13 @@ function normalizeNeedle(value: string): string {
     .trim();
 }
 
+/** Identity of a quote's words, ignoring the curly quotes and whitespace that
+ * differ between the stored form and a fresh proposal. Two quotes with the
+ * same fingerprint would put the same words on screen twice. */
+export function quoteFingerprint(value: string): string {
+  return normalizeNeedle(value);
+}
+
 /** True when every segment of the candidate appears verbatim in the corpus.
  * A mid-quote ellipsis is allowed; both halves must match independently. */
 export function isVerbatimQuote(corpus: string, candidate: string): boolean {
@@ -96,6 +103,7 @@ export function validateA2UIQuotes(
   corpusFor: (artifactId: string) => string,
   allowedArtifactIds: Set<string>,
   limit = 3,
+  alreadyUsed: ReadonlySet<string> = new Set(),
 ): Map<string, string> {
   const accepted = new Map<string, string>();
   if (!Array.isArray(raw)) return accepted;
@@ -115,6 +123,13 @@ export function validateA2UIQuotes(
     }
     if (text.length > MAX_QUOTE_CHARS) {
       console.warn(`A2UI quote rejected (too long) for ${artifactId}`);
+      continue;
+    }
+    // An earlier answer in this conversation already pinned these words, and
+    // the visitor can still see it. The model is asked not to repeat one; this
+    // is the part that does not depend on it complying.
+    if (alreadyUsed.has(quoteFingerprint(text))) {
+      console.warn(`A2UI quote rejected (already used this conversation) for ${artifactId}`);
       continue;
     }
     const corpus = corpusFor(artifactId);

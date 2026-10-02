@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getPostBySlug, getSortedPosts } from "@/utils/blogUtils";
-import { OG_COLORS, OgBotanicalFrame } from "@/app/og-brand";
+import { OG_COLORS, OgCorpusFrame } from "@/app/og-brand";
 
 export const alt = "Blog post by Karthik Thyagarajan";
 export const size = { width: 1200, height: 630 };
@@ -29,8 +29,8 @@ async function loadGoogleFont(
 
 function titleFontSize(title: string): number {
   const len = title.length;
-  if (len <= 28) return 104;
-  if (len <= 48) return 84;
+  if (len <= 28) return 72;
+  if (len <= 48) return 64;
   if (len <= 72) return 68;
   if (len <= 100) return 56;
   return 48;
@@ -61,7 +61,7 @@ export default async function BlogOpengraphImage({
   const fontText = `${post.title}${date}${eyebrow}${url}`;
 
   const [serif, mono] = await Promise.all([
-    loadGoogleFont("Source Serif 4", 500, "italic", fontText),
+    loadGoogleFont("Karla", 500, "normal", fontText),
     loadGoogleFont("JetBrains Mono", 500, "normal", fontText),
   ]);
 
@@ -69,17 +69,19 @@ export default async function BlogOpengraphImage({
     (
       <div
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           background: OG_COLORS.surface,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "84px 96px",
+          padding: 0,
           color: OG_COLORS.ink,
         }}
       >
-        <OgBotanicalFrame />
+        <OgCorpusFrame />
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: "84px 140px" }}>
         <div
           style={{
             display: "flex",
@@ -111,7 +113,7 @@ export default async function BlogOpengraphImage({
         <div
           style={{
             display: "flex",
-            fontFamily: "serif",
+            fontFamily: "sans",
             fontStyle: "italic",
             fontWeight: 500,
             fontSize: titleFontSize(post.title),
@@ -137,12 +139,13 @@ export default async function BlogOpengraphImage({
           <span style={{ display: "flex" }}>{date}</span>
           <span style={{ display: "flex" }}>{url}</span>
         </div>
+        </div>
       </div>
     ),
     {
       ...size,
       fonts: [
-        { name: "serif", data: serif, style: "italic", weight: 500 },
+        { name: "sans", data: serif, style: "normal", weight: 500 },
         { name: "mono", data: mono, style: "normal", weight: 500 },
       ],
     },

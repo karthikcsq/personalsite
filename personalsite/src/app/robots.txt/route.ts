@@ -6,10 +6,8 @@ const SITE = "https://www.karthikthyagarajan.com";
 
 const body = `User-agent: *
 Allow: /
-# /api/* is chat and gallery data, not content. /a2ui-draft is a scratch page.
-# Neither should burn crawl budget.
+# API responses are data, not portfolio pages.
 Disallow: /api/
-Disallow: /a2ui-draft
 
 Sitemap: ${SITE}/sitemap.xml
 Host: ${SITE}

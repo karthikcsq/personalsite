@@ -2,10 +2,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const homeChat = readFileSync(
-  new URL("../src/app/HomeChatClient.tsx", import.meta.url),
-  "utf8",
-);
 const chatInput = readFileSync(
   new URL("../src/app/components/ChatInput.tsx", import.meta.url),
   "utf8",
@@ -41,10 +37,6 @@ const assetCatalog = readFileSync(
   new URL("../src/a2ui/assetCatalog.ts", import.meta.url),
   "utf8",
 );
-const chatRoute = readFileSync(
-  new URL("../src/app/api/chat/route.ts", import.meta.url),
-  "utf8",
-);
 const modelRouting = readFileSync(
   new URL("../src/utils/modelRouting.ts", import.meta.url),
   "utf8",
@@ -54,31 +46,8 @@ const galleryIndex = readFileSync(
   "utf8",
 );
 
-test("desktop chat panes stay constrained to the viewport track", () => {
-  assert.match(homeChat, /grid h-full min-h-0[^"]*overflow-hidden/);
-  assert.match(homeChat, /flex h-full min-h-0 flex-col/);
-  assert.match(homeChat, /min-h-0 flex-1 overflow-y-auto/);
-  assert.match(homeChat, /h-full min-h-0 overflow-y-auto/);
-});
 
-test("queue growth cannot shrink the docked input out of view", () => {
-  assert.match(homeChat, /max-w-\[620px\] shrink-0 pb-5/);
-  assert.match(chatInput, /max-w-\[620px\] shrink-0/);
-  assert.match(a2uiStyles, /\.composerDock\s*\{\s*position: fixed;/);
-});
 
-test("A2UI surfaces queued follow-ups in the conversation rail", () => {
-  assert.match(homeChat, /queuedPrompts=\{queue\}/);
-  assert.match(a2uiExperience, /aria-label="Queued follow-ups"/);
-  assert.match(homeChat, /onEditQueued=\{startEditQueue\}/);
-  assert.match(homeChat, /onReorderQueued=\{reorderQueue\}/);
-  assert.match(a2uiExperience, /<Reorder\.Group/);
-  assert.match(a2uiExperience, /<Reorder\.Item/);
-  assert.doesNotMatch(a2uiExperience, /Move queued question up/);
-  assert.doesNotMatch(a2uiExperience, /Move queued question down/);
-  assert.match(a2uiStyles, /\.queuedFollowUps/);
-  assert.match(a2uiStyles, /border-radius: 15px 15px 15px 5px/);
-});
 
 test("evidence slips collapse before their titles become too narrow", () => {
   assert.match(
@@ -216,15 +185,6 @@ test("project workbench assets reserve a stable column without splitting heading
   );
 });
 
-test("the chat route falls back when sparse vector ids drift from the index", () => {
-  assert.match(chatRoute, /sparseResultsLookMisaligned/);
-  assert.match(
-    chatRoute,
-    /retrying with dense retrieval[\s\S]*baselineResponse = await index\.query\(\{\s*vector: baselineEmbedding,\s*topK: 30,/,
-  );
-  assert.match(chatRoute, /relevanceThresholdForMode\(retrievalMode\)/);
-  assert.doesNotMatch(chatRoute, /favorite project.*Repple/i);
-});
 
 test("four-stage papers use a content-sized two-by-two layout", () => {
   assert.match(
@@ -237,23 +197,6 @@ test("four-stage papers use a content-sized two-by-two layout", () => {
   );
 });
 
-test("fresh A2UI responses choose a host-owned visual family and safe composition", () => {
-  assert.match(homeChat, /presentationSeed/);
-  assert.match(homeChat, /crypto\.getRandomValues/);
-  assert.match(a2uiExperience, /type A2UIVisualVariant = "folio" \| "diagram" \| "margin"/);
-  assert.match(a2uiExperience, /mixPresentationSeed\(presentationSeed, "document:visual"\)/);
-  assert.match(a2uiExperience, /compositionCandidates\(/);
-  assert.match(a2uiExperience, /data-visual=\{visualVariant\}/);
-  assert.match(a2uiExperience, /function recentVisualVariantsForTurns/);
-  assert.match(
-    a2uiExperience,
-    /visualVariantForSeed\([\s\S]*?previous \? \[previous\] : \[\]/,
-  );
-  assert.match(
-    a2uiExperience,
-    /mixPresentationSeed\(presentationSeed, "document:visual"\),\s*recentVisualVariants/,
-  );
-});
 
 test("semantic type, composition, and item arrangement rotate independently", () => {
   assert.match(a2uiPresentation, /export function mixPresentationSeed/);
@@ -367,17 +310,6 @@ test("focused A2UI answers use adaptive density instead of mandatory grids", () 
   );
 });
 
-test("unified route uses the A2UI model without a separate answer call", () => {
-  assert.match(modelRouting, /"OPENAI_ANSWER_FAST_MODEL"/);
-  assert.match(modelRouting, /legacyAnswerModel \|\| "gpt-5-mini"/);
-  assert.match(modelRouting, /legacyAnswerModel \|\| "gpt-5\.6-luna"/);
-  assert.match(modelRouting, /"GEMINI_A2UI_MODEL", GEMINI_FAST_MODEL/);
-  assert.match(modelRouting, /const SIMPLE_FACT/);
-  assert.match(modelRouting, /const COMPLEX_QUESTION/);
-  assert.match(chatRoute, /generateA2UI\(/);
-  assert.doesNotMatch(chatRoute, /selectAnswerRoute\(|composeA2UI\(/);
-  assert.match(a2uiComposer, /MODEL_CONFIG\.a2uiModel/);
-});
 
 test("role questions cannot ship an empty source sheet as the primary", () => {
   assert.match(a2uiComposer, /asksAboutPersonalContribution/);
@@ -408,17 +340,6 @@ test("answer and A2UI prompts count exact award placements as wins", () => {
   );
 });
 
-test("answer generation and A2UI composition share one evidence contract", () => {
-  assert.match(a2uiGenerator, /GROUNDING/);
-  assert.match(chatRoute, /MATCHING CANONICAL PORTFOLIO RECORDS/);
-  assert.match(chatRoute, /LIVE GALLERY DIRECTORY/);
-  assert.match(a2uiGenerator, /Award placements are wins/);
-  assert.match(a2uiComposer, /ANSWER AND EVIDENCE CONTRACT/);
-  assert.match(a2uiComposer, /withGuaranteedSourceAccess/);
-  assert.match(a2uiComposer, /hasAnswerBearingPrimary/);
-  assert.match(a2uiComposer, /For a gallery answer, include one open_path action/);
-  assert.match(a2uiComposer, /Award placements are wins/);
-});
 
 test("essay layouts align their paper and notes and embed the quote below the paper", () => {
   assert.match(a2uiExperience, /const embeddedQuote =/);

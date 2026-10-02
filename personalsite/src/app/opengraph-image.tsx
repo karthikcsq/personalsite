@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
-import { OG_COLORS, OgBotanicalFrame } from "@/app/og-brand";
+import { OG_COLORS, OgCorpusFrame } from "@/app/og-brand";
 
 export const alt =
-  "Karthik Thyagarajan — Builder, Researcher, Engineer";
+  "Karthik Thyagarajan — Researcher, Builder, Writer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -22,7 +22,7 @@ async function loadGoogleFont(
 }
 
 export default async function OpengraphImage() {
-  const headline = "Builder, Researcher, Engineer.";
+  const headline = "Researcher, Builder, Writer.";
   const eyebrow = "KARTHIK THYAGARAJAN";
   const url = "karthikthyagarajan.com";
   const fontText = `${headline}${eyebrow}${url}`;
@@ -36,17 +36,19 @@ export default async function OpengraphImage() {
     (
       <div
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           background: OG_COLORS.surface,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "84px 96px",
+          padding: 0,
           color: OG_COLORS.ink,
         }}
       >
-        <OgBotanicalFrame />
+        <OgCorpusFrame />
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: "84px 140px" }}>
         <div
           style={{
             display: "flex",
@@ -80,15 +82,15 @@ export default async function OpengraphImage() {
             display: "flex",
             flexDirection: "column",
             fontFamily: "sans",
-            fontSize: 110,
+            fontSize: 68,
             fontWeight: 500,
             lineHeight: 1,
-            letterSpacing: -4,
+            letterSpacing: -2,
             color: OG_COLORS.ink,
           }}
         >
-          <span style={{ display: "flex" }}>Builder, Researcher,</span>
-          <span style={{ display: "flex" }}>Engineer.</span>
+          <span style={{ display: "flex" }}>Researcher, Builder,</span>
+          <span style={{ display: "flex" }}>Writer.</span>
         </div>
 
         <div
@@ -102,7 +104,8 @@ export default async function OpengraphImage() {
           }}
         >
           <span style={{ display: "flex" }}>{url}</span>
-          <span style={{ display: "flex" }}>Ask the site anything.</span>
+          <span style={{ display: "flex" }}>Work · Projects · Writing · Involvement</span>
+        </div>
         </div>
       </div>
     ),

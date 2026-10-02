@@ -884,15 +884,28 @@ export function sanitizeA2UIDocument(
         .filter((component): component is A2UIComponent => component !== null)
     : [];
 
+  // One quote belongs to one component. When two named the same quote, the
+  // surface rendered those words twice.
+  const claimedQuotes = new Set<string>();
+  const claimQuotes = (component: A2UIComponent): A2UIComponent => {
+    const quoteIds = component.quoteIds.filter((id) => !claimedQuotes.has(id));
+    for (const id of quoteIds) claimedQuotes.add(id);
+    return quoteIds.length === component.quoteIds.length
+      ? component
+      : { ...component, quoteIds };
+  };
+  primary = claimQuotes(primary);
+  supporting = supporting.map(claimQuotes);
+
   const firstQuoteId = allowedQuotes.values().next().value as string | undefined;
   if (firstQuoteId && options.autoQuote !== false) {
-    const existingQuote = [primary, ...supporting].find(
-      (component) =>
-        component.type === "quote_focus" &&
-        component.quoteIds.includes(firstQuoteId),
+    const existingQuote = [primary, ...supporting].find((component) =>
+      component.quoteIds.includes(firstQuoteId),
     );
-    supporting = existingQuote && existingQuote !== primary
-      ? [existingQuote]
+    supporting = existingQuote
+      ? existingQuote === primary
+        ? supporting
+        : [existingQuote]
       : primary.type === "quote_focus"
         ? []
         : [{

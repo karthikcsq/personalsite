@@ -1,0 +1,155 @@
+.world {
+  --surface: #fff;
+  --ink: #202124;
+  --muted: #7b808b;
+  --faint: #a6abb4;
+  --rule: rgba(32, 33, 36, 0.13);
+  position: relative;
+  min-height: 100svh;
+  overflow: clip;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 850ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.world[data-ready="false"],
+.world[data-ready="false"] .sun,
+.world[data-ready="false"] .sun::after,
+.world[data-ready="false"] .branch {
+  transition: none;
+}
+
+.world[data-night="true"] {
+  --surface: #090d14;
+  --ink: #f3f5f8;
+  --muted: #9aa2b0;
+  --faint: #7a8392;
+  --rule: rgba(223, 231, 242, 0.14);
+}
+
+.world[data-xray="true"]:not([data-night="true"]) {
+  --surface: #b8bcc0;
+  --muted: #545b64;
+}
+
+.environment {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.branch {
+  position: absolute;
+  left: -8vw;
+  bottom: -7vw;
+  width: min(67vw, 840px);
+  aspect-ratio: 3 / 2;
+  background: url("/living-corpus/bare-branch-shadow-knobless.png") center / contain no-repeat;
+  opacity: 0.37;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 7%, transparent 40%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 7%, transparent 40%);
+  transition: opacity 850ms ease, filter 850ms ease;
+}
+
+.world[data-night="true"] .branch {
+  background-image: url("/living-corpus/winter-branch.png");
+  filter: invert(1) saturate(0) brightness(1.15);
+  opacity: 0.26;
+}
+
+.world[data-xray="true"] .branch {
+  opacity: 0.58;
+}
+
+.sun {
+  position: fixed;
+  z-index: 5;
+  top: clamp(48px, 8vh, 96px);
+  left: clamp(42px, 6vw, 104px);
+  width: clamp(42px, 3.7vw, 58px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f14b29;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 800ms ease, box-shadow 800ms ease;
+}
+
+.sun::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #292c30;
+  content: "";
+  opacity: 0;
+  transform: translateX(112%);
+  transition: opacity 180ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 800ms ease;
+}
+
+.sun[data-charging="true"]::after,
+.sun[data-eclipsed="true"]::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sun[data-eclipsed="true"] {
+  box-shadow: 0 0 0 1px rgba(255, 202, 155, 0.65),
+    0 0 11px 2px rgba(247, 119, 63, 0.28),
+    0 0 28px rgba(241, 75, 41, 0.17);
+}
+
+.world[data-night="true"] .sun {
+  background: #eef4fb;
+  box-shadow: 0 0 24px rgba(203, 221, 241, 0.16);
+}
+
+.world[data-night="true"] .sun[data-charging="true"],
+.world[data-night="true"] .sun[data-eclipsed="true"] {
+  background: #893b39;
+  box-shadow: 0 0 22px rgba(142, 50, 48, 0.27), 0 0 54px rgba(142, 50, 48, 0.1);
+}
+
+.world[data-night="true"] .sun::after {
+  background: #090d14;
+}
+
+.world[data-night="true"] .sun[data-eclipsed="true"]::after {
+  opacity: 0.12;
+}
+
+.sun:focus-visible,
+.world a:focus-visible,
+.world button:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 5px;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 96px, 1120px);
+  min-height: 100svh;
+  margin: 0 auto;
+}
+
+.world:has([role="dialog"]) .shell { z-index: 10; }
+
+@media (max-width: 760px) {
+  .shell { width: min(100% - 40px, 640px); }
+  .sun { position: absolute; top: 34px; left: 20px; width: 42px; }
+  .branch { position: fixed; left: -30vw; bottom: -20vw; width: 105vw; opacity: 0.1; }
+  .world[data-night="true"] .branch { opacity: 0.1; }
+  .world[data-xray="true"] .branch { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world, .branch, .sun, .sun::after { transition-duration: 0.01ms !important; }
+}

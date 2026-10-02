@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
         port: '', // Leave empty for default ports
         pathname: '/galleryimgs/**', // Match all images under the galleryimgs folder
       },
+      {
+        protocol: 'https',
+        hostname: 'kt-personalsite.s3.us-east-2.amazonaws.com',
+        port: '',
+        pathname: '/blog/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

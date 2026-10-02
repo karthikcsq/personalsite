@@ -1,3 +1,4 @@
+import { corpusItemHref } from "@/lib/living-corpus/links";
 import { getJobsFromYaml } from "@/utils/jobUtils";
 import { getProjectsFromYaml } from "@/utils/projectUtils";
 import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
@@ -86,7 +87,7 @@ function line(parts: {
   return `- ${head} -${body} ${links.join(" ")}`;
 }
 
-// The home page is server-rendered on demand (its metadata reads ?q), so
+// The home page is server-rendered on demand (its section comes from the URL), so
 // without this the whole corpus would be re-read from disk on every request.
 // Dev skips the cache so edits to YAML or corpus files show up on reload.
 let cached: string | null = null;
@@ -125,8 +126,7 @@ function render(): string {
   out.push("");
   out.push(
     "Any note page is also available as raw markdown by appending `/raw` to its URL. " +
-      "For questions this index does not answer there is a retrieval-backed chat at " +
-      `${SITE}/?q=<your+question>.`,
+      "Explore Work, Projects, Writing, and Involvement from the interactive portfolio.",
   );
   out.push("");
 
@@ -141,7 +141,7 @@ function render(): string {
           title: `${job.title}, ${job.company}`,
           meta: job.year,
           summary: truncate(job.description.join(" ")),
-          url: `${SITE}/work#${slug}`,
+          url: `${SITE}${corpusItemHref("work", `work:${slug}`)}`,
           notes: noteFor("work", slug),
         }),
       );
@@ -158,7 +158,7 @@ function render(): string {
           title: project.title,
           meta: [project.date, project.tools].filter(Boolean).join(" - "),
           summary: truncate(project.description),
-          url: `${SITE}/projects#${project.id}`,
+          url: `${SITE}${corpusItemHref("projects", `project:${project.id}`)}`,
           notes: noteFor("project", project.id),
           links: (project.links ?? []).map((l) => ({ label: l.label, url: l.url })),
         }),
@@ -181,7 +181,7 @@ function render(): string {
           title: entry.title,
           meta: [entry.date, entry.tools].filter(Boolean).join(" - "),
           summary: truncate(entry.bullets.join(" ")),
-          url: entry.link || `${SITE}/projects`,
+          url: entry.link || `${SITE}/?section=projects`,
         }),
       );
     }
@@ -198,7 +198,7 @@ function render(): string {
           title: `${item.title}${item.org && item.org !== item.title ? `, ${item.org}` : ""}`,
           meta: [item.role, item.date].filter(Boolean).join(" - "),
           summary: truncate(item.tagline || item.whatItIs),
-          url: `${SITE}/involvement#${item.slug}`,
+          url: `${SITE}${corpusItemHref("involvement", `involvement:${item.slug}`)}`,
           notes: noteFor("involvement", item.slug),
           links: (item.links ?? []).map((l) => ({ label: l.label, url: l.url })),
         }),
@@ -217,7 +217,7 @@ function render(): string {
         line({
           title: topic.title,
           summary: truncate(topic.tagline),
-          url: noteUrl ?? `${SITE}/notes`,
+          url: noteUrl ?? `${SITE}/?section=writing`,
         }),
       );
     }
@@ -263,7 +263,7 @@ function render(): string {
   out.push("## Other pages");
   out.push("");
   out.push(`- **About** - longer bio and background. [page](${SITE}/about)`);
-  out.push(`- **Notes index** - every long-form writeup in one list. [page](${SITE}/notes)`);
+  out.push(`- **Writing** - essays and ideas. [page](${SITE}/?section=writing)`);
   out.push(`- **Gallery** - photography. [page](${SITE}/gallery)`);
   out.push(`- **Resume** - PDF. [file](${SITE}/resume.pdf)`);
   out.push("");
