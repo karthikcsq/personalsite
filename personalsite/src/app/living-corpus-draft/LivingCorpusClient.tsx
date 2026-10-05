@@ -37,6 +37,9 @@ import {
 } from "@/lib/living-corpus/achievements";
 import styles from "./living-corpus.module.css";
 
+const FAILURE_TRANSITION_MS = 560;
+const FAILURE_GLITCH_MS = 180;
+
 function ArrowIcon({ back = false }: { back?: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 18 18" width="18" height="18" fill="none">
@@ -881,9 +884,6 @@ function Environment({
         }}
       />
       </ViewTransition>
-      {failure ? (
-        <div className={styles.failureBackground} aria-hidden="true" />
-      ) : null}
       <div
         className={styles.branch}
         data-night={night ? "true" : "false"}
@@ -1007,6 +1007,16 @@ function Environment({
   );
 }
 
+function FailureGlitchText({ children }: { children: string }) {
+  return (
+    <span className={styles.failureGlitchText}>
+      {children}
+      <span className={styles.failureGlitchCopy} data-slice="one" aria-hidden="true">{children}</span>
+      <span className={styles.failureGlitchCopy} data-slice="two" aria-hidden="true">{children}</span>
+    </span>
+  );
+}
+
 function FailureView({
   response,
   loading,
@@ -1027,10 +1037,9 @@ function FailureView({
         <span>Back</span>
       </button>
       <header className={styles.failureHeader}>
-        <h1>What broke</h1>
+        <h1><FailureGlitchText>What broke</FailureGlitchText></h1>
         <p>
-          Wrong assumptions, abandoned approaches, and things I would build
-          differently.
+          <FailureGlitchText>Wrong assumptions, abandoned approaches, and things I would build differently.</FailureGlitchText>
         </p>
       </header>
 
@@ -1042,9 +1051,9 @@ function FailureView({
         </div>
       ) : error ? (
         <div className={styles.failureError} role="status">
-          <p>{error}</p>
+          <p><FailureGlitchText>{error}</FailureGlitchText></p>
           <button type="button" onClick={onRetry}>
-            try again
+            <FailureGlitchText>try again</FailureGlitchText>
           </button>
         </div>
       ) : (
@@ -1052,12 +1061,12 @@ function FailureView({
           {(response?.excerpts ?? []).map((excerpt) => (
             <article key={excerpt.id}>
               <p className={styles.meta}>
-                {excerpt.source} · {excerpt.meta}
+                <FailureGlitchText>{`${excerpt.source} · ${excerpt.meta}`}</FailureGlitchText>
               </p>
-              <h2>{excerpt.heading}</h2>
-              <p>{excerpt.text}</p>
+              <h2><FailureGlitchText>{excerpt.heading}</FailureGlitchText></h2>
+              <p><FailureGlitchText>{excerpt.text}</FailureGlitchText></p>
               <a href={excerpt.href}>
-                <span>open note</span>
+                <FailureGlitchText>open note</FailureGlitchText>
                 <ArrowIcon />
               </a>
             </article>
@@ -1090,6 +1099,7 @@ export default function LivingCorpusClient({
   const [attentionClosing, setAttentionClosing] = useState(false);
   const [failureOpen, setFailureOpen] = useState(false);
   const [failureClosing, setFailureClosing] = useState(false);
+  const [failureGlitch, setFailureGlitch] = useState(false);
   const [failureLoading, setFailureLoading] = useState(false);
   const [failureResponse, setFailureResponse] =
     useState<WhatBrokeResponse | null>(null);
@@ -1107,6 +1117,41 @@ export default function LivingCorpusClient({
     [items],
   );
   const allLeafTargets = useMemo(() => leafTargets(items), [items]);
+
+  useEffect(() => {
+    if (!failureOpen || failureClosing) {
+      setFailureGlitch(false);
+      return;
+    }
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let nextGlitch: ReturnType<typeof setTimeout> | undefined;
+    let endGlitch: ReturnType<typeof setTimeout> | undefined;
+    const stop = () => {
+      clearTimeout(nextGlitch);
+      clearTimeout(endGlitch);
+      setFailureGlitch(false);
+    };
+    const pulse = () => {
+      if (reducedMotion.matches || document.visibilityState !== "visible") return;
+      setFailureGlitch(true);
+      endGlitch = setTimeout(() => setFailureGlitch(false), FAILURE_GLITCH_MS);
+      nextGlitch = setTimeout(pulse, 2000 + Math.random() * 5000);
+    };
+    const restart = () => {
+      stop();
+      pulse();
+    };
+
+    restart();
+    reducedMotion.addEventListener("change", restart);
+    document.addEventListener("visibilitychange", restart);
+    return () => {
+      stop();
+      reducedMotion.removeEventListener("change", restart);
+      document.removeEventListener("visibilitychange", restart);
+    };
+  }, [failureOpen, failureClosing]);
 
   useEffect(() => {
     let hash = window.location.hash.slice(1);
@@ -1466,7 +1511,7 @@ export default function LivingCorpusClient({
       return;
     }
     setFailureClosing(true);
-    failureCloseTimer.current = setTimeout(finishClosingWhatBroke, 1490);
+    failureCloseTimer.current = setTimeout(finishClosingWhatBroke, FAILURE_TRANSITION_MS);
   };
 
   const retryWhatBroke = () => {
@@ -1485,6 +1530,11 @@ export default function LivingCorpusClient({
       data-open={selected ? "true" : "false"}
       data-failure={failureOpen ? "true" : "false"}
       data-failure-closing={failureClosing ? "true" : "false"}
+      data-failure-glitch={failureGlitch ? "true" : "false"}
+      style={{
+        "--failure-transition-duration": `${FAILURE_TRANSITION_MS}ms`,
+        "--failure-glitch-duration": `${FAILURE_GLITCH_MS}ms`,
+      } as CSSProperties}
       data-xray={xrayActive && !failureOpen ? "true" : "false"}
       data-view={
         failureOpen ? "failure" : activeItem ? "reader" : selected ? "index" : "home"
@@ -1516,13 +1566,6 @@ export default function LivingCorpusClient({
         onOpenEntry={openXrayEntry}
         itemById={itemById}
       />
-
-      {failureOpen ? (
-        <>
-          <div className={styles.gust} aria-hidden="true" />
-          <div className={styles.breakTransition} aria-hidden="true" />
-        </>
-      ) : null}
 
       <ViewTransition name="corpus-identity" share="corpus-identity" default="none">
       <header className={styles.identity}>
