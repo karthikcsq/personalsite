@@ -141,7 +141,7 @@ export default function Achievements() {
   }, [ensureAudioContext, soundEnabled]);
 
   useEffect(() => {
-    if (!activeToast || open || !soundEnabled || document.visibilityState !== "visible") return;
+    if (!activeToast || !soundEnabled || document.visibilityState !== "visible") return;
     const context = audioContextRef.current;
     if (!context) return;
     let canceled = false;
@@ -155,7 +155,7 @@ export default function Achievements() {
     return () => {
       canceled = true;
     };
-  }, [activeToast?.id, open, soundEnabled]);
+  }, [activeToast?.id, soundEnabled]);
 
   useEffect(() => {
     return () => {
@@ -185,7 +185,6 @@ export default function Achievements() {
   }, [open]);
 
   const showCollection = () => {
-    setQueue([]);
     setOpen(true);
   };
 
@@ -194,17 +193,16 @@ export default function Achievements() {
       <button
         type="button"
         className={styles.trigger}
-        data-notifying={activeToast && !open ? "true" : "false"}
+        data-notifying={activeToast ? "true" : "false"}
         aria-label={`Achievements, ${unlocked.length} unlocked`}
         aria-expanded={open}
         aria-controls={open ? "site-achievements" : undefined}
         onClick={() => {
-          setQueue([]);
           setOpen((current) => !current);
         }}
       >
         <span className={styles.glyph} aria-hidden="true">✳</span>
-        {activeToast && !open ? (
+        {activeToast ? (
           <>
             <span key={`mark-${activeToast.id}`} className={styles.glyphPulse} aria-hidden="true">✳</span>
             <span key={`ripple-${activeToast.id}`} className={styles.ripple} aria-hidden="true" />
@@ -213,7 +211,14 @@ export default function Achievements() {
       </button>
 
       {open ? (
-        <section id="site-achievements" className={styles.collection} aria-label="Achievements">
+        <section
+          id="site-achievements"
+          className={styles.collection}
+          aria-label="Achievements"
+          onPointerLeave={(event) => {
+            if (event.pointerType === "mouse") setOpen(false);
+          }}
+        >
           <div className={styles.collectionHeader}>
             <h2>Achievements</h2>
             <div className={styles.collectionActions}>
@@ -256,7 +261,7 @@ export default function Achievements() {
       ) : null}
 
       <div className={styles.announcement} role="status" aria-live="polite" aria-atomic="true">
-        {!open && activeToast ? (
+        {activeToast ? (
           <button key={activeToast.id} type="button" className={styles.toast} data-kind={activeToast.id} aria-label={`${activeToast.title}. View achievements`} onClick={showCollection}>
             <span className={styles.toastCard} aria-hidden="true" />
             <span className={styles.toastPull} aria-hidden="true">

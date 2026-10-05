@@ -9,6 +9,10 @@
   --achievement-motif: #929aa7;
   --achievement-halo: rgba(32, 33, 36, 0.11);
   position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
   z-index: 60;
   top: 18px;
   right: clamp(18px, 3.2vw, 48px);
@@ -93,8 +97,7 @@
 }
 
 .collection {
-  position: absolute;
-  top: 38px;
+  position: relative;
   right: 0;
   width: min(304px, calc(100vw - 36px));
   max-height: calc(100svh - 78px);
@@ -175,6 +178,8 @@
 }
 
 .announcement { position: absolute; top: 36px; right: 0; }
+.collection ~ .announcement { position: relative; top: auto; }
+.root:has(.toast) .collection { max-height: calc(100svh - 150px); }
 .toast {
   position: relative;
   display: block;
