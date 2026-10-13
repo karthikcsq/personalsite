@@ -40,6 +40,33 @@ import styles from "./living-corpus.module.css";
 const FAILURE_TRANSITION_MS = 560;
 const FAILURE_GLITCH_MS = 180;
 
+const CONTACT_LINKS = [
+  { label: "Email", href: "mailto:karthik6002@gmail.com", title: "karthik6002@gmail.com", icon: "mail" },
+  { label: "GitHub", href: "https://github.com/karthikcsq", icon: "github" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06", icon: "linkedin" },
+] as const;
+
+function ContactIcon({ name }: { name: "mail" | "github" | "linkedin" }) {
+  if (name === "mail") {
+    return (
+      <svg className={`${styles.contactIcon} ${styles.contactMailIcon}`} aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="m3 7 9 6 9-6" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className={styles.contactIcon} aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+      {name === "github" ? (
+        <path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.103.768-.244.768-.542 0-.267-.01-.975-.015-1.914-3.13.68-3.79-1.508-3.79-1.508-.511-1.299-1.248-1.644-1.248-1.644-1.022-.699.077-.685.077-.685 1.13.08 1.725 1.16 1.725 1.16 1.004 1.72 2.633 1.223 3.274.936.103-.728.393-1.223.714-1.505-2.499-.284-5.126-1.249-5.126-5.563 0-1.229.439-2.233 1.16-3.02-.117-.284-.503-1.428.11-2.977 0 0 .945-.303 3.094 1.154A10.78 10.78 0 0 1 12 6.187c.956.005 1.919.13 2.819.38 2.148-1.456 3.09-1.154 3.09-1.154.617 1.55.23 2.693.113 2.977.723.787 1.159 1.791 1.159 3.02 0 4.325-2.631 5.276-5.138 5.555.404.35.764 1.043.764 2.101 0 1.516-.014 2.738-.014 3.11 0 .3.203.65.774.54A11.25 11.25 0 0 0 12 .75Z" />
+      ) : (
+        <path d="M20.45 2H3.55C2.69 2 2 2.68 2 3.52v16.96c0 .84.69 1.52 1.55 1.52h16.9c.86 0 1.55-.68 1.55-1.52V3.52c0-.84-.69-1.52-1.55-1.52ZM7.93 18.75H4.98V9.2h2.95v9.55ZM6.45 7.9a1.71 1.71 0 1 1 0-3.42 1.71 1.71 0 0 1 0 3.42Zm12.3 10.85H15.8V14.1c0-1.11-.02-2.54-1.55-2.54-1.55 0-1.79 1.21-1.79 2.46v4.73H9.51V9.2h2.83v1.3h.04c.39-.74 1.36-1.52 2.8-1.52 3 0 3.56 1.97 3.56 4.53v5.24Z" />
+      )}
+    </svg>
+  );
+}
+
 function ArrowIcon({ back = false }: { back?: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 18 18" width="18" height="18" fill="none">
@@ -1581,7 +1608,25 @@ export default function LivingCorpusClient({
         >
           Karthik Thyagarajan
         </button>
-        <p>researcher · builder · writer</p>
+        <nav className={styles.contact} aria-label="Contact and profiles">
+          <div className={styles.contactLinks}>
+            {CONTACT_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                aria-label={link.label}
+                className={styles.contactIconLink}
+                title={"title" in link ? link.title : link.label}
+              >
+                <ContactIcon name={link.icon} />
+                <svg className={styles.contactLeaf} aria-hidden="true" viewBox="0 0 48 24">
+                  <path className={styles.contactLeafShape} d="M5 20C8 6 25 1 42 4C39 16 23 24 5 20Z" />
+                  <path className={styles.contactLeafVein} d="M2 22L36 7M15 17L16 10M23 13L30 15" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </nav>
       </header>
       </ViewTransition>
 

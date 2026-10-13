@@ -783,15 +783,6 @@
     font-size 720ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.identity p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-  letter-spacing: 0.015em;
-  transition: margin 720ms cubic-bezier(0.16, 1, 0.3, 1),
-    font-size 720ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .page[data-open="true"] .identity {
   top: clamp(40px, 7vh, 76px);
   left: var(--home-anchor-left);
@@ -801,14 +792,9 @@
   font-size: 24px;
 }
 
-.page[data-open="true"] .identity p {
-  margin-top: 5px;
-  font-size: 12px;
-}
-
 .menu {
   position: absolute;
-  top: calc(50svh + 12px);
+  top: calc(50svh - 4px);
   left: var(--home-anchor-left);
   z-index: 2;
   display: grid;
@@ -865,6 +851,112 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
+}
+
+.contact {
+  position: relative;
+  width: min(320px, var(--home-menu-width));
+  color: var(--muted);
+}
+
+.contactLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+}
+
+.contactLinks a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  color: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 180ms ease;
+}
+
+.contactLinks a:hover,
+.contactLinks a:focus-visible {
+  color: var(--ink);
+}
+
+.contactLinks a:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.contactIcon {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.contactMailIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.contactLinks .contactIconLink {
+  justify-content: center;
+  min-width: 32px;
+}
+
+.contactIconLink .contactLeaf {
+  left: calc(50% - 19px);
+}
+
+.contactLeaf {
+  position: absolute;
+  left: 8px;
+  bottom: -7px;
+  width: 38px;
+  height: 19px;
+  overflow: visible;
+  color: #62694c;
+  opacity: 0;
+  filter: blur(2px);
+  transform: translate(-4px, -3px) rotate(-9deg);
+  transition: opacity 220ms ease, transform 300ms ease;
+  pointer-events: none;
+}
+
+.contactLeafShape {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 0.7;
+}
+
+.contactLeafVein {
+  fill: none;
+  stroke: var(--surface);
+  stroke-width: 0.8;
+}
+
+.contactLinks a:hover .contactLeaf,
+.contactLinks a:focus-visible .contactLeaf {
+  opacity: 0.22;
+  transform: translate(0, 0) rotate(-9deg);
+}
+
+.page[data-night="true"] .contactLeaf {
+  color: #c2cede;
+  filter: none;
+}
+
+.page[data-night="true"] .contactLeafShape {
+  fill: none;
+}
+
+.page[data-night="true"] .contactLeafVein {
+  stroke: currentColor;
+}
+
+.page[data-night="true"] .contactLinks a:hover .contactLeaf,
+.page[data-night="true"] .contactLinks a:focus-visible .contactLeaf {
+  opacity: 0.5;
 }
 
 .gravityItem {
@@ -2205,7 +2297,7 @@
   }
 
   .menu {
-    top: calc(50svh + 20px);
+    top: calc(50svh - 20px);
     row-gap: 12px;
     column-gap: 12px;
   }
@@ -2226,7 +2318,7 @@
   }
 
   .page[data-open="true"] .menu {
-    top: 178px;
+    top: 198px;
     left: 24px;
     gap: 4px 12px;
     width: var(--open-menu-width);
@@ -2321,6 +2413,12 @@
   }
 }
 
+@media (pointer: coarse) {
+  .contactLinks .contactIconLink {
+    min-width: 44px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page[data-failure-glitch="true"] .failureGlitchText,
   .page[data-failure-glitch="true"] .failureGlitchCopy {
@@ -2329,6 +2427,8 @@
 
   .identity,
   .menu,
+  .contactLinks a,
+  .contactLeaf,
   .sun,
   .sun::after,
   .branch,
