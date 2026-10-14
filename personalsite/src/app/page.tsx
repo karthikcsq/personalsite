@@ -67,12 +67,9 @@ export default async function Page({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd) }}
       />
-      {/* The full site index, inline. Middleware already swaps this page for
-          /llms.txt when the requester identifies as an agent, but plenty of
-          fetchers send a browser user-agent and get the HTML. A script block
-          of an unhandled MIME type is never parsed, executed, rendered, or
-          read aloud, so this costs a human reader nothing while putting the
-          whole inventory in the raw response of a bare fetch("/"). */}
+      {/* The full site index, inline. Agents can also fetch /llms.txt
+          directly. Some fetchers read the HTML at /, so the unhandled script
+          type exposes the index without rendering or executing it. */}
       <script
         type="text/markdown"
         id="site-index"
