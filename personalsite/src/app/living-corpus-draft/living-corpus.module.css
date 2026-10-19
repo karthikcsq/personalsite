@@ -10,7 +10,7 @@
   --open-shell-width: min(700px, calc(100vw - var(--open-gutter) - 40px));
   --open-menu-width: 360px;
   --shell-left: calc((100vw - var(--shell-width)) / 2);
-  --home-menu-width: clamp(390px, 34vw, 460px);
+  --home-menu-width: min(480px, calc(100vw - 48px));
   --home-anchor-left: calc(50vw - (var(--home-menu-width) / 2));
   position: relative;
   min-height: 100svh;
@@ -760,10 +760,13 @@
 
 .identity {
   position: absolute;
-  top: calc(50svh - 112px);
+  top: calc(50svh - 85px);
   left: var(--home-anchor-left);
   z-index: 2;
   width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   transition: top 720ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: top;
 }
@@ -775,7 +778,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: clamp(28px, 2.6vw, 36px);
+  font-size: 26px;
   font-weight: 520;
   letter-spacing: -0.036em;
   cursor: pointer;
@@ -786,6 +789,9 @@
 .page[data-open="true"] .identity {
   top: clamp(40px, 7vh, 76px);
   left: var(--home-anchor-left);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .page[data-open="true"] .identity button {
@@ -794,12 +800,11 @@
 
 .menu {
   position: absolute;
-  top: calc(50svh - 4px);
+  top: calc(50svh - 35px);
   left: var(--home-anchor-left);
   z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 20px;
+  display: flex;
+  gap: 20px;
   align-items: center;
   justify-content: start;
   width: var(--home-menu-width);
@@ -818,7 +823,7 @@
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: clamp(16px, 1.45vw, 19px);
+  font-size: 12px;
   letter-spacing: -0.018em;
   text-align: left;
   text-decoration: none;
@@ -855,14 +860,14 @@
 
 .contact {
   position: relative;
-  width: min(320px, var(--home-menu-width));
+  width: auto;
   color: var(--muted);
 }
 
 .contactLinks {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 8px;
+  gap: 0 2px;
 }
 
 .contactLinks a {
@@ -890,18 +895,66 @@
 
 .contactIcon {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .contactMailIcon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .contactLinks .contactIconLink {
   justify-content: center;
-  min-width: 32px;
+  min-width: 28px;
+}
+
+.invitation {
+  position: absolute;
+  top: calc(50svh + 12px);
+  left: var(--home-anchor-left);
+  z-index: 3;
+  width: var(--home-menu-width);
+  margin: 0;
+  color: #62656e;
+  font-size: 15px;
+  line-height: 1.7;
+  text-wrap: balance;
+  transition: opacity 220ms ease, visibility 220ms;
+}
+
+.invitation a {
+  display: inline-block;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 3px;
+}
+
+.talk {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.page[data-night="true"] .invitation {
+  color: #adb4c0;
+}
+
+.invitation a:hover {
+  text-decoration-color: currentColor;
+}
+
+.invitation a:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 5px;
+}
+
+.page[data-open="true"] .invitation,
+.page[data-failure="true"] .invitation {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .contactIconLink .contactLeaf {
@@ -1089,6 +1142,8 @@
 }
 
 .page[data-open="true"] .menu {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   top: 104px;
   left: calc(var(--open-gutter) + var(--open-shell-width) - var(--open-menu-width));
   width: var(--open-menu-width);
@@ -1296,6 +1351,19 @@
   line-height: 1.08;
 }
 
+.reader[data-continuous="true"] {
+  outline: none;
+}
+
+.reader[data-continuous="true"] .readerHeader h1 {
+  margin-top: 0;
+  font-size: 30px;
+}
+
+.reader[data-continuous="true"] .noteSections {
+  margin-top: 32px;
+}
+
 .readerHeader > p:last-child {
   max-width: 650px;
   margin: 17px 0 0;
@@ -1359,6 +1427,19 @@
   scroll-margin-top: 120px;
 }
 
+.noteSections section:focus {
+  outline: none;
+}
+
+.noteSections section[data-highlighted="true"] h2 {
+  font-weight: 650;
+}
+
+.page .reader .noteSections section[data-highlighted="true"] p {
+  color: var(--ink);
+  font-weight: 550;
+}
+
 .noteSections h2 {
   margin: 0 0 11px;
   font-size: 19px;
@@ -1372,6 +1453,21 @@
   color: #62656e;
   font-size: 15px;
   line-height: 1.72;
+}
+
+.noteSections p + p {
+  margin-top: 14px;
+}
+
+.noteSections a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 3px;
+}
+
+.noteSections a:hover {
+  text-decoration-color: currentColor;
 }
 
 .noteSections .mediaStack {
@@ -2250,6 +2346,20 @@
     opacity: 1;
   }
 
+  /* Give the reading column the full phone screen. The tree stays on the
+     entrance and category views, where it still carries the visit trail. */
+  .page[data-view="reader"] .branch {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .page[data-view="reader"] .environment {
+    position: absolute;
+    bottom: auto;
+    height: 100svh;
+  }
+
   .windHint {
     display: none;
   }
@@ -2290,21 +2400,37 @@
 
   .identity {
     top: calc(50svh - 126px);
+    max-width: var(--home-menu-width);
+    flex-wrap: wrap;
+    gap: 0 12px;
   }
 
   .identity button {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .menu {
-    top: calc(50svh - 20px);
-    row-gap: 12px;
+    top: calc(50svh - 30px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 0;
     column-gap: 12px;
   }
 
   .menu button,
   .menu a {
-    font-size: 16px;
+    font-size: 12px;
+  }
+
+  .invitation {
+    top: calc(50svh + 48px);
+    font-size: 14px;
+  }
+
+  .page[data-view="home"] .branch {
+    width: min(480px, 108vw);
+    bottom: -50px;
+    left: -95px;
   }
 
   .page[data-open="true"] .identity {
@@ -2357,7 +2483,7 @@
   }
 
   .reader {
-    padding-top: 450px;
+    padding-top: 280px;
   }
 
   .readerHeader {
@@ -2409,7 +2535,7 @@
 @media (max-width: 360px) {
   .menu button,
   .menu a {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
@@ -2427,6 +2553,7 @@
 
   .identity,
   .menu,
+  .invitation,
   .contactLinks a,
   .contactLeaf,
   .sun,

@@ -6,12 +6,14 @@ export interface TopicEntry {
   slug: string;
   title: string;
   tagline: string;
+  presentation?: 'continuous';
 }
 
 interface YamlTopicItem {
   slug?: string;
   title?: string;
   tagline?: string;
+  presentation?: string;
 }
 
 interface RootYaml {
@@ -50,6 +52,7 @@ export function getTopicsFromYaml(): TopicEntry[] {
       slug: it.slug.trim(),
       title: (it.title || `On ${it.slug}`).trim(),
       tagline: (it.tagline || '').trim(),
+      presentation: it.presentation === 'continuous' ? 'continuous' : undefined,
     });
   }
   cache = entries;

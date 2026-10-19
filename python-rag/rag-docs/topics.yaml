@@ -7,6 +7,7 @@
 #   - slug:    matches `topic:<slug>` and `corpus/topic_<slug>.md`
 #     title:   short caption shown on the tile (e.g. "On agents")
 #     tagline: optional one-line subtitle under the title
+#     presentation: "continuous" keeps the topic as one note in the reader
 #
 # Authoring flow: run `/quote-harvest topic:<slug>` to draft the corpus file,
 # then add the entry here, then re-run `uv run python create-pinecone.py`.
@@ -15,6 +16,9 @@
 # retrieved topic isn't in this registry.
 
 topics:
+  - slug: "what-im-looking-for"
+    title: "What I'm looking for"
+    presentation: "continuous"
   - slug: "agents"
     title: "On agents"
     tagline: "When agents save time and money, not just effort."

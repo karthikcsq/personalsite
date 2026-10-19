@@ -30,6 +30,7 @@ export interface MinimalCorpusItem {
   description: string;
   href: string;
   fullTextHref?: string;
+  readingStyle?: "continuous";
   links?: Array<{ label: string; url: string }>;
   referenceItems: string[];
   media: MinimalCorpusMedia[];
@@ -37,6 +38,7 @@ export interface MinimalCorpusItem {
     id: string;
     heading: string;
     text: string;
+    html?: string;
     media: MinimalCorpusMedia[];
   }>;
 }

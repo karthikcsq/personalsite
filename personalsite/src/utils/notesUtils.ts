@@ -229,8 +229,8 @@ function resolveArtifact(kind: NoteKind, slug: string): Resolved {
       subtitle: topic.tagline,
       // Taglines are full sentences; uppercase mono mangles them.
       meta: '',
-      sourceHref: null,
-      sourceLabel: null,
+      sourceHref: topic.presentation === 'continuous' ? corpusItemHref('writing', `topic:${slug}`) : null,
+      sourceLabel: topic.presentation === 'continuous' ? topic.title : null,
     };
   }
 
@@ -253,7 +253,9 @@ interface RawNote {
 let cache: RawNote[] | null = null;
 
 function loadAll(): RawNote[] {
-  if (cache) return cache;
+  // Authored Markdown lives outside the Next.js package, so Fast Refresh
+  // doesn't invalidate this module when a note changes during development.
+  if (cache && process.env.NODE_ENV === 'production') return cache;
   const dir = findCorpusDir();
   if (!dir) {
     cache = [];

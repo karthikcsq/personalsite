@@ -448,6 +448,20 @@ function buildIdeas(): CorpusArtifact[] {
     const note = findNote("topic", topic.slug);
     const markdown = getNoteMarkdown("topic", topic.slug);
     if (!note || !markdown) return [];
+    if (topic.presentation === "continuous") {
+      const href = noteHref("topic", topic.slug);
+      return [artifact({
+        id: `topic:${topic.slug}`,
+        category: "writing",
+        title: note.title,
+        meta: "",
+        description: topic.tagline,
+        href,
+        explicitTopics: note.topics,
+        quotes: quotesFromMarkdown(markdown, href, note.title),
+        sections: sectionsFromMarkdown(markdown, href, note.title),
+      })];
+    }
     return ideaArtifacts(note, markdown);
   });
 }

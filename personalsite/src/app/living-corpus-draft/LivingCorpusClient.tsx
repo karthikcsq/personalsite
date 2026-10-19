@@ -12,6 +12,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
@@ -36,6 +37,7 @@ import {
   type AchievementId,
 } from "@/lib/living-corpus/achievements";
 import styles from "./living-corpus.module.css";
+import { CONTACT_TOPICS, CONTACT_NOTE_HREF, CONTACT_NOTE_ID } from "@/lib/living-corpus/contactInvitation";
 
 const FAILURE_TRANSITION_MS = 560;
 const FAILURE_GLITCH_MS = 180;
@@ -286,7 +288,7 @@ function snowContactStyle(
 
 type ReadEntries = Partial<Record<MinimalCategory, string[]>>;
 
-function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null) {
+function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null, push = false) {
   const url = new URL(window.location.href);
   if (category) url.searchParams.set("section", category);
   else url.searchParams.delete("section");
@@ -295,7 +297,8 @@ function syncSectionUrl(category: MinimalCategory | null, itemId?: string, secti
   url.hash = sectionId ?? "";
   const nextUrl = `${url.pathname}${url.search}${url.hash}`;
   if (nextUrl !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-    window.history.replaceState(null, "", nextUrl);
+    if (push) window.history.pushState(null, "", nextUrl);
+    else window.history.replaceState(null, "", nextUrl);
   }
 }
 
@@ -389,8 +392,15 @@ function InlineReader({
 }) {
   const readerRef = useRef<HTMLElement>(null);
   const bodySections = readableSections(item);
+  const continuous = item.readingStyle === "continuous";
+  const [highlightedSectionId, setHighlightedSectionId] = useState(focusSectionId);
 
   useEffect(() => {
+    if (continuous) readerRef.current?.focus({ preventScroll: true });
+  }, [item.id, continuous]);
+
+  useEffect(() => {
+    setHighlightedSectionId(focusSectionId);
     if (!focusSectionId) return;
     const frame = window.requestAnimationFrame(() => {
       const section = Array.from(
@@ -405,9 +415,10 @@ function InlineReader({
           : "smooth",
         block: "start",
       });
+      if (section instanceof HTMLElement && continuous) section.focus({ preventScroll: true });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [item.id, focusSectionId]);
+  }, [item.id, focusSectionId, continuous]);
 
   useEffect(() => {
     const reader = readerRef.current;
@@ -450,6 +461,7 @@ function InlineReader({
     item.category === "work" && item.referenceItems.length > 0;
 
   const jumpTo = (sectionId: string | null) => {
+    setHighlightedSectionId(sectionId);
     const target = sectionId
       ? Array.from(readerRef.current?.querySelectorAll("[data-corpus-section]") ?? [])
           .find((candidate) => candidate.getAttribute("data-corpus-section") === sectionId)
@@ -463,16 +475,16 @@ function InlineReader({
   };
 
   return (
-    <section className={styles.reader} ref={readerRef} key={item.id}>
+    <section className={styles.reader} ref={readerRef} key={item.id} data-continuous={continuous || undefined} tabIndex={continuous ? -1 : undefined} aria-label={item.title}>
       <button type="button" className={styles.back} onClick={onBack}>
         <ArrowIcon back />
-        <span>{item.category}</span>
+        <span>{continuous ? "home" : item.category}</span>
       </button>
 
       <header className={styles.readerHeader} data-corpus-overview>
-        <p className={styles.meta}>{item.meta}</p>
+        {item.meta ? <p className={styles.meta}>{item.meta}</p> : null}
         <h1>{item.title}</h1>
-        <p>{item.description}</p>
+        {item.description ? <p>{item.description}</p> : null}
       </header>
 
       {showReference ? (
@@ -483,7 +495,7 @@ function InlineReader({
         </ul>
       ) : null}
 
-      {item.fullTextHref || item.links?.length ? (
+      {!continuous && (item.fullTextHref || item.links?.length) ? (
         <div className={styles.readerLinks}>
           {item.fullTextHref ? <a href={item.fullTextHref}>Full text ↗</a> : null}
           {item.links?.map((link) => (
@@ -494,7 +506,7 @@ function InlineReader({
 
       <ReaderMedia media={item.media} />
 
-      {bodySections.length > 0 ? (
+      {!continuous && bodySections.length > 0 ? (
         <nav className={styles.readerToc} aria-label={`Contents of ${item.title}`}>
           <p>Contents</p>
           <ol>
@@ -517,11 +529,13 @@ function InlineReader({
       {bodySections.length ? (
         <div className={styles.noteSections}>
           {bodySections.map((section) => (
-            <section key={section.id} data-corpus-section={section.id}>
+            <section key={section.id} id={continuous ? section.id : undefined} tabIndex={continuous ? -1 : undefined} aria-label={continuous ? section.heading : undefined} data-corpus-section={section.id} data-highlighted={highlightedSectionId === section.id || undefined}>
               {section.heading.toLowerCase() !== item.title.toLowerCase() ? (
                 <h2>{section.heading}</h2>
               ) : null}
-              <p>{section.text}</p>
+              {section.html ? (
+                <div dangerouslySetInnerHTML={{ __html: section.html }} />
+              ) : <p>{section.text}</p>}
               <ReaderMedia media={section.media} />
             </section>
           ))}
@@ -1148,11 +1162,39 @@ export default function LivingCorpusClient({
   const sunHoverLockUntilRef = useRef(0);
   const sessionIdRef = useRef("");
   const failureReturnScrollRef = useRef(0);
+  const invitationRef = useRef<HTMLAnchorElement>(null);
+  const previousItemRef = useRef(activeItem?.id);
+  useEffect(() => {
+    const returningHome = previousItemRef.current === CONTACT_NOTE_ID && !activeItem && !selected;
+    previousItemRef.current = activeItem?.id;
+    if (!returningHome) return;
+    // Wait until the entrance's visibility transition has restored its links.
+    const timer = setTimeout(() => invitationRef.current?.focus({ preventScroll: true }),
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 240);
+    return () => clearTimeout(timer);
+  }, [activeItem, selected]);
   const itemById = useMemo(
     () => new Map(items.map((item) => [item.id, item])),
     [items],
   );
   const allLeafTargets = useMemo(() => leafTargets(items), [items]);
+  const contactNote = itemById.get(CONTACT_NOTE_ID);
+
+  useEffect(() => {
+    const restoreUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const item = itemById.get(params.get("item") ?? "") ?? null;
+      const requested = params.get("section");
+      const category = item?.category ?? MINIMAL_CATEGORIES.find(
+        ({ id }) => id === (requested === "ideas" ? "writing" : requested),
+      )?.id ?? null;
+      setSelected(category);
+      setActiveItem(item);
+      setReaderSectionId(window.location.hash.slice(1) || null);
+    };
+    window.addEventListener("popstate", restoreUrl);
+    return () => window.removeEventListener("popstate", restoreUrl);
+  }, [itemById]);
 
   useEffect(() => {
     if (!failureOpen || failureClosing) {
@@ -1439,6 +1481,18 @@ export default function LivingCorpusClient({
     }
   };
 
+  const openContactNote = (event: ReactMouseEvent<HTMLAnchorElement>, sectionId: string | null = null) => {
+    if (!contactNote || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    clearAttention();
+    growBranch(contactNote.category);
+    rememberEntry(contactNote.category, `${contactNote.id}#opened`);
+    syncSectionUrl(contactNote.category, contactNote.id, sectionId, true);
+    setReaderSectionId(sectionId);
+    setSelected(contactNote.category);
+    setActiveItem(contactNote);
+  };
+
   const resetVisit = () => {
     clearAttention();
     resetAchievements();
@@ -1647,6 +1701,20 @@ export default function LivingCorpusClient({
         onAttentionEnd={endAttention}
       />
 
+      {contactNote ? (
+        <p className={styles.invitation} aria-hidden={selected !== null || failureOpen} inert={selected !== null || failureOpen}>
+          Building {CONTACT_TOPICS.map((topic, index) => (
+            <Fragment key={topic.section}>
+              {index === 0 ? "" : index === CONTACT_TOPICS.length - 1 ? ", or " : ", "}
+              <a ref={index === 0 ? invitationRef : undefined} href={`${CONTACT_NOTE_HREF}#${topic.section}`} onClick={(event) => openContactNote(event, topic.section)}>
+                {topic.label}
+              </a>
+            </Fragment>
+          ))}?{" "}
+          <span className={styles.talk}>Let’s talk.</span>
+        </p>
+      ) : null}
+
       {attentionCategory && !selected && !failureOpen ? (
         <aside
           className={styles.gravityField}
@@ -1691,8 +1759,18 @@ export default function LivingCorpusClient({
       <div className={styles.shell}>
         {activeItem ? (
           <InlineReader
+            key={activeItem.id}
             item={activeItem}
-            onBack={() => { syncSectionUrl(selected); setActiveItem(null); setReaderSectionId(null); }}
+            onBack={() => {
+              const home = activeItem.readingStyle === "continuous";
+              syncSectionUrl(home ? null : selected);
+              setActiveItem(null);
+              setReaderSectionId(null);
+              if (home) {
+                setSelected(null);
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }
+            }}
             onRead={rememberEntry}
             focusSectionId={readerSectionId}
           />

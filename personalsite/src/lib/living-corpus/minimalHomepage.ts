@@ -3,6 +3,9 @@ import { corpusItemHref } from "./links";
 import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
 import path from "node:path";
 import matter from "gray-matter";
+import { remark } from "remark";
+import html from "remark-html";
+import { getNoteMarkdown } from "@/utils/notesUtils";
 import { projects } from "@/data/projectsData";
 import { buildLivingCorpus } from "@/lib/living-corpus/buildLivingCorpus";
 import {
@@ -17,6 +20,31 @@ const VISIBLE_CATEGORIES = new Set<MinimalCategory>(
 );
 
 const projectsById = new Map(projects.map((project) => [project.id, project]));
+
+// Keep paragraphs and authored links in continuous notes. The ordinary corpus
+// excerpts stay plain text for their existing list and exploration surfaces.
+function noteHtmlBySection(markdown: string): Map<string, string> {
+  const sections = new Map<string, string>();
+  let id = "overview";
+  let lines: string[] = [];
+  const flush = () => {
+    if (lines.some((line) => line.trim())) {
+      sections.set(id, remark().use(html).processSync(lines.join("\n")).toString());
+    }
+    lines = [];
+  };
+  for (const line of markdown.split("\n")) {
+    const heading = /^#{1,6}\s+(.+)$/.exec(line.trim());
+    if (heading) {
+      flush();
+      id = slugify(heading[1]);
+    } else {
+      lines.push(line);
+    }
+  }
+  flush();
+  return sections;
+}
 
 function slugify(value: string): string {
   return value
@@ -164,6 +192,10 @@ export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
     if (!VISIBLE_CATEGORIES.has(category as MinimalCategory)) return [];
     const normalizedDescription = artifact.description.trim().toLowerCase();
     const isWriting = artifact.category === "writing";
+    const continuous = artifact.id.startsWith("topic:");
+    const noteHtml = continuous
+      ? noteHtmlBySection(getNoteMarkdown("topic", artifact.id.slice(6)) ?? "")
+      : new Map<string, string>();
     const writingMedia = isWriting
       ? blogMediaBySection(artifact.id, artifact.title)
       : new Map<string, MinimalCorpusMedia[]>();
@@ -174,6 +206,7 @@ export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
         title: artifact.title,
         meta: artifact.meta,
         description: artifact.description,
+        readingStyle: continuous ? "continuous" : undefined,
         href: corpusItemHref(category as MinimalCategory, artifact.id),
         fullTextHref: /^\/(blog|notes)\//.test(artifact.href) ? artifact.href : undefined,
         links: (artifact.category === "projects"
@@ -183,10 +216,11 @@ export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
           (reference) => reference.trim().toLowerCase() !== normalizedDescription,
         ),
         media: artifact.category === "projects" ? projectMedia(artifact.id) : [],
-        sections: artifact.sections.map((section) => ({
+        sections: artifact.sections.filter((section) => !continuous || section.id !== "overview").map((section) => ({
           id: section.id,
           heading: section.heading,
           text: section.text,
+          html: noteHtml.get(section.id),
           media: writingMedia.get(section.id) ?? [],
         })),
       },
