@@ -1,5 +1,6 @@
 import { corpusItemHref } from "./links";
 
+// Copy lives in python-rag/rag-docs/corpus/topic_what-im-looking-for.md.
 export const CONTACT_NOTE_ID = "topic:what-im-looking-for";
 export const CONTACT_NOTE_HREF = corpusItemHref("writing", CONTACT_NOTE_ID);
 export const CONTACT_TOPICS = [
