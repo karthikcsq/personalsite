@@ -5,11 +5,13 @@ topics: [live-ai, voice, video, motion, wearables, xr, agents, webmcp, adoption]
 
 ## Live AI
 
-Voice, video, motion. AI that people interact with in real time.
+I’m interested in AI you can speak to while showing it what you’re doing. I want to point at something, say “this part,” move the camera, and ask a follow-up without having to explain the whole situation again.
 
-I'm interested in what you can build when someone can talk, show you something, or move, and get a useful response as they do it. There's a lot that written instructions can't communicate well, especially when you're trying to learn or do something physical.
+For example, if I’m trying to fix something, I should be able to show what I’m seeing, try a suggestion, and have the AI follow what changed. A lot of the context comes from what we’re looking at together. Being able to refer to that directly makes the interaction much easier.
 
-If you're building something people interact with live, [email me](mailto:karthik6002@gmail.com). I'd like to try it.
+The details matter here. Can I interrupt it? Does it remember something I showed it a minute ago? Can it tell when I’m still explaining? Does its response arrive while it’s still useful? I’m interested in how people solve those problems and what they can build once speaking and showing things works well.
+
+If you’re building something people interact with live, [email me](mailto:karthik6002@gmail.com). I’d like to try it.
 
 ## Invisible wearables
 
