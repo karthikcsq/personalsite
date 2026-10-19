@@ -22,6 +22,7 @@ const connect = [
   { label: "Email", href: "mailto:karthik6002@gmail.com" },
   { label: "GitHub", href: "https://github.com/karthikcsq" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/karthikthyagarajan06" },
+  { label: "X", href: "https://x.com/karthikthy" },
   { label: "Résumé", href: "/resume.pdf" },
 ];
 
