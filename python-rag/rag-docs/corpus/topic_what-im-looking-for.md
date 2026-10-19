@@ -5,15 +5,13 @@ topics: [live-ai, voice, video, motion, wearables, xr, agents, webmcp, adoption]
 
 ## Live AI
 
-If you're building something people interact with live, [email me](mailto:karthik6002@gmail.com). I'd like to try it.
-
 Voice, video, motion. AI that people interact with in real time.
 
 I'm interested in what you can build when someone can talk, show you something, or move, and get a useful response as they do it. There's a lot that written instructions can't communicate well, especially when you're trying to learn or do something physical.
 
-## Invisible wearables
+If you're building something people interact with live, [email me](mailto:karthik6002@gmail.com). I'd like to try it.
 
-Building an AI-first wearable? [Email me](mailto:karthik6002@gmail.com). I'd like to see what you're working on.
+## Invisible wearables
 
 I really like WHOOP and Google Fit. I'm looking for an AI-first wearable that can do something useful with what it learns about you, without you having to ask every time. A chat window with your data attached doesn't really get there.
 
@@ -21,9 +19,9 @@ Working on glasses made me think a lot about how little of the underlying system
 
 By "invisible," I mean devices you can use without constantly thinking about operating them. I'm interested in what that takes, both in the hardware and in deciding when the AI should do something, ask, or leave you alone.
 
-## Internet infrastructure for AI agents
+Building an AI-first wearable? [Email me](mailto:karthik6002@gmail.com). I'd like to see what you're working on.
 
-Working on getting more services to support agents? [Email me](mailto:karthik6002@gmail.com). I'd like to hear how you're approaching adoption.
+## Internet infrastructure for AI agents
 
 My agent should be able to book a table at a restaurant without someone having built an integration for that specific booking platform.
 
@@ -32,3 +30,7 @@ My agent should be able to book a table at a restaurant without someone having b
 I think adoption is the bigger problem. Having a way to expose these actions only helps if the services people actually use implement it. That needs to be easy enough for an ordinary business to do, ideally through the tools they already use to build their website.
 
 I've run into similar friction with google-tools-mcp. Finding a tool and using it still involves too much setup. I'd like to meet people making this easier on both sides: for businesses to offer, and for agents to discover and use.
+
+Then there's scale. Discovery, authentication, permissions, and tool calls all have to keep working as more agents and services come online. I'm interested in the infrastructure that makes that possible without someone manually wiring up every new connection.
+
+Building infrastructure for internet agents? [Email me](mailto:karthik6002@gmail.com). I'd like to hear what you're working on.
