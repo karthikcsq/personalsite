@@ -69,7 +69,7 @@ export default function Achievements() {
   const activeToast = queue[0];
   const unlockedIds = new Set(unlocked.map(({ id }) => id));
 
-  const ensureAudioContext = useCallback(() => {
+  const createAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       if (typeof window.AudioContext === "undefined") return;
       try {
@@ -78,10 +78,34 @@ export default function Achievements() {
         return;
       }
     }
-    if (audioContextRef.current.state === "suspended") {
-      void audioContextRef.current.resume().catch(() => {});
-    }
+    return audioContextRef.current;
   }, []);
+
+  const ensureAudioContext = useCallback(() => {
+    const context = createAudioContext();
+    if (context?.state === "suspended") {
+      void context.resume().catch(() => {});
+    }
+  }, [createAudioContext]);
+
+  useEffect(() => {
+    if (!soundEnabled) return;
+    // Audio device setup can block the first gesture. Prepare it at idle,
+    // leaving resume and playback to the trusted interaction below.
+    const prepare = () => {
+      if (document.visibilityState !== "visible" || audioContextRef.current) return;
+      const context = createAudioContext();
+      if (context?.state === "running") {
+        void context.suspend().catch(() => {});
+      }
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(prepare);
+      return () => window.cancelIdleCallback(idle);
+    }
+    const timer = window.setTimeout(prepare, 300);
+    return () => window.clearTimeout(timer);
+  }, [createAudioContext, soundEnabled]);
 
   useEffect(() => {
     setUnlocked(readUnlockedAchievements());
