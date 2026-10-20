@@ -265,7 +265,7 @@ function render(): string {
     out.push("");
   }
 
-  out.push("## Collection: recommended reading by other authors");
+  out.push("## Recommended reading");
   out.push("");
   for (const entry of collection) {
     out.push(`- **${entry.title}** by ${entry.author}. ${entry.note} [read](${entry.href})`);
@@ -276,7 +276,7 @@ function render(): string {
   out.push("");
   out.push(`- **For founders and hiring teams** - experience, ownership, and evidence. [brief](${SITE}/brief)`);
   out.push(`- **About** - longer bio and background. [page](${SITE}/about)`);
-  out.push(`- **Writing** - essays and a curated collection. [page](${SITE}/writing)`);
+  out.push(`- **Writing** - essays and recommended reading. [page](${SITE}/writing)`);
   out.push(`- **Gallery** - photography. [page](${SITE}/gallery)`);
   out.push(`- **Resume** - PDF. [file](${SITE}/resume.pdf)`);
   out.push("");

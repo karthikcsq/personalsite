@@ -1945,7 +1945,7 @@ export default function LivingCorpusClient({
             </ol>
             {selected === "writing" ? (
               <section className={styles.collection} id="collection" aria-labelledby="collection-heading">
-                <h2 className={styles.collectionHeading} id="collection-heading">Collection</h2>
+                <h2 className={styles.collectionHeading} id="collection-heading">Recommended reading</h2>
                 <ul className={styles.list}>
                   {collection.map((entry) => (
                     <li key={entry.id}>
