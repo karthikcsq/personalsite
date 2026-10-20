@@ -9,6 +9,22 @@ import path from "path";
 loadEnv({ path: path.resolve(__dirname, "../.env"), override: false });
 
 const nextConfig: NextConfig = {
+  // Runtime corpus readers use sibling repository content. Preserve that
+  // layout in function output instead of tracing the whole app as data.
+  outputFileTracingRoot: path.resolve(__dirname, '..'),
+  outputFileTracingIncludes: {
+    '/*': [
+      '../python-rag/rag-docs/corpus/*.md',
+      '../python-rag/rag-docs/karthik_thyagarajan_truth.yaml',
+      '../python-rag/rag-docs/involvement.yaml',
+      '../python-rag/rag-docs/topics.yaml',
+    ],
+  },
+  outputFileTracingExcludes: {
+    // Static assets are served separately; no server code reads these files.
+    // Keep them in public/ and in Git — only remove them from function traces.
+    '/*': ['./design/**/*', './public/**/*', './src/data/bm25-model.json'],
+  },
   images: {
     remotePatterns: [
       {
