@@ -1,0 +1,8 @@
+.page { max-width: 720px; margin: 0 auto; padding: clamp(60px, 12vh, 130px) 0 80px; color: var(--ink); font-size: 16px; line-height: 1.8; }
+.back { color: var(--muted); font-size: 13px; }
+.page h1 { margin: 28px 0 40px; font-size: clamp(32px, 5vw, 48px); font-weight: 480; letter-spacing: -0.04em; line-height: 1.15; }
+.page h3 { margin: 32px 0 10px; font-size: 20px; font-weight: 550; line-height: 1.4; }
+.page p { margin: 0 0 20px; }
+.page ul { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 0; margin-bottom: 26px; list-style: none; }
+.page a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
+.page a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }

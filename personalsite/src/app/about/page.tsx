@@ -1,3 +1,4 @@
+import FounderBrief from "@/app/components/FounderBrief";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,23 +51,29 @@ export default function AboutPage() {
           </figure>
           <div className={styles.prose}>
             <p>
-              I&apos;m Karthik. I study Computer Science and Artificial Intelligence
-              at Purdue, and I tend to build things that are too ambitious for
-              the week I have.
+              I&apos;m Karthik, studying Computer Science and Artificial Intelligence at Purdue.
             </p>
             <p>
-              That habit led me to co-found Repple and buildpurdue, a campus
-              accelerator. It also takes me into research labs and hackathons.
-              I care about systems that actually ship, and interfaces that
-              respect the person using them.
+              At Samsung Research America, I co-architected an always-on AI agent
+              runtime for XR glasses, working on orchestration, on-device routing,
+              memory, and tool permissions. I&apos;m currently building Tavi, a voice
+              teammate that answers codebase questions and handles small engineering
+              tasks during standups.
             </p>
             <p>
-              I work across ML, robotics, and product engineering. I&apos;m not
-              precious about which layer of the stack I&apos;m on, as long as the
-              thing gets out the door.
+              Outside of that, I co-founded buildpurdue to bring Purdue&apos;s founders
+              into the same room. We run late-night co-working and a selective cohort
+              where founders work through problems in their ventures.
             </p>
+            <p>
+              I&apos;m interested in live AI, wearables, and the infrastructure agents
+              need to operate across the internet.
+            </p>
+            <p className={styles.briefLink}><Link href="/brief">For founders and hiring teams ↗</Link></p>
           </div>
         </div>
+
+        <FounderBrief />
 
         <div className={styles.lower}>
           <section className={styles.paths} aria-labelledby="about-paths">

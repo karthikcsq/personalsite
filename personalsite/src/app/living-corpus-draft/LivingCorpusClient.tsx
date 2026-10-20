@@ -10,6 +10,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
@@ -1220,11 +1221,13 @@ export default function LivingCorpusClient({
   initialSection = null,
   initialItemId,
   latestPost,
+  founderBrief,
 }: {
   items: MinimalCorpusItem[];
   initialSection?: MinimalCategory | null;
   initialItemId?: string;
   latestPost?: { title: string; href: string };
+  founderBrief?: ReactNode;
 }) {
   const [selected, setSelected] = useState<MinimalCategory | null>(initialSection);
   const [animateIndex, setAnimateIndex] = useState(initialSection === null);
@@ -1942,6 +1945,8 @@ export default function LivingCorpusClient({
           onRetry={retryWhatBroke}
         />
       ) : null}
+
+      {founderBrief}
 
       <button
         type="button"

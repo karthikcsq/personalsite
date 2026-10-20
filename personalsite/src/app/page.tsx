@@ -1,3 +1,5 @@
+import FounderBrief from "@/app/components/FounderBrief";
+import { founderBrief } from "@/lib/living-corpus/founderBrief";
 import { redirect } from "next/navigation";
 import LivingCorpusClient from "@/app/living-corpus-draft/LivingCorpusClient";
 import CorpusPageTransition from "@/app/components/CorpusPageTransition";
@@ -27,6 +29,8 @@ const identityJsonLd = {
       name: "Karthik Thyagarajan",
       url: SITE,
       jobTitle: "Founder-engineer",
+      description: founderBrief.summary,
+      sameAs: ["https://github.com/karthikcsq", "https://www.linkedin.com/in/karthikthyagarajan06"],
       alumniOf: { "@type": "CollegeOrUniversity", name: "Purdue University" },
       knowsAbout: [
         "AI agents",
@@ -91,7 +95,7 @@ export default async function Page({
         <a href="/about">About</a>
       </nav>
       <CorpusPageTransition page="home">
-        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} latestPost={latestPost ? { title: latestPost.title, href: `/blog/${latestPost.slug}` } : undefined} initialSection={initialSection} initialItemId={initialItem?.id} />
+        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} founderBrief={<FounderBrief />} latestPost={latestPost ? { title: latestPost.title, href: `/blog/${latestPost.slug}` } : undefined} initialSection={initialSection} initialItemId={initialItem?.id} />
       </CorpusPageTransition>
     </>
   );

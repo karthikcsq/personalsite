@@ -1,3 +1,4 @@
+import { founderBriefMarkdown } from "@/lib/living-corpus/founderBrief";
 import { corpusItemHref } from "@/lib/living-corpus/links";
 import { getJobsFromYaml } from "@/utils/jobUtils";
 import { getProjectsFromYaml } from "@/utils/projectUtils";
@@ -112,6 +113,9 @@ function render(): string {
   const out: string[] = [];
 
   out.push("# Karthik Thyagarajan");
+  out.push("");
+  out.push(founderBriefMarkdown());
+  out.push("## Portfolio index");
   out.push("");
   out.push(
     "Founder-engineer and Purdue CS student. This file is the complete machine-readable " +
@@ -262,6 +266,7 @@ function render(): string {
 
   out.push("## Other pages");
   out.push("");
+  out.push(`- **For founders and hiring teams** - experience, ownership, and evidence. [brief](${SITE}/brief)`);
   out.push(`- **About** - longer bio and background. [page](${SITE}/about)`);
   out.push(`- **Writing** - essays and ideas. [page](${SITE}/?section=writing)`);
   out.push(`- **Gallery** - photography. [page](${SITE}/gallery)`);
