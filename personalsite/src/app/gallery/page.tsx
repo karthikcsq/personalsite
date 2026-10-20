@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import MinimalInterior from "@/app/components/MinimalInterior";
 import CorpusPageTransition from "@/app/components/CorpusPageTransition";
+import { recordPhotoAlbumVisit } from "@/lib/living-corpus/personalGrowth";
 import styles from "./gallery.module.css";
 
 type Albums = Record<string, string[]>;
@@ -57,6 +58,10 @@ export default function GalleryPage() {
   const names = useMemo(() => Object.keys(albums), [albums]);
   const images = albums[album] ?? [];
   const selected = images[index];
+
+  useEffect(() => {
+    if (status === "ready" && images.length > 0) recordPhotoAlbumVisit(album);
+  }, [status, album, images.length]);
 
   const move = useCallback((direction: number) => {
     if (!images.length) return;

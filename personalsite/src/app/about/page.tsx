@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import MinimalInterior from "@/app/components/MinimalInterior";
 import CorpusPageTransition from "@/app/components/CorpusPageTransition";
+import { CONTACT_NOTE_HREF } from "@/lib/living-corpus/contactInvitation";
 import styles from "./about.module.css";
 
 export const metadata: Metadata = {
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 const paths = [
+  { label: "What I’m looking for", href: CONTACT_NOTE_HREF },
   { label: "Work", href: "/?section=work" },
   { label: "Projects", href: "/?section=projects" },
   { label: "Writing", href: "/?section=writing" },

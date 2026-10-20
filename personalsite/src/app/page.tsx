@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import LivingCorpusClient from "@/app/living-corpus-draft/LivingCorpusClient";
 import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import { buildMinimalCorpusItems } from "@/lib/living-corpus/minimalHomepage";
 import { MINIMAL_CATEGORIES } from "@/lib/living-corpus/minimalTypes";
+import { getSortedPosts } from "@/utils/blogUtils";
 import { buildLlmsIndex } from "@/utils/llmsIndex";
 
 // Only `</script` can terminate the block early; the rest of the markdown is
@@ -55,7 +57,9 @@ export default async function Page({
   const sectionParam = params.section;
   const itemParam = Array.isArray(params.item) ? params.item[0] : params.item;
   const items = buildMinimalCorpusItems();
+  const latestPost = getSortedPosts()[0];
   const initialItem = items.find((item) => item.id === itemParam) ?? null;
+  if (initialItem?.category === "writing" && initialItem.readingStyle !== "continuous" && initialItem.fullTextHref) redirect(initialItem.fullTextHref);
   const requestedSection = Array.isArray(sectionParam) ? sectionParam[0] : sectionParam;
   const initialSection = initialItem?.category ?? MINIMAL_CATEGORIES.find(
     ({ id }) => id === (requestedSection === "ideas" ? "writing" : requestedSection),
@@ -87,7 +91,7 @@ export default async function Page({
         <a href="/about">About</a>
       </nav>
       <CorpusPageTransition page="home">
-        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} initialSection={initialSection} initialItemId={initialItem?.id} />
+        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} latestPost={latestPost ? { title: latestPost.title, href: `/blog/${latestPost.slug}` } : undefined} initialSection={initialSection} initialItemId={initialItem?.id} />
       </CorpusPageTransition>
     </>
   );

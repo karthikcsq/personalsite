@@ -10,7 +10,7 @@
   --open-shell-width: min(700px, calc(100vw - var(--open-gutter) - 40px));
   --open-menu-width: 360px;
   --shell-left: calc((100vw - var(--shell-width)) / 2);
-  --home-menu-width: min(480px, calc(100vw - 48px));
+  --home-menu-width: min(400px, calc(100vw - 48px));
   --home-anchor-left: calc(50vw - (var(--home-menu-width) / 2));
   position: relative;
   min-height: 100svh;
@@ -358,22 +358,8 @@
   opacity: 0.5;
 }
 
-.branch[data-gusting="true"] .branchArt {
-  animation: branch-gust var(--failure-transition-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 .branch[data-gusting="true"] .branchTipLayer {
   animation: branch-tip-break 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.branch[data-gusting="true"] .branchBaseImage {
-  animation: branch-consume 480ms cubic-bezier(0.55, 0, 0.35, 1) 30ms both;
-}
-
-.branch[data-gusting="true"] .subBranch,
-.branch[data-gusting="true"] .leaf,
-.branch[data-gusting="true"] .snowContact {
-  animation: branch-life-drain 380ms cubic-bezier(0.55, 0, 0.35, 1) 60ms both;
 }
 
 .resetControl {
@@ -845,7 +831,7 @@
 .menu a:focus-visible,
 .identity button:focus-visible,
 .back:focus-visible,
-.list button:focus-visible,
+.list a:focus-visible,
 .gravityItem:focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: 5px;
@@ -909,12 +895,16 @@
   min-width: 28px;
 }
 
-.invitation {
+.landingNotes {
   position: absolute;
   top: calc(50svh + 12px);
   left: var(--home-anchor-left);
   z-index: 3;
   width: var(--home-menu-width);
+  transition: opacity 220ms ease, visibility 220ms;
+}
+
+.invitation {
   margin: 0;
   color: #62656e;
   font-size: 15px;
@@ -950,8 +940,8 @@
   outline-offset: 5px;
 }
 
-.page[data-open="true"] .invitation,
-.page[data-failure="true"] .invitation {
+.page[data-open="true"] .landingNotes,
+.page[data-failure="true"] .landingNotes {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1028,7 +1018,7 @@
   cursor: pointer;
   pointer-events: auto;
   animation: gravity-arrive 880ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: opacity, filter, transform;
+  will-change: opacity, transform;
 }
 
 .gravityItem[data-slot="1"] {
@@ -1203,7 +1193,7 @@
   text-transform: uppercase;
 }
 
-.list button {
+.list a {
   display: block;
   width: 100%;
   padding: 22px 0 24px;
@@ -1238,8 +1228,8 @@
   transition: opacity 180ms ease, transform 180ms ease, color 180ms ease;
 }
 
-.list button:hover .itemArrow,
-.list button:focus-visible .itemArrow {
+.list a:hover .itemArrow,
+.list a:focus-visible .itemArrow {
   color: var(--ink);
   opacity: 1;
   transform: translateX(0);
@@ -1480,7 +1470,6 @@
 
 .page[data-failure="true"] {
   background: var(--surface);
-  animation: failure-background var(--failure-transition-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .page[data-night="true"][data-failure="true"] {
@@ -1493,7 +1482,7 @@
 .page[data-failure="true"] .resetControl {
   animation: interface-break 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
   pointer-events: none;
-  will-change: opacity, filter, transform;
+  will-change: opacity, transform;
 }
 
 .page[data-failure="true"] .identity {
@@ -1503,10 +1492,6 @@
 .page[data-failure="true"] .menu,
 .page[data-failure="true"] .resetControl {
   animation-delay: 72ms;
-}
-
-.page[data-failure="true"] .environment {
-  animation: environment-break var(--failure-transition-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .page[data-failure="true"] .branch {
@@ -1520,6 +1505,10 @@
 .page[data-failure="true"] .shell {
   position: absolute;
   inset: 0;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+  contain: paint;
 }
 
 .failureView {
@@ -1533,34 +1522,15 @@
   isolation: isolate;
 }
 
-.failureView::before {
-  position: absolute;
-  inset: 18px -34px 80px;
-  z-index: -1;
-  background: linear-gradient(
-    90deg,
-    transparent 0,
-    color-mix(in srgb, var(--surface) 72%, transparent) 9%,
-    color-mix(in srgb, var(--surface) 72%, transparent) 91%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0,
-    #000 28px,
-    #000 calc(100% - 34px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0,
-    #000 28px,
-    #000 calc(100% - 34px),
-    transparent 100%
-  );
-  backdrop-filter: blur(1.5px);
-  content: "";
-  pointer-events: none;
+/* Once the handover finishes, stop rendering the retired view and tree. */
+.page[data-failure-settled="true"] .branch,
+.page[data-failure-settled="true"] .identity,
+.page[data-failure-settled="true"] .menu,
+.page[data-failure-settled="true"] .shell,
+.page[data-failure-settled="true"] .resetControl {
+  display: none;
+  animation: none;
+  will-change: auto;
 }
 
 .page[data-failure-closing="true"] .failureView {
@@ -1573,22 +1543,8 @@
   animation: original-branch-return var(--failure-transition-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.page[data-failure-closing="true"] .branch[data-gusting="true"] .branchArt {
-  animation: branch-art-return 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 .page[data-failure-closing="true"] .branch[data-gusting="true"] .branchTipLayer {
   animation: branch-tip-return 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.page[data-failure-closing="true"] .branch[data-gusting="true"] .branchBaseImage {
-  animation: branch-consume 480ms cubic-bezier(0.22, 1, 0.36, 1) reverse both;
-}
-
-.page[data-failure-closing="true"] .branch[data-gusting="true"] .subBranch,
-.page[data-failure-closing="true"] .branch[data-gusting="true"] .leaf,
-.page[data-failure-closing="true"] .branch[data-gusting="true"] .snowContact {
-  animation: branch-life-drain 420ms cubic-bezier(0.22, 1, 0.36, 1) reverse both;
 }
 
 .page[data-failure-closing="true"] .shell,
@@ -1695,7 +1651,6 @@
   background: var(--faint);
   content: "";
   opacity: 0.5;
-  animation: quiet-pulse 1100ms ease-in-out infinite alternate;
 }
 
 .failureLoading span::before {
@@ -1706,16 +1661,6 @@
 .failureLoading span::after {
   top: 82px;
   width: min(520px, 82%);
-}
-
-.failureLoading span:nth-child(2)::before,
-.failureLoading span:nth-child(2)::after {
-  animation-delay: 130ms;
-}
-
-.failureLoading span:nth-child(3)::before,
-.failureLoading span:nth-child(3)::after {
-  animation-delay: 260ms;
 }
 
 .failureError {
@@ -1748,6 +1693,7 @@
 }
 
 .failureGlitchCopy {
+  display: none;
   position: absolute;
   inset: 0;
   background: var(--surface);
@@ -1757,41 +1703,43 @@
   user-select: none;
 }
 
-.page[data-failure-glitch="true"] .failureGlitchText {
-  animation: failure-letter-jitter var(--failure-glitch-duration) steps(1, end) both;
+.failureGlitchText[data-glitch-visible="true"] .failureGlitchCopy {
+  display: block;
+  will-change: transform, opacity;
 }
 
-.page[data-failure-glitch="true"] .failureGlitchCopy[data-slice="one"] {
+/* Keep slice masks fixed: each pulse moves only the already clipped letters. */
+.failureGlitchCopy[data-slice="one"] {
+  clip-path: inset(18% 0 65%);
   text-shadow: 1px 0 rgba(186, 107, 85, 0.55);
-  animation: failure-text-slice-one var(--failure-glitch-duration) steps(1, end) both;
 }
 
-.page[data-failure-glitch="true"] .failureGlitchCopy[data-slice="two"] {
+.failureGlitchCopy[data-slice="two"] {
+  clip-path: inset(58% 0 24%);
   text-shadow: -1px 0 rgba(112, 135, 159, 0.45);
-  animation: failure-text-slice-two var(--failure-glitch-duration) steps(1, end) both;
 }
 
-@keyframes failure-letter-jitter {
-  0%, 100% { transform: translateX(0); }
-  10% { transform: translateX(-1px) skewX(-0.6deg); }
-  34% { transform: translateX(1px) skewX(0.4deg); }
-  60% { transform: translateX(-1px); }
-  82% { transform: translateX(0); }
+.failureGlitchText[data-glitch="true"] .failureGlitchCopy[data-slice="one"] {
+  animation: failure-text-slice-one var(--failure-glitch-duration) linear both;
+}
+
+.failureGlitchText[data-glitch="true"] .failureGlitchCopy[data-slice="two"] {
+  animation: failure-text-slice-two var(--failure-glitch-duration) linear both;
 }
 
 @keyframes failure-text-slice-one {
-  0%, 100% { opacity: 0; transform: translateX(0); clip-path: inset(0 0 100%); }
-  10% { opacity: 1; transform: translateX(-5px); clip-path: inset(18% 0 65%); }
-  34% { opacity: 1; transform: translateX(4px); clip-path: inset(42% 0 43%); }
-  60% { opacity: 1; transform: translateX(-3px); clip-path: inset(62% 0 22%); }
+  0%, 100% { opacity: 0; transform: translateX(0); }
+  10% { opacity: 1; transform: translateX(-5px); }
+  34% { opacity: 1; transform: translateX(4px); }
+  60% { opacity: 1; transform: translateX(-3px); }
   82% { opacity: 0; transform: translateX(0); }
 }
 
 @keyframes failure-text-slice-two {
-  0%, 100% { opacity: 0; transform: translateX(0); clip-path: inset(0 0 100%); }
-  10% { opacity: 0.8; transform: translateX(4px); clip-path: inset(58% 0 24%); }
-  34% { opacity: 1; transform: translateX(-4px); clip-path: inset(24% 0 61%); }
-  60% { opacity: 0.8; transform: translateX(3px); clip-path: inset(37% 0 48%); }
+  0%, 100% { opacity: 0; transform: translateX(0); }
+  10% { opacity: 0.8; transform: translateX(4px); }
+  34% { opacity: 1; transform: translateX(-4px); }
+  60% { opacity: 0.8; transform: translateX(3px); }
   82% { opacity: 0; transform: translateX(0); }
 }
 
@@ -1907,47 +1855,10 @@
   }
 }
 
-@keyframes branch-gust {
-  0% {
-    transform: translate3d(var(--wind-pull-x), var(--wind-pull-y), 0)
-      rotate(var(--wind-pull));
-    filter: none;
-  }
-  8% {
-    transform: translate3d(
-        calc(var(--wind-pull-x) * 1.14),
-        calc(var(--wind-pull-y) * 1.18),
-        0
-      )
-      rotate(calc(var(--wind-pull) * 1.12));
-    filter: contrast(1.06);
-  }
-  17% {
-    transform: translate3d(-4px, 2px, 0)
-      rotate(calc(var(--wind-pull) * 1.04));
-    filter: grayscale(0.42) contrast(1.35);
-  }
-  25% {
-    transform: translate3d(3px, -1px, 0)
-      rotate(calc(var(--wind-pull) * 0.98));
-    filter: grayscale(0.7) contrast(0.88);
-  }
-  38% {
-    transform: translate3d(-1px, 0, 0)
-      rotate(calc(var(--wind-pull) * 1.01));
-    filter: grayscale(0.88) contrast(0.74);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(var(--wind-pull));
-    filter: grayscale(1) contrast(0.66);
-  }
-}
-
 @keyframes branch-tip-break {
   0% {
     transform: rotate(var(--wind-tip-angle)) skewY(var(--wind-tip-shear))
       scaleX(var(--wind-tip-stretch));
-    filter: none;
     opacity: 1;
   }
   14% {
@@ -1955,28 +1866,24 @@
       rotate(calc(var(--wind-tip-angle) * 1.18))
       skewY(calc(var(--wind-tip-shear) * 1.12))
       scaleX(calc(var(--wind-tip-stretch) + 0.01));
-    filter: contrast(1.08);
     opacity: 1;
   }
   34% {
     transform: translate3d(20px, 28px, 0)
       rotate(calc(var(--wind-tip-angle) * 1.45 + 6deg))
       skewY(calc(var(--wind-tip-shear) * 0.72)) scaleX(1.01);
-    filter: grayscale(0.48) contrast(1.12);
     opacity: 0.88;
   }
   62% {
     transform: translate3d(48px, 76px, 0)
       rotate(calc(var(--wind-tip-angle) * 1.7 + 13deg))
       skewY(calc(var(--wind-tip-shear) * 0.28)) scaleX(0.995);
-    filter: grayscale(0.82) contrast(0.82);
     opacity: 0.5;
   }
   100% {
     transform: translate3d(76px, 124px, 0)
       rotate(calc(var(--wind-tip-angle) * 1.9 + 19deg)) skewY(0deg)
       scaleX(0.98);
-    filter: grayscale(1) contrast(0.66);
     opacity: 0;
   }
 }
@@ -1987,19 +1894,16 @@
     transform: translate3d(76px, 124px, 0)
       rotate(calc(var(--wind-tip-angle) * 1.9 + 19deg)) skewY(0deg)
       scaleX(0.98);
-    filter: grayscale(1) contrast(0.66);
     opacity: 0;
   }
   58% {
     transform: translate3d(8px, 11px, 0)
       rotate(calc(var(--wind-tip-angle) * 0.3))
       skewY(calc(var(--wind-tip-shear) * 0.2)) scaleX(1.005);
-    filter: grayscale(0.35) contrast(0.9);
     opacity: 0.64;
   }
   100% {
     transform: rotate(0deg) skewY(0deg) scaleX(1);
-    filter: none;
     opacity: 1;
   }
 }
@@ -2008,16 +1912,13 @@
   0%,
   18% {
     opacity: 1;
-    filter: none;
   }
   42% {
     opacity: 0.34;
-    filter: grayscale(1) contrast(0.66);
   }
   64%,
   100% {
     opacity: 0;
-    filter: grayscale(1) contrast(0.5);
   }
 }
 
@@ -2025,77 +1926,12 @@
   0%,
   18% {
     opacity: 0;
-    filter: grayscale(1) contrast(0.5);
   }
   58% {
     opacity: 0.42;
-    filter: grayscale(0.72) contrast(0.72);
   }
   100% {
     opacity: 1;
-    filter: none;
-  }
-}
-
-@keyframes branch-art-return {
-  0%,
-  18% {
-    transform: translate3d(0, 0, 0) rotate(var(--wind-pull));
-    filter: grayscale(1) contrast(0.66);
-  }
-  62% {
-    transform: translate3d(-2px, 1px, 0) rotate(-0.35deg);
-    filter: grayscale(0.35) contrast(0.9);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    filter: none;
-  }
-}
-
-@keyframes branch-consume {
-  0%,
-  8% {
-    clip-path: inset(0 0 0 0);
-    filter: none;
-    opacity: 0.46;
-  }
-  24% {
-    clip-path: inset(0 0 0 14%);
-    filter: grayscale(0.6) contrast(0.82);
-    opacity: 0.38;
-  }
-  43% {
-    clip-path: inset(0 0 0 34%);
-    filter: grayscale(0.9) contrast(0.68);
-    opacity: 0.28;
-  }
-  63% {
-    clip-path: inset(0 0 0 58%);
-    filter: grayscale(1) contrast(0.58);
-    opacity: 0.2;
-  }
-  82%,
-  100% {
-    clip-path: inset(0 0 0 67%);
-    filter: grayscale(1) contrast(0.5);
-    opacity: 0.08;
-  }
-}
-
-@keyframes branch-life-drain {
-  0%,
-  12% {
-    opacity: 1;
-    filter: none;
-  }
-  55% {
-    opacity: 0.28;
-    filter: grayscale(1) contrast(0.7);
-  }
-  100% {
-    opacity: 0;
-    filter: grayscale(1) contrast(0.5);
   }
 }
 
@@ -2103,17 +1939,14 @@
   from {
     opacity: 0;
     transform: translate3d(0, 6px, 0);
-    filter: blur(2px);
   }
   35% {
     opacity: 0.88;
     transform: translate3d(0, 0, 0);
-    filter: blur(0);
   }
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    filter: blur(0);
   }
 }
 
@@ -2121,17 +1954,14 @@
   0% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    filter: blur(0);
   }
   58% {
     opacity: 0.18;
     transform: translate3d(8px, 0, 0);
-    filter: blur(2px);
   }
   100% {
     opacity: 0;
     transform: translate3d(18px, 5px, 0);
-    filter: blur(7px);
   }
 }
 
@@ -2160,72 +1990,23 @@
   12% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    filter: none;
   }
   17% {
     opacity: 0.96;
     transform: translate3d(-4px, 0, 0);
-    filter: contrast(1.2);
   }
   22% {
     opacity: 0.82;
     transform: translate3d(5px, -1px, 0);
-    filter: grayscale(0.38) contrast(0.9);
   }
   31% {
     opacity: 0.52;
     transform: translate3d(-2px, 0, 0);
-    filter: blur(1px) grayscale(0.75);
   }
   52%,
   100% {
     opacity: 0;
     transform: translate3d(-12px, -3px, 0);
-    filter: blur(5px) grayscale(1);
-  }
-}
-
-@keyframes environment-break {
-  0%,
-  12% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    filter: none;
-  }
-  17% {
-    opacity: 0.92;
-    transform: translate3d(-3px, 1px, 0);
-    filter: grayscale(0.25) contrast(1.18);
-  }
-  24% {
-    opacity: 1;
-    transform: translate3d(4px, -1px, 0);
-    filter: grayscale(0.5) contrast(0.86);
-  }
-  42%,
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    filter: none;
-  }
-}
-
-@keyframes failure-background {
-  0%,
-  15% {
-    background-color: var(--surface);
-  }
-  17% {
-    background-color: color-mix(in srgb, var(--surface) 82%, var(--void));
-  }
-  20% {
-    background-color: var(--surface);
-  }
-  23% {
-    background-color: color-mix(in srgb, var(--surface) 94%, var(--void));
-  }
-  100% {
-    background-color: var(--surface);
   }
 }
 
@@ -2422,8 +2203,11 @@
     font-size: 12px;
   }
 
-  .invitation {
+  .landingNotes {
     top: calc(50svh + 48px);
+  }
+
+  .invitation {
     font-size: 14px;
   }
 
@@ -2465,7 +2249,7 @@
     margin-bottom: 16px;
   }
 
-  .list button {
+  .list a {
     padding: 19px 0 21px;
   }
 
@@ -2546,9 +2330,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page[data-failure-glitch="true"] .failureGlitchText,
-  .page[data-failure-glitch="true"] .failureGlitchCopy {
+  .failureGlitchText[data-glitch="true"] .failureGlitchCopy {
     animation: none;
+  }
+
+  .failureGlitchText[data-glitch-visible="true"] .failureGlitchCopy {
+    display: none;
+    will-change: auto;
   }
 
   .identity,
@@ -2570,8 +2358,6 @@
   .page[data-animate-index="true"] .index,
   .reader,
   .failureView,
-  .failureView::before,
-  .branch[data-gusting="true"] .branchArt,
   .branch[data-gusting="true"] .branchTipLayer {
     animation: none;
   }
@@ -2586,12 +2372,7 @@
     animation: none;
   }
 
-  .branch[data-gusting="true"] .branchBaseImage,
-  .branch[data-gusting="true"] .subBranch,
-  .branch[data-gusting="true"] .leaf,
-  .branch[data-gusting="true"] .snowContact,
   .page[data-failure="true"],
-  .page[data-failure="true"] .environment,
   .page[data-failure="true"] .shell,
   .page[data-failure="true"] .identity,
   .page[data-failure="true"] .menu,
@@ -2599,23 +2380,7 @@
     animation: none;
   }
 
-  .failureView::before {
-    opacity: 1;
-  }
-
   .page[data-failure="true"] .branch {
-    opacity: 0;
-  }
-
-  .branch[data-gusting="true"] .branchBaseImage {
-    clip-path: inset(0 0 0 67%);
-    filter: grayscale(1) contrast(0.5);
-    opacity: 0.08;
-  }
-
-  .branch[data-gusting="true"] .subBranch,
-  .branch[data-gusting="true"] .leaf,
-  .branch[data-gusting="true"] .snowContact {
     opacity: 0;
   }
 
@@ -2656,3 +2421,98 @@
 .readerLinks { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 24px 0; }
 .readerLinks a { color: var(--muted); font-size: 13px; text-decoration: none; }
 .readerLinks a:hover { color: var(--ink); }
+
+.latestPost {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.latestLabel {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.latestTitle {
+  font-size: 14px;
+  line-height: 1.6;
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 4px;
+}
+
+.latestTitle > span {
+  color: var(--muted);
+}
+
+.latestPost:hover .latestTitle {
+  text-decoration-color: currentColor;
+}
+
+.latestPost:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 5px;
+}
+
+.landingFeatures {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 24px;
+  margin-top: 24px;
+  align-items: start;
+}
+
+.currentlyBuilding {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.currentlyBuilding a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 3px;
+}
+
+.currentlyBuilding a:hover {
+  text-decoration-color: currentColor;
+}
+
+.currentlyBuilding a:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 5px;
+}
+
+/* Keep the landing composition slightly above the viewport midpoint. */
+.page[data-view="home"] .identity,
+.page[data-view="home"] .menu,
+.page[data-view="home"] .landingNotes {
+  translate: 0 -40px;
+}
+
+.subBranch[data-branch="about"] {
+  --socket-x: 23.6%;
+  --socket-y: 75.8%;
+  --branch-angle: -30deg;
+  --branch-scale: 0.72;
+  --xray-unscale: 1.39;
+  --xray-arrival: 260ms;
+}
+
+.subBranch[data-branch="photos"] {
+  --socket-x: 47.8%;
+  --socket-y: 55.3%;
+  --branch-angle: -60deg;
+  --branch-scale: 0.6;
+  --branch-flip: -1;
+  --xray-unscale: 1.67;
+  --xray-arrival: 520ms;
+}

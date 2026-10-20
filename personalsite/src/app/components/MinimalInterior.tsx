@@ -4,6 +4,7 @@ import { ViewTransition, useCallback, useLayoutEffect, useRef, useState } from "
 import SiteHeader from "./SiteHeader";
 import { LIVING_CORPUS_SESSION_KEYS as KEYS } from "@/lib/living-corpus/visitState";
 import { syncAchievements, unlockAchievement } from "@/lib/living-corpus/achievements";
+import { recordAboutVisit } from "@/lib/living-corpus/personalGrowth";
 import styles from "./minimal-interior.module.css";
 
 type Page = "about" | "photos" | "work" | "projects" | "writing" | "involvement";
@@ -35,6 +36,10 @@ export default function MinimalInterior({
     const frame = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  useLayoutEffect(() => {
+    if (page === "about") recordAboutVisit();
+  }, [page]);
 
   useLayoutEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);

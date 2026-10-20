@@ -26,6 +26,8 @@ focus: "These days Karthik's work centers on agent systems and memory."
 impact:
   - tier: flagship
     entries:
+      - id: "project:tavi"
+        why: "Currently building Tavi, a voice teammate that answers codebase questions, drafts follow-ups, and previews small code changes during engineering standups, with scripted multi-person meeting evaluations for when to speak and when to stay quiet."
       - id: "work:Samsung Research America"
         why: "Co-architected Samsung's always-on AI agent orchestrator, owning half of a 25+ module runtime that ships on XR glasses, including the agent's long-term memory, model routing, and safety layers."
       - id: "work:Memories.ai"

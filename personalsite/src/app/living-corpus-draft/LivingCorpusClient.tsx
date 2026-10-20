@@ -36,6 +36,7 @@ import {
   unlockAchievement,
   type AchievementId,
 } from "@/lib/living-corpus/achievements";
+import { PERSONAL_PAGES, type PersonalPage } from "@/lib/living-corpus/personalGrowth";
 import styles from "./living-corpus.module.css";
 import { CONTACT_TOPICS, CONTACT_NOTE_HREF, CONTACT_NOTE_ID } from "@/lib/living-corpus/contactInvitation";
 
@@ -114,7 +115,7 @@ const LEAF_FAN = [
   { rotation: 176, scale: 0.42 },
 ] as const;
 
-function leafStyle(index: number, category: MinimalCategory): CSSProperties {
+function leafStyle(index: number, category: GrowthCategory): CSSProperties {
   const socket = LEAF_SOCKETS[index % LEAF_SOCKETS.length];
   const fan = LEAF_FAN[
     Math.floor(index / LEAF_SOCKETS.length) % LEAF_FAN.length
@@ -157,8 +158,10 @@ const BRANCH_ORIENTATION = {
   projects: { angle: -52, flipped: true },
   writing: { angle: -56, flipped: true },
   involvement: { angle: -18, flipped: false },
+  about: { angle: -30, flipped: false },
+  photos: { angle: -60, flipped: true },
 } satisfies Record<
-  MinimalCategory,
+  GrowthCategory,
   { angle: number; flipped: boolean }
 >;
 
@@ -261,7 +264,7 @@ const SNOW_CONTACTS: readonly SnowContact[] = [
 
 function snowContactStyle(
   contact: SnowContact,
-  category: MinimalCategory,
+  category: GrowthCategory,
   index: number,
 ): SnowContactStyle {
   const { angle, flipped } = BRANCH_ORIENTATION[category];
@@ -286,7 +289,9 @@ function snowContactStyle(
   };
 }
 
-type ReadEntries = Partial<Record<MinimalCategory, string[]>>;
+type GrowthCategory = MinimalCategory | PersonalPage;
+const GROWTH_CATEGORIES: readonly { id: GrowthCategory }[] = [...MINIMAL_CATEGORIES, ...PERSONAL_PAGES.map((id) => ({ id }))];
+type ReadEntries = Partial<Record<GrowthCategory, string[]>>;
 
 function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null, push = false) {
   const url = new URL(window.location.href);
@@ -495,9 +500,8 @@ function InlineReader({
         </ul>
       ) : null}
 
-      {!continuous && (item.fullTextHref || item.links?.length) ? (
+      {!continuous && item.links?.length ? (
         <div className={styles.readerLinks}>
-          {item.fullTextHref ? <a href={item.fullTextHref}>Full text ↗</a> : null}
           {item.links?.map((link) => (
             <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} ↗</a>
           ))}
@@ -561,7 +565,7 @@ function Environment({
   itemById,
 }: {
   open: boolean;
-  branches: MinimalCategory[];
+  branches: GrowthCategory[];
   readEntries: ReadEntries;
   night: boolean;
   sunHoverLockUntil: number;
@@ -581,7 +585,7 @@ function Environment({
   const sunPointerDownRef = useRef(false);
   const sunClickConsumedRef = useRef(false);
   const [eclipseCharging, setEclipseCharging] = useState(false);
-  const [readyBranches, setReadyBranches] = useState<Set<MinimalCategory>>(
+  const [readyBranches, setReadyBranches] = useState<Set<GrowthCategory>>(
     () => new Set(),
   );
 
@@ -722,6 +726,7 @@ function Environment({
   };
 
   useEffect(() => {
+    if (failure) return;
     let frame = 0;
 
     const updateScrollFade = () => {
@@ -747,7 +752,7 @@ function Environment({
       window.removeEventListener("resize", scheduleScrollFade);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [open]);
+  }, [open, failure]);
 
   useEffect(
     () => () => {
@@ -774,10 +779,13 @@ function Environment({
   };
 
   useEffect(() => {
-    if (failure) return;
     const physics = pullPhysicsRef.current;
     if (physics.frame) window.cancelAnimationFrame(physics.frame);
     physics.frame = 0;
+    if (failure) {
+      dragRef.current = null;
+      return;
+    }
     physics.current = { root: 0, tip: 0, shear: 0, stretch: 1 };
     physics.target = { root: 0, tip: 0, shear: 0, stretch: 1 };
     physics.velocity = { root: 0, tip: 0, shear: 0, stretch: 0 };
@@ -944,8 +952,8 @@ function Environment({
         <div className={styles.branchArt} ref={branchArtRef}>
           {(
             [
-              { className: styles.branchRootLayer, categories: ["work", "projects"] },
-              { className: styles.branchTipLayer, categories: ["involvement", "writing"] },
+              { className: styles.branchRootLayer, categories: ["work", "projects", "about"] },
+              { className: styles.branchTipLayer, categories: ["involvement", "writing", "photos"] },
             ] as const
           ).map((layer) => (
             <div className={layer.className} key={layer.className}>
@@ -961,7 +969,7 @@ function Environment({
               />
               {branches
                 .filter((category) =>
-                  (layer.categories as readonly MinimalCategory[]).includes(category),
+                  (layer.categories as readonly GrowthCategory[]).includes(category),
                 )
                 .map((category) => (
                   <span
@@ -986,7 +994,10 @@ function Environment({
                         type="button"
                         className={styles.branchXrayTag}
                         aria-label={`Open ${category}`}
-                        onClick={() => onOpenCategory(category)}
+                        onClick={() => {
+                          if (category === "about" || category === "photos") window.location.assign(category === "photos" ? "/gallery" : "/about");
+                          else onOpenCategory(category);
+                        }}
                       >
                         <span>{category}</span>
                       </button>
@@ -1024,8 +1035,11 @@ function Environment({
                             key={`marker-${entryId}`}
                             className={styles.leafXrayMarker}
                             style={leafXrayMarkerStyle(index)}
-                            aria-label={`Open ${xrayEntryLabel(entryId, itemById)}`}
-                            onClick={() => onOpenEntry(category, entryId)}
+                            aria-label={`Open ${category === "about" || category === "photos" ? category : xrayEntryLabel(entryId, itemById)}`}
+                            onClick={() => {
+                              if (category === "about" || category === "photos") window.location.assign(category === "photos" ? "/gallery" : "/about");
+                              else onOpenEntry(category, entryId);
+                            }}
                           >
                             <span>{index + 1}</span>
                           </button>
@@ -1071,17 +1085,91 @@ function FailureView({
   response,
   loading,
   error,
+  closing,
   onClose,
   onRetry,
 }: {
   response: WhatBrokeResponse | null;
   loading: boolean;
   error: string | null;
+  closing: boolean;
   onClose: () => void;
   onRetry: () => void;
 }) {
+  const viewRef = useRef<HTMLElement>(null);
+  const visibleTextRef = useRef(new Set<HTMLElement>());
+
+  useEffect(() => {
+    const text = viewRef.current?.querySelectorAll<HTMLElement>(`.${styles.failureGlitchText}`);
+    if (!text) return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const node = entry.target as HTMLElement;
+        if (entry.isIntersecting) {
+          visibleTextRef.current.add(node);
+          node.dataset.glitchVisible = "true";
+        } else {
+          visibleTextRef.current.delete(node);
+          delete node.dataset.glitchVisible;
+          delete node.dataset.glitch;
+        }
+      }
+    });
+    text.forEach((node) => observer.observe(node));
+    return () => {
+      observer.disconnect();
+      text.forEach((node) => {
+        visibleTextRef.current.delete(node);
+        delete node.dataset.glitchVisible;
+        delete node.dataset.glitch;
+      });
+    };
+  }, [response, loading, error]);
+
+  useEffect(() => {
+    if (closing) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let nextGlitch: ReturnType<typeof setTimeout> | undefined;
+    let endGlitch: ReturnType<typeof setTimeout> | undefined;
+    const activeText = new Set<HTMLElement>();
+    const clearPulse = () => {
+      activeText.forEach((node) => delete node.dataset.glitch);
+      activeText.clear();
+    };
+    const stop = () => {
+      clearTimeout(nextGlitch);
+      clearTimeout(endGlitch);
+      clearPulse();
+    };
+    const pulse = () => {
+      if (reducedMotion.matches || document.visibilityState !== "visible") return;
+      // Transient DOM flags leave the homepage and tree out of each pulse.
+      visibleTextRef.current.forEach((node) => {
+        node.dataset.glitch = "true";
+        activeText.add(node);
+      });
+      endGlitch = setTimeout(clearPulse, FAILURE_GLITCH_MS);
+      nextGlitch = setTimeout(pulse, 2000 + Math.random() * 5000);
+    };
+    const restart = () => {
+      stop();
+      if (!reducedMotion.matches && document.visibilityState === "visible") {
+        // Let the first paint and viewport observations finish before glitching.
+        nextGlitch = setTimeout(pulse, 120);
+      }
+    };
+    restart();
+    reducedMotion.addEventListener("change", restart);
+    document.addEventListener("visibilitychange", restart);
+    return () => {
+      stop();
+      reducedMotion.removeEventListener("change", restart);
+      document.removeEventListener("visibilitychange", restart);
+    };
+  }, [closing]);
+
   return (
-    <section className={styles.failureView} id="what-broke">
+    <section ref={viewRef} className={styles.failureView} id="what-broke">
       <button type="button" className={styles.back} onClick={onClose}>
         <ArrowIcon back />
         <span>Back</span>
@@ -1131,16 +1219,18 @@ export default function LivingCorpusClient({
   items,
   initialSection = null,
   initialItemId,
+  latestPost,
 }: {
   items: MinimalCorpusItem[];
   initialSection?: MinimalCategory | null;
   initialItemId?: string;
+  latestPost?: { title: string; href: string };
 }) {
   const [selected, setSelected] = useState<MinimalCategory | null>(initialSection);
   const [animateIndex, setAnimateIndex] = useState(initialSection === null);
   const [activeItem, setActiveItem] = useState<MinimalCorpusItem | null>(() => items.find((item) => item.id === initialItemId) ?? null);
   const [readerSectionId, setReaderSectionId] = useState<string | null>(null);
-  const [branches, setBranches] = useState<MinimalCategory[]>([]);
+  const [branches, setBranches] = useState<GrowthCategory[]>([]);
   const [readEntries, setReadEntries] = useState<ReadEntries>({});
   const [night, setNight] = useState(false);
   const [xrayActive, setXrayActive] = useState(false);
@@ -1149,12 +1239,11 @@ export default function LivingCorpusClient({
   const [attentionClosing, setAttentionClosing] = useState(false);
   const [failureOpen, setFailureOpen] = useState(false);
   const [failureClosing, setFailureClosing] = useState(false);
-  const [failureGlitch, setFailureGlitch] = useState(false);
   const [failureLoading, setFailureLoading] = useState(false);
   const [failureResponse, setFailureResponse] =
     useState<WhatBrokeResponse | null>(null);
   const [failureError, setFailureError] = useState<string | null>(null);
-  const branchesRef = useRef<MinimalCategory[]>([]);
+  const branchesRef = useRef<GrowthCategory[]>([]);
   const readEntriesRef = useRef<ReadEntries>({});
   const attentionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attentionHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1162,7 +1251,9 @@ export default function LivingCorpusClient({
   const sunHoverLockUntilRef = useRef(0);
   const sessionIdRef = useRef("");
   const failureReturnScrollRef = useRef(0);
+  const pageRef = useRef<HTMLElement>(null);
   const invitationRef = useRef<HTMLAnchorElement>(null);
+  const featuredProject = items.find((item) => item.id === "project:tavi");
   const previousItemRef = useRef(activeItem?.id);
   useEffect(() => {
     const returningHome = previousItemRef.current === CONTACT_NOTE_ID && !activeItem && !selected;
@@ -1197,37 +1288,16 @@ export default function LivingCorpusClient({
   }, [itemById]);
 
   useEffect(() => {
-    if (!failureOpen || failureClosing) {
-      setFailureGlitch(false);
-      return;
-    }
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let nextGlitch: ReturnType<typeof setTimeout> | undefined;
-    let endGlitch: ReturnType<typeof setTimeout> | undefined;
-    const stop = () => {
-      clearTimeout(nextGlitch);
-      clearTimeout(endGlitch);
-      setFailureGlitch(false);
-    };
-    const pulse = () => {
-      if (reducedMotion.matches || document.visibilityState !== "visible") return;
-      setFailureGlitch(true);
-      endGlitch = setTimeout(() => setFailureGlitch(false), FAILURE_GLITCH_MS);
-      nextGlitch = setTimeout(pulse, 2000 + Math.random() * 5000);
-    };
-    const restart = () => {
-      stop();
-      pulse();
-    };
-
-    restart();
-    reducedMotion.addEventListener("change", restart);
-    document.addEventListener("visibilitychange", restart);
+    const page = pageRef.current;
+    if (!page) return;
+    delete page.dataset.failureSettled;
+    if (!failureOpen || failureClosing) return;
+    const settleTimer = setTimeout(() => {
+      page.dataset.failureSettled = "true";
+    }, FAILURE_TRANSITION_MS);
     return () => {
-      stop();
-      reducedMotion.removeEventListener("change", restart);
-      document.removeEventListener("visibilitychange", restart);
+      clearTimeout(settleTimer);
+      delete page.dataset.failureSettled;
     };
   }, [failureOpen, failureClosing]);
 
@@ -1241,12 +1311,16 @@ export default function LivingCorpusClient({
     if (!initialSection || !hash) return;
     const linkedItem = items.find((item) => item.category === initialSection && item.id.split(":")[1] === hash);
     if (linkedItem) {
+      if ((linkedItem.category === "writing" && linkedItem.readingStyle !== "continuous" && linkedItem.fullTextHref)) {
+        window.location.replace(linkedItem.fullTextHref);
+        return;
+      }
       setActiveItem(linkedItem);
       syncSectionUrl(linkedItem.category, linkedItem.id);
     }
   }, [initialItemId, initialSection, items]);
   const visibleItems = selected
-    ? items.filter((item) => item.category === selected)
+    ? items.filter((item) => item.category === selected && item.id !== CONTACT_NOTE_ID)
     : [];
   const firstIdeaIndex = visibleItems.findIndex((item) => item.id.startsWith("idea:"));
   const attentionItems = attentionCategory
@@ -1257,7 +1331,7 @@ export default function LivingCorpusClient({
           ),
         );
         const categoryItems = items.filter(
-          (item) => item.category === attentionCategory,
+          (item) => item.id !== CONTACT_NOTE_ID && item.category === attentionCategory,
         );
         return [
           ...categoryItems.filter((item) => !inspectedIds.has(item.id)),
@@ -1278,8 +1352,8 @@ export default function LivingCorpusClient({
       )?.id;
       const restoredBranches = [...new Set(savedBranches.map((branch) =>
         branch === "ideas" ? "writing" : branch,
-      ))].filter((branch): branch is MinimalCategory =>
-        MINIMAL_CATEGORIES.some((category) => category.id === branch),
+      ))].filter((branch): branch is GrowthCategory =>
+        GROWTH_CATEGORIES.some((category) => category.id === branch),
       );
       const linkedBranchGrew = linkedCategory && !restoredBranches.includes(linkedCategory);
       const nextBranches = linkedBranchGrew
@@ -1295,7 +1369,7 @@ export default function LivingCorpusClient({
         window.sessionStorage.getItem(SESSION_KEYS.readEntries) ?? "{}",
       ) as ReadEntries & { ideas?: string[] };
       const restoredReadEntries = Object.fromEntries(
-        MINIMAL_CATEGORIES.map(({ id }) => {
+        GROWTH_CATEGORIES.map(({ id }) => {
           const saved = [
             ...(Array.isArray(savedReadEntries[id]) ? savedReadEntries[id] : []),
             ...(id === "writing" && Array.isArray(savedReadEntries.ideas)
@@ -1303,7 +1377,7 @@ export default function LivingCorpusClient({
               : []),
           ];
           return [id, [...new Set(saved.filter(
-            (entryId): entryId is string => typeof entryId === "string",
+            (entryId): entryId is string => typeof entryId === "string" && entryId !== "page:photos#opened",
           ))]];
         }),
       ) as ReadEntries;
@@ -1313,8 +1387,10 @@ export default function LivingCorpusClient({
       setNight(restoredNight);
       // Achievements persist across visits even though the visible tree is a
       // session trail. Fold the saved trail into cumulative growth coverage.
-      restoredBranches.forEach(recordBranchCoverage);
-      MINIMAL_CATEGORIES.forEach(({ id }) =>
+      restoredBranches.forEach((branch) => {
+        if (branch !== "about" && branch !== "photos") recordBranchCoverage(branch);
+      });
+      GROWTH_CATEGORIES.forEach(({ id }) =>
         (restoredReadEntries[id] ?? []).forEach(recordLeafCoverage),
       );
       const growth = readGrowthCoverage();
@@ -1434,6 +1510,10 @@ export default function LivingCorpusClient({
       chooseCategory(category);
       return;
     }
+    if ((item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) {
+      window.location.assign(item.fullTextHref);
+      return;
+    }
     setReaderSectionId(sectionId);
     syncSectionUrl(category, item.id, sectionId);
     setSelected(category);
@@ -1481,16 +1561,16 @@ export default function LivingCorpusClient({
     }
   };
 
-  const openContactNote = (event: ReactMouseEvent<HTMLAnchorElement>, sectionId: string | null = null) => {
-    if (!contactNote || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+  const openLandingItem = (event: ReactMouseEvent<HTMLAnchorElement>, item: MinimalCorpusItem, sectionId: string | null = null) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     event.preventDefault();
     clearAttention();
-    growBranch(contactNote.category);
-    rememberEntry(contactNote.category, `${contactNote.id}#opened`);
-    syncSectionUrl(contactNote.category, contactNote.id, sectionId, true);
+    growBranch(item.category);
+    rememberEntry(item.category, `${item.id}#opened`);
+    syncSectionUrl(item.category, item.id, sectionId, true);
     setReaderSectionId(sectionId);
-    setSelected(contactNote.category);
-    setActiveItem(contactNote);
+    setSelected(item.category);
+    setActiveItem(item);
   };
 
   const resetVisit = () => {
@@ -1613,6 +1693,7 @@ export default function LivingCorpusClient({
 
   return (
     <main
+      ref={pageRef}
       className={styles.page}
       data-corpus-page="home"
       data-animate-index={animateIndex ? "true" : "false"}
@@ -1620,7 +1701,6 @@ export default function LivingCorpusClient({
       data-open={selected ? "true" : "false"}
       data-failure={failureOpen ? "true" : "false"}
       data-failure-closing={failureClosing ? "true" : "false"}
-      data-failure-glitch={failureGlitch ? "true" : "false"}
       style={{
         "--failure-transition-duration": `${FAILURE_TRANSITION_MS}ms`,
         "--failure-glitch-duration": `${FAILURE_GLITCH_MS}ms`,
@@ -1701,12 +1781,13 @@ export default function LivingCorpusClient({
         onAttentionEnd={endAttention}
       />
 
+      <div className={styles.landingNotes} aria-hidden={selected !== null || failureOpen} inert={selected !== null || failureOpen}>
       {contactNote ? (
-        <p className={styles.invitation} aria-hidden={selected !== null || failureOpen} inert={selected !== null || failureOpen}>
+        <p className={styles.invitation}>
           Building {CONTACT_TOPICS.map((topic, index) => (
             <Fragment key={topic.section}>
               {index === 0 ? "" : index === CONTACT_TOPICS.length - 1 ? ", or " : ", "}
-              <a ref={index === 0 ? invitationRef : undefined} href={`${CONTACT_NOTE_HREF}#${topic.section}`} onClick={(event) => openContactNote(event, topic.section)}>
+              <a ref={index === 0 ? invitationRef : undefined} href={`${CONTACT_NOTE_HREF}#${topic.section}`} onClick={(event) => openLandingItem(event, contactNote, topic.section)}>
                 {topic.label}
               </a>
             </Fragment>
@@ -1714,6 +1795,28 @@ export default function LivingCorpusClient({
           <span className={styles.talk}>Let’s talk.</span>
         </p>
       ) : null}
+
+      <div className={styles.landingFeatures}>
+      {featuredProject ? (
+        <div className={styles.currentlyBuilding}>
+          <span className={styles.latestLabel}>Currently building</span>
+          <a href={`${featuredProject.href}#overview`} onClick={(event) => openLandingItem(event, featuredProject, "overview")}>
+            {featuredProject.title}
+          </a>
+        </div>
+      ) : null}
+
+      {latestPost ? (
+        <a
+          className={styles.latestPost}
+          href={latestPost.href}
+        >
+          <span className={styles.latestLabel}>Latest writing</span>
+          <span className={styles.latestTitle}>{latestPost.title} <span aria-hidden="true">↗</span></span>
+        </a>
+      ) : null}
+      </div>
+      </div>
 
       {attentionCategory && !selected && !failureOpen ? (
         <aside
@@ -1739,6 +1842,10 @@ export default function LivingCorpusClient({
               onFocus={holdAttention}
               onPointerEnter={holdAttention}
               onClick={() => {
+                if ((item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) {
+                  window.location.assign(item.fullTextHref);
+                  return;
+                }
                 clearAttention();
                 growBranch(item.category);
                 rememberEntry(item.category, `${item.id}#opened`);
@@ -1796,9 +1903,11 @@ export default function LivingCorpusClient({
                     <li className={styles.listGroupLabel}>Ideas</li>
                   ) : null}
                   <li>
-                    <button
-                      type="button"
-                      onClick={() => {
+                    <a
+                      href={(item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref) ? item.fullTextHref : item.href}
+                      onClick={(event) => {
+                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || (item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) return;
+                        event.preventDefault();
                         growBranch(item.category);
                         rememberEntry(item.category, `${item.id}#opened`);
                         setReaderSectionId(null);
@@ -1814,7 +1923,7 @@ export default function LivingCorpusClient({
                       </div>
                       <p className={styles.meta}>{item.meta}</p>
                       <p className={styles.description}>{item.description}</p>
-                    </button>
+                    </a>
                   </li>
                 </Fragment>
               ))}
@@ -1828,6 +1937,7 @@ export default function LivingCorpusClient({
           response={failureResponse}
           loading={failureLoading}
           error={failureError}
+          closing={failureClosing}
           onClose={closeWhatBroke}
           onRetry={retryWhatBroke}
         />
