@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import RssLink from "@/app/components/RssLink";
 import CorpusNavigation from "@/app/components/CorpusNavigation";
 import {
   Fragment,
@@ -1886,6 +1887,7 @@ export default function LivingCorpusClient({
           />
         ) : selected ? (
           <section className={styles.index}>
+            <div className={styles.indexActions}>
             <button
               type="button"
               className={styles.back}
@@ -1898,6 +1900,10 @@ export default function LivingCorpusClient({
               <ArrowIcon back />
               <span>all</span>
             </button>
+            {selected === "writing" ? (
+              <RssLink />
+            ) : null}
+            </div>
 
             <ol className={styles.list}>
               {visibleItems.map((item, index) => (

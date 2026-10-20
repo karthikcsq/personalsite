@@ -2516,3 +2516,9 @@
   --xray-unscale: 1.67;
   --xray-arrival: 520ms;
 }
+
+.indexActions {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}

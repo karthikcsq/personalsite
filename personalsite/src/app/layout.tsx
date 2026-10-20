@@ -74,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${karla.variable} ${sourceSerif.variable} h-full`}
     >
       <head>
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Karthik Thyagarajan — Writing" />
         {/* Discovery hint for agents that read the document but do not sniff
             well-known paths. /llms.txt is the full machine-readable index. */}
         <link

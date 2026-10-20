@@ -68,7 +68,7 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <CorpusArticle category="writing" title={post.title} meta={post.date} summary={post.summary}>
+    <CorpusArticle showRss category="writing" title={post.title} meta={post.date} summary={post.summary}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
     </CorpusArticle>

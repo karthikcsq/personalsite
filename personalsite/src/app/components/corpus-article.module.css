@@ -37,3 +37,5 @@
 .toc a { font-size: 13px; text-decoration: none; }
 .topics { margin-top: 48px; color: var(--muted); font-size: 12px; }
 @media (max-width: 760px) { .article { margin-top: 48px; padding-bottom: 90px; } .heading { margin-top: 32px; } }
+
+.actions { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
