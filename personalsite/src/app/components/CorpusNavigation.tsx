@@ -7,10 +7,10 @@ import styles from "./corpus-navigation.module.css";
 
 export const CORPUS_NAV_ITEMS = [
   { id: "about", label: "About", href: "/about" },
-  { id: "work", label: "Work", href: "/?section=work" },
-  { id: "projects", label: "Projects", href: "/?section=projects" },
-  { id: "writing", label: "Writing", href: "/?section=writing" },
-  { id: "involvement", label: "Involvement", href: "/?section=involvement" },
+  { id: "work", label: "Work", href: "/work" },
+  { id: "projects", label: "Projects", href: "/projects" },
+  { id: "writing", label: "Writing", href: "/writing" },
+  { id: "involvement", label: "Involvement", href: "/involvement" },
   { id: "photos", label: "Photos", href: "/gallery" },
 ] as const;
 
@@ -26,7 +26,7 @@ export function destinationForPath(pathname: string): CorpusDestination | null {
   if (pathname.startsWith("/work")) return "work";
   if (pathname.startsWith("/projects")) return "projects";
   if (pathname.startsWith("/involvement")) return "involvement";
-  if (pathname.startsWith("/blog") || pathname.startsWith("/notes")) return "writing";
+  if (pathname.startsWith("/writing") || pathname.startsWith("/blog") || pathname.startsWith("/notes")) return "writing";
   return null;
 }
 
@@ -55,19 +55,24 @@ export default function CorpusNavigation({
           if (isCategory(item.id) && onSelectCategory) {
             const category = item.id;
             return (
-              <button
+              <Link
                 key={category}
-                type="button"
+                href={item.href}
+                prefetch={false}
                 data-selected={current === category ? "true" : "false"}
-                aria-pressed={current === category}
+                aria-current={current === category ? "page" : undefined}
                 onBlur={onAttentionEnd}
-                onClick={() => onSelectCategory(category)}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                  event.preventDefault();
+                  onSelectCategory(category);
+                }}
                 onFocus={() => onAttentionStart?.(category)}
                 onPointerEnter={() => onAttentionStart?.(category)}
                 onPointerLeave={onAttentionEnd}
               >
                 {item.label}
-              </button>
+              </Link>
             );
           }
 

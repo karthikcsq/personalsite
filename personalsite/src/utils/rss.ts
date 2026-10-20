@@ -25,7 +25,7 @@ export function buildRssFeed(posts: readonly PostMeta[]): string {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Karthik Thyagarajan — Writing</title>
-    <link>${SITE}/?section=writing</link>
+    <link>${SITE}/writing</link>
     <description>Essays by Karthik Thyagarajan on AI, technology, and building.</description>
     <language>en</language>
     <atom:link href="${SITE}/feed.xml" rel="self" type="application/rss+xml" />${sortedPosts.length ? `

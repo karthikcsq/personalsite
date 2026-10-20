@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { corpusSectionHref, corpusSectionFromPath } from "@/lib/living-corpus/links";
+import { collection } from "@/data/collection";
 import RssLink from "@/app/components/RssLink";
 import CorpusNavigation from "@/app/components/CorpusNavigation";
 import {
@@ -295,10 +297,10 @@ type GrowthCategory = MinimalCategory | PersonalPage;
 const GROWTH_CATEGORIES: readonly { id: GrowthCategory }[] = [...MINIMAL_CATEGORIES, ...PERSONAL_PAGES.map((id) => ({ id }))];
 type ReadEntries = Partial<Record<GrowthCategory, string[]>>;
 
-function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null, push = false) {
+function syncSectionUrl(category: MinimalCategory | null, itemId?: string, sectionId?: string | null, push = true) {
   const url = new URL(window.location.href);
-  if (category) url.searchParams.set("section", category);
-  else url.searchParams.delete("section");
+  url.pathname = category ? corpusSectionHref(category) : "/";
+  url.searchParams.delete("section");
   if (itemId) url.searchParams.set("item", itemId);
   else url.searchParams.delete("item");
   url.hash = sectionId ?? "";
@@ -1272,6 +1274,14 @@ export default function LivingCorpusClient({
     () => new Map(items.map((item) => [item.id, item])),
     [items],
   );
+  useEffect(() => {
+    const label = MINIMAL_CATEGORIES.find(({ id }) => id === selected)?.label;
+    document.title = label ? `${label} · Karthik Thyagarajan` : "Karthik Thyagarajan";
+    document.querySelector('link[rel="canonical"]')?.setAttribute(
+      "href", `https://www.karthikthyagarajan.com${selected ? corpusSectionHref(selected) : "/"}`,
+    );
+  }, [selected]);
+
   const allLeafTargets = useMemo(() => leafTargets(items), [items]);
   const contactNote = itemById.get(CONTACT_NOTE_ID);
 
@@ -1280,7 +1290,7 @@ export default function LivingCorpusClient({
       const params = new URLSearchParams(window.location.search);
       const item = itemById.get(params.get("item") ?? "") ?? null;
       const requested = params.get("section");
-      const category = item?.category ?? MINIMAL_CATEGORIES.find(
+      const category = item?.category ?? corpusSectionFromPath(window.location.pathname) ?? MINIMAL_CATEGORIES.find(
         ({ id }) => id === (requested === "ideas" ? "writing" : requested),
       )?.id ?? null;
       setSelected(category);
@@ -1320,13 +1330,12 @@ export default function LivingCorpusClient({
         return;
       }
       setActiveItem(linkedItem);
-      syncSectionUrl(linkedItem.category, linkedItem.id);
+      syncSectionUrl(linkedItem.category, linkedItem.id, null, false);
     }
   }, [initialItemId, initialSection, items]);
   const visibleItems = selected
     ? items.filter((item) => item.category === selected && item.id !== CONTACT_NOTE_ID)
     : [];
-  const firstIdeaIndex = visibleItems.findIndex((item) => item.id.startsWith("idea:"));
   const attentionItems = attentionCategory
     ? (() => {
         const inspectedIds = new Set(
@@ -1351,7 +1360,7 @@ export default function LivingCorpusClient({
         window.sessionStorage.getItem(SESSION_KEYS.branches) ?? "[]",
       ) as string[];
       const requestedSection = new URLSearchParams(window.location.search).get("section");
-      const linkedCategory = MINIMAL_CATEGORIES.find(
+      const linkedCategory = corpusSectionFromPath(window.location.pathname) ?? MINIMAL_CATEGORIES.find(
         (category) => category.id === (requestedSection === "ideas" ? "writing" : requestedSection),
       )?.id;
       const restoredBranches = [...new Set(savedBranches.map((branch) =>
@@ -1906,11 +1915,8 @@ export default function LivingCorpusClient({
             </div>
 
             <ol className={styles.list}>
-              {visibleItems.map((item, index) => (
+              {visibleItems.map((item) => (
                 <Fragment key={item.id}>
-                  {selected === "writing" && index === firstIdeaIndex ? (
-                    <li className={styles.listGroupLabel}>Ideas</li>
-                  ) : null}
                   <li>
                     <a
                       href={(item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref) ? item.fullTextHref : item.href}
@@ -1937,6 +1943,25 @@ export default function LivingCorpusClient({
                 </Fragment>
               ))}
             </ol>
+            {selected === "writing" ? (
+              <section className={styles.collection} id="collection" aria-labelledby="collection-heading">
+                <h2 className={styles.collectionHeading} id="collection-heading">Collection</h2>
+                <ul className={styles.list}>
+                  {collection.map((entry) => (
+                    <li key={entry.id}>
+                      <a href={entry.href} target="_blank" rel="noopener noreferrer">
+                        <div className={styles.itemHeading}>
+                          <h3>{entry.title}</h3>
+                          <span className={styles.collectionArrow} aria-hidden="true">↗</span>
+                        </div>
+                        <p className={styles.meta}>{entry.author}</p>
+                        <p className={styles.description}>{entry.note}</p>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </section>
         ) : null}
       </div>

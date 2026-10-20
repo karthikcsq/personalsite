@@ -38,10 +38,11 @@ test('sitemap lists only final, self-canonical HTML pages', { skip: !base }, asy
   }
   for (const section of ['work', 'projects', 'involvement', 'writing']) {
     const response = await fetch(`${base}/?section=${section}`, { redirect: 'manual' });
-    assert.equal(response.status, 200, `${section} remains a valid homepage state`);
-    assert.match(response.headers.get('content-type') ?? '', /^text\/html/);
+    assert.equal(response.status, 308, `${section} query links redirect to clean section paths`);
+    assert.equal(response.headers.get('location'), `/${section}`);
+    assert.ok(urls.includes(`https://www.karthikthyagarajan.com/${section}`));
   }
-  for (const sectionPath of ['/work', '/projects', '/involvement', '/blog', '/notes']) {
+  for (const sectionPath of ['/blog', '/notes']) {
     const response = await fetch(`${base}${sectionPath}`, { redirect: 'manual' });
     assert.equal(response.status, 308, `${sectionPath} is a redirect and must not be in the sitemap`);
     assert.ok(!urls.includes(`https://www.karthikthyagarajan.com${sectionPath}`));

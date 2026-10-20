@@ -20,10 +20,10 @@ The public experience is the minimal living corpus. Its four sections are Work, 
 
 ## Public routes and presentation
 
-- `src/app/page.tsx` resolves `?section=` and `?item=` on the server so direct links render the correct view immediately. It renders `living-corpus-draft/LivingCorpusClient.tsx`; the component directory name is historical, and the `/living-corpus-draft` route redirects home.
+- `/work`, `/projects`, `/writing`, and `/involvement` render their sections directly through `components/CorpusLandingPage.tsx` and `living-corpus-draft/LivingCorpusClient.tsx`. Item links use `/<section>?item=<id>`. Legacy root `?section=` links redirect to the corresponding clean path; blog articles retain `/blog/[slug]`. The `/living-corpus-draft` route redirects home.
 - `src/lib/living-corpus/minimalTypes.ts` defines visible categories and reader data. `minimalHomepage.ts` builds those items from the corpus, blog posts, projects, and involvement data.
 - `src/lib/living-corpus/links.ts` builds item URLs. Use it rather than linking to section-list anchors.
-- `/work`, `/projects`, `/involvement`, `/blog`, and `/notes` permanently redirect to the corresponding homepage section. Anchored section bookmarks resolve to their matching items in the client.
+- `/blog` and `/notes` permanently redirect to `/writing`. Anchored section bookmarks resolve to their matching items in the client. Use `src/lib/living-corpus/links.ts` for section and item destinations.
 - `/blog/[slug]` and `/notes/[kind]/[slug]` retain their canonical URLs and full content, rendered with `CorpusArticle` and `MinimalInterior`. Note source links open the matching corpus item.
 - About and Photos also use `MinimalInterior`. Shared navigation lives in `CorpusNavigation` and `SiteHeader`; page transitions use `CorpusPageTransition`.
 - `ConditionalChrome` renders the global achievements panel without a separate navigation system or botanical frame.

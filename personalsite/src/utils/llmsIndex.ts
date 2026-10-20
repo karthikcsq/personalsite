@@ -1,3 +1,4 @@
+import { collection } from "@/data/collection";
 import { founderBriefMarkdown } from "@/lib/living-corpus/founderBrief";
 import { corpusItemHref } from "@/lib/living-corpus/links";
 import { getJobsFromYaml } from "@/utils/jobUtils";
@@ -185,7 +186,7 @@ function render(): string {
           title: entry.title,
           meta: [entry.date, entry.tools].filter(Boolean).join(" - "),
           summary: truncate(entry.bullets.join(" ")),
-          url: entry.link || `${SITE}/?section=projects`,
+          url: entry.link || `${SITE}/projects`,
         }),
       );
     }
@@ -221,7 +222,7 @@ function render(): string {
         line({
           title: topic.title,
           summary: truncate(topic.tagline),
-          url: noteUrl ?? `${SITE}/?section=writing`,
+          url: noteUrl ?? `${SITE}/writing`,
         }),
       );
     }
@@ -264,11 +265,18 @@ function render(): string {
     out.push("");
   }
 
+  out.push("## Collection: recommended reading by other authors");
+  out.push("");
+  for (const entry of collection) {
+    out.push(`- **${entry.title}** by ${entry.author}. ${entry.note} [read](${entry.href})`);
+  }
+  out.push("");
+
   out.push("## Other pages");
   out.push("");
   out.push(`- **For founders and hiring teams** - experience, ownership, and evidence. [brief](${SITE}/brief)`);
   out.push(`- **About** - longer bio and background. [page](${SITE}/about)`);
-  out.push(`- **Writing** - essays and ideas. [page](${SITE}/?section=writing)`);
+  out.push(`- **Writing** - essays and a curated collection. [page](${SITE}/writing)`);
   out.push(`- **Gallery** - photography. [page](${SITE}/gallery)`);
   out.push(`- **Resume** - PDF. [file](${SITE}/resume.pdf)`);
   out.push("");

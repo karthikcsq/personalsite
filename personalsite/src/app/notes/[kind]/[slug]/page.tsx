@@ -82,7 +82,7 @@ export default async function NotePage({ params }: Props) {
       url: SITE,
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    isPartOf: { "@type": "Collection", name: "Writing", url: `${SITE}/?section=writing` },
+    isPartOf: { "@type": "Collection", name: "Writing", url: `${SITE}/writing` },
   };
 
   const category = note.kind === "project" ? "projects" : note.kind === "topic" ? "writing" : note.kind;

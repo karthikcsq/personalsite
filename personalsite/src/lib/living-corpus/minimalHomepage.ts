@@ -183,10 +183,7 @@ function blogMediaBySection(
 export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
   const artifacts = buildLivingCorpus().artifacts;
   const involvementById = new Map(getInvolvementsFromYaml().map((item) => [`involvement:${item.slug}`, item]));
-  const orderedArtifacts = [
-    ...artifacts.filter((artifact) => artifact.category !== "ideas"),
-    ...artifacts.filter((artifact) => artifact.category === "ideas"),
-  ];
+  const orderedArtifacts = artifacts.filter((artifact) => artifact.category !== "ideas");
   return orderedArtifacts.flatMap<MinimalCorpusItem>((artifact) => {
     const category = artifact.category === "ideas" ? "writing" : artifact.category;
     if (!VISIBLE_CATEGORIES.has(category as MinimalCategory)) return [];

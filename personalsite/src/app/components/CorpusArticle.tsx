@@ -21,7 +21,7 @@ export default function CorpusArticle({
       <MinimalInterior page={category}>
         <main className={styles.article}>
           <div className={styles.actions}>
-            <Link className={styles.back} href={`/?section=${category}`}>← {category}</Link>
+            <Link className={styles.back} href={`/${category}`}>← {category}</Link>
             {showRss ? <RssLink /> : null}
           </div>
           <header className={styles.heading}>

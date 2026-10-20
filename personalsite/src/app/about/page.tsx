@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 
 const paths = [
   { label: "What I’m looking for", href: CONTACT_NOTE_HREF },
-  { label: "Work", href: "/?section=work" },
-  { label: "Projects", href: "/?section=projects" },
-  { label: "Writing", href: "/?section=writing" },
-  { label: "Involvement", href: "/?section=involvement" },
+  { label: "Work", href: "/work" },
+  { label: "Projects", href: "/projects" },
+  { label: "Writing", href: "/writing" },
+  { label: "Involvement", href: "/involvement" },
 ];
 
 const connect = [

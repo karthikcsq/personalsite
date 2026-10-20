@@ -1,0 +1,114 @@
+import FounderBrief from "@/app/components/FounderBrief";
+import { founderBrief } from "@/lib/living-corpus/founderBrief";
+import { redirect, permanentRedirect } from "next/navigation";
+import { corpusSectionHref, corpusItemHref } from "@/lib/living-corpus/links";
+import LivingCorpusClient from "@/app/living-corpus-draft/LivingCorpusClient";
+import CorpusPageTransition from "@/app/components/CorpusPageTransition";
+import { buildMinimalCorpusItems } from "@/lib/living-corpus/minimalHomepage";
+import { MINIMAL_CATEGORIES, type MinimalCategory } from "@/lib/living-corpus/minimalTypes";
+import { getSortedPosts } from "@/utils/blogUtils";
+import { buildLlmsIndex } from "@/utils/llmsIndex";
+
+// Only `</script` can terminate the block early; the rest of the markdown is
+// inert inside an unhandled script type and must survive byte-for-byte so an
+// agent reading it gets valid markdown.
+function escapeForScript(s: string): string {
+  return s.replace(/<\/(script)/gi, "<\\/$1");
+}
+
+const SITE = "https://www.karthikthyagarajan.com";
+
+// Sitewide identity graph. Lives on the home page rather than the root
+// layout so it is declared exactly once per crawl rather than on every
+// route. Links out to the sections a crawler should follow.
+const identityJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${SITE}/#person`,
+      name: "Karthik Thyagarajan",
+      url: SITE,
+      jobTitle: "Founder-engineer",
+      description: founderBrief.summary,
+      sameAs: ["https://github.com/karthikcsq", "https://www.linkedin.com/in/karthikthyagarajan06"],
+      alumniOf: { "@type": "CollegeOrUniversity", name: "Purdue University" },
+      knowsAbout: [
+        "AI agents",
+        "Machine learning",
+        "On-device AI",
+        "Robotics",
+        "Computer vision",
+        "Quantum key distribution",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      url: SITE,
+      name: "Karthik Thyagarajan",
+      publisher: { "@id": `${SITE}/#person` },
+      inLanguage: "en",
+    },
+  ],
+};
+
+export type CorpusSearchParams = { section?: string | string[]; item?: string | string[] };
+
+export default async function CorpusLandingPage({
+  searchParams,
+  category = null,
+}: {
+  searchParams: Promise<CorpusSearchParams>;
+  category?: MinimalCategory | null;
+}) {
+  const params = await searchParams;
+  const sectionParam = params.section;
+  const itemParam = Array.isArray(params.item) ? params.item[0] : params.item;
+  const items = buildMinimalCorpusItems();
+  const latestPost = getSortedPosts()[0];
+  const initialItem = items.find((item) => item.id === itemParam) ?? null;
+  if (initialItem?.category === "writing" && initialItem.readingStyle !== "continuous" && initialItem.fullTextHref) redirect(initialItem.fullTextHref);
+  const requestedSection = Array.isArray(sectionParam) ? sectionParam[0] : sectionParam;
+  const initialSection = initialItem?.category ?? category ?? MINIMAL_CATEGORIES.find(
+    ({ id }) => id === (requestedSection === "ideas" ? "writing" : requestedSection),
+  )?.id ?? null;
+
+  if (!category && initialSection) {
+    permanentRedirect(initialItem ? corpusItemHref(initialSection, initialItem.id) : corpusSectionHref(initialSection));
+  }
+  if (category && initialItem && initialItem.category !== category) {
+    permanentRedirect(initialItem.href);
+  }
+
+  return (
+    <>
+      {!category ? <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd) }}
+      /> : null}
+      {/* The full site index, inline. Agents can also fetch /llms.txt
+          directly. Some fetchers read the HTML at /, so the unhandled script
+          type exposes the index without rendering or executing it. */}
+      <script
+        type="text/markdown"
+        id="site-index"
+        data-canonical="/llms.txt"
+        dangerouslySetInnerHTML={{ __html: escapeForScript(buildLlmsIndex()) }}
+      />
+      {/* Crawlable path into the rest of the site for agents that do not
+          execute the client-side living corpus. */}
+      <nav aria-label="Sections" className="sr-only">
+        <a href="/work">Work</a>
+        <a href="/projects">Projects</a>
+        <a href="/involvement">Involvement</a>
+        <a href="/writing">Writing</a>
+        <a href="/gallery">Photography</a>
+        <a href="/about">About</a>
+      </nav>
+      <CorpusPageTransition page="home">
+        <LivingCorpusClient key={initialItem?.id ?? initialSection ?? "home"} items={items} founderBrief={<FounderBrief />} latestPost={latestPost ? { title: latestPost.title, href: `/blog/${latestPost.slug}` } : undefined} initialSection={initialSection} initialItemId={initialItem?.id} />
+      </CorpusPageTransition>
+    </>
+  );
+}
