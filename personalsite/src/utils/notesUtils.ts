@@ -79,17 +79,11 @@ function isNoteKind(s: string): s is NoteKind {
   return (NOTE_KINDS as readonly string[]).includes(s);
 }
 
-function findCorpusDir(): string | null {
-  const candidates = [
-    path.join(process.cwd(), '..', 'python-rag', 'rag-docs', 'corpus'),
-    path.join(process.cwd(), 'python-rag', 'rag-docs', 'corpus'),
-    path.join(process.cwd(), 'rag-docs', 'corpus'),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p) && fs.statSync(p).isDirectory()) return p;
-  }
-  return null;
-}
+// Keep filesystem reads anchored to the canonical corpus location. Returning
+// an unknown directory from a probing helper makes output tracing include
+// unrelated files from the whole app (including design/public assets).
+// next.config.ts includes these sibling files in deployed function output.
+const corpusDirectory = path.join(process.cwd(), '..', 'python-rag', 'rag-docs', 'corpus');
 
 // Split markdown into lines, tracking fenced code blocks so heading logic
 // never fires on a `# comment` inside a snippet.
@@ -256,14 +250,13 @@ function loadAll(): RawNote[] {
   // Authored Markdown lives outside the Next.js package, so Fast Refresh
   // doesn't invalidate this module when a note changes during development.
   if (cache && process.env.NODE_ENV === 'production') return cache;
-  const dir = findCorpusDir();
-  if (!dir) {
+  if (!fs.existsSync(corpusDirectory)) {
     cache = [];
     return cache;
   }
 
   const notes: RawNote[] = [];
-  for (const name of fs.readdirSync(dir).sort()) {
+  for (const name of fs.readdirSync(corpusDirectory).sort()) {
     if (!name.endsWith('.md')) continue;
 
     const underscore = name.indexOf('_');
@@ -275,7 +268,7 @@ function loadAll(): RawNote[] {
 
     let raw: string;
     try {
-      raw = fs.readFileSync(path.join(dir, name), 'utf8');
+      raw = fs.readFileSync(path.join(corpusDirectory, name), 'utf8');
     } catch {
       continue;
     }
