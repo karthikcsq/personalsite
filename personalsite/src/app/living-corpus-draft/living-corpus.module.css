@@ -376,7 +376,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 13px;
+  font-size: 16.25px;
   line-height: 1;
   opacity: 0.32;
   text-shadow: 0 1px 5px color-mix(in srgb, var(--ink) 24%, transparent);
@@ -539,7 +539,7 @@
   min-height: 18px;
   padding: 2px 6px;
   border-radius: 999px;
-  font-size: 7px;
+  font-size: 8.75px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -558,7 +558,7 @@
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  font-size: 7px;
+  font-size: 8.75px;
   font-weight: 650;
   line-height: 1;
 }
@@ -699,7 +699,7 @@
   position: absolute;
   right: 5%;
   bottom: 44%;
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 510;
   letter-spacing: 0.08em;
   opacity: 0;
@@ -763,7 +763,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 26px;
+  font-size: 32.5px;
   font-weight: 520;
   letter-spacing: -0.036em;
   cursor: pointer;
@@ -780,7 +780,7 @@
 }
 
 .page[data-open="true"] .identity button {
-  font-size: 24px;
+  font-size: 30px;
 }
 
 .menu {
@@ -808,7 +808,7 @@
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: -0.018em;
   text-align: left;
   text-decoration: none;
@@ -862,7 +862,7 @@
   gap: 4px;
   min-height: 44px;
   color: inherit;
-  font-size: 13px;
+  font-size: 16.25px;
   text-decoration: none;
   white-space: nowrap;
   transition: color 180ms ease;
@@ -906,7 +906,7 @@
 .invitation {
   margin: 0;
   color: #62656e;
-  font-size: 15px;
+  font-size: 18.75px;
   line-height: 1.7;
   text-wrap: balance;
   transition: opacity 220ms ease, visibility 220ms;
@@ -1063,7 +1063,7 @@
 
 .gravityMeta {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11.25px;
   font-weight: 560;
   letter-spacing: 0.11em;
   line-height: 1.45;
@@ -1072,7 +1072,7 @@
 }
 
 .gravityTitle {
-  font-size: clamp(14px, 1.1vw, 17px);
+  font-size: clamp(17.5px, 1.375vw, 21.25px);
   font-weight: 510;
   letter-spacing: -0.025em;
   line-height: 1.28;
@@ -1080,7 +1080,7 @@
 
 .gravityOpen {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
   letter-spacing: 0.04em;
   opacity: 0;
   transform: translateY(-3px);
@@ -1141,7 +1141,7 @@
 
 .page[data-open="true"] .menu button,
 .page[data-open="true"] .menu a {
-  font-size: 13px;
+  font-size: 16.25px;
 }
 
 .index {
@@ -1162,7 +1162,7 @@
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 15px;
   cursor: pointer;
   transition: color 180ms ease;
 }
@@ -1206,7 +1206,7 @@
 .itemHeading h2,
 .itemHeading h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 510;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -1229,7 +1229,7 @@
 .meta {
   margin: 7px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13.75px;
   font-weight: 530;
   letter-spacing: 0.095em;
   line-height: 1.5;
@@ -1240,7 +1240,7 @@
   max-width: 630px;
   margin: 9px 0 0;
   color: #6f717a;
-  font-size: 14px;
+  font-size: 17.5px;
   line-height: 1.55;
 }
 
@@ -1270,7 +1270,7 @@
 .readerToc > p {
   margin: 0 0 16px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1296,7 +1296,7 @@
   color: var(--ink);
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 16.25px;
   line-height: 1.45;
   text-align: left;
 }
@@ -1304,7 +1304,7 @@
 .readerToc button span {
   flex: 0 0 20px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
 }
@@ -1326,7 +1326,7 @@
 
 .readerHeader h1 {
   margin: 9px 0 0;
-  font-size: clamp(30px, 4vw, 42px);
+  font-size: clamp(37.5px, 5vw, 52.5px);
   font-weight: 510;
   letter-spacing: -0.045em;
   line-height: 1.08;
@@ -1338,7 +1338,7 @@
 
 .reader[data-continuous="true"] .readerHeader h1 {
   margin-top: 0;
-  font-size: 30px;
+  font-size: 37.5px;
 }
 
 .reader[data-continuous="true"] .noteSections {
@@ -1349,7 +1349,7 @@
   max-width: 650px;
   margin: 17px 0 0;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 18.75px;
   line-height: 1.68;
 }
 
@@ -1360,7 +1360,7 @@
   padding: 25px 0 27px 18px;
   border-bottom: 1px solid var(--rule);
   color: #5f626b;
-  font-size: 13px;
+  font-size: 16.25px;
   line-height: 1.58;
 }
 
@@ -1423,7 +1423,7 @@
 
 .noteSections h2 {
   margin: 0 0 11px;
-  font-size: 19px;
+  font-size: 23.75px;
   font-weight: 520;
   letter-spacing: -0.025em;
   line-height: 1.25;
@@ -1432,7 +1432,7 @@
 .noteSections p {
   margin: 0;
   color: #62656e;
-  font-size: 15px;
+  font-size: 18.75px;
   line-height: 1.72;
 }
 
@@ -1554,7 +1554,7 @@
 
 .failureHeader h1 {
   margin: 0;
-  font-size: clamp(34px, 4.5vw, 54px);
+  font-size: clamp(42.5px, 5.625vw, 67.5px);
   font-weight: 510;
   letter-spacing: -0.052em;
   line-height: 1.02;
@@ -1564,7 +1564,7 @@
   max-width: 610px;
   margin: 17px auto 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 17.5px;
   line-height: 1.66;
 }
 
@@ -1583,7 +1583,7 @@
 
 .failureList h2 {
   margin: 7px 0 0;
-  font-size: 19px;
+  font-size: 23.75px;
   font-weight: 520;
   letter-spacing: -0.025em;
   line-height: 1.28;
@@ -1592,7 +1592,7 @@
 .failureList article > p:not(.meta) {
   margin: 13px 0 0;
   color: #62656e;
-  font-size: 14px;
+  font-size: 17.5px;
   line-height: 1.72;
 }
 
@@ -1606,7 +1606,7 @@
   align-items: center;
   margin-top: 15px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13.75px;
   letter-spacing: 0.04em;
   text-decoration: none;
   transition: color 180ms ease, gap 180ms ease;
@@ -1659,7 +1659,7 @@
   padding: 28px 0;
   border-bottom: 1px solid var(--rule);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 16.25px;
 }
 
 .failureError p {
@@ -2178,7 +2178,7 @@
   }
 
   .identity button {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .menu {
@@ -2191,7 +2191,7 @@
 
   .menu button,
   .menu a {
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .landingNotes {
@@ -2199,7 +2199,7 @@
   }
 
   .invitation {
-    font-size: 14px;
+    font-size: 17.5px;
   }
 
   .page[data-view="home"] .branch {
@@ -2215,7 +2215,7 @@
   }
 
   .page[data-open="true"] .identity button {
-    font-size: 22px;
+    font-size: 27.5px;
   }
 
   .page[data-open="true"] .menu {
@@ -2229,7 +2229,7 @@
 
   .page[data-open="true"] .menu button,
   .page[data-open="true"] .menu a {
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .index {
@@ -2246,7 +2246,7 @@
 
   .itemHeading h2,
 .itemHeading h3 {
-    font-size: 18px;
+    font-size: 22.5px;
   }
 
   .itemArrow {
@@ -2254,7 +2254,7 @@
   }
 
   .description {
-    font-size: 13px;
+    font-size: 16.25px;
     line-height: 1.58;
   }
 
@@ -2267,16 +2267,16 @@
   }
 
   .readerHeader h1 {
-    font-size: 30px;
+    font-size: 37.5px;
   }
 
   .readerHeader > p:last-child,
   .noteSections p {
-    font-size: 14px;
+    font-size: 17.5px;
   }
 
   .referenceList {
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .noteSections {
@@ -2304,14 +2304,14 @@
   }
 
   .failureHeader h1 {
-    font-size: 38px;
+    font-size: 47.5px;
   }
 }
 
 @media (max-width: 360px) {
   .menu button,
   .menu a {
-    font-size: 12px;
+    font-size: 15px;
   }
 }
 
@@ -2411,7 +2411,7 @@
 }
 
 .readerLinks { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 24px 0; }
-.readerLinks a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.readerLinks a { color: var(--muted); font-size: 16.25px; text-decoration: none; }
 .readerLinks a:hover { color: var(--ink); }
 
 .latestPost {
@@ -2427,12 +2427,12 @@
   display: block;
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13.75px;
   line-height: 1.5;
 }
 
 .latestTitle {
-  font-size: 14px;
+  font-size: 17.5px;
   line-height: 1.6;
   text-decoration: underline;
   text-decoration-color: var(--faint);
@@ -2463,7 +2463,7 @@
 .currentlyBuilding {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 17.5px;
   line-height: 1.7;
 }
 
@@ -2525,7 +2525,7 @@
 .collectionHeading {
   margin: 0 0 16px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13.75px;
   font-weight: 530;
   letter-spacing: 0.095em;
   text-transform: uppercase;

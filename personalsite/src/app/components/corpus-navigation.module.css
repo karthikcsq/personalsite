@@ -9,7 +9,7 @@
   display: block;
   padding: 5px 0;
   color: var(--muted, var(--color-ink-muted));
-  font-size: 14px;
+  font-size: 17.5px;
   letter-spacing: -0.018em;
   line-height: 1.4;
   text-decoration: none;
@@ -40,5 +40,5 @@
     width: min(100%, 350px);
   }
 
-  .compact a { font-size: 13px; }
+  .compact a { font-size: 16.25px; }
 }

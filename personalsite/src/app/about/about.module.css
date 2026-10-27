@@ -6,7 +6,7 @@
 
 .eyebrow {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13.75px;
   font-weight: 550;
   letter-spacing: 0.19em;
   line-height: 1.6;
@@ -41,7 +41,7 @@
   max-width: 690px;
   margin: 22px 0 40px;
   color: var(--ink);
-  font-size: clamp(36px, 4.4vw, 60px);
+  font-size: clamp(45px, 5.5vw, 75px);
   font-weight: 480;
   letter-spacing: -0.052em;
   line-height: 1.1;
@@ -51,7 +51,7 @@
   grid-area: prose;
   max-width: 640px;
   color: var(--ink);
-  font-size: clamp(16px, 1.43vw, 18px);
+  font-size: clamp(20px, 1.787vw, 22.5px);
   letter-spacing: -0.013em;
   line-height: 1.75;
 }
@@ -76,14 +76,14 @@
   padding: 14px 0;
   border-bottom: 1px solid var(--rule);
   color: var(--ink);
-  font-size: 21px;
+  font-size: 26.25px;
   letter-spacing: -0.035em;
   text-decoration: none;
   transition: padding-left 220ms ease, color 220ms ease;
 }
 
 .pathList a:hover { padding-left: 7px; }
-.pathList a span:last-child { color: var(--faint); font-size: 16px; }
+.pathList a span:last-child { color: var(--faint); font-size: 20px; }
 
 .photoLink {
   position: relative;
@@ -101,7 +101,7 @@
   display: inline-block;
   margin-top: 12px;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 15px;
   text-decoration: none;
 }
 
@@ -115,7 +115,7 @@
   padding-top: 25px;
   border-top: 1px solid var(--rule);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -130,9 +130,9 @@
     grid-template-columns: 1fr;
     grid-template-areas: "heading" "portrait" "prose";
   }
-  .intro h1 { margin: 18px 0 28px; font-size: clamp(36px, 9vw, 50px); }
+  .intro h1 { margin: 18px 0 28px; font-size: clamp(45px, 11.25vw, 62.5px); }
   .portrait { width: min(75%, 300px); margin: 0 0 34px; }
-  .prose { font-size: 16px; line-height: 1.72; }
+  .prose { font-size: 20px; line-height: 1.72; }
   .lower { grid-template-columns: 1fr; gap: 72px; margin-top: 76px; }
   .pathList a { max-width: none; }
   .personal { max-width: 520px; }
@@ -140,6 +140,6 @@
   .footer nav { margin-top: 26px; }
 }
 
-.briefLink { font-size: 13px; color: var(--muted); }
+.briefLink { font-size: 16.25px; color: var(--muted); }
 .briefLink a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
 .briefLink a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }

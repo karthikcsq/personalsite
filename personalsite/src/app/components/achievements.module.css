@@ -70,7 +70,7 @@
 .toast:focus-visible { outline: 1px solid var(--achievement-ink); outline-offset: 4px; }
 .glyph {
   display: block;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 300;
   line-height: 1;
   -webkit-text-stroke: 0 currentColor;
@@ -81,7 +81,7 @@
   position: absolute;
   display: block;
   color: var(--achievement-ink);
-  font-size: 18px;
+  font-size: 22.5px;
   font-weight: 700;
   line-height: 1;
   opacity: 0;
@@ -116,7 +116,7 @@
 
 .collectionHeader h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 18.75px;
   font-weight: 560;
   letter-spacing: -0.025em;
 }
@@ -132,11 +132,11 @@
   background: transparent;
   color: var(--achievement-muted);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 25px;
   line-height: 0.8;
 }
 .collectionHeader .soundToggle {
-  font-size: 11px;
+  font-size: 13.75px;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -160,12 +160,12 @@
   place-items: center;
   border: 1px solid var(--achievement-rule);
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 13.75px;
   line-height: 1;
 }
 .list li[data-found="true"] .mark { border-color: currentColor; }
-.list h3 { margin: 0; font-size: 13px; font-weight: 550; line-height: 1.25; }
-.list p { margin: 4px 0 0; color: var(--achievement-muted); font-size: 11px; line-height: 1.45; }
+.list h3 { margin: 0; font-size: 16.25px; font-weight: 550; line-height: 1.25; }
+.list p { margin: 4px 0 0; color: var(--achievement-muted); font-size: 13.75px; line-height: 1.45; }
 .srOnly {
   position: absolute;
   width: 1px;
@@ -257,8 +257,8 @@
 .toastMotif svg { display: block; width: 24px; height: 24px; }
 .toast[data-kind="eclipse"] .toastMotif,
 .toast[data-kind="break"] .toastMotif { color: #ba6b55; }
-.toastTitle { flex: 1; font-size: 14px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
-.toastOrdinal { align-self: center; color: var(--achievement-muted); font-size: 11px; font-weight: 400; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.toastTitle { flex: 1; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
+.toastOrdinal { align-self: center; color: var(--achievement-muted); font-size: 13.75px; font-weight: 400; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
 
 @keyframes arrive {
   from { opacity: 0; transform: translateY(-8px); }

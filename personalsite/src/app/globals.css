@@ -97,6 +97,7 @@ html[data-interior-eclipse="night"] {
 }
 
 html {
+  font-size: 125%;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
