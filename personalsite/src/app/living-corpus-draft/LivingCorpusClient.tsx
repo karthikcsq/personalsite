@@ -1801,7 +1801,12 @@ export default function LivingCorpusClient({
             <Fragment key={topic.section}>
               {index === 0 ? "" : index === CONTACT_TOPICS.length - 1 ? ", or " : ", "}
               <a ref={index === 0 ? invitationRef : undefined} href={`${CONTACT_NOTE_HREF}#${topic.section}`} onClick={(event) => openLandingItem(event, contactNote, topic.section)}>
-                {topic.label}
+                {topic.section === "internet-infrastructure-for-ai-agents" ? (
+                  <>
+                    <span className={styles.desktopTopic}>{topic.label}</span>
+                    <span className={styles.mobileTopic}>agent infrastructure</span>
+                  </>
+                ) : topic.label}
               </a>
             </Fragment>
           ))}?{" "}
