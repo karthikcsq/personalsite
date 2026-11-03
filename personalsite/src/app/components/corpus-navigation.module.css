@@ -8,7 +8,7 @@
 .compact a {
   display: block;
   padding: 5px 0;
-  color: var(--muted, var(--color-ink-muted));
+  color: color-mix(in srgb, var(--muted, var(--color-ink-muted)) 75%, var(--ink, var(--color-ink)));
   font-size: 17.5px;
   letter-spacing: -0.018em;
   line-height: 1.4;

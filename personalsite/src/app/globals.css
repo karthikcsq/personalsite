@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #202124;
+}
+
+@property --muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7b808b;
+}
+
 @theme {
   --color-surface: #fff;
   --color-surface-raised: #fff;

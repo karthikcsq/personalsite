@@ -82,6 +82,7 @@ export default function MinimalInterior({
 
   return (
     <div className={styles.world} data-corpus-page={page} data-night={night} data-xray={xray} data-ready={ready}>
+      <div className={styles.sky} aria-hidden="true" />
       <div className={styles.environment} aria-hidden="true">
         <div className={styles.branch} />
       </div>
@@ -139,7 +140,10 @@ export default function MinimalInterior({
           toggleNight();
         }}
         onContextMenu={(event) => event.preventDefault()}
-      />
+      >
+        <span className={styles.diamond} aria-hidden="true" />
+        <span className={styles.lunarEclipse} aria-hidden="true" />
+      </button>
       </ViewTransition>
       <div className={styles.shell}>
         <SiteHeader current={page} />

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { corpusSectionHref, corpusSectionFromPath } from "@/lib/living-corpus/links";
 import { collection } from "@/data/collection";
 import RssLink from "@/app/components/RssLink";
@@ -10,6 +12,7 @@ import {
   ViewTransition,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -593,6 +596,10 @@ function Environment({
     () => new Set(),
   );
 
+  useEffect(() => {
+    setReadyBranches(new Set());
+  }, [night]);
+
   const cancelEclipseCharge = () => {
     if (eclipseTimerRef.current) clearTimeout(eclipseTimerRef.current);
     eclipseTimerRef.current = null;
@@ -944,7 +951,10 @@ function Environment({
           cancelEclipseCharge();
           onToggleNight();
         }}
-      />
+      >
+        <span className={styles.diamond} aria-hidden="true" />
+        <span className={styles.lunarEclipse} aria-hidden="true" />
+      </button>
       </ViewTransition>
       <div
         className={styles.branch}
@@ -953,7 +963,7 @@ function Environment({
         data-gusting={failure ? "true" : "false"}
         data-xray={xray ? "true" : "false"}
       >
-        <div className={styles.branchArt} ref={branchArtRef}>
+        <div className={styles.branchArt} ref={branchArtRef} key={night ? "winter" : "daylight"}>
           {(
             [
               { className: styles.branchRootLayer, categories: ["work", "projects", "about"] },
@@ -1232,6 +1242,7 @@ export default function LivingCorpusClient({
   latestPost?: { title: string; href: string };
   founderBrief?: ReactNode;
 }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<MinimalCategory | null>(initialSection);
   const [animateIndex, setAnimateIndex] = useState(initialSection === null);
   const [activeItem, setActiveItem] = useState<MinimalCorpusItem | null>(() => items.find((item) => item.id === initialItemId) ?? null);
@@ -1239,6 +1250,7 @@ export default function LivingCorpusClient({
   const [branches, setBranches] = useState<GrowthCategory[]>([]);
   const [readEntries, setReadEntries] = useState<ReadEntries>({});
   const [night, setNight] = useState(false);
+  const [appearanceReady, setAppearanceReady] = useState(false);
   const [xrayActive, setXrayActive] = useState(false);
   const [attentionCategory, setAttentionCategory] =
     useState<MinimalCategory | null>(null);
@@ -1326,13 +1338,13 @@ export default function LivingCorpusClient({
     const linkedItem = items.find((item) => item.category === initialSection && item.id.split(":")[1] === hash);
     if (linkedItem) {
       if ((linkedItem.category === "writing" && linkedItem.readingStyle !== "continuous" && linkedItem.fullTextHref)) {
-        window.location.replace(linkedItem.fullTextHref);
+        router.replace(linkedItem.fullTextHref);
         return;
       }
       setActiveItem(linkedItem);
       syncSectionUrl(linkedItem.category, linkedItem.id, null, false);
     }
-  }, [initialItemId, initialSection, items]);
+  }, [initialItemId, initialSection, items, router]);
   const visibleItems = selected
     ? items.filter((item) => item.category === selected && item.id !== CONTACT_NOTE_ID)
     : [];
@@ -1352,6 +1364,18 @@ export default function LivingCorpusClient({
         ].slice(0, 3);
       })()
     : [];
+
+  useLayoutEffect(() => {
+    try {
+      setNight(window.sessionStorage.getItem(SESSION_KEYS.season) === "winter");
+      setXrayActive(window.sessionStorage.getItem(SESSION_KEYS.xray) === "true");
+    } catch {
+      // Keep the default appearance when storage is unavailable.
+    }
+    // Restore the destination's appearance before enabling user-triggered fades.
+    const frame = requestAnimationFrame(() => setAppearanceReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     try {
@@ -1397,7 +1421,6 @@ export default function LivingCorpusClient({
       readEntriesRef.current = restoredReadEntries;
       setReadEntries(restoredReadEntries);
       const restoredNight = window.sessionStorage.getItem(SESSION_KEYS.season) === "winter";
-      setNight(restoredNight);
       // Achievements persist across visits even though the visible tree is a
       // session trail. Fold the saved trail into cumulative growth coverage.
       restoredBranches.forEach((branch) => {
@@ -1421,9 +1444,6 @@ export default function LivingCorpusClient({
         }
         if (hasAllBranches(linkedGrowth.branches)) unlockAchievement("all-branches");
       }
-      setXrayActive(
-        window.sessionStorage.getItem(SESSION_KEYS.xray) === "true",
-      );
       const savedSessionId = window.sessionStorage.getItem(SESSION_KEYS.sessionId);
       sessionIdRef.current = savedSessionId || crypto.randomUUID();
       if (!savedSessionId) {
@@ -1524,7 +1544,7 @@ export default function LivingCorpusClient({
       return;
     }
     if ((item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) {
-      window.location.assign(item.fullTextHref);
+      router.push(item.fullTextHref);
       return;
     }
     setReaderSectionId(sectionId);
@@ -1558,8 +1578,7 @@ export default function LivingCorpusClient({
   }, [allLeafTargets, growBranch]);
 
   const toggleNight = () => {
-    // Season changes remount the scene to replay branch growth. Ignore the
-    // pointer still resting on the new sun until it deliberately leaves.
+    // Replay branch growth while preventing an accidental eclipse on hover.
     sunHoverLockUntilRef.current = Date.now() + 800;
     const next = !night;
     setNight(next);
@@ -1709,6 +1728,7 @@ export default function LivingCorpusClient({
       ref={pageRef}
       className={styles.page}
       data-corpus-page="home"
+      data-ready={appearanceReady}
       data-animate-index={animateIndex ? "true" : "false"}
       data-night={night ? "true" : "false"}
       data-open={selected ? "true" : "false"}
@@ -1723,8 +1743,8 @@ export default function LivingCorpusClient({
         failureOpen ? "failure" : activeItem ? "reader" : selected ? "index" : "home"
       }
     >
+      <div className={styles.sky} aria-hidden="true" />
       <Environment
-        key={night ? "winter" : "daylight"}
         open={!failureOpen && selected !== null}
         branches={branches}
         readEntries={readEntries}
@@ -1797,7 +1817,7 @@ export default function LivingCorpusClient({
       <div className={styles.landingNotes} aria-hidden={selected !== null || failureOpen} inert={selected !== null || failureOpen}>
       {contactNote ? (
         <p className={styles.invitation}>
-          Building {CONTACT_TOPICS.map((topic, index) => (
+          Interested in {CONTACT_TOPICS.map((topic, index) => (
             <Fragment key={topic.section}>
               {index === 0 ? "" : index === CONTACT_TOPICS.length - 1 ? ", or " : ", "}
               <a ref={index === 0 ? invitationRef : undefined} href={`${CONTACT_NOTE_HREF}#${topic.section}`} onClick={(event) => openLandingItem(event, contactNote, topic.section)}>
@@ -1825,13 +1845,13 @@ export default function LivingCorpusClient({
       ) : null}
 
       {latestPost ? (
-        <a
+        <Link
           className={styles.latestPost}
           href={latestPost.href}
         >
           <span className={styles.latestLabel}>Latest writing</span>
           <span className={styles.latestTitle}>{latestPost.title} <span aria-hidden="true">↗</span></span>
-        </a>
+        </Link>
       ) : null}
       </div>
       </div>
@@ -1861,7 +1881,7 @@ export default function LivingCorpusClient({
               onPointerEnter={holdAttention}
               onClick={() => {
                 if ((item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) {
-                  window.location.assign(item.fullTextHref);
+                  router.push(item.fullTextHref);
                   return;
                 }
                 clearAttention();
@@ -1923,8 +1943,9 @@ export default function LivingCorpusClient({
               {visibleItems.map((item) => (
                 <Fragment key={item.id}>
                   <li>
-                    <a
+                    <Link
                       href={(item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref) ? item.fullTextHref : item.href}
+                      prefetch={(item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref) ? null : false}
                       onClick={(event) => {
                         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || (item.category === "writing" && item.readingStyle !== "continuous" && item.fullTextHref)) return;
                         event.preventDefault();
@@ -1943,7 +1964,7 @@ export default function LivingCorpusClient({
                       </div>
                       <p className={styles.meta}>{item.meta}</p>
                       <p className={styles.description}>{item.description}</p>
-                    </a>
+                    </Link>
                   </li>
                 </Fragment>
               ))}

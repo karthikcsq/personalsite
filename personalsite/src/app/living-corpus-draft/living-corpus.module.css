@@ -19,7 +19,14 @@
   color: var(--ink);
   font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
   transition: background-color 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    --ink 1400ms ease-in-out, --muted 1400ms ease-in-out;
+}
+
+.page[data-ready="false"],
+.page[data-ready="false"] *,
+.page[data-ready="false"] *::before,
+.page[data-ready="false"] *::after {
+  transition: none !important;
 }
 
 .page[data-night="true"] {
@@ -59,6 +66,58 @@
   z-index: 2;
 }
 
+.environment::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(235, 243, 255, 0.75) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle, rgba(218, 230, 248, 0.48) 0 0.65px, transparent 1.2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.64) 0 1px, transparent 1.6px);
+  background-size: 241px 197px, 173px 263px, 367px 311px;
+  background-position: 31px 44px, 97px 112px, 166px 29px;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.page[data-night="true"] .environment::after { opacity: 0.8; }
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28)), url("/living-corpus/sunset-sky.webp") center / cover no-repeat;
+  transition: opacity 900ms ease;
+}
+
+.sky::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(rgba(0, 2, 9, 0.85), rgba(0, 2, 9, 0.85)), url("/living-corpus/night-sky.webp") center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 1400ms ease-in-out;
+}
+
+.sky::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  pointer-events: none;
+  background: rgba(117, 126, 141, 0.48);
+  backdrop-filter: grayscale(0.7);
+  opacity: 0;
+  transition: opacity 950ms ease;
+}
+
+.page[data-night="true"] .sky::after { opacity: 1; }
+.page[data-xray="true"] .sky::before,
+.page:has(.sun[data-charging="true"]) .sky::before { opacity: 1; }
+.page[data-night="true"] .sky::before { background: rgba(0, 3, 12, 0.4); }
+
 .sun {
   position: absolute;
   top: clamp(48px, 8vh, 96px);
@@ -68,7 +127,8 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: #f14b29;
+  background: #fff;
+  box-shadow: 0 0 18px 7px rgba(255, 255, 255, 0.95), 0 0 45px 15px rgba(255, 245, 234, 0.85), 0 0 100px 35px rgba(255, 224, 200, 0.32);
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
@@ -81,19 +141,79 @@
     background-color 800ms ease, box-shadow 800ms ease;
 }
 
+.sun::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(rgba(239, 243, 249, 0.52), rgba(239, 243, 249, 0.52)), url("/living-corpus/moon.webp") center / contain no-repeat;
+  opacity: 0;
+  transition: opacity 1400ms ease-in-out;
+}
+
+.page[data-night="true"] .sun::before { opacity: 1; }
+.page[data-xray="true"] .sun::before,
+.page .sun[data-charging="true"]::before { opacity: 0; }
+.page[data-night="true"] .sun[data-charging="true"]::before,
+.page[data-night="true"][data-xray="true"] .sun::before { opacity: 1; }
+
+.diamond {
+  position: absolute;
+  top: calc(14% - 10px);
+  right: calc(14% - 10px);
+  z-index: 3;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  background: radial-gradient(circle, #fff 0%, #fff 15%, rgba(255, 255, 255, 0.85) 29%, rgba(232, 240, 255, 0.38) 55%, transparent 72%);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 17px rgba(220, 234, 255, 0.9));
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.diamond::before, .diamond::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.diamond::before {
+  top: -80%; left: 48%; width: 4%; height: 260%;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.95), transparent);
+}
+
+.diamond::after {
+  top: 48%; left: -80%; width: 260%; height: 4%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+}
+
+.page[data-night="false"][data-xray="true"] .diamond { opacity: 1; }
+
+.lunarEclipse {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 50%;
+  pointer-events: none;
+  background: linear-gradient(rgba(132, 38, 22, 0.72), rgba(108, 28, 18, 0.72)), url("/living-corpus/moon.webp") center / contain no-repeat;
+  opacity: 0;
+  transition: opacity 1400ms ease-in-out;
+}
+
+.page[data-night="true"][data-xray="true"] .lunarEclipse { opacity: 1; }
+
 .sun::after {
   position: absolute;
   z-index: 1;
   inset: 0;
   border-radius: 50%;
-  background: var(--surface);
+  background: #10131c;
   content: "";
   opacity: 0;
   pointer-events: none;
   transform: translateX(112%);
-  transition: opacity 160ms ease,
-    transform 950ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 160ms ease, transform 950ms cubic-bezier(0.22, 1, 0.36, 1), background-color 900ms ease;
 }
 
 .sun[data-charging="true"]::after,
@@ -102,46 +222,29 @@
   transform: translateX(0);
 }
 
-.page[data-failure="false"]:has(.sun[data-charging="true"]) .sun::after,
-.page[data-failure="false"][data-xray="true"] .sun::after {
-  background: #292c30;
+.page[data-xray="true"] .sun {
+  box-shadow: 0 0 0 1px rgba(240, 245, 255, 0.9),
+    0 0 15px 4px rgba(255, 255, 255, 0.88),
+    0 0 35px 9px rgba(224, 235, 255, 0.56),
+    0 0 70px 15px rgba(213, 225, 246, 0.24);
 }
 
-.page[data-failure="false"][data-xray="true"] .sun {
-  box-shadow: 0 0 0 1px rgba(255, 202, 155, 0.65),
-    0 0 11px 2px rgba(247, 119, 63, 0.28),
-    0 0 28px rgba(241, 75, 41, 0.17);
-}
-
-.sun:focus-visible {
-  outline: 1px solid var(--ink);
-  outline-offset: 7px;
-}
+.sun:focus-visible { outline: 1px solid var(--ink); outline-offset: 7px; }
 
 .page[data-night="true"] .sun {
   background: #eef4fb;
-  box-shadow: 0 0 24px rgba(203, 221, 241, 0.16);
+  box-shadow: none;
+  filter: drop-shadow(0 0 12px rgba(220, 232, 255, 0.55));
 }
 
-.page[data-night="true"][data-failure="false"]:has(.sun[data-charging="true"])
-  .sun,
-.page[data-night="true"][data-failure="false"][data-xray="true"] .sun {
-  background: #893b39;
-  box-shadow: 0 0 22px rgba(142, 50, 48, 0.27),
-    0 0 54px rgba(142, 50, 48, 0.1);
+.page[data-night="true"] .sun[data-charging="true"],
+.page[data-night="true"][data-xray="true"] .sun {
+  background: #632719;
+  box-shadow: 0 0 18px rgba(171, 67, 38, 0.3), 0 0 42px rgba(135, 45, 29, 0.14);
 }
 
-.page[data-night="true"][data-failure="false"]:has(.sun[data-charging="true"])
-  .sun::after {
-  background: #38191d;
-}
-
-.page[data-night="true"][data-failure="false"][data-xray="true"]
-  .sun::after {
-  background: #090d14;
-  opacity: 0.12;
-  transform: translateX(0);
-}
+/* A lunar eclipse changes colour without a disk sliding across the Moon. */
+.page[data-night="true"] .sun::after { opacity: 0; transform: translateX(0); }
 
 .branch {
   position: absolute;
@@ -153,6 +256,8 @@
   transform-origin: left bottom;
   transition: opacity 500ms ease, transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+.page[data-view="home"][data-night="false"] .branch img { opacity: 0.32; }
 
 .branch[data-open="true"] {
   opacity: 1;
@@ -806,7 +911,7 @@
   padding: 7px 0;
   border: 0;
   background: transparent;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--muted) 75%, var(--ink));
   font: inherit;
   font-size: 15px;
   letter-spacing: -0.018em;
@@ -905,7 +1010,7 @@
 
 .invitation {
   margin: 0;
-  color: #62656e;
+  color: var(--ink);
   font-size: 18.75px;
   line-height: 1.7;
   text-wrap: balance;
@@ -924,10 +1029,6 @@
 .talk {
   color: var(--ink);
   white-space: nowrap;
-}
-
-.page[data-night="true"] .invitation {
-  color: #adb4c0;
 }
 
 .invitation a:hover {
@@ -2208,8 +2309,6 @@
   .mobileTopic { display: inline; }
 
   .page .landingFeatures {
-    grid-template-columns: 1fr;
-    gap: 18px;
     margin-top: 28px;
   }
 
@@ -2217,6 +2316,13 @@
     width: min(420px, 94vw);
     bottom: 10px;
     left: -55px;
+  }
+
+  /* Keep the first branch, leaves, and markers inside the phone viewport. */
+  .page .branch:has(.subBranch[data-branch="work"]),
+  .page[data-view="home"] .branch:has(.subBranch[data-branch="work"]),
+  .page .branch[data-night="true"][data-open="true"]:has(.subBranch[data-branch="work"]) {
+    left: 18px;
   }
 
   .page[data-open="true"] .identity {
@@ -2334,6 +2440,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page, .sky, .sky::before, .sky::after, .sun::before, .lunarEclipse, .diamond { transition-duration: 0.01ms !important; }
   .failureGlitchText[data-glitch="true"] .failureGlitchCopy {
     animation: none;
   }
@@ -2427,7 +2534,10 @@
 .readerLinks a:hover { color: var(--ink); }
 
 .latestPost {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
   width: fit-content;
   max-width: 100%;
   margin-top: 0;
@@ -2436,15 +2546,14 @@
 }
 
 .latestLabel {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--muted);
+  display: inline;
+  color: color-mix(in srgb, var(--muted) 75%, var(--ink));
   font-size: 13.75px;
   line-height: 1.5;
 }
 
 .latestTitle {
-  font-size: 17.5px;
+  font-size: 15px;
   line-height: 1.6;
   text-decoration: underline;
   text-decoration-color: var(--faint);
@@ -2466,16 +2575,20 @@
 
 .landingFeatures {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   margin-top: 24px;
   align-items: start;
 }
 
 .currentlyBuilding {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
   margin: 0;
   color: var(--muted);
-  font-size: 17.5px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
