@@ -13,7 +13,7 @@ export default async function NoteOpengraphImage({ params }: { params: Promise<{
   const { kind, slug } = await params;
   const note = (NOTE_KINDS as readonly string[]).includes(kind) ? findNote(kind as NoteKind, slug) : null;
   return renderArticleCard({
-    eyebrow: note ? `${noteKindLabel(note.kind)} · Notes` : "Notes",
+    kicker: note ? `${noteKindLabel(note.kind)} notes` : "Notes",
     title: note?.title ?? "Notes",
     subtitle: note?.summary,
   });

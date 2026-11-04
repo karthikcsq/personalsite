@@ -8,5 +8,5 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default async function OpengraphImage() {
-  return renderArticleCard({ title: section.title, subtitle: section.blurb, meta: `karthikthyagarajan.com${section.path}` });
+  return renderArticleCard({ title: section.title, subtitle: section.blurb });
 }

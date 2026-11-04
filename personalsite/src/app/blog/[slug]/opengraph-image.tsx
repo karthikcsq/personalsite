@@ -19,9 +19,8 @@ export default async function BlogOpengraphImage({ params }: { params: Promise<{
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   return renderArticleCard({
-    eyebrow: "Essay",
+    kicker: `Essay · ${formatDate(post.date)}`,
     title: post.title,
     subtitle: post.summary,
-    meta: formatDate(post.date),
   });
 }
