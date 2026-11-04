@@ -1779,62 +1779,6 @@
   text-underline-offset: 4px;
 }
 
-.failureGlitchText {
-  position: relative;
-  display: block;
-}
-
-.failureGlitchCopy {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: var(--surface);
-  color: inherit;
-  opacity: 0;
-  pointer-events: none;
-  user-select: none;
-}
-
-.failureGlitchText[data-glitch-visible="true"] .failureGlitchCopy {
-  display: block;
-  will-change: transform, opacity;
-}
-
-/* Keep slice masks fixed: each pulse moves only the already clipped letters. */
-.failureGlitchCopy[data-slice="one"] {
-  clip-path: inset(18% 0 65%);
-  text-shadow: 1px 0 rgba(186, 107, 85, 0.55);
-}
-
-.failureGlitchCopy[data-slice="two"] {
-  clip-path: inset(58% 0 24%);
-  text-shadow: -1px 0 rgba(112, 135, 159, 0.45);
-}
-
-.failureGlitchText[data-glitch="true"] .failureGlitchCopy[data-slice="one"] {
-  animation: failure-text-slice-one var(--failure-glitch-duration) linear both;
-}
-
-.failureGlitchText[data-glitch="true"] .failureGlitchCopy[data-slice="two"] {
-  animation: failure-text-slice-two var(--failure-glitch-duration) linear both;
-}
-
-@keyframes failure-text-slice-one {
-  0%, 100% { opacity: 0; transform: translateX(0); }
-  10% { opacity: 1; transform: translateX(-5px); }
-  34% { opacity: 1; transform: translateX(4px); }
-  60% { opacity: 1; transform: translateX(-3px); }
-  82% { opacity: 0; transform: translateX(0); }
-}
-
-@keyframes failure-text-slice-two {
-  0%, 100% { opacity: 0; transform: translateX(0); }
-  10% { opacity: 0.8; transform: translateX(4px); }
-  34% { opacity: 1; transform: translateX(-4px); }
-  60% { opacity: 0.8; transform: translateX(3px); }
-  82% { opacity: 0; transform: translateX(0); }
-}
-
 @keyframes reveal {
   from {
     opacity: 0;
@@ -2441,15 +2385,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .page, .sky, .sky::before, .sky::after, .sun::before, .lunarEclipse, .diamond { transition-duration: 0.01ms !important; }
-  .failureGlitchText[data-glitch="true"] .failureGlitchCopy {
-    animation: none;
-  }
-
-  .failureGlitchText[data-glitch-visible="true"] .failureGlitchCopy {
-    display: none;
-    will-change: auto;
-  }
-
   .identity,
   .menu,
   .invitation,

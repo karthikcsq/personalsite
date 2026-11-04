@@ -48,7 +48,6 @@ import styles from "./living-corpus.module.css";
 import { CONTACT_TOPICS, CONTACT_NOTE_HREF, CONTACT_NOTE_ID } from "@/lib/living-corpus/contactInvitation";
 
 const FAILURE_TRANSITION_MS = 560;
-const FAILURE_GLITCH_MS = 180;
 
 const CONTACT_LINKS = [
   { label: "Email", href: "mailto:karthik6002@gmail.com", title: "karthik6002@gmail.com", icon: "mail" },
@@ -1085,140 +1084,52 @@ function Environment({
   );
 }
 
-function FailureGlitchText({ children }: { children: string }) {
-  return (
-    <span className={styles.failureGlitchText}>
-      {children}
-      <span className={styles.failureGlitchCopy} data-slice="one" aria-hidden="true">{children}</span>
-      <span className={styles.failureGlitchCopy} data-slice="two" aria-hidden="true">{children}</span>
-    </span>
-  );
-}
-
 function FailureView({
   response,
   loading,
   error,
-  closing,
   onClose,
   onRetry,
 }: {
   response: WhatBrokeResponse | null;
   loading: boolean;
   error: string | null;
-  closing: boolean;
   onClose: () => void;
   onRetry: () => void;
 }) {
-  const viewRef = useRef<HTMLElement>(null);
-  const visibleTextRef = useRef(new Set<HTMLElement>());
-
-  useEffect(() => {
-    const text = viewRef.current?.querySelectorAll<HTMLElement>(`.${styles.failureGlitchText}`);
-    if (!text) return;
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        const node = entry.target as HTMLElement;
-        if (entry.isIntersecting) {
-          visibleTextRef.current.add(node);
-          node.dataset.glitchVisible = "true";
-        } else {
-          visibleTextRef.current.delete(node);
-          delete node.dataset.glitchVisible;
-          delete node.dataset.glitch;
-        }
-      }
-    });
-    text.forEach((node) => observer.observe(node));
-    return () => {
-      observer.disconnect();
-      text.forEach((node) => {
-        visibleTextRef.current.delete(node);
-        delete node.dataset.glitchVisible;
-        delete node.dataset.glitch;
-      });
-    };
-  }, [response, loading, error]);
-
-  useEffect(() => {
-    if (closing) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let nextGlitch: ReturnType<typeof setTimeout> | undefined;
-    let endGlitch: ReturnType<typeof setTimeout> | undefined;
-    const activeText = new Set<HTMLElement>();
-    const clearPulse = () => {
-      activeText.forEach((node) => delete node.dataset.glitch);
-      activeText.clear();
-    };
-    const stop = () => {
-      clearTimeout(nextGlitch);
-      clearTimeout(endGlitch);
-      clearPulse();
-    };
-    const pulse = () => {
-      if (reducedMotion.matches || document.visibilityState !== "visible") return;
-      // Transient DOM flags leave the homepage and tree out of each pulse.
-      visibleTextRef.current.forEach((node) => {
-        node.dataset.glitch = "true";
-        activeText.add(node);
-      });
-      endGlitch = setTimeout(clearPulse, FAILURE_GLITCH_MS);
-      nextGlitch = setTimeout(pulse, 2000 + Math.random() * 5000);
-    };
-    const restart = () => {
-      stop();
-      if (!reducedMotion.matches && document.visibilityState === "visible") {
-        // Let the first paint and viewport observations finish before glitching.
-        nextGlitch = setTimeout(pulse, 120);
-      }
-    };
-    restart();
-    reducedMotion.addEventListener("change", restart);
-    document.addEventListener("visibilitychange", restart);
-    return () => {
-      stop();
-      reducedMotion.removeEventListener("change", restart);
-      document.removeEventListener("visibilitychange", restart);
-    };
-  }, [closing]);
-
   return (
-    <section ref={viewRef} className={styles.failureView} id="what-broke">
+    <section className={styles.failureView} id="what-broke">
       <button type="button" className={styles.back} onClick={onClose}>
         <ArrowIcon back />
         <span>Back</span>
       </button>
       <header className={styles.failureHeader}>
-        <h1><FailureGlitchText>What broke</FailureGlitchText></h1>
-        <p>
-          <FailureGlitchText>Wrong assumptions, abandoned approaches, and things I would build differently.</FailureGlitchText>
-        </p>
+        <h1>What broke</h1>
+        <p>Wrong assumptions, abandoned approaches, and things I would build differently.</p>
       </header>
 
       {loading ? (
-        <div className={styles.failureLoading} aria-label="Selecting exact passages">
+        <div className={styles.failureLoading} role="status" aria-label="Loading">
           {[0, 1, 2].map((index) => (
             <span key={index} />
           ))}
         </div>
       ) : error ? (
         <div className={styles.failureError} role="status">
-          <p><FailureGlitchText>{error}</FailureGlitchText></p>
+          <p>{error}</p>
           <button type="button" onClick={onRetry}>
-            <FailureGlitchText>try again</FailureGlitchText>
+            Try again
           </button>
         </div>
       ) : (
         <div className={styles.failureList}>
           {(response?.excerpts ?? []).map((excerpt) => (
             <article key={excerpt.id}>
-              <p className={styles.meta}>
-                <FailureGlitchText>{`${excerpt.source} · ${excerpt.meta}`}</FailureGlitchText>
-              </p>
-              <h2><FailureGlitchText>{excerpt.heading}</FailureGlitchText></h2>
-              <p><FailureGlitchText>{excerpt.text}</FailureGlitchText></p>
+              <p className={styles.meta}>{`${excerpt.source} · ${excerpt.meta}`}</p>
+              <h2>{excerpt.heading}</h2>
+              <p>{excerpt.text}</p>
               <a href={excerpt.href}>
-                <FailureGlitchText>open note</FailureGlitchText>
+                Read the note
                 <ArrowIcon />
               </a>
             </article>
@@ -1736,7 +1647,6 @@ export default function LivingCorpusClient({
       data-failure-closing={failureClosing ? "true" : "false"}
       style={{
         "--failure-transition-duration": `${FAILURE_TRANSITION_MS}ms`,
-        "--failure-glitch-duration": `${FAILURE_GLITCH_MS}ms`,
       } as CSSProperties}
       data-xray={xrayActive && !failureOpen ? "true" : "false"}
       data-view={
@@ -1997,7 +1907,6 @@ export default function LivingCorpusClient({
           response={failureResponse}
           loading={failureLoading}
           error={failureError}
-          closing={failureClosing}
           onClose={closeWhatBroke}
           onRetry={retryWhatBroke}
         />
