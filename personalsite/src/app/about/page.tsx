@@ -1,5 +1,6 @@
 import FounderBrief from "@/app/components/FounderBrief";
 import type { Metadata } from "next";
+import { sectionMetadata } from "@/lib/og/sections";
 import Image from "next/image";
 import Link from "next/link";
 import MinimalInterior from "@/app/components/MinimalInterior";
@@ -7,11 +8,7 @@ import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import { CONTACT_NOTE_HREF } from "@/lib/living-corpus/contactInvitation";
 import styles from "./about.module.css";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "Karthik Thyagarajan — a builder, researcher, and writer studying Computer Science and AI at Purdue.",
-};
+export const metadata: Metadata = sectionMetadata("about");
 
 const paths = [
   { label: "What I’m looking for", href: CONTACT_NOTE_HREF },

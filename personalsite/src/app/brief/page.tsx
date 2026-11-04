@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
+import { sectionMetadata } from "@/lib/og/sections";
 import Link from "next/link";
 import FounderBrief from "@/app/components/FounderBrief";
 import MinimalInterior from "@/app/components/MinimalInterior";
 import CorpusPageTransition from "@/app/components/CorpusPageTransition";
 import styles from "./brief.module.css";
 
-export const metadata: Metadata = {
-  title: "For founders and hiring teams",
-  description: "Karthik Thyagarajan's startup and founding-team experience, technical ownership, shipped products, and supporting evidence.",
-  alternates: { canonical: "/brief" },
-};
+export const metadata: Metadata = sectionMetadata("brief");
 
 export default function BriefPage() {
   return (

@@ -30,6 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         post.summary || `Read Karthik Thyagarajan's blog post: ${post.title}`,
       type: "article",
+      url: `/blog/${resolvedParams.slug}`,
+      siteName: "Karthik Thyagarajan",
+      locale: "en_US",
       publishedTime: post.date,
       authors: ["Karthik Thyagarajan"],
     },

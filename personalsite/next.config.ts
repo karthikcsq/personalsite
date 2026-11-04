@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       '../python-rag/rag-docs/karthik_thyagarajan_truth.yaml',
       '../python-rag/rag-docs/involvement.yaml',
       '../python-rag/rag-docs/topics.yaml',
+      // Share-card images read these with fs (Satori can't decode the WebP originals).
+      './assets/og/*',
     ],
   },
   outputFileTracingExcludes: {

@@ -101,6 +101,7 @@ uv sync  # Installs all dependencies into .venv/
 
 - `src/app/sitemap.ts` and `src/app/robots.ts` generate `/sitemap.xml` and `/robots.txt` at build time. New route sections need adding to the sitemap by hand; blog posts and notes are enumerated automatically
 - `metadataBase` in `src/app/layout.tsx` is `https://www.karthikthyagarajan.com` and every relative `alternates.canonical` resolves against it. Keep it matching the host the site actually serves on
+- Share cards: every `opengraph-image.tsx` renders through `src/lib/og/card.tsx` (sunset sky + headshot, read from `personalsite/assets/og/` as JPEGs since Satori can't decode WebP). Section pages take their title, description, card blurb and `openGraph` block from `src/lib/og/sections.ts` via `sectionMetadata()`. A page-level `openGraph` replaces the root one wholesale, so it must restate `url`/`siteName`
 - JSON-LD: `Person` + `WebSite` on the home page, `BlogPosting` on blog posts, `Article` on note pages, `CollectionPage` on `/notes`
 - The home page is server-rendered on demand rather than prerendered, because `generateMetadata` reads the `?q` search param for shareable chat links. Its only crawlable outbound links are the `sr-only` nav in `src/app/page.tsx` (the chat UI itself renders no static links)
 
