@@ -230,6 +230,19 @@
   outline-offset: 5px;
 }
 
+/* Solid page colour laid over the sky and branch on long-form pages. Its
+   opacity is driven by scroll position in MinimalInterior. It sits above
+   .environment and below the sun and .shell. */
+.readingVeil {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--surface);
+  opacity: 0;
+  transition: background-color 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .shell {
   position: relative;
   z-index: 1;

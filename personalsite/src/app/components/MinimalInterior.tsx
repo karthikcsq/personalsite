@@ -1,6 +1,6 @@
 "use client";
 
-import { ViewTransition, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { ViewTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import SiteHeader from "./SiteHeader";
 import { LIVING_CORPUS_SESSION_KEYS as KEYS } from "@/lib/living-corpus/visitState";
 import { syncAchievements, unlockAchievement } from "@/lib/living-corpus/achievements";
@@ -9,13 +9,25 @@ import styles from "./minimal-interior.module.css";
 
 type Page = "about" | "photos" | "work" | "projects" | "writing" | "involvement";
 
+// Scroll distance (px) over which the reading veil goes from clear to solid.
+// It starts once the article header has mostly scrolled away, so the sky
+// still frames the title but never sits behind running text.
+const VEIL_START = 160;
+const VEIL_RANGE = 360;
+// Stop just short of solid so the sun (a white disc) still reads on the page.
+const VEIL_MAX = 0.9;
+
 export default function MinimalInterior({
   page,
   children,
+  readingVeil = false,
 }: {
   page: Page;
   children: React.ReactNode;
+  /** Fade the sky and branch behind long-form text as the reader scrolls. */
+  readingVeil?: boolean;
 }) {
+  const veilRef = useRef<HTMLDivElement | null>(null);
   const [night, setNight] = useState(false);
   const [xray, setXray] = useState(false);
   const [charging, setCharging] = useState(false);
@@ -44,6 +56,28 @@ export default function MinimalInterior({
   useLayoutEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
+
+  useEffect(() => {
+    const veil = veilRef.current;
+    if (!readingVeil || !veil) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const progress = Math.min(1, Math.max(0, (window.scrollY - VEIL_START) / VEIL_RANGE));
+      veil.style.opacity = String(progress * VEIL_MAX);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [readingVeil]);
 
   const cancelCharge = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -86,6 +120,7 @@ export default function MinimalInterior({
       <div className={styles.environment} aria-hidden="true">
         <div className={styles.branch} />
       </div>
+      {readingVeil ? <div ref={veilRef} className={styles.readingVeil} aria-hidden="true" /> : null}
       <ViewTransition name="corpus-sun" share="corpus-sun" default="none">
       <button
         type="button"

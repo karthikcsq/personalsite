@@ -1,6 +1,9 @@
 import CorpusArticle from "@/app/components/CorpusArticle";
+import RssLink from "@/app/components/RssLink";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getSortedPosts } from "@/utils/blogUtils";
+import { formatPostDate, getPostBySlug, getSortedPosts, type PostMeta } from "@/utils/blogUtils";
+import styles from "@/app/components/corpus-article.module.css";
 import { Metadata } from "next";
 
 type Props = {
@@ -51,11 +54,48 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 }
 
 const SITE = "https://www.karthikthyagarajan.com";
+const EMAIL = "karthik6002@gmail.com";
+
+function PostFooter({ post, newer, older }: { post: PostMeta; newer?: PostMeta; older?: PostMeta }) {
+  const subject = encodeURIComponent(`Re: ${post.title}`);
+  return (
+    <footer className={styles.postFooter}>
+      <p className={styles.reply}>
+        Thoughts, disagreements, or something I got wrong?{" "}
+        <a href={`mailto:${EMAIL}?subject=${subject}`}>Email me</a>.
+      </p>
+      {newer || older ? (
+        <nav className={styles.adjacent} aria-label="More writing">
+          {older ? (
+            <Link href={`/blog/${older.slug}`} className={styles.adjacentLink}>
+              <span className={styles.adjacentLabel}>← Older</span>
+              <span className={styles.adjacentTitle}>{older.title}</span>
+            </Link>
+          ) : <span />}
+          {newer ? (
+            <Link href={`/blog/${newer.slug}`} className={styles.adjacentLink} data-align="end">
+              <span className={styles.adjacentLabel}>Newer →</span>
+              <span className={styles.adjacentTitle}>{newer.title}</span>
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
+      <div className={styles.footerLinks}>
+        <Link href="/writing">All writing</Link>
+        <RssLink />
+      </div>
+    </footer>
+  );
+}
 
 export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
-  if (!getSortedPosts().some((post) => post.slug === resolvedParams.slug)) notFound();
+  const posts = getSortedPosts();
+  const index = posts.findIndex((post) => post.slug === resolvedParams.slug);
+  if (index === -1) notFound();
   const post = await getPostBySlug(resolvedParams.slug);
+  const newer = posts[index - 1];
+  const older = posts[index + 1];
   const url = `${SITE}/blog/${resolvedParams.slug}`;
 
   const jsonLd = {
@@ -71,7 +111,16 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <CorpusArticle showRss category="writing" title={post.title} meta={post.date} summary={post.summary}>
+    <CorpusArticle
+      showRss
+      essay
+      category="writing"
+      title={post.title}
+      meta={<><time dateTime={post.date}>{formatPostDate(post.date)}</time> · {post.readingMinutes} min read</>}
+      summary={post.summary}
+      headings={post.headings}
+      footer={<PostFooter post={post} newer={newer} older={older} />}
+    >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
     </CorpusArticle>
