@@ -127,19 +127,32 @@ html, body {
     color 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html:has([data-corpus-page]),
+/* Corpus pages draw their sky on a fixed layer inside the page. The root
+   carries the same sky because, during a page transition, the outgoing page
+   fades out before the incoming one fades in, and the root shows through that
+   gap. A plain white root read as a white flash between pages. The trailing
+   colours are fallbacks for browsers that ignore `fixed` (iOS Safari). */
+html:has([data-corpus-page]) {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28)) fixed,
+    url("/living-corpus/sunset-sky.webp") center / cover no-repeat fixed #e8dce4;
+}
+
+html:has([data-corpus-page][data-night="true"]) {
+  background:
+    linear-gradient(rgba(0, 2, 9, 0.85), rgba(0, 2, 9, 0.85)) fixed,
+    url("/living-corpus/night-sky.webp") center / cover no-repeat fixed #090d14;
+}
+
+html:has([data-corpus-page][data-xray="true"]:not([data-night="true"])) {
+  background:
+    linear-gradient(rgba(117, 126, 141, 0.48), rgba(117, 126, 141, 0.48)) fixed,
+    linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28)) fixed,
+    url("/living-corpus/sunset-sky.webp") center / cover no-repeat fixed #b8bcc0;
+}
+
 body:has([data-corpus-page]) {
-  background: #fff;
-}
-
-html:has([data-corpus-page][data-night="true"]),
-body:has([data-corpus-page][data-night="true"]) {
-  background: #090d14;
-}
-
-html:has([data-corpus-page][data-xray="true"]:not([data-night="true"])),
-body:has([data-corpus-page][data-xray="true"]:not([data-night="true"])) {
-  background: #b8bcc0;
+  background: transparent;
 }
 
 /* The home, About, and Photos pages exchange like adjacent sheets. */
