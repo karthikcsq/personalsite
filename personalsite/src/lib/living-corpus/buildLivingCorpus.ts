@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { projects } from "@/data/projectsData";
-import { getSortedPosts } from "@/utils/blogUtils";
+import { getSortedPosts, postMetaLine } from "@/utils/blogUtils";
 import { getInvolvementsFromYaml } from "@/utils/involvementUtils";
 import { getJobsFromYaml } from "@/utils/jobUtils";
 import { getProjectsFromYaml } from "@/utils/projectUtils";
@@ -490,7 +490,7 @@ function buildWriting(): CorpusArtifact[] {
       id: `writing:${post.slug}`,
       category: "writing",
       title: post.title,
-      meta: post.date,
+      meta: postMetaLine(post),
       description,
       href,
       quotes: finalQuotes,

@@ -39,3 +39,130 @@
 @media (max-width: 760px) { .article { margin-top: 48px; padding-bottom: 90px; } .heading { margin-top: 32px; } }
 
 .actions { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* ---------- Essay reading treatment (blog posts) ---------- */
+
+/* Serif for running text only; headings, captions and tables keep the site's
+   sans so the page still reads as part of the site. */
+.article[data-essay] .content p,
+.article[data-essay] .content li,
+.article[data-essay] .content blockquote {
+  font-family: var(--font-serif);
+  font-size: 19.5px;
+  line-height: 1.75;
+}
+.article[data-essay] .content blockquote { font-style: italic; }
+.article[data-essay] .summary {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+.article[data-essay] .meta { color: color-mix(in srgb, var(--ink) 62%, transparent); }
+
+.body { position: relative; }
+
+/* Contents: sticky rail in the left margin on wide screens. */
+.tocRail { display: none; }
+.tocRailInner {
+  position: sticky;
+  top: 168px;
+  max-height: calc(100svh - 208px);
+  overflow-y: auto;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.tocRailInner p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tocRail ol, .tocInline ol { margin: 0; padding: 0; list-style: none; }
+.tocRail li { margin: 0 0 10px; }
+.tocRail a {
+  display: block;
+  padding-left: 12px;
+  border-left: 1px solid var(--rule);
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.tocRail a:hover { color: var(--ink); }
+.tocRail a[aria-current] { color: var(--ink); border-left-color: var(--ink); }
+
+/* Narrow screens: a collapsed disclosure above the text. */
+.tocInline {
+  margin: 44px 0 8px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-size: 16px;
+}
+.tocInline summary { color: var(--muted); cursor: pointer; font-size: 15px; }
+.tocInline summary:hover { color: var(--ink); }
+.tocInline ol { margin-top: 12px; }
+.tocInline li { margin: 8px 0; }
+.tocInline a { color: var(--ink); text-decoration: none; }
+.tocInline + .content { margin-top: 36px; }
+
+@media (min-width: 1200px) {
+  .tocRail {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(100% + 48px);
+    width: 180px;
+  }
+  .tocInline { display: none; }
+  .tocInline + .content { margin-top: 44px; }
+}
+
+/* ---------- Post footer ---------- */
+
+.postFooter {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.reply { margin: 0; font-size: 17px; line-height: 1.6; }
+.reply a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 4px; }
+.reply a:hover { text-decoration-color: var(--ink); }
+.adjacent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+.adjacentLink {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.adjacentLink[data-align="end"] { text-align: right; }
+.adjacentLabel { color: var(--muted); font-size: 13px; }
+.adjacentTitle { font-size: 16.5px; font-weight: 500; line-height: 1.4; }
+.adjacentLink:hover .adjacentTitle { text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 4px; }
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 28px;
+  margin-top: 40px;
+  font-size: 13px;
+}
+.footerLinks > a:first-child { color: var(--muted); text-decoration: none; }
+.footerLinks > a:first-child:hover { color: var(--ink); }
+
+@media (max-width: 760px) {
+  .article[data-essay] .content p,
+  .article[data-essay] .content li,
+  .article[data-essay] .content blockquote { font-size: 18.5px; }
+  .adjacent { grid-template-columns: 1fr; }
+  .adjacentLink[data-align="end"] { text-align: left; }
+}
