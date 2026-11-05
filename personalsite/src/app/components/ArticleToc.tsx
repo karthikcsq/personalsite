@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./corpus-article.module.css";
 
-export type TocHeading = { id: string; text: string };
+export type TocHeading = { id: string; text: string; level?: 2 | 3 };
 
 // A heading counts as "current" once its top passes this fraction of the
 // viewport, so the highlight changes as a section becomes the one being read.
@@ -49,7 +49,7 @@ export default function ArticleToc({ headings }: { headings: TocHeading[] }) {
   const list = (
     <ol>
       {headings.map((heading) => (
-        <li key={heading.id}>
+        <li key={heading.id} data-level={heading.level ?? 2}>
           <a
             href={`#${heading.id}`}
             aria-current={active === heading.id ? "location" : undefined}
