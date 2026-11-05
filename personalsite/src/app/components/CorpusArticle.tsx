@@ -7,7 +7,8 @@ import CorpusPageTransition from "./CorpusPageTransition";
 import ArticleToc, { type TocHeading } from "./ArticleToc";
 import styles from "./corpus-article.module.css";
 
-// Essays with fewer sections than this read fine without a contents list.
+// Essays with fewer headings than this (sections and subsections together)
+// read fine without a contents list.
 const MIN_TOC_HEADINGS = 4;
 
 export default function CorpusArticle({

@@ -21,6 +21,8 @@ export interface PostMeta {
 export interface PostHeading {
   id: string;
   text: string;
+  /** 2 for a section, 3 for a subsection nested under it. */
+  level: 2 | 3;
 }
 
 export interface Post extends PostMeta {
@@ -76,7 +78,7 @@ function stripTags(value: string): string {
 
 // remark-html emits headings without ids. Give every h2–h4 a stable anchor so
 // the table of contents and shared links can point at a section, and collect
-// the h2s as the contents list.
+// the h2s and h3s as the contents list.
 function anchorHeadings(contentHtml: string): { contentHtml: string; headings: PostHeading[] } {
   const headings: PostHeading[] = [];
   const used = new Map<string, number>();
@@ -88,7 +90,7 @@ function anchorHeadings(contentHtml: string): { contentHtml: string; headings: P
       const count = used.get(base) ?? 0;
       used.set(base, count + 1);
       const id = count ? `${base}-${count + 1}` : base;
-      if (level === '2') headings.push({ id, text });
+      if (level === '2' || level === '3') headings.push({ id, text, level: level === '2' ? 2 : 3 });
       return `<h${level} id="${id}">${inner}</h${level}>`;
     },
   );
