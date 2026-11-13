@@ -296,8 +296,8 @@ export default function Monolith({
       <div ref={sceneRef} className={s.scene} data-started={started} data-wave={overtureDone}>
         <div className={s.pin}>
           <header className={s.top}>
-            <span className={s.who}>{name}</span>
-            <nav className={`${st.links} ${st.mono}`} aria-label="Elsewhere">
+            <h1 className={s.who}>{name}</h1>
+            <nav className={s.social} aria-label="Elsewhere">
               {links.map((l) => (
                 <a key={l.href} href={l.href}>
                   {l.label}
