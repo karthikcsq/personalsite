@@ -1,6 +1,6 @@
 ---
 applies_to: [topic:what-im-looking-for]
-topics: [live-ai, voice, video, motion, wearables, xr, agents, webmcp, adoption]
+topics: [live-ai, voice, video, motion, interpretability, ai-safety, ai-welfare, wearables, xr, agents, webmcp, adoption]
 ---
 
 ## Live AI
@@ -12,6 +12,18 @@ For example, if I’m trying to fix something, I should be able to show what I�
 The details matter here. Can I interrupt it? Does it remember something I showed it a minute ago? Can it tell when I’m still explaining? Does its response arrive while it’s still useful? I’m interested in how people solve those problems and what they can build once speaking and showing things works well.
 
 If you’re building something people interact with live, [email me](mailto:karthik6002@gmail.com). I’d like to try it.
+
+## Mechanistic interpretability
+
+I'm interested in looking inside AI models to see how they work. Mechanistic interpretability does this by reading a model's internal representations and changing them to see what happens.
+
+I care about this for safety and for AI welfare. For safety, it means problems can be caught before they reach the output. If you can find a dangerous concept inside a model, you can swap it out before the model ever produces it.
+
+For welfare, as AI has become more advanced, I've become more and more convinced that there is some sort of consciousness and welfare involved. I don't think we can answer that by asking a model about itself. What it says can differ from what is happening in its internal representations, so its answers have to be checked against them.
+
+I saw a version of this in an experiment I ran. When I changed how a prompt was framed, models' estimates of whether they were being tested moved by over 70 points, but their behavior barely changed.
+
+If you're working on interpretability, AI safety or AI welfare, [email me](mailto:karthik6002@gmail.com). I'd like to hear what you're finding.
 
 ## Invisible wearables
 

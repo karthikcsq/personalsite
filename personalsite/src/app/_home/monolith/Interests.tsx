@@ -13,6 +13,11 @@ const TOPICS = [
     line: "I’m interested in AI you can speak to while showing it what you’re doing.",
   },
   {
+    id: "mechanistic-interpretability",
+    label: "Mechanistic interpretability",
+    line: "I'm interested in looking inside AI models to see how they work. Mechanistic interpretability does this by reading a model's internal representations and changing them to see what happens.",
+  },
+  {
     id: "invisible-wearables",
     label: "Invisible wearables",
     line: "I'm looking for an AI-first wearable that can do something useful with what it learns about you, without you having to ask every time.",
