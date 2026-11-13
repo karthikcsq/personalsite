@@ -29,10 +29,13 @@ My agent should be able to book a table at a restaurant without someone having b
 
 [WebMCP](https://developer.chrome.com/docs/ai/webmcp) is a really good example of where this should go. A website can expose the actions an agent can take, with enough information to actually use them. The restaurant tells the agent how to book a table, and the agent does it.
 
-I think adoption is the bigger problem. Having a way to expose these actions only helps if the services people actually use implement it. That needs to be easy enough for an ordinary business to do, ideally through the tools they already use to build their website.
+This is an example of a creative way in which we can use AI on the internet. Internet agent communication and autonomous database exploration and analysis are things that are cool.
 
-I've run into similar friction with google-tools-mcp. Finding a tool and using it still involves too much setup. I'd like to meet people making this easier on both sides: for businesses to offer, and for agents to discover and use.
+A few more I'd love to see:
 
-Then there's scale. Discovery, authentication, permissions, and tool calls all have to keep working as more agents and services come online. I'm interested in the infrastructure that makes that possible without someone manually wiring up every new connection.
+- Agents negotiating with each other: my agent and a store's agent settle a return or a price without either of us getting on a call.
+- Websites that rebuild themselves for whoever is reading, whether that's a person or an agent, instead of one fixed page for everyone.
+- Agents that watch the web for me: a price drop, a policy change, a booking slot opening up, and acting the moment it happens instead of me checking.
+- Public data I can actually ask questions of: a city budget, court records, or a sports archive that an agent can explore and chart for me.
 
 Building infrastructure for internet agents? [Email me](mailto:karthik6002@gmail.com). I'd like to hear what you're working on.
