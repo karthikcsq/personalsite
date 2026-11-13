@@ -1,62 +1,94 @@
 # AGENTS.md
 
-Guidance for agents working in this repository. The redesign starts from checkpoint `9a775a3` (`feat: checkpoint minimal living corpus redesign`).
+Guidance for agents working in this repository.
 
 ## Overview
 
-Karthik Thyagarajan's personal portfolio uses Next.js 16 App Router, React 19, TypeScript, and Tailwind CSS 4. The website package lives in `personalsite/`; run npm commands there. The repository also contains Python tools and source documents in `python-rag/`. The production site is https://www.karthikthyagarajan.com and is hosted on Vercel.
+Karthik Thyagarajan's personal site: https://www.karthikthyagarajan.com, hosted on Vercel.
 
-The public experience is the minimal living corpus. Its four sections are Work, Projects, Writing, and Involvement, with About and Photos as separate pages. All public pages use the same white field, sun/branch environment, winter-night mode, and eclipse interaction. There is no public chat UI or `/api/chat` endpoint, and no prompt-specific `/api/og` endpoint.
+- `personalsite/`: the website (Next.js 16 App Router, React 19, TypeScript, CSS modules). Run npm commands here.
+- `python-rag/`: the source documents the site reads (`rag-docs/`), plus the older Pinecone tooling.
 
-## Development
+The site is one long home page (the "Monolith" design) plus essay pages, note pages and a brief. There is no chatbot, gallery page or separate Work/Projects/About page any more; those URLs redirect into home-page sections (see `personalsite/next.config.ts`).
 
-- `npm run dev` — local Next.js development server.
-- `npm run build` — production compilation, TypeScript checks, and static generation.
-- `npm start` — serve the production build.
-- `npm test` — Node tests in `tests/*.test.mjs`.
-- `npx tsc --noEmit` — standalone TypeScript check.
-- The inherited `npm run lint` script uses `next lint`, which is unsupported in Next.js 16.
-- Read applicable Next.js guides in `personalsite/node_modules/next/dist/docs/` before changing routing or framework APIs; `personalsite/AGENTS.md` also contains Next.js guidance.
+Next.js 16 differs from what you may remember. Read the matching guide in `personalsite/node_modules/next/dist/docs/` before touching framework APIs (see `personalsite/AGENTS.md`).
 
-## Public routes and presentation
+## Commands (from `personalsite/`)
 
-- `/work`, `/projects`, `/writing`, and `/involvement` render their sections directly through `components/CorpusLandingPage.tsx` and `living-corpus-draft/LivingCorpusClient.tsx`. Item links use `/<section>?item=<id>`. Legacy root `?section=` links redirect to the corresponding clean path; blog articles retain `/blog/[slug]`. The `/living-corpus-draft` route redirects home.
-- `src/lib/living-corpus/minimalTypes.ts` defines visible categories and reader data. `minimalHomepage.ts` builds those items from the corpus, blog posts, projects, and involvement data.
-- `src/lib/living-corpus/links.ts` builds item URLs. Use it rather than linking to section-list anchors.
-- `/blog` and `/notes` permanently redirect to `/writing`. Anchored section bookmarks resolve to their matching items in the client. Use `src/lib/living-corpus/links.ts` for section and item destinations.
-- `/blog/[slug]` and `/notes/[kind]/[slug]` retain their canonical URLs and full content, rendered with `CorpusArticle` and `MinimalInterior`. Note source links open the matching corpus item.
-- About and Photos also use `MinimalInterior`. Shared navigation lives in `CorpusNavigation` and `SiteHeader`; page transitions use `CorpusPageTransition`.
-- `ConditionalChrome` renders the global achievements panel without a separate navigation system or botanical frame.
-- `/a2ui-draft` redirects home. Historical A2UI components/utilities remain in source but are not a public experience.
-- The branded `not-found.tsx` handles missing pages, including unknown blog posts.
-- `opengraph-image.tsx`, blog-specific Open Graph images, `og-brand.tsx`, and `icon.svg` share the redesign's visual identity.
-- `sitemap.ts`, `/llms.txt`, `/llms-full.txt`, and the inline homepage index must reflect current destinations. Middleware serves the markdown index to programmatic root requests while preserving HTML for browsers, search engines, and link-preview crawlers.
+- `npm run dev`: dev server. Over the tailnet: `DEV_ALLOWED_ORIGINS=<host> npx next dev -H 0.0.0.0 -p 3123`.
+- `npm run build` / `npm start`: production build and serve.
+- `npm run lint`: ESLint (flat config, `eslint-config-next`). Should be clean.
+- `npm test`: Node tests in `tests/*.test.mjs`.
+- `npx tsc --noEmit`: type check. Errors under `.next/types` are stale generated files; ignore them.
+
+## Routes
+
+- `/`: the home page. `src/app/page.tsx` reads the data and passes it to `src/app/_home/monolith/Monolith.tsx`. Its sections are, in order, an overture (a record to play), Writing, Work, Also, interests and photographs.
+- `/blog/[slug]`: essays from `personalsite/blog/posts/`.
+- `/notes/[kind]/[slug]`: one page per corpus file, plus `/raw` for the Markdown. Project notes show the project's video at the top and its links (from `projects.json` / `involvement.yaml`).
+- `/brief`: the founder brief.
+- `/feed.xml`, `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/llms-full.txt`.
+- Redirects: `/work`, `/projects` and `/involvement` go to `/#work`; `/writing` and `/blog` to `/#writing`; `/notes` to `/#work`; `/gallery` to `/#photographs`; `/about` to `/`. Old `?item=kind:slug` links go to that item's note page. When you remove a route, add a redirect for it.
+- `src/proxy.ts` serves the brief as Markdown to requests that explicitly prefer `text/markdown`.
+
+## How the home page works
+
+- **Code:** everything for the home page lives in `src/app/_home/`.
+  - `monolith/`: layout and sections.
+  - `exhibit/plates/`: the animated line drawing for each work item.
+  - `sound/`: the waveform, the piano keys and the recording data.
+  - `player/`: the site-wide player.
+- **Work items:** each item's one-line description is in the `PLAN` table in `src/app/page.tsx`. A selected item opens in place, showing its line, "More →" (its note) and any extra link (`also`, e.g. the QKD paper).
+- **Music player:** `player/Player.tsx` is mounted once in the root layout (via `components/ConditionalChrome.tsx`), so music keeps playing across pages. There is a single `<audio>` element; the home waveform and the docked rail (`monolith/Rail.tsx`) both read from it. Internal links must use `next/link` (the `Go` component does this), or the page reloads and the music stops.
+- **Recordings:**
+  - Data: listed with their waveform peaks in `sound/recitalPeaks.ts`.
+  - Audio: the files live in S3 at `kt-personalsite.s3.us-east-2.amazonaws.com/media/recordings/`. The bucket allows public reads and CORS.
+  - Override: `NEXT_PUBLIC_RECORDINGS_BASE` changes where they are loaded from.
+  - Adding a recording: upload the `.m4a` file and add its entry, peaks and duration.
+- **Page transitions:** React `ViewTransition` (`_home/PageTransition.tsx`; global CSS at the end of `globals.css`).
+  - A work or essay title morphs into the page heading (`SharedTitle`).
+  - The rail stays fixed.
+  - CSS modules hash `view-transition-name`, so set it inline.
+  - The morph only pairs with a prefetched page, so check it with a production build; `next dev` doesn't prefetch.
+- **Back links:**
+  - `components/BackLink.tsx` returns the visitor to the home-page section they came from, read from sessionStorage `mo-back`.
+  - The `mo-return` key reopens the work item they left.
+- **Photos:** resized copies in `public/media/photos/`, listed in `monolith/photos.ts`. Other images are in `public/media/shared/`.
 
 ## Content and data
 
-- Blog posts live in `personalsite/blog/posts/` with `title`, `date`, and optional `summary` frontmatter. `src/utils/blogUtils.ts` uses gray-matter and remark. Trusted authored Markdown can contain raw HTML.
-- Personal and work data live in `python-rag/rag-docs/karthik_thyagarajan_truth.yaml`. Work entries require `role`, `company`, `start_date`, `end_date`, and `bullets`.
-- Corpus notes live in `python-rag/rag-docs/corpus/` as `<kind>_<slug>.md`. `notesUtils.ts` publishes public notes, their raw Markdown routes, and links to their source items. Honor `public: false`.
-- Projects are defined in `src/data/projects.json` and typed by `projectsData.ts`. Preserve outbound links, demo embeds, and images in the reader; media precedes Contents.
-- Work and involvement utilities parse YAML. Keep corpus identity stable because item URLs, coverage, and achievements refer to those IDs.
-- Session state and achievements are managed by `visitState.ts` and `achievements.ts`. Compatibility maps the former Ideas category to Writing. Keep reset, reduced-motion, storage-unavailable, keyboard, and touch behavior working.
+- **Essays:** `personalsite/blog/posts/*.md`. Frontmatter is `title` and `date`, plus an optional `summary`. Raw HTML is allowed.
+- **Corpus notes:** `python-rag/rag-docs/corpus/<kind>_<slug>.md`. `src/utils/notesUtils.ts` is the registry.
+  - Kinds: project, work, involvement, topic.
+  - `public: false` hides a note from the site.
+  - Authoring rules are in `corpus/README.md`.
+- **Work history:** `python-rag/rag-docs/karthik_thyagarajan_truth.yaml`.
+- **Projects:** `src/data/projects.json` (links, videos, images).
+- **Involvement and topics:** YAML under `python-rag/rag-docs/`.
+- **Item ids** (`kind:slug`) are used by URLs, redirects and the home page. Keep them stable.
 
-## Photos
+## Writing and design rules (from Karthik)
 
-- `/api/gallery` uses the server-only `galleryIndex.ts` to list S3 album objects, with caching and request deduplication.
-- Images use `next/image` responsive optimization in both the grid and lightbox.
-- S3 host: `kt-personalsite.s3.us-east-2.amazonaws.com`; allowed paths are `/galleryimgs/**` and `/blog/**` in `next.config.ts`.
+- Prose visitors read must be Karthik's own words, verbatim. Don't write taglines, bios or summaries for him. New copy only with his approval, or when he asks you to draft options.
+- Upright type only, never italic. Fonts: Fraunces (display) and IBM Plex Mono, from `_home/fonts.ts`.
+- Minimal and premium, showing rather than telling.
+- Section headings use the large, light "chapter" style. No small numbered labels such as "01".
+- No scroll-jacking, pinned banners, snap scrolling, or fades over photo rows.
+- Recordings show only the composer and the piece.
+- When offering design options, show at most three and recommend one.
 
-## AI and document tooling
+## Environment
 
-- Live AI routes are under `/api/living-corpus/` (attend, journey, what-broke). Keep portfolio exploration useful without an AI request.
-- `python-rag/` retains document/vector-management tools. Run `uv sync` there to install dependencies, and `uv run python create-pinecone.py` for incremental updates. `--reset` deletes vectors and requires confirmation.
-- Root `.env` is loaded by `next.config.ts`; deployed environment variables take precedence. Do not print or commit credentials.
-- Python vector setup uses `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, and `OPENAI_API_KEY`. Live AI integrations may use OpenAI and TypeSafe configuration; check their route code for the exact variables.
-- Shared rate-limiting helpers use Upstash or Vercel KV environment variables. Their historical chat naming does not imply a public chat endpoint.
+- `next.config.ts` loads the repo-root `.env`. Variables set in Vercel take precedence. Never print or commit credentials.
+- The site itself needs no secrets. The optional variables are `NEXT_PUBLIC_RECORDINGS_BASE` and `DEV_ALLOWED_ORIGINS`.
+- `python-rag/create-pinecone.py` still uses `PINECONE_API_KEY`, `PINECONE_INDEX_NAME` and `OPENAI_API_KEY` (`uv sync`, then `uv run python create-pinecone.py`; `--reset` wipes the index after a confirmation prompt). The site no longer queries Pinecone.
 
-## Code constraints
+## SEO
 
-- API handlers use named HTTP method exports and Next.js App Router conventions, never default handler exports.
-- TypeScript is strict; `@/*` resolves to `personalsite/src/*`.
-- Preserve the minimal visual system across every public route, metadata image, error page, and content link. Do not restore the retired chat or alternate prototype interfaces.
+- `metadataBase` in `src/app/layout.tsx` is the production URL; relative canonicals resolve against it.
+- Share cards: `opengraph-image.tsx` files, rendered through `src/lib/og/card.tsx`.
+- JSON-LD:
+  - Person and WebSite on the home page
+  - BlogPosting on essays
+  - Article on notes
+- Keep these in step with the routes: `sitemap.ts`, `llms.txt`, `llms-full.txt`, and the inline index on the home page.
