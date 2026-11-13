@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./corpus-article.module.css";
 
 export type TocHeading = { id: string; text: string; level?: 2 | 3 };
@@ -10,12 +10,14 @@ export type TocHeading = { id: string; text: string; level?: 2 | 3 };
 const ACTIVE_LINE = 0.3;
 
 /**
- * Contents for long essays. On wide screens it is a sticky rail in the left
- * margin that tracks the section being read. On narrow screens it collapses
+ * Contents for long essays and notes. On wide screens it is a sticky rail in
+ * the left margin that tracks the section being read, scrolling itself to
+ * keep that section's entry in view. On narrow screens it collapses
  * into a "Contents" disclosure above the text.
  */
 export default function ArticleToc({ headings }: { headings: TocHeading[] }) {
   const [active, setActive] = useState<string | null>(null);
+  const railRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const elements = headings
@@ -46,6 +48,19 @@ export default function ArticleToc({ headings }: { headings: TocHeading[] }) {
     };
   }, [headings]);
 
+  // When the rail is taller than the viewport, scroll the rail itself (never
+  // the page) so the chapter being read stays in view.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail || !active || rail.scrollHeight <= rail.clientHeight) return;
+    const link = rail.querySelector<HTMLElement>(`a[href="#${CSS.escape(active)}"]`);
+    if (!link) return;
+    const linkTop = link.getBoundingClientRect().top - rail.getBoundingClientRect().top + rail.scrollTop;
+    const target = linkTop - (rail.clientHeight - link.offsetHeight) / 2;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    rail.scrollTo({ top: Math.max(0, target), behavior: reduce ? "auto" : "smooth" });
+  }, [active]);
+
   const list = (
     <ol>
       {headings.map((heading) => (
@@ -64,7 +79,7 @@ export default function ArticleToc({ headings }: { headings: TocHeading[] }) {
   return (
     <>
       <aside className={styles.tocRail}>
-        <nav className={styles.tocRailInner} aria-label="Contents">
+        <nav ref={railRef} className={styles.tocRailInner} aria-label="Contents">
           <p>Contents</p>
           {list}
         </nav>

@@ -81,7 +81,7 @@ function PostFooter({ post, newer, older }: { post: PostMeta; newer?: PostMeta; 
         </nav>
       ) : null}
       <div className={styles.footerLinks}>
-        <Link href="/writing">All writing</Link>
+        <Link href="/#writing">All writing</Link>
         <RssLink />
       </div>
     </footer>
@@ -113,9 +113,9 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <CorpusArticle
       showRss
-      essay
-      category="writing"
+      back="/#writing"
       title={post.title}
+      titleId={`essay:${post.slug}`}
       meta={<><time dateTime={post.date}>{formatPostDate(post.date)}</time> · {post.readingMinutes} min read</>}
       summary={post.summary}
       headings={post.headings}

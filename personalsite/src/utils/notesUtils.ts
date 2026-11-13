@@ -367,3 +367,37 @@ export async function getNote(kind: NoteKind, slug: string): Promise<Note | null
 export function noteHref(kind: NoteKind, slug: string): string {
   return `/notes/${kind}/${slug}`;
 }
+
+// The YouTube id of the artifact's "Video" link, if it has one, so the note
+// can show the video under its title.
+/** An artifact's outside links (paper, code, poster, website), shown on its note. The video is embedded instead. */
+export function noteLinks(kind: NoteKind, slug: string): { label: string; url: string }[] {
+  if (kind === 'involvement') {
+    const inv = getInvolvementsFromYaml().find((i) => i.slug === slug);
+    if (!inv) return [];
+    if (inv.links.length) return inv.links.map((l) => ({ label: l.label.charAt(0).toUpperCase() + l.label.slice(1), url: l.url }));
+    return inv.link ? [{ label: 'Website', url: inv.link }] : [];
+  }
+  if (kind !== 'project') return [];
+  return (projects.find((p) => p.id === slug)?.links ?? [])
+    .filter((l) => !(l.type === 'youtube' && l.label.toLowerCase() === 'video'))
+    .map((l) => ({ label: l.label, url: l.url }));
+}
+
+export function noteVideoId(kind: NoteKind, slug: string): string | null {
+  if (kind !== 'project') return null;
+  const link = projects
+    .find((p) => p.id === slug)
+    ?.links.find((l) => l.type === 'youtube' && l.label.toLowerCase() === 'video');
+  if (!link) return null;
+  try {
+    const url = new URL(link.url);
+    if (url.hostname === 'youtu.be') return url.pathname.slice(1) || null;
+    if (url.hostname.endsWith('youtube.com')) {
+      return url.searchParams.get('v') ?? (/^\/(?:embed|shorts)\/([\w-]+)/.exec(url.pathname)?.[1] ?? null);
+    }
+  } catch {
+    // A malformed link just means no video.
+  }
+  return null;
+}

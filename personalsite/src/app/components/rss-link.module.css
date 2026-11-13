@@ -2,24 +2,26 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--muted);
+  font-family: var(--st-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
   line-height: 1.6;
-  text-decoration: underline;
-  text-decoration-color: var(--faint);
-  text-underline-offset: 4px;
+  text-decoration: none;
+  transition: color 200ms;
 }
 
 .link:hover {
-  text-decoration-color: currentColor;
+  color: var(--accent);
 }
 
 .link:focus-visible {
-  outline: 1px solid var(--ink);
+  outline: 1px solid var(--accent);
   outline-offset: 5px;
 }
 
 .link svg {
   flex-shrink: 0;
+  width: 11px;
+  height: 11px;
 }
