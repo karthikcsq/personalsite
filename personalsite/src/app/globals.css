@@ -378,3 +378,27 @@ body:has([data-corpus-page]) {
   font-style: italic;
   font-size: 1.05em;
 }
+
+/* Page transitions (see src/app/_home/PageTransition.tsx): the old page
+   fades up and away, the new one rises in a beat later. Titles that exist on
+   both pages travel from one to the other. */
+::view-transition-old(.page-out) { animation: 240ms cubic-bezier(.4, 0, 1, 1) both vt-leave; }
+::view-transition-new(.page-in) { animation: 520ms cubic-bezier(.2, .8, .2, 1) 140ms both vt-arrive; }
+@keyframes vt-leave { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vt-arrive { from { opacity: 0; transform: translateY(14px); } }
+::view-transition-group(.morph) { animation-duration: 560ms; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+/* one solid title in flight: draw only where it's going, scaled from where it was */
+::view-transition-old(.morph) { display: none; }
+::view-transition-new(.morph) { animation: none; height: 100%; width: 100%; object-fit: fill; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 300ms; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* The music rail stays exactly where it is while the page changes around it. */
+::view-transition-group(music-rail), ::view-transition-old(music-rail), ::view-transition-new(music-rail) { animation: none; }
+::view-transition-old(music-rail) { display: none; }
+/* Draw order during a page change: pages at the bottom, the travelling title
+   above them, the rail on top of everything. */
+::view-transition-group(.morph) { z-index: 50; }
+::view-transition-group(music-rail) { z-index: 100; }

@@ -3,6 +3,7 @@ import { Karla, Source_Serif_4 } from "next/font/google";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import ConditionalChrome from "@/app/components/ConditionalChrome";
+import { display, mono } from "@/app/_home/fonts";
 
 const karla = Karla({
   subsets: ["latin"],
@@ -71,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${karla.variable} ${sourceSerif.variable} h-full`}
+      className={`${karla.variable} ${sourceSerif.variable} ${display.variable} ${mono.variable} h-full`}
     >
       <head>
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Karthik Thyagarajan — Writing" />

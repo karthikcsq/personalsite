@@ -1,0 +1,49 @@
+.overture { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; transition: opacity 600ms ease; }
+.overture[data-hidden="true"] { opacity: 0; pointer-events: none; }
+.overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 30; color: var(--ink); }
+
+.panel { display: grid; justify-items: center; gap: 26px; width: 100%; }
+
+.shelf { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(18px, 3vw, 48px); }
+.shelf .record { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 6px; width: clamp(120px, 11vw, 170px); transition: opacity 500ms ease, transform 600ms cubic-bezier(.2,.8,.2,1); }
+.shelf .record:focus-visible .disc { outline: 1px solid var(--accent); outline-offset: 6px; border-radius: 50%; }
+
+.disc { width: 100%; height: auto; transition: transform 900ms cubic-bezier(.2,.8,.2,1); }
+.edge { fill: #fbf8f1; stroke: rgba(28, 26, 22, 0.25); stroke-width: 0.8; }
+.groove { stroke: var(--ink); stroke-width: 0.7; stroke-linecap: round; opacity: 0.55; transition: stroke 400ms ease, opacity 400ms ease; }
+.label { fill: var(--paper); stroke: rgba(28, 26, 22, 0.35); stroke-width: 0.6; }
+.mark { fill: var(--ink); opacity: 0.55; transform: scale(1); transition: fill 300ms ease, opacity 300ms ease, transform 500ms cubic-bezier(.2,.8,.2,1); }
+.record[data-hot="true"] .mark { fill: var(--accent); opacity: 1; transform: scale(1.35); }
+
+.grooves { animation: spin 60s linear infinite; }
+.record[data-hot="true"] .grooves { animation-duration: 6s; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.record[data-hot="true"] .groove { stroke: var(--accent); opacity: 0.85; }
+.record[data-hot="true"] { transform: translateY(-4px); }
+
+.composer { margin-top: 6px; font-family: var(--st-mono), monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.title { font-size: 17px; line-height: 1.15; letter-spacing: -0.01em; text-align: center; color: var(--ink); transition: color 300ms ease; }
+.record[data-hot="true"] .title { color: var(--accent); }
+
+.caption { margin: 0; min-height: 1.4em; font-size: 15px; color: var(--muted); }
+
+/* choosing: the others step back; the chosen record is taken over by the unrolling drawing */
+.overture[data-chosen="true"] .record:not([data-chosen="true"]),
+.overture[data-chosen="true"] .caption { opacity: 0; pointer-events: none; }
+.overture[data-chosen="true"] .record[data-chosen="true"] { opacity: 0; transition-duration: 120ms; }
+
+@media (max-width: 760px) {
+  .shelf { gap: 18px 14px; }
+  .shelf .record { width: 28vw; }
+  .title { font-size: 14px; }
+}
+/* the records arrive one by one */
+.slot { animation: arrive 900ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+@keyframes arrive { from { opacity: 0; transform: translateY(14px); } }
+.slot .disc { animation: settle 1300ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+@keyframes settle { from { transform: rotate(-120deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .grooves, .slot, .slot .disc { animation: none; }
+}
+
+.shelf .record { -webkit-user-select: none; user-select: none; }

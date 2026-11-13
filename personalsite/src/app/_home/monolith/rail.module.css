@@ -1,0 +1,55 @@
+.rail {
+  /* its own copy of the site tokens: the rail lives outside every page */
+  --paper: #f3eee3; --ink: #1c1a16; --muted: #7a7366; --faint: #b3ab9b; --rule: rgba(28, 26, 22, 0.14); --accent: #c2462b;
+  position: fixed;
+  z-index: 20;
+  left: clamp(10px, 1.4vw, 22px);
+  top: 50%;
+  height: min(78svh, 680px);
+  width: 40px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  justify-items: center;
+  gap: 10px;
+  transform: translate(0, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms ease;
+}
+.rail[data-on="true"] { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+
+.btn { display: grid; place-items: center; width: 26px; height: 26px; color: var(--muted) !important; transition: color 150ms; }
+.btn svg { width: 11px; height: 11px; fill: currentColor; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.btn { position: relative; }
+.btn::after { content: ""; position: absolute; inset: -9px; }
+.play::after { inset: -7px; }
+.btn:hover { color: var(--ink) !important; }
+.play { width: 30px; height: 30px; border: 1px solid var(--ink) !important; border-radius: 50% !important; color: var(--ink) !important; }
+.play:hover { background: var(--ink) !important; color: var(--paper) !important; }
+
+.wave { position: relative; width: 40px; height: 100%; min-height: 0; cursor: ns-resize; }
+.wave:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+.wave svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.peak { stroke: var(--ink); stroke-width: 0.6; opacity: 0.2; vector-effect: non-scaling-stroke; }
+.rms { stroke: var(--ink); stroke-width: 1; opacity: 0.5; vector-effect: non-scaling-stroke; }
+.played .peak { stroke: var(--accent); opacity: 0.4; }
+.played .rms { stroke: var(--accent); opacity: 0.95; }
+.head { stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.cursor { stroke: var(--ink); stroke-width: 1; opacity: 0.35; vector-effect: non-scaling-stroke; }
+
+/* bars draw in from the centre line, top to bottom, when the rail arrives */
+
+.tip { position: absolute; left: calc(100% + 10px); transform: translateY(-50%); font-family: var(--st-mono), monospace; font-size: 10px; color: var(--ink); background: var(--paper); padding: 2px 6px; border: 1px solid var(--rule); border-radius: 999px; white-space: nowrap; pointer-events: none; }
+
+.label { display: grid; justify-items: center; gap: 2px; width: 64px; text-align: center; }
+.labelMeta { font-family: var(--st-mono), monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 64px; }
+
+@media (max-width: 760px) {
+  .rail { left: 4px; width: 30px; height: 60svh; }
+  .wave { width: 30px; }
+  .label { display: grid; justify-items: center; gap: 2px; width: 64px; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail, .rail[data-on="true"] .wave g { transition: none; animation: none; }
+}
+

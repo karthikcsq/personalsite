@@ -1,0 +1,146 @@
+/* Monolith: one waveform, then the writing, then the work. Built on the studio tokens. */
+
+/* Space kept clear for the music rail on the left edge. */
+.labels { --rail-gutter: clamp(112px, 11vw, 168px); }
+
+.top { display: flex; justify-content: space-between; align-items: baseline; padding: 26px 0 0; }
+.who { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+
+.stage1 { min-height: calc(100svh - 60px); display: grid; align-content: center; gap: 36px; padding: 2vh 0 6vh; }
+.tagline { justify-self: center; max-width: 34ch; margin: 0; text-align: center; font-size: clamp(20px, 1.7vw, 26px); font-weight: 380; line-height: 1.25; letter-spacing: -0.012em; text-wrap: balance; }
+.tagline a { margin-left: 4px; text-decoration: none; color: var(--muted); }
+.tagline a:hover { color: var(--accent); }
+
+/* Writing: the second thing you see. Large, calm, one per line. */
+.writing { margin: 0; padding: 14vh 0 clamp(64px, 11vh, 112px) max(0px, calc(var(--rail-gutter) - var(--pad))); }
+.label { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--ink); text-transform: uppercase; }
+.essays { list-style: none; margin: 0; padding: 0; }
+.essays li { opacity: 0; transform: translateY(18px); transition: opacity 900ms cubic-bezier(.2,.8,.2,1), transform 1100ms cubic-bezier(.2,.8,.2,1); }
+.essays li[data-shown="true"] { opacity: 1; transform: none; }
+.essay { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: baseline; padding: 22px 0; }
+.essayNo { font-family: var(--st-mono), monospace; font-size: 11px; color: var(--faint); }
+.essayTitle { font-size: clamp(26px, 2.6vw, 40px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; transition: color 200ms, transform 500ms cubic-bezier(.2,.8,.2,1); }
+.essaySub { display: block; margin-top: 6px; font-size: 16px; color: var(--muted); letter-spacing: 0; }
+.essay:hover .essayTitle { color: var(--accent); transform: translateX(6px); }
+.essayMeta { text-align: right; white-space: nowrap; opacity: 0; transition: opacity 400ms ease; }
+.essay:hover .essayMeta, .essay:focus-visible .essayMeta { opacity: 1; }
+
+/* Work: the plates, wide. */
+.work { padding: 0 0 clamp(64px, 11vh, 112px); }
+.restSec { padding-top: 0 !important; }
+.workGrid { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: clamp(32px, 4vw, 72px); align-items: start; margin-top: 22px; }
+.workList { list-style: none; margin: 0; padding: 0; }
+.workList li + li { border-top: 1px solid var(--rule); }
+.workList .workItem { display: grid; grid-template-columns: minmax(0, 1fr); align-items: baseline; width: 100%; text-align: left; padding: 13px 0; position: relative; }
+.workList .workItem[aria-selected="true"] { padding: 13px 0 0; }
+/* the progress line is the divider under the open item, centred in its gap */
+.workList li { transition: border-color 500ms ease; }
+.workList li:has(> [aria-selected="true"]) + li { border-top-color: transparent; }
+.workTitle { font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; color: var(--muted); transition: color 200ms; }
+.workItem[aria-selected="true"] .workTitle, .workItem:hover .workTitle { color: var(--ink); }
+.workMeta { display: block; margin-top: 6px; line-height: 1.5; }
+
+.workLine { margin: 12px 0 0; max-width: 46ch; font-size: 16px; line-height: 1.5; color: var(--ink); }
+.workLinks { display: flex; gap: 22px; margin-top: 10px; }
+.workOpen .workMore { justify-self: start; font-size: 11px; letter-spacing: 0.04em; color: var(--accent); text-decoration: none; transition: transform 300ms cubic-bezier(.2,.8,.2,1); }
+.workOpen .workMore:hover { transform: translateX(4px); }
+
+@media (max-width: 900px) {
+  .workGrid { grid-template-columns: 1fr; }
+  .essay { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .essayMeta { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workFill { animation: none; }
+}
+
+
+/* ── Scroll scene: choose a piece → the quote rises over it → writing ── */
+.scene { position: relative; --q: 0; }
+.pin { position: sticky; top: 0; height: 100svh; display: grid; grid-template-rows: auto 1fr; overflow: visible; z-index: 3; }
+.music { position: relative; display: grid; align-content: center; gap: 18px; padding-bottom: 4vh; }
+/* before a piece is chosen, the overture has the stage; the player waits */
+.scene:not([data-started="true"]) .music > section { opacity: 0; pointer-events: none; }
+.scene[data-started="true"] .music > section { animation: playerIn 900ms ease 0.5s both; }
+@keyframes playerIn { from { opacity: 0; } }
+/* the waveform appears as the record's grooves land on it */
+.scene .music [role="slider"] svg { transition: opacity 500ms ease; }
+.scene:not([data-wave="true"]) .music [role="slider"] svg { opacity: 0; }
+/* everything but the waveform steps back as the quote rises; the waveform itself travels to the rail */
+.music > section > :not([role="slider"]), .top { opacity: clamp(0, calc(1 - var(--q) * 1.8), 1); }
+.music [role="slider"] { position: relative; z-index: 3; will-change: transform; }
+
+.quote { position: relative; z-index: 4; height: 100svh; display: grid; place-items: center; pointer-events: none; }
+.quote::before { content: none; }
+.quoteText { position: relative; max-width: 22ch; margin: 0; text-align: center; font-size: clamp(34px, 4.4vw, 66px); font-weight: 380; line-height: 1.06; letter-spacing: -0.025em; text-wrap: balance; pointer-events: auto; opacity: calc(0.2 + var(--q) * 0.8); }
+.quoteText a { margin-left: 6px; font-size: 14px; vertical-align: middle; text-decoration: none; color: var(--muted); }
+.quoteText a:hover { color: var(--accent); }
+
+.quietLabel { margin: 0 0 3vh; font-weight: 400; text-transform: uppercase; letter-spacing: 0.2em !important; opacity: 0; transition: opacity 1200ms ease; }
+.quietLabel[data-shown="true"] { opacity: 1; }
+.work .quietLabel { max-width: none; }
+.platePlaceholder { aspect-ratio: 16 / 9; border: 1px solid var(--rule); }
+@media (prefers-reduced-motion: reduce) {
+  .essays li, .quietLabel { opacity: 1; transform: none; transition: none; }
+}
+
+.afterRail { padding-left: max(0px, calc(var(--rail-gutter) - var(--pad))); }
+.gutter { margin-left: max(0px, calc(var(--rail-gutter) - var(--pad))) !important; }
+@media (max-width: 760px) { .afterRail { padding-left: 30px; } .writing { padding-left: 30px; } }
+
+/* ── Smooth switching in the work list ──────────────── */
+.workTitle { transition: color 500ms ease; }
+.workItem span:first-child { transition: color 500ms ease; }
+.workOpen { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 650ms cubic-bezier(.2,.8,.2,1), opacity 450ms ease; }
+.workRow[data-active="true"] .workOpen { grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 650ms cubic-bezier(.2,.8,.2,1), opacity 600ms ease 150ms; }
+.workOpenInner { min-height: 0; overflow: hidden; display: grid; }
+.workTrack { display: block; height: 1px; margin: 17px 0 0 0; background: var(--rule); position: relative; overflow: hidden; }
+.workFill { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); animation: fill var(--dwell) linear forwards; }
+@keyframes fill { to { transform: scaleX(1); } }
+.workCaption { animation: captionIn 700ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes captionIn { from { opacity: 0; transform: translateY(8px); filter: blur(2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .workOpen, .workCaption, .workFill { transition: none; animation: none; }
+}
+
+/* ── The slices that ripple onto the rail ───────────── */
+.chunks { position: fixed; z-index: 19; display: none; pointer-events: none; }
+.chunk { position: absolute; top: 0; height: 100%; transform-origin: 50% 50%; will-change: transform; }
+.chunk svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.chunkPeak { stroke: var(--ink); stroke-width: 0.6; opacity: 0.18; vector-effect: non-scaling-stroke; }
+.chunkRms { stroke: var(--ink); stroke-width: 1.1; opacity: 0.45; vector-effect: non-scaling-stroke; }
+.chunkPlayed .chunkPeak { stroke: var(--accent); opacity: 0.35; }
+.chunkPlayed .chunkRms { stroke: var(--accent); opacity: 0.85; }
+
+/* ── Sign-off ───────────────────────────────────────── */
+.close { margin-top: 8vh; padding: 9vh 0 6vh; border-top: 1px solid var(--rule); display: grid; gap: 32px; }
+.closeLine { margin: 0; max-width: 24ch; font-size: clamp(28px, 3vw, 46px); font-weight: 380; line-height: 1.12; letter-spacing: -0.022em; text-wrap: balance; }
+.closeLine a { color: inherit; text-decoration: none; background-image: linear-gradient(currentColor, currentColor); background-size: 100% 1px; background-position: 0 92%; background-repeat: no-repeat; transition: color 200ms; }
+.closeLine a:hover { color: var(--accent); }
+.talk { color: var(--accent); }
+.closeRow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 18px 40px; }
+.closeLink { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.closeLink:hover { color: var(--accent); }
+.socials { display: flex; gap: 28px; }
+.socials a { font-size: clamp(18px, 1.6vw, 22px); letter-spacing: -0.01em; color: var(--ink); text-decoration: none; transition: color 200ms; }
+.socials a:hover { color: var(--accent); }
+
+/* before a piece is chosen, the records fade back as the quote rises */
+.scene:not([data-wave="true"]) .music > div:first-child { opacity: clamp(0, calc(1 - var(--q) * 1.8), 1); }
+.close { margin: 0 0 10vh; }
+.footer { align-items: center; margin-top: 10vh !important; padding-top: 28px !important; }
+
+
+@media (max-width: 760px) {
+  .top { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .top nav { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+}
+
+/* Section labels: the section's name, large and light, like a chapter opening. */
+.labels [data-seclabel] { margin: 0 0 clamp(20px, 3vh, 36px); font-family: inherit; font-size: clamp(44px, 5.4vw, 88px); font-weight: 300; line-height: 1; letter-spacing: -0.045em; text-transform: none; color: var(--faint); }
+
+/* Phones: the footer stacks, so the hidden piano never pushes the page sideways. */
+@media (max-width: 760px) {
+  .footer { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .socials { flex-wrap: wrap; gap: 10px 22px; }
+}

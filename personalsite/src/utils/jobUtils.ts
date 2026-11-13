@@ -34,7 +34,7 @@ const ICON_MAP: Record<string, string> = {
   'Fairfax County Public Schools': '/companies/fcps.png'
 };
 
-function getIconForCompany(company: string): string {
+export function getIconForCompany(company: string): string {
   if (ICON_MAP[company]) return ICON_MAP[company];
   // Fallback: attempt slug approach
   const slug = company.toLowerCase().replace(/[^a-z0-9]+/g, '');

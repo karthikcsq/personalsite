@@ -50,7 +50,11 @@ function cleanMarkdown(value: string): string {
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
     .replace(/<[^>]+>/g, " ")
-    .replace(/[`*_>#~-]/g, " ")
+    // List markers and horizontal rules, not the hyphens inside words
+    // ("lip-sync", "always-on").
+    .replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, "")
+    .replace(/(^|\s)-{2,}(?=\s|$)/g, " ")
+    .replace(/[`*_>#~]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

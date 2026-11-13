@@ -21,8 +21,26 @@ const VISIBLE_CATEGORIES = new Set<MinimalCategory>(
 
 const projectsById = new Map(projects.map((project) => [project.id, project]));
 
-// Keep paragraphs and authored links in continuous notes. The ordinary corpus
-// excerpts stay plain text for their existing list and exploration surfaces.
+const NOTE_KINDS = new Set(["project", "work", "involvement", "topic"]);
+
+/**
+ * What the entry reader shows, as HTML: the artifact's note, section by
+ * section, so its paragraphs, lists, links, and hyphens survive. A project
+ * with no note shows its write-up (`ragNarrative`) the same way. Elsewhere
+ * (lists, search) sections stay plain text.
+ */
+function readerHtml(artifactId: string): Map<string, string> {
+  const kind = artifactId.split(":")[0];
+  const slug = artifactId.slice(kind.length + 1);
+  if (!NOTE_KINDS.has(kind)) return new Map();
+  const note = getNoteMarkdown(kind as "project" | "work" | "involvement" | "topic", slug);
+  if (note) return noteHtmlBySection(note);
+  const writeUp = kind === "project" ? projectsById.get(slug)?.ragNarrative : undefined;
+  return writeUp ? new Map([["overview", remark().use(html).processSync(writeUp).toString()]]) : new Map();
+}
+
+// Keep paragraphs and authored links in notes. The ordinary corpus excerpts
+// stay plain text for their existing list and exploration surfaces.
 function noteHtmlBySection(markdown: string): Map<string, string> {
   const sections = new Map<string, string>();
   let id = "overview";
@@ -190,9 +208,7 @@ export function buildMinimalCorpusItems(): MinimalCorpusItem[] {
     const normalizedDescription = artifact.description.trim().toLowerCase();
     const isWriting = artifact.category === "writing";
     const continuous = artifact.id.startsWith("topic:");
-    const noteHtml = continuous
-      ? noteHtmlBySection(getNoteMarkdown("topic", artifact.id.slice(6)) ?? "")
-      : new Map<string, string>();
+    const noteHtml = readerHtml(artifact.id);
     const writingMedia = isWriting
       ? blogMediaBySection(artifact.id, artifact.title)
       : new Map<string, MinimalCorpusMedia[]>();
