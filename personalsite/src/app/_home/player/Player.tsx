@@ -3,7 +3,7 @@
 // The one player for the whole site. It lives in the root layout, so the music
 // keeps playing as the visitor moves between pages. The home page's big
 // waveform and the docked rail are two views of this same player.
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { attach, audio } from "../sound/audio";
 import { RECORDINGS } from "../sound/recitalPeaks";
@@ -94,6 +94,10 @@ export default function PlayerProvider({ children }: { children: ReactNode }) {
   // On the home page the rail appears once the waveform has travelled to it;
   // everywhere else it is simply there, once something has been played.
   const railOn = started && (pathname === "/" ? homeRail : true);
+  // Pages read this to leave room for the rail at the left edge.
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-rail", railOn);
+  }, [railOn]);
 
   return (
     <Ctx.Provider value={value}>

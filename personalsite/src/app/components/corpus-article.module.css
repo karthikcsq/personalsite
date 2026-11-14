@@ -11,6 +11,7 @@
   --pad: clamp(20px, 4vw, 64px);
   min-height: 100svh;
   padding: 0 var(--pad);
+  transition: padding-left 400ms cubic-bezier(0.22, 1, 0.36, 1);
   background: var(--paper);
   color: var(--ink);
   font-family: var(--st-display), Georgia, serif;
@@ -204,4 +205,11 @@
   .content h2 { margin-top: 52px; }
   .adjacent { grid-template-columns: 1fr; gap: 28px; }
   .adjacentLink[data-align="end"] { text-align: left; }
+}
+
+/* While the music rail is showing (it's fixed at the left edge), keep the
+   text clear of it. */
+:global(html[data-rail]) .paper { padding-left: max(var(--pad), 84px); }
+@media (max-width: 760px) {
+  :global(html[data-rail]) .paper { padding-left: 48px; }
 }
