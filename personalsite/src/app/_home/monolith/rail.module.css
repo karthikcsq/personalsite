@@ -47,7 +47,9 @@
 @media (max-width: 760px) {
   .rail { left: 4px; width: 30px; height: 60svh; }
   .wave { width: 30px; }
-  .label { display: grid; justify-items: center; gap: 2px; width: 64px; text-align: center; }
+  /* only the time: the composer's name would run into the page text */
+  .label { width: 30px; }
+  .labelComposer { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rail, .rail[data-on="true"] .wave g { transition: none; animation: none; }

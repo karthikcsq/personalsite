@@ -402,3 +402,8 @@ body:has([data-corpus-page]) {
    above them, the rail on top of everything. */
 ::view-transition-group(.morph) { z-index: 50; }
 ::view-transition-group(music-rail) { z-index: 100; }
+
+/* The home page is drawn on paper; give the root the same colour so a
+   rubber-band bounce or mid-scroll gap never shows white. */
+html:has(main[data-home]) { background: #f3eee3; }
+html:has(main[data-home]) body { background: transparent; }

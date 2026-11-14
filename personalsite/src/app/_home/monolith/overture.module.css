@@ -16,7 +16,6 @@
 .record[data-hot="true"] .mark { fill: var(--accent); opacity: 1; transform: scale(1.35); }
 
 .grooves { animation: spin 60s linear infinite; }
-.record[data-hot="true"] .grooves { animation-duration: 6s; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .record[data-hot="true"] .groove { stroke: var(--accent); opacity: 0.85; }
 .record[data-hot="true"] { transform: translateY(-4px); }

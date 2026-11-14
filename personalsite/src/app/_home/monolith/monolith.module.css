@@ -137,6 +137,8 @@
 
 
 @media (max-width: 760px) {
+  /* the player's head and list clear out before the quote reaches them */
+  .music > section > :not([role="slider"]), .top { opacity: clamp(0, calc(1 - var(--q) * 3.2), 1); }
   .top { flex-direction: column; align-items: flex-start; gap: 16px; }
   .top nav { gap: 6px 22px; padding-right: 0; }
 }

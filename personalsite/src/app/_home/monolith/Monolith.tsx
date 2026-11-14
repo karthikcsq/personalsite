@@ -260,7 +260,7 @@ export default function Monolith({
   const current = work[active];
 
   return (
-    <main className={`${st.root} ${encore ? snd.encore : ""}`}>
+    <main data-home className={`${st.root} ${encore ? snd.encore : ""}`}>
       <div ref={chunkLayer} className={s.chunks} aria-hidden>
         {Array.from({ length: CHUNKS }, (_, i) => {
           const peaks = RECORDINGS[rec.which].peaks;

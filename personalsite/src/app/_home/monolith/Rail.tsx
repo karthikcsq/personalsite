@@ -85,7 +85,7 @@ export default function Rail({ on }: { on: boolean }) {
         <svg viewBox="0 0 12 12" aria-hidden><path d="M6 9 L2.5 4 H9.5 Z" /></svg>
       </button>
       <span className={s.label}>
-        <span className={s.labelMeta}>{composer}</span>
+        <span className={`${s.labelMeta} ${s.labelComposer}`}>{composer}</span>
         <span className={s.labelMeta}>{fmt(state.time)}</span>
       </span>
     </aside>

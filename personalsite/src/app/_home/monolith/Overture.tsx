@@ -4,7 +4,7 @@
 // own waveform, wrapped into a circle. Click one to play it: its grooves unroll
 // from a circle into a straight line, landing exactly on the waveform, which
 // then takes over.
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RECORDINGS } from "../sound/recitalPeaks";
 import s from "./overture.module.css";
 
@@ -124,6 +124,29 @@ export default function Overture({ onChoose, onUnrolled, hidden }: { onChoose: (
     onChoose(i, 0); // from the first note
     requestAnimationFrame(() => unroll(i));
   };
+
+  // Hovering speeds a record up and leaving slows it down. Only the playback
+  // rate changes (eased over 600ms), so each disc carries on from the angle
+  // it's at instead of jumping to a new point in its spin.
+  useEffect(() => {
+    const spins = discs.current.map((el) => el?.querySelector(`.${s.grooves}`)?.getAnimations()[0]);
+    const from = spins.map((a) => a?.playbackRate ?? 1);
+    let t0 = -1;
+    let raf = 0;
+    const step = (now: number) => {
+      if (t0 < 0) t0 = now;
+      const k = Math.min(1, (now - t0) / 600);
+      const e = 1 - Math.pow(1 - k, 3);
+      spins.forEach((a, i) => {
+        if (!a) return;
+        const to = hovered === i ? 10 : 1;
+        a.updatePlaybackRate(from[i] + (to - from[i]) * e);
+      });
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [hovered]);
 
   const shown = hovered ?? chosen;
 
