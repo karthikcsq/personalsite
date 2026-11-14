@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import CorpusArticle from "@/app/components/CorpusArticle";
 import styles from "@/app/components/corpus-article.module.css";
 import type { Metadata } from "next";
+import { noteSummary } from "@/app/_home/oneLiners";
 import {
   NOTE_KINDS,
   getAllNotes,
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${note.title} — Notes`;
   const description =
-    note.summary || `Karthik Thyagarajan's notes on ${note.title}.`;
+    (await noteSummary(`${note.kind}:${note.slug}`)) || note.summary || `Karthik Thyagarajan's notes on ${note.title}.`;
   const url = `${SITE}${noteHref(note.kind, note.slug)}`;
 
   return {
@@ -62,11 +63,13 @@ export default async function NotePage({ params }: Props) {
   if (!note) notFound();
 
   const url = `${SITE}${noteHref(note.kind, note.slug)}`;
+  const oneLiner = await noteSummary(`${note.kind}:${note.slug}`);
+  const links = noteLinks(note.kind, note.slug);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: `${note.title} — Notes`,
-    description: note.summary,
+    description: oneLiner || note.summary,
     about: note.title,
     keywords: note.topics.join(", "),
     inLanguage: "en",
@@ -92,7 +95,10 @@ export default async function NotePage({ params }: Props) {
       back={back}
       title={note.title}
       titleId={`${note.kind}:${note.slug}`}
-      meta={note.subtitle || note.meta}
+      // a sentence about the thing, not a keyword list: projects lose their
+      // tools line; jobs keep role and dates
+      meta={note.kind === "project" ? undefined : note.subtitle || note.meta}
+      summary={oneLiner}
       headings={note.headings.map((h) => ({ id: h.id, text: h.text, level: h.depth ? 3 : 2 }))}
       minTocHeadings={3}
       media={video ? (
@@ -109,16 +115,14 @@ export default async function NotePage({ params }: Props) {
       ) : null}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <div className={styles.links}>
-        {noteLinks(note.kind, note.slug).map((l) => (
+      {links.length ? <div className={styles.links}>
+        {links.map((l) => (
           <a key={l.url} href={l.url} target={l.url.startsWith("/") ? undefined : "_blank"} rel={l.url.startsWith("/") ? undefined : "noopener noreferrer"}>
             {l.label} ↗
           </a>
         ))}
-        <a href={`${noteHref(note.kind, note.slug)}/raw`}>Raw markdown ↗</a>
-      </div>
+      </div> : null}
       <div dangerouslySetInnerHTML={{ __html: note.contentHtml }} />
-      {note.topics.length ? <footer className={styles.topics}>{note.topics.join(" · ")}</footer> : null}
     </CorpusArticle>
   );
 }

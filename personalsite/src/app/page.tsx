@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import fs from "node:fs";
 import path from "node:path";
-import { getSiteData, type SpikeItem } from "@/app/_home/_data/siteData";
-import type { ExhibitEntry, PlateKey } from "@/app/_home/exhibit/types";
-import { verbatim } from "@/app/_home/exhibit/engrave";
+import { getSiteData } from "@/app/_home/_data/siteData";
+import type { ExhibitEntry } from "@/app/_home/exhibit/types";
+import { PLAN } from "@/app/_home/oneLiners";
 import { display, mono } from "@/app/_home/fonts";
 import Monolith from "@/app/_home/monolith/Monolith";
 import ms from "@/app/_home/monolith/monolith.module.css";
@@ -62,25 +62,6 @@ const identityJsonLd = {
     { "@type": "WebSite", "@id": `${SITE}/#website`, url: SITE, name: "Karthik Thyagarajan", publisher: { "@id": `${SITE}/#person` }, inLanguage: "en" },
   ],
 };
-
-const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
-const sentenceWith = (text: string, needle: string, fallback: string) =>
-  (text.match(/[^.!?]+[.!?]+/g) ?? []).map((x) => x.trim()).find((x) => x.includes(needle)) ?? fallback;
-
-// The stage order: most important first. Every line is verbatim from his descriptions.
-const PLAN: { id: string; plate: PlateKey; also?: { label: string; href: string }; line: (i: SpikeItem) => string }[] = [
-  { id: "project:tavi", plate: "tavi", line: (i) => sentenceWith(i.description, "building Tavi", i.lede) },
-  // Verbatim from his résumé bullet (src/utils/karthik_thyagarajan_truth.yaml).
-  { id: "work:samsung-research-america", plate: "samsung", line: () => "Co-architected Samsung's always-on AI agent orchestrator from scratch in Kotlin." },
-  { id: "project:parm", plate: "parm", line: (i) => i.lede },
-  // Workshopped with him (Nov 2026).
-  { id: "work:memories-ai", plate: "memories", line: () => "Built a pipeline that indexes hours of video so vision language models can search it." },
-  { id: "project:repple", plate: "repple", line: (i) => i.lede },
-  { id: "involvement:buildpurdue", plate: "buildpurdue", line: (i) => i.lede },
-  // His line (Nov 2026).
-  { id: "project:qkd", plate: "qkd", also: { label: "Paper", href: "https://aip.brightspotcdn.com/2d/d1/92e8ebfd41debaa238ed0e28a30e/8-riso-online.pdf" }, line: () => "We showed that a real, working quantum key distribution setup could be built using photonics for under $2,000." },
-  { id: "work:peraton-labs", plate: "peraton", line: (i) => capitalize(verbatim(i.description, "a first-of-its-kind reinforcement learning agent for IoT malware detection", i.lede)) + "." },
-];
 
 export default async function Page() {
   const data = await getSiteData();
