@@ -11,7 +11,16 @@ export interface ProjectEntry {
 }
 
 interface RootYaml {
-  projects?: ProjectEntry[];
+  projects?: (Omit<ProjectEntry, "bullets"> & { bullets?: unknown[] })[];
+}
+
+/** A résumé bullet is a string, or `{ text, show_on }` when it is limited to the CV or résumé. */
+export function bulletText(bullet: unknown): string {
+  if (typeof bullet === "string") return bullet;
+  if (bullet && typeof bullet === "object" && "text" in bullet) {
+    return String((bullet as { text: unknown }).text);
+  }
+  return String(bullet ?? "");
 }
 
 const candidates = () => [
@@ -33,7 +42,7 @@ export function getProjectsFromYaml(): ProjectEntry[] {
   if (!raw) return [];
   try {
     const data = yaml.load(raw) as RootYaml;
-    return data.projects ?? [];
+    return (data.projects ?? []).map((p) => ({ ...p, bullets: (p.bullets ?? []).map(bulletText) }));
   } catch {
     return [];
   }

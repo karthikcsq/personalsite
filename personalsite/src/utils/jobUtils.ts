@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import { bulletText } from './projectUtils';
 
 export interface JobEntry {
   title: string;
@@ -15,7 +16,7 @@ interface YamlExperienceItem {
   company: string;
   start_date: string; // e.g. "Jun 2025"
   end_date: string;   // e.g. "Present" or "Aug 2023"
-  bullets: string[];
+  bullets: unknown[];
 }
 
 interface RootYaml {
@@ -81,7 +82,7 @@ export function getJobsFromYaml(): JobEntry[] {
   const jobs: JobEntry[] = experience.map((item) => ({
     title: item.role,
     company: item.company,
-    description: item.bullets,
+    description: (item.bullets ?? []).map(bulletText),
     year: `${item.start_date} - ${item.end_date}`,
     icon: getIconForCompany(item.company),
   }));
