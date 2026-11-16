@@ -165,6 +165,15 @@ projects:
       - Building a voice AI teammate for engineering standups that answers codebase questions, drafts tickets and PR descriptions, and makes small code changes in a live preview before the meeting ends.
       - Built sandboxed coding agents in per-task git branches and a Realtime turn-taking loop, evaluated by playing scripted multi-person meetings with synthetic voices and scoring when Tavi should speak.
 
+  - title: "PARM"
+    show_on: ["cv", "resume"]
+    tools: "Python, TypeScript, OpenAI API"
+    date: "Ongoing"
+    link: "https://github.com/karthikcsq/parm"
+    bullets:
+      - Built a causal benchmark for whether an AI agent recalls a personal memory only once a late tool result makes it relevant, with 157 frozen scenarios, 471 runnable cases, and deterministic scoring with no LLM judge.
+      - On a 54-case development suite, PARM's retrieval policy made 30 of 36 correct decisions against 18 for the strongest baselines, admitting 6 spurious memory sources versus 1,361 for all-entity RAG.
+
   - title: "Repple"
     show_on: ["cv", "resume"]
     tools: "FastAPI, PostgreSQL, Supabase, OpenAI API, Claude"
@@ -173,7 +182,8 @@ projects:
     bullets:
       - Co-founded a competitive fitness iOS app live on the App Store; built the entire backend in FastAPI, PostgreSQL, and Supabase with Pydantic-validated schemas.
       - Built real-time synchronized multiplayer workout sessions, a custom ELO matchmaking algorithm pairing users by fitness level, and cron-driven point aggregation powering weekly team matchups, streaks, and leaderboards.
-      - Shipped LLM-generated workout plans using OpenAI and Anthropic Claude that adapt to each user's logged performance metrics.
+      - text: Shipped LLM-generated workout plans using OpenAI and Anthropic Claude that adapt to each user's logged performance metrics.
+        show_on: ["cv"]
 
   - title: "buildpurdue"
     show_on: ["cv"]
@@ -204,7 +214,7 @@ projects:
       - Designed the three-layer identity, scoring, and researcher-review pipeline in Next.js 14 and PostgreSQL; won Best Proof-of-Human Application at Catapult 2026.
 
   - title: "Caladrius (HackGT - 2nd Place)"
-    show_on: ["cv", "resume"]
+    show_on: ["cv"]
     tools: "React Native, Python, LangGraph, AWS S3, REST API, Next.js"
     date: "Sep 2025"
     link: "https://github.com/karthikcsq/Caladrius"
