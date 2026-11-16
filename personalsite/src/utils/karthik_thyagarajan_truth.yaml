@@ -156,9 +156,18 @@ experience:
       - Built a LangChain RAG system for classified document retrieval with vector database indexing and document chunking, running entirely on local LLaMA 2 inference with no external API access, reducing query time 65%.
 
 projects:
+  - title: "Tavi"
+    show_on: ["cv", "resume"]
+    tools: "TypeScript, React, Node.js, OpenAI Realtime API, Codex, MCP"
+    date: "Ongoing"
+    link: "https://youtu.be/V724rfJXvSU"
+    bullets:
+      - Building a voice AI teammate for engineering standups that answers codebase questions, drafts tickets and PR descriptions, and makes small code changes in a live preview before the meeting ends.
+      - Built sandboxed coding agents in per-task git branches and a Realtime turn-taking loop, evaluated by playing scripted multi-person meetings with synthetic voices and scoring when Tavi should speak.
+
   - title: "Repple"
     show_on: ["cv", "resume"]
-    tools: "Python (FastAPI), PostgreSQL, Supabase, Pydantic, OpenAI API, Anthropic Claude, TypeScript"
+    tools: "FastAPI, PostgreSQL, Supabase, OpenAI API, Claude"
     date: "Nov 2025 - Jun 2026"
     link: "https://www.linkedin.com/company/reppleapp"
     bullets:
@@ -187,7 +196,7 @@ projects:
 
   - title: "Veritas (Catapult 2026 - Best Proof-of-Human Application)"
     show_on: ["cv", "resume"]
-    tools: "Next.js 14, React 19, PostgreSQL, Supabase, NextAuth.js, World ID, OpenAI GPT-4o, Pinecone, Vercel"
+    tools: "Next.js, World ID, GPT-4o, Pinecone"
     date: "2026"
     link: "https://github.com/karthikcsq/veritas"
     bullets:
@@ -214,7 +223,7 @@ projects:
 
   - title: "Photonic Implementation of Quantum Key Distribution"
     show_on: ["cv"]
-    tools: "Python, NumPy, Oscilloscope, Optics Hardware"
+    tools: "Python, NumPy, Optics"
     date: "Oct 2023 - May 2024"
     link: "https://arxiv.org/abs/2509.04389"
     bullets:
